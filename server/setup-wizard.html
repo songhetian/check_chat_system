@@ -25,27 +25,25 @@
             <div class="step"></div>
             <div class="step"></div>
         </div>
-        <h2>数据库配置向导</h2>
-        <p>欢迎使用 Smart-CS。请指定您的 MySQL 数据库连接信息，系统将自动完成初始化。</p>
+        <h2>系统维护与配置</h2>
+        <p>欢迎使用 Smart-CS。在此您可以管理数据库连接或执行系统级维护。</p>
         
         <div class="form-item">
-            <label>MySQL 主机地址</label>
+            <label>MySQL 连接配置</label>
             <input type="text" placeholder="127.0.0.1 (本地) 或 远程 IP">
         </div>
-        <div class="form-item" style="display: flex; gap: 20px;">
-            <div style="flex: 2;">
-                <label>用户名</label>
-                <input type="text" value="root">
-            </div>
-            <div style="flex: 3;">
-                <label>密码</label>
-                <input type="password" placeholder="请输入数据库密码">
+
+        <div style="margin-top: 30px; padding: 15px; background: #fff1f0; border-radius: 8px; border: 1px solid #ffa39e;">
+            <label style="color: #cf1322;">高级维护选项</label>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button style="flex: 1; font-size: 12px; background: white;">导出所有日志 (Excel)</button>
+                <button style="flex: 1; font-size: 12px; background: white;">清理30天前历史数据</button>
             </div>
         </div>
 
         <div class="footer">
             <button>检测连接</button>
-            <button class="btn-primary">开始部署</button>
+            <button class="btn-primary">保存配置并启动</button>
         </div>
     </div>
 </body>

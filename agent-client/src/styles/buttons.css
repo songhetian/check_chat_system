@@ -1,0 +1,22 @@
+/* 商业级按钮全局样式 */
+@layer components {
+  .btn-premium {
+    @apply relative overflow-hidden transition-all duration-300 active:scale-95 disabled:opacity-50;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-primary-gradient {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    @apply border border-blue-600 text-white hover:brightness-110;
+  }
+
+  .btn-danger-gradient {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+    @apply border border-red-600 text-white hover:brightness-110;
+  }
+
+  .btn-amber-gradient {
+    background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+    @apply border border-amber-600 text-white hover:brightness-110;
+  }
+}

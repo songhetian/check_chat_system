@@ -48,26 +48,28 @@ class MonitorEngine {
     analyze(text) {
         const found = this.sensitiveWords.find(word => text.includes(word));
         if (found) {
-            this.intervene(found, text);
+            // 抓取上下文：取敏感词前后的文字
+            const index = text.indexOf(found);
+            const context = text.substring(Math.max(0, index - 20), Math.min(text.length, index + 20));
+            this.intervene(found, context);
         }
     }
 
-    // 物理干预：执行删除
-    intervene(word, fullText) {
-        console.warn(`检测到敏感内容: [${word}]`);
+    intervene(word, context) {
+        console.warn(`检测到敏感内容: [${word}], 上下文: ${context}`);
         
-        // 1. 模拟按键：全选并删除
+        // 执行物理删除
         robot.keyTap('a', 'control');
         robot.keyTap('backspace');
 
-        // 2. 通知 UI 层显示警告
-        ipcRenderer.send('violation-detected', {
-            word: word,
-            message: '由于包含敏感词汇，内容已自动拦截并清除。'
-        });
+        // 将拦截事件持久化到本地（以防断网）
+        this.saveLocalLog({ word, context, time: new Date() });
 
-        // 3. 上报给服务端记录
-        this.reportViolation(word, fullText);
+        // 通知 UI
+        ipcRenderer.send('violation-detected', { word, context });
+
+        // 尝试上报
+        this.reportViolation(word, context);
     }
 
     reportViolation(word, content) {

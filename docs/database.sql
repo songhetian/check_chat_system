@@ -53,6 +53,21 @@ CREATE TABLE `system_logs` (
   FOREIGN KEY (`operator_id`) REFERENCES `users`(`id`)
 );
 
+-- 求助知识库 (沉淀主管的解决方案)
+CREATE TABLE `help_knowledge` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `question` TEXT NOT NULL COMMENT '客服提出的问题',
+  `solution` TEXT NOT NULL COMMENT '主管给出的方案',
+  `screenshot_url` VARCHAR(255) COMMENT '求助时的截图证物',
+  `dept_id` INT,
+  `scope` ENUM('global', 'dept') DEFAULT 'dept' COMMENT '可见范围',
+  `tags` VARCHAR(100) COMMENT '关键词标签',
+  `click_count` INT DEFAULT 0 COMMENT '被查阅次数',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`dept_id`) REFERENCES `departments`(`id`)
+);
+
+
 -- 监控记录表
 CREATE TABLE `monitor_logs` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,

@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { EventsGateway } from './modules/events/events.gateway';
+import { WordsController } from './modules/words/words.controller';
+import { HealthController } from './modules/health.controller';
 
 @Module({
   imports: [
@@ -13,7 +16,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false,
     }),
-    // 模块将在此处按需注入
   ],
+  controllers: [WordsController, HealthController],
+  providers: [EventsGateway],
 })
 export class AppModule {}
