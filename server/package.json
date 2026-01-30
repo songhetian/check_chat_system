@@ -10,13 +10,25 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^10.3.0",
+    "@nestjs/platform-express": "^10.3.0",
+    "@nestjs/platform-socket.io": "^10.3.0",
     "@nestjs/typeorm": "^10.0.1",
     "@nestjs/websockets": "^10.3.0",
-    "@nestjs/platform-socket.io": "^10.3.0",
+    "exceljs": "^4.4.0",
     "mysql2": "^3.9.0",
-    "typeorm": "^0.3.20",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.1",
     "socket.io": "^4.7.4",
-    "exceljs": "^4.4.0"
+    "typeorm": "^0.3.20"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.3.0",
+    "@nestjs/schematics": "^10.1.0",
+    "@types/node": "^20.11.16",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.3.3"
   }
 }

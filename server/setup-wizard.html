@@ -42,9 +42,31 @@
         </div>
 
         <div class="footer">
-            <button>检测连接</button>
-            <button class="btn-primary">保存配置并启动</button>
+            <button onclick="testConnection()">检测连接</button>
+            <button class="btn-primary" onclick="saveConfig()">保存配置并启动</button>
         </div>
     </div>
+    <script>
+        async function testConnection() {
+            const host = document.querySelector('input').value;
+            alert('正在检测与 ' + (host || '默认地址') + ' 的连接...');
+            try {
+                const res = await fetch('/health');
+                const data = await res.json();
+                if (data.status === 'healthy') {
+                    alert('连接成功！数据库状态: ' + data.dbConnection);
+                } else {
+                    alert('服务响应异常');
+                }
+            } catch (e) {
+                alert('无法连接到服务器，请检查后端是否启动');
+            }
+        }
+
+        function saveConfig() {
+            alert('配置已保存 (演示模式)');
+            console.log('Save triggered');
+        }
+    </script>
 </body>
 </html>

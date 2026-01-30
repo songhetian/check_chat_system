@@ -1,11 +1,25 @@
-import { Module } from '@nestjs/common';
+import { Module, Get, Controller, Res } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { EventsGateway } from './modules/events/events.gateway';
 import { WordsController } from './modules/words/words.controller';
 import { HealthController } from './modules/health.controller';
+import { join } from 'path';
+import { Response } from 'express';
+
+@Controller()
+export class AppController {
+  @Get()
+  getApp(@Res() res: Response) {
+    res.sendFile(join(__dirname, '..', 'setup-wizard.html'));
+  }
+}
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST || 'localhost',
@@ -17,7 +31,7 @@ import { HealthController } from './modules/health.controller';
       synchronize: false,
     }),
   ],
-  controllers: [WordsController, HealthController],
+  controllers: [AppController, WordsController, HealthController],
   providers: [EventsGateway],
 })
 export class AppModule {}
