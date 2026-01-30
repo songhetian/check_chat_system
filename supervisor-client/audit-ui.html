@@ -1,0 +1,55 @@
+<!-- 补充到 supervisor-client/index.html 的 main-content 中 -->
+<div id="audit-section" style="display: none;">
+    <div class="header">
+        <h2>监控预警日志</h2>
+        <div class="filter-bar">
+            <input type="text" placeholder="搜索客服姓名..." style="width: 150px; padding: 6px;">
+            <select style="padding: 6px;">
+                <option>全部部门</option>
+                <option>销售部</option>
+                <option>售后部</option>
+            </select>
+            <button style="width: auto; background: #fff; color: #333; border: 1px solid #d9d9d9;">导出记录</button>
+        </div>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+        <thead>
+            <tr style="background: #fafafa; text-align: left; border-bottom: 1px solid #f0f0f0;">
+                <th style="padding: 15px;">触发时间</th>
+                <th style="padding: 15px;">客服人员</th>
+                <th style="padding: 15px;">敏感词</th>
+                <th style="padding: 15px;">上下文内容</th>
+                <th style="padding: 15px;">处理状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+                <td style="padding: 15px; font-size: 13px; color: #666;">2026-01-28 14:20:01</td>
+                <td style="padding: 15px;">张小明 (销售一部)</td>
+                <td style="padding: 15px;"><span style="color: #ff4d4f; background: #fff1f0; padding: 2px 6px; border-radius: 4px;">加微信</span></td>
+                <td style="padding: 15px; font-size: 13px;">客户问怎么联系，客服回复“您可以加我微信...”</td>
+                <td style="padding: 15px;"><span style="color: #52c41a;">✓ 已拦截</span></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+                <td style="padding: 15px; font-size: 13px; color: #666;">2026-01-28 15:05:32</td>
+                <td style="padding: 15px;">李华 (售后组)</td>
+                <td style="padding: 15px;"><span style="color: #faad14; background: #fffbe6; padding: 2px 6px; border-radius: 4px;">垃圾</span></td>
+                <td style="padding: 15px; font-size: 13px;">客服回复“那个垃圾产品不是我们公司的...”</td>
+                <td style="padding: 15px;"><span style="color: #1890ff;">ℹ 已记录</span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .filter-bar {
+        display: flex;
+        gap: 10px;
+    }
+    th {
+        font-weight: 600;
+        color: #1d1d1f;
+        font-size: 14px;
+    }
+</style>

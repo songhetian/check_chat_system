@@ -1,0 +1,21 @@
+{
+  "name": "smart-cs-agent",
+  "version": "1.0.0",
+  "description": "Smart CS Agent Floating Client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "socket.io-client": "^4.7.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@douyinfe/semi-ui": "^2.40.0"
+  },
+  "devDependencies": {
+    "electron": "^25.0.0",
+    "electron-builder": "^24.4.0"
+  }
+}

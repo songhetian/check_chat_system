@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { background: #f0f2f5; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .wizard-card { width: 500px; background: white; border-radius: 12px; padding: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .step-indicator { display: flex; margin-bottom: 30px; }
+        .step { flex: 1; height: 4px; background: #e8e8e8; margin: 0 4px; border-radius: 2px; }
+        .step.active { background: #1890ff; }
+        h2 { margin-top: 0; color: #1d1d1f; }
+        p { color: #86868b; font-size: 14px; line-height: 1.6; }
+        .form-item { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 4px; box-sizing: border-box; }
+        .footer { display: flex; justify-content: space-between; margin-top: 30px; }
+        button { padding: 10px 20px; border-radius: 4px; cursor: pointer; border: 1px solid #d9d9d9; }
+        .btn-primary { background: #1890ff; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <div class="wizard-card">
+        <div class="step-indicator">
+            <div class="step active"></div>
+            <div class="step"></div>
+            <div class="step"></div>
+        </div>
+        <h2>数据库配置向导</h2>
+        <p>欢迎使用 Smart-CS。请指定您的 MySQL 数据库连接信息，系统将自动完成初始化。</p>
+        
+        <div class="form-item">
+            <label>MySQL 主机地址</label>
+            <input type="text" placeholder="127.0.0.1 (本地) 或 远程 IP">
+        </div>
+        <div class="form-item" style="display: flex; gap: 20px;">
+            <div style="flex: 2;">
+                <label>用户名</label>
+                <input type="text" value="root">
+            </div>
+            <div style="flex: 3;">
+                <label>密码</label>
+                <input type="password" placeholder="请输入数据库密码">
+            </div>
+        </div>
+
+        <div class="footer">
+            <button>检测连接</button>
+            <button class="btn-primary">开始部署</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --danger-color: #ff4d4f;
+        }
+        body {
+            margin: 0;
+            padding: 10px;
+            overflow: hidden;
+            font-family: -apple-system, sans-serif;
+            background: transparent;
+        }
+        /* 震屏动画 */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .shaking {
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+            border: 2px solid var(--danger-color) !important;
+        }
+
+        .capsule {
+            display: flex;
+            align-items: center;
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 5px 15px;
+            height: 40px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            -webkit-app-region: drag;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .icon-group {
+            display: flex;
+            gap: 15px;
+            -webkit-app-region: no-drag;
+        }
+        .icon {
+            cursor: pointer;
+            font-size: 18px;
+            filter: grayscale(1);
+            transition: all 0.2s;
+        }
+        .icon:hover { filter: grayscale(0); transform: scale(1.2); }
+
+        .search-area {
+            margin: 0 15px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 4px 15px;
+            font-size: 12px;
+            color: #ccc;
+            -webkit-app-region: no-drag;
+        }
+
+        /* 备忘录弹窗 */
+        #memo-panel {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 10px;
+            right: 10px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            color: #333;
+            -webkit-app-region: no-drag;
+        }
+        .memo-input {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .memo-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="capsule" id="main-capsule">
+        <div class="icon-group">
+            <span class="icon" onclick="toggleMemo()" title="备忘录">📝</span>
+            <span class="icon" onclick="requestHelp()" title="求助主管">🆘</span>
+            <span class="icon" title="快捷话术">💬</span>
+        </div>
+        <div class="search-area">输入关键词搜话术...</div>
+        <div id="status-dot" style="width:8px; height:8px; background:#52c41a; border-radius:50%;"></div>
+    </div>
+
+    <!-- 备忘录面板 -->
+    <div id="memo-panel">
+        <h4 style="margin: 0 0 10px 0;">快速备忘</h4>
+        <input type="text" id="memo-text" class="memo-input" placeholder="输入待办事项...">
+        <input type="datetime-local" id="memo-time" class="memo-input">
+        <button class="memo-btn" onclick="saveMemo()">添加提醒</button>
+    </div>
+
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script>
+        // 这里假设已经 npm install 了 socket.io-client
+        // 实际运行时需要指向服务端的局域网地址
+        // const socket = io('http://192.168.1.100:3000'); 
+
+        // 监听底层引擎发来的违规信号
+        const { ipcRenderer } = require('electron');
+        ipcRenderer.on('on-violation', (event, data) => {
+            const capsule = document.getElementById('main-capsule');
+            const searchArea = document.querySelector('.search-area');
+            
+            // 变红震动
+            capsule.classList.add('shaking');
+            capsule.style.background = 'rgba(255, 77, 79, 0.9)'; // 红色
+            searchArea.innerText = `拦截: ${data.word}`;
+            searchArea.style.color = 'white';
+
+            // 3秒后恢复
+            setTimeout(() => {
+                capsule.classList.remove('shaking');
+                capsule.style.background = 'rgba(20, 20, 20, 0.85)';
+                searchArea.innerText = '输入关键词搜话术...';
+                searchArea.style.color = '#ccc';
+            }, 3000);
+        });
+
+        function toggleMemo() {
+            const panel = document.getElementById('memo-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function saveMemo() {
+            const text = document.getElementById('memo-text').value;
+            const time = document.getElementById('memo-time').value;
+            if(!text) return alert('请输入内容');
+            
+            // 发送到服务端保存
+            console.log('保存备忘:', { text, time });
+            alert('备忘录已设置，到点将自动提醒！');
+            toggleMemo();
+        }
+
+        function requestHelp() {
+            const ok = confirm('确定要向主管发起协助请求吗？');
+            if(ok) {
+                // socket.emit('request-help', { content: '客户对价格不满意，请求介入' });
+                alert('求助请求已发送，请等待主管响应。');
+            }
+        }
+
+        // 模拟接收震屏
+        window.simulateShake = function() {
+            const capsule = document.getElementById('main-capsule');
+            capsule.classList.add('shaking');
+            // 播放提示音
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.play();
+            
+            setTimeout(() => {
+                capsule.classList.remove('shaking');
+            }, 3000);
+        };
+    </script>
+</body>
+</html>
