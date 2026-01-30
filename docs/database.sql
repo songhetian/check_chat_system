@@ -88,5 +88,19 @@ CREATE TABLE `memos` (
   `is_completed` BOOLEAN DEFAULT FALSE,
   `source` ENUM('self', 'supervisor') DEFAULT 'self',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
-);
+-- 插入初始部门
+INSERT INTO `departments` (`name`) VALUES ('销售部'), ('售后部');
+
+-- 插入初始用户 (密码暂存为明文，生产环境建议通过服务端加密)
+-- 管理员
+INSERT INTO `users` (`username`, `password`, `role`, `nickname`) 
+VALUES ('admin', 'admin123', 'admin', '系统管理员');
+
+-- 主管 (所属部门 ID = 1)
+INSERT INTO `users` (`username`, `password`, `role`, `dept_id`, `nickname`) 
+VALUES ('supervisor', 'super123', 'supervisor', 1, '销售主管');
+
+-- 客服 (所属部门 ID = 1)
+INSERT INTO `users` (`username`, `password`, `role`, `dept_id`, `nickname`) 
+VALUES ('agent01', 'agent123', 'agent', 1, '客服小明');
+
