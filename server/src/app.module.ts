@@ -5,13 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost', // 实际部署时可从配置文件读取
-      port: 3306,
-      username: 'root',
-      password: 'password',
-      database: 'smart_cs_db',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT) || 3306,
+      username: process.env.DB_USER || 'root',
+      password: process.env.DB_PASS || 'password',
+      database: process.env.DB_NAME || 'smart_cs_db',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, // 生产环境建议关闭，由 docs/database.sql 维护
+      synchronize: false,
     }),
     // 模块将在此处按需注入
   ],
