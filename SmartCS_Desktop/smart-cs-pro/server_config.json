@@ -1,0 +1,6 @@
+{
+    "api_url": "http://127.0.0.1:8000/api",
+    "server_url": "ws://127.0.0.1:8000",
+    "ollama_url": "http://localhost:11434/api/chat",
+    "ai_enabled": false
+}

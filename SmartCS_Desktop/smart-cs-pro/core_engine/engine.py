@@ -1,0 +1,455 @@
+import json
+import time
+import asyncio
+import base64
+import re
+from collections import deque
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
+import pandas as pd
+import io
+
+# ... (之前的代码保持不变)
+
+@app.post("/api/admin/agent/praise")
+async def praise_agent(agent_id: str):
+    # 下发“表扬”指令，触发坐席端烟花
+    await broadcast_event({
+        "type": "PRAISE",
+        "agent_id": agent_id,
+        "message": "主管为您点赞！表现优异！"
+    })
+    return {"status": "ok"}
+
+import subprocess
+import os
+
+# ... (之前的代码保持不变)
+
+@app.post("/api/agent/convert-video")
+async def convert_video(input_path: str):
+    """
+    使用 FFmpeg 将 MOV/AVI 等格式转换为压缩后的 MP4
+    """
+    if not os.path.exists(input_path):
+        return {"status": "error", "message": "文件不存在"}
+    
+    output_path = os.path.splitext(input_path)[0] + "_converted.mp4"
+    
+    # 执行 FFmpeg 指令 (假设用户系统已安装 ffmpeg)
+    # -y: 覆盖输出, -crf 28: 中等压缩率提升速度
+    cmd = f'ffmpeg -y -i "{input_path}" -vcodec libx264 -crf 28 "{output_path}"'
+    
+    try:
+        # 发送进度占位通知
+        await broadcast_event({"type": "CONVERT_STATUS", "status": "PROCESSING"})
+        
+        subprocess.run(cmd, shell=True, check=True)
+        
+        await broadcast_event({"type": "CONVERT_STATUS", "status": "DONE", "path": output_path})
+        return {"status": "ok", "output": output_path}
+    except Exception as e:
+        await broadcast_event({"type": "CONVERT_STATUS", "status": "ERROR"})
+        return {"status": "error", "message": str(e)}
+
+from PIL import Image, ImageDraw, ImageFont
+import pypinyin
+
+# ... (之前的代码保持不变)
+
+@app.post("/api/agent/image-defense")
+async def image_defense(input_path: str, watermark_text: str):
+    """
+    为图片添加安全水印并压缩，防止客户乱传
+    """
+    if not os.path.exists(input_path):
+        return {"status": "error", "message": "文件不存在"}
+    
+    try:
+        with Image.open(input_path) as img:
+            # 转换为 RGB 模式
+            img = img.convert("RGBA")
+            txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
+            draw = ImageDraw.Draw(txt)
+            
+            # 设置水印文字 (简单逻辑：在中心画一个半透明文字)
+            # 注意：实际生产需要指定一个支持中文字体的 .ttf 文件路径
+            draw.text((10, 10), watermark_text, fill=(255, 255, 255, 80))
+            
+            combined = Image.alpha_composite(img, txt)
+            output_path = os.path.splitext(input_path)[0] + "_safe.jpg"
+            combined.convert("RGB").save(output_path, "JPEG", quality=50) # 压缩质量
+            
+            return {"status": "ok", "output": output_path}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+import requests
+
+# --- 深度语义风控提示词 (LLM Prompt) ---
+SYSTEM_PROMPT = """
+你是一个专业的客服监控专家。请分析以下坐席的输入内容，并按JSON格式输出结果。
+判断维度：
+1. 态度：是否阴阳怪气、不耐烦或辱骂。
+2. 违规：是否引导私下交易、规避平台规则。
+3. 机会：客户是否表现出明显的购买意向。
+
+输出格式必须是：{"risk_score": 0-10, "is_violation": bool, "reason": "原因", "suggestion": "建议话术"}
+"""
+
+# --- 配置加载逻辑 ---
+def load_config():
+    try:
+        with open("../server_config.json", "r") as f:
+            return json.load(f)
+    except:
+        return {"ollama_url": "http://localhost:11434/api/chat", "ai_enabled": False}
+
+CONFIG = load_config()
+
+async def analyze_with_llm(text):
+    """
+    智能 AI 分析 (方案 A/B 兼容模式)
+    """
+    if not CONFIG.get("ai_enabled", False):
+        return # 方案 A：直接跳过，零资源占用
+
+    try:
+        url = CONFIG.get("ollama_url")
+        payload = {
+            "model": "qwen2:1.5b",
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": text}
+            ],
+            "stream": False,
+            "format": "json"
+        }
+        # 设置极短超时，防止影响主链路
+        response = requests.post(url, json=payload, timeout=1.5)
+        # ... 后续处理逻辑保持不变
+        result = json.loads(response.json()['message']['content'])
+        
+        if result.get("is_violation"):
+            await broadcast_event({
+                "type": "VIOLATION",
+                "id": str(int(time.time() * 1000)),
+                "agent": "当前坐席",
+                "keyword": "语义风险",
+                "context": text,
+                "reason": result.get("reason"),
+                "screenshot": f"data:image/jpeg;base64,{capture_evidence()}",
+                "timestamp": time.time() * 1000
+            })
+    except:
+        pass # Ollama 未启动时静默跳过
+
+# 在 check_text 匹配不到关键词时调用大模型
+# threading.Thread(target=lambda: asyncio.run(analyze_with_llm(raw_text))).start()
+from fastapi.middleware.cors import CORSMiddleware
+from pynput import keyboard
+import uvicorn
+import threading
+from PIL import ImageGrab
+import win32gui
+
+app = FastAPI()
+
+# 允许本地跨域
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# --- 核心状态配置 ---
+class RiskEngine:
+    def __init__(self):
+        self.sensitive_words = ["滚蛋", "转账", "加微信", "骗子"] # 实际从DB加载
+        self.product_keywords = {"耳机": "SL-2024-X1", "手表": "TW-GT-05"} # 商品触发词
+        self.char_buffer = deque(maxlen=30) # 滑动窗口缓冲区
+        self.active_connections = []
+
+    def normalize_text(self, text):
+        # 归一化：去掉所有非中文字符，防止 “滚 蛋” 逃避
+        return re.sub(r'[^\u4e00-\u9fa5]', '', text)
+
+    def check_text(self):
+        raw_text = "".join(self.char_buffer)
+        clean_text = self.normalize_text(raw_text)
+        
+        # 1. 检查违规词 (保持高优先级)
+        for word in self.sensitive_words:
+            if word in clean_text:
+                return {"type": "VIOLATION", "keyword": word, "context": raw_text}
+        
+        # 2. 检查商品意向 (多重匹配逻辑)
+        matched_products = []
+        for kw, pid in self.product_keywords.items():
+            if kw in clean_text:
+                matched_products.append({"pid": pid, "keyword": kw})
+        
+        if matched_products:
+            # 如果命中多个，返回列表；如果只有一个，前端也可以统一处理
+            return {
+                "type": "PRODUCT_SUGGESTION", 
+                "products": matched_products[:5], # 最多推荐前5个，防止刷屏
+                "count": len(matched_products)
+            }
+        
+        return None
+
+engine = RiskEngine()
+
+# --- 键盘钩子监听逻辑 ---
+def on_press(key):
+    try:
+        if hasattr(key, 'char') and key.char:
+            res = engine.add_char(key.char)
+            if res:
+                # 发现违规，立即触发异步推送
+                asyncio.run_coroutine_threadsafe(broadcast_event(res), main_loop)
+    except:
+        pass
+
+def start_keyboard_hook():
+    with keyboard.Listener(on_press=on_press) as listener:
+        listener.join()
+
+# --- 精准取证截图逻辑 ---
+def capture_evidence():
+    try:
+        # 获取当前活动窗口句柄
+        hwnd = win32gui.GetForegroundWindow()
+        # 这里可以加入逻辑，判断如果是微信/钉钉才截图
+        img = ImageGrab.grab() # 实际可以使用 grab(bbox) 截取特定窗口
+        img.thumbnail((800, 450)) # 压缩以提升传输速度
+        
+        import io
+        buffered = io.BytesIO()
+        img.save(buffered, format="JPEG", quality=60)
+        return base64.b64encode(buffered.getvalue()).decode('utf-8')
+    except:
+        return ""
+
+# --- WebSocket 实时推送 ---
+@app.websocket("/ws/risk")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    engine.active_connections.append(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        engine.active_connections.remove(websocket)
+
+async def broadcast_event(data):
+    if data["type"] == "VIOLATION":
+        # 违规时带上截图
+        data["screenshot"] = f"data:image/jpeg;base64,{capture_evidence()}"
+        data["timestamp"] = time.time() * 1000
+        data["id"] = str(int(time.time() * 1000))
+        data["agent"] = "当前坐席"
+
+    for conn in engine.active_connections:
+        await conn.send_text(json.dumps(data))
+
+# ... (之前的导入保持不变)
+from paddleocr import PaddleOCR
+import numpy as np
+
+# 初始化本地 OCR (初次运行会自动下载模型，约 100MB)
+ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+
+class SmartScanner:
+    def __init__(self):
+        # 模拟不同聊天软件的区域坐标 (实际可通过 win32gui 动态计算)
+        self.regions = {
+            "name_area": (450, 50, 800, 100),  # 顶部名字区域 [左, 上, 右, 下]
+            "chat_area": (400, 150, 900, 700)  # 聊天记录区域
+        }
+        self.last_customer = ""
+
+    def scan_screen(self):
+        """
+        全自动化扫描流程
+        """
+        full_img = ImageGrab.grab()
+        
+        # 1. 识别客户名字 (谁在跟我聊天)
+        name_crop = full_img.crop(self.regions["name_area"])
+        name_res = ocr.ocr(np.array(name_crop), cls=True)
+        
+        if name_res and name_res[0]:
+            customer_name = name_res[0][0][1][0] # 提取识别到的第一行文字
+            if customer_name != self.last_customer:
+                self.last_customer = customer_name
+                # 触发画像弹窗
+                asyncio.run_coroutine_threadsafe(
+                    broadcast_event({
+                        "type": "trigger-customer", 
+                        "detail": self.get_customer_persona(customer_name)
+                    }), 
+                    main_loop
+                )
+
+        # 2. 识别聊天内容与意向 (他在说什么)
+        chat_crop = full_img.crop(self.regions["chat_area"])
+        chat_res = ocr.ocr(np.array(chat_crop), cls=True)
+        
+        if chat_res and chat_res[0]:
+            # 获取最后一条消息 (通常在最下面)
+            last_msg = chat_res[0][-1][1][0]
+            self.analyze_intent(last_msg)
+
+import sqlite3
+
+# ... (之前的代码保持不变)
+
+class PersonaEngine:
+    def __init__(self):
+        self.db_path = "customers.db"
+        self._init_db()
+
+    def _init_db(self):
+        conn = sqlite3.connect(self.db_path)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS customers (
+                name TEXT PRIMARY KEY,
+                level TEXT,
+                tags TEXT,
+                ltv REAL,
+                frequency INTEGER,
+                is_risk BOOLEAN
+            )
+        """)
+        # 预存一些模拟数据，实际由主管 Excel 导入
+        conn.execute("REPLACE INTO customers VALUES ('王大锤', 'VIP', '高意向,老客户', 12500, 45, 0)")
+        conn.commit()
+        conn.close()
+
+    def get_persona(self, name):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM customers WHERE name=?", (name,))
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            return {
+                "name": row[0],
+                "level": row[1],
+                "tags": row[2].split(','),
+                "ltv": f"{row[3]:,}",
+                "frequency": row[4],
+                "lastProducts": ["系统分析中..."],
+                "isRisk": bool(row[5])
+            }
+        else:
+            # 陌生人逻辑：自动建档
+            return {
+                "name": name,
+                "level": "NEW",
+                "tags": ["首次咨询"],
+                "ltv": "0",
+                "frequency": 1,
+                "lastProducts": [],
+                "isRisk": False
+            }
+
+persona_engine = PersonaEngine()
+
+# 在 SmartScanner 识别到名字后调用
+# ... customer_data = persona_engine.get_persona(customer_name)
+
+# --- 风险等级定义 ---
+RISK_LEVELS = {
+    "315": "CRITICAL",
+    "投诉": "HIGH",
+    "起诉": "CRITICAL",
+    "曝光": "CRITICAL",
+    "退钱": "MEDIUM",
+    "不买了": "MEDIUM",
+    "贵": "LOW",
+    "老客户": "LOW"
+}
+
+class SmartScanner:
+    # ... (之前的初始化代码保持不变)
+
+    def analyze_intent(self, text, customer_name):
+        """
+        分级分析逻辑
+        """
+        for word, level in RISK_LEVELS.items():
+            if word in text:
+                if level == "CRITICAL":
+                    # 1. 触发最高级别红色报警
+                    asyncio.run_coroutine_threadsafe(
+                        broadcast_event({
+                            "type": "RED_ALERT",
+                            "agent": "当前坐席",
+                            "keyword": word,
+                            "context": text,
+                            "screenshot": f"data:image/jpeg;base64,{capture_evidence()}"
+                        }), 
+                        main_loop
+                    )
+                    # 2. 数据库强制修改为高危客户
+                    self.update_db_risk(customer_name, True)
+                
+                elif level == "HIGH" or level == "MEDIUM":
+                    # 触发 SOP 指引
+                    asyncio.run_coroutine_threadsafe(
+                        broadcast_event({
+                            "type": "SOP_GUIDE",
+                            "steps": ["立即开启专业录音", "话术：为您转接高级主管", "禁止使用情绪化字眼"]
+                        }),
+                        main_loop
+                    )
+                
+                else:
+                    # LOW：仅进行画像打标
+                    self.update_customer_tag(customer_name, word)
+
+    def update_db_risk(self, name, is_risk):
+        conn = sqlite3.connect("customers.db")
+        conn.execute("UPDATE customers SET is_risk=? WHERE name=?", (is_risk, name))
+        conn.commit()
+        conn.close()
+
+    def update_customer_tag(self, name, word):
+        # 简单的自动打标逻辑
+        tag = "价格敏感" if word == "贵" else "老客户" if word == "老客户" else "意向客户"
+        conn = sqlite3.connect("customers.db")
+        # 这里实际需要更复杂的去重和合并字符串逻辑
+        conn.execute("UPDATE customers SET tags = tags || ? WHERE name=?", (f",{tag}", name))
+        conn.commit()
+        conn.close()
+
+scanner = SmartScanner()
+
+# 在主循环中定时运行扫描 (建议 3-5 秒一次，防止占用 CPU 过高)
+def auto_scan_loop():
+    while True:
+        try:
+            scanner.scan_screen()
+        except: pass
+        time.sleep(3)
+
+# ... (在 main 中启动该线程)
+
+# --- 启动服务 ---
+if __name__ == "__main__":
+    # 在独立线程运行键盘钩子
+    threading.Thread(target=start_keyboard_hook, daemon=True).start()
+    
+    # 获取异步事件循环
+    main_loop = asyncio.new_event_loop()
+    threading.Thread(target=lambda: uvicorn.run(app, host="127.0.0.1", port=8000), daemon=True).start()
+    
+    # 启动自动扫描线程
+    threading.Thread(target=auto_scan_loop, daemon=True).start()
+    
+    print("🚀 Smart-CS Pro 核心引擎已启动 (Port: 8000)")
+    while True: time.sleep(1)
