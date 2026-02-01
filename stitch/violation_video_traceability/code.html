@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Violation Video Traceability</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white">
+<div class="relative flex h-screen w-full flex-col overflow-hidden">
+<!-- Header -->
+<header class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between border-b border-white/5">
+<div class="text-white flex size-12 shrink-0 items-center justify-start cursor-pointer">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</div>
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Traceability Details</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex items-center justify-center rounded-lg h-12 bg-transparent text-white p-0">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area (Scrollable) -->
+<main class="flex-1 overflow-y-auto">
+<!-- Video Player Section -->
+<div class="p-0 bg-black">
+<div class="relative flex items-center justify-center bg-zinc-900 bg-cover bg-center aspect-video" data-alt="CCTV or screen recording of a customer service interaction" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCWmEGrIcP0MT2366na1ym8-X8YIbskDzz5bZJJJ6bl-oncVj7MP7bf56Y_fJWlXTF4AkAJqODJ1ZHpMKs5PntIdaPzJOq0PHliPEZXjYo8nvw_ZvsPxhn5q9OPO8-uoujeJVKbOj18QCLoMjp-vYkqg-D-wS2CL_b0BJMBn1KIn-L47eitNCXaKRzhbgXAVwbIZJvo9uTX_QKplW7S-upzneaweOWoFkpzf3bciD8ovLUxDKJ-I_8F7ffN2s6JbJu99usHMeufYYr-");'>
+<div class="absolute inset-0 bg-black/40"></div>
+<button class="relative z-10 flex shrink-0 items-center justify-center rounded-full size-16 bg-white/20 backdrop-blur-md text-white border border-white/30">
+<span class="material-symbols-outlined !text-4xl" style="font-variation-settings: 'FILL' 1">play_arrow</span>
+</button>
+<!-- Player Controls Overlay -->
+<div class="absolute inset-x-0 bottom-0 px-4 py-3 bg-gradient-to-t from-black/80 to-transparent">
+<div class="flex h-4 items-center justify-center mb-1">
+<div class="h-1 flex-1 rounded-full bg-primary"></div>
+<div class="relative">
+<div class="absolute -left-2 -top-2 size-4 rounded-full bg-primary border-2 border-white shadow-lg"></div>
+</div>
+<div class="h-1 flex-[1.5] rounded-full bg-white/30"></div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<p class="text-white text-xs font-medium leading-normal">03:42</p>
+<span class="text-white/40 text-xs">/</span>
+<p class="text-white/60 text-xs font-medium leading-normal">12:15</p>
+</div>
+<span class="material-symbols-outlined text-white text-sm">fullscreen</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Violation Details Container -->
+<div class="px-4">
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pt-6 pb-2">Violation Details</h2>
+<div class="grid grid-cols-[30%_1fr] gap-x-4">
+<div class="col-span-2 grid grid-cols-subgrid border-t border-white/10 py-4">
+<p class="text-[#9dabb9] text-sm font-normal">Event Time</p>
+<p class="text-white text-sm font-medium">2023-10-24 14:20:05</p>
+</div>
+<div class="col-span-2 grid grid-cols-subgrid border-t border-white/10 py-4">
+<p class="text-[#9dabb9] text-sm font-normal">Supervisor</p>
+<p class="text-white text-sm font-medium">Agent ID: CS-9921</p>
+</div>
+<div class="col-span-2 grid grid-cols-subgrid border-t border-white/10 py-4">
+<p class="text-[#9dabb9] text-sm font-normal">Violation</p>
+<p class="text-[#ff5252] text-sm font-bold">Sensitive Word Trigger</p>
+</div>
+</div>
+<!-- Keywords Section -->
+<h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-6 pb-3">Keywords Detected</h3>
+<div class="flex flex-wrap gap-2 pb-6">
+<span class="px-3 py-1.5 bg-primary/20 text-primary text-sm font-bold rounded-lg border border-primary/30">#Refund_Now</span>
+<span class="px-3 py-1.5 bg-primary/20 text-primary text-sm font-bold rounded-lg border border-primary/30">#Password_Reset</span>
+<span class="px-3 py-1.5 bg-[#ff5252]/10 text-[#ff5252] text-sm font-bold rounded-lg border border-[#ff5252]/30">#Aggressive_Tone</span>
+<span class="px-3 py-1.5 bg-primary/20 text-primary text-sm font-bold rounded-lg border border-primary/30">#Unauthorized</span>
+</div>
+<!-- Remarks Section -->
+<div class="bg-white/5 rounded-xl p-4 mb-8">
+<p class="text-[#9dabb9] text-xs font-bold uppercase tracking-wider mb-2">Automated Remark</p>
+<p class="text-white/80 text-sm leading-relaxed">
+                        System detected multiple high-risk keywords during a 15-second window. The agent appeared to bypass standard security verification protocols during the refund request phase.
+                    </p>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar (Sticky) -->
+<footer class="p-4 bg-background-light dark:bg-background-dark border-t border-white/5 flex gap-3 pb-8">
+<button class="flex-1 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors">
+                False Positive
+            </button>
+<button class="flex-[2] h-12 flex items-center justify-center bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 transition-colors">
+                Confirm Violation
+            </button>
+</footer>
+</div>
+</body></html>
