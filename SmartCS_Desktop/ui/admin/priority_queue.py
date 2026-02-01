@@ -1,7 +1,7 @@
 import flet as ft
 from datetime import datetime
 
-class ViolationQueue(ft.UserControl):
+class ViolationQueue(ft.Control):
     def __init__(self):
         super().__init__()
         # agent_id -> {count, last_time, last_word, is_handled}

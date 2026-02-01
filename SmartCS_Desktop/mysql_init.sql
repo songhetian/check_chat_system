@@ -4,7 +4,28 @@
 CREATE DATABASE IF NOT EXISTS smart_cs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE smart_cs;
 
--- 1. 敏感词/监控词表
+-- 1. 部门表 (Departments)
+CREATE TABLE IF NOT EXISTS `departments` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(100) UNIQUE NOT NULL,
+    `description` VARCHAR(200)
+);
+
+-- 2. 用户表 (Users)
+CREATE TABLE IF NOT EXISTS `users` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `username` VARCHAR(50) UNIQUE NOT NULL,
+    `password_hash` VARCHAR(255) NOT NULL,
+    `real_name` VARCHAR(100),
+    `role` ENUM('AGENT', 'SUPERVISOR', 'ADMIN', 'HQ') DEFAULT 'AGENT',
+    `department_id` INT,
+    `status` VARCHAR(20) DEFAULT 'Active',
+    `last_login` DATETIME,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`department_id`) REFERENCES `departments`(`id`)
+);
+
+-- 3. 敏感词/监控词表
 CREATE TABLE IF NOT EXISTS `sensitive_words` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `word` VARCHAR(100) UNIQUE NOT NULL,
@@ -12,6 +33,22 @@ CREATE TABLE IF NOT EXISTS `sensitive_words` (
     `action` VARCHAR(50) DEFAULT 'Alert', -- Alert, Block, Shake
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ... (其他表保持不变) ...
+
+-- 预置一些基础数据
+INSERT IGNORE INTO `departments` (id, name, description) VALUES 
+(1, 'General', 'Default Dept'),
+(2, 'Sales', 'Sales Department'),
+(3, 'Support', 'Customer Support'),
+(4, 'HQ', 'Command Center');
+
+-- 密码均为: 123456 (在生产环境中应该使用 bcrypt 存储 hash)
+INSERT IGNORE INTO `users` (username, password_hash, real_name, role, department_id) VALUES 
+('admin', '123456', 'System Admin', 'ADMIN', 1),
+('hq01', '123456', 'HQ Commander', 'HQ', 4),
+('sales01', '123456', 'Sales Agent 01', 'AGENT', 2),
+('boss_sales', '123456', 'Sales Manager', 'SUPERVISOR', 2);
 
 -- 2. 知识库/话术表
 CREATE TABLE IF NOT EXISTS `knowledge_base` (

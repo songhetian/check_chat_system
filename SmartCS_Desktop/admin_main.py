@@ -10,18 +10,109 @@ from core.config_loader import load_client_config
 import flet as ft
 import json
 import time
+import requests
+
+import os
 
 def main(page: ft.Page):
-    # Load Config
+    # Load Basic Config
     app_config = load_client_config()
+    api_base = app_config.get("api_url", "http://localhost:8000/api")
     server_base = app_config.get("server_url", "ws://localhost:8000")
-    my_dept = app_config.get("department", "General")
+    
+    from core.config_loader import get_base_path
+    session_file = os.path.join(get_base_path(), "assets", ".session_admin")
 
-    page.title = f"Smart-CS Admin Center - {my_dept} Dept"
+    page.title = "Smart-CS 管理端身份验证"
+    page.window_width = 450
+    page.window_height = 600
+    page.window_center()
+    page.bgcolor = "#0D1B2A"
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+    user_input = ft.TextField(label="管理员工号", prefix_icon=ft.icons.ADMIN_PANEL_SETTINGS, width=320, border_color="#1e293b")
+    pass_input = ft.TextField(label="安全访问密钥", prefix_icon=ft.icons.PASSWORD, password=True, can_reveal_password=True, width=320, border_color="#1e293b")
+    remember_me = ft.Checkbox(label="记录管理员会话", value=True, label_style=ft.TextStyle(size=12))
+    error_text = ft.Text("", color=ft.colors.RED_400)
+    loading_ring = ft.ProgressRing(width=20, height=20, visible=False)
+    
+    login_btn = ft.ElevatedButton(
+        content=ft.Row([ft.Text("验证身份并进入系统"), loading_ring], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
+        on_click=lambda e: perform_login(), 
+        width=320, height=50,
+        style=ft.ButtonStyle(bgcolor=ft.colors.BLUE_800, color=ft.colors.WHITE)
+    )
+
+    def perform_login():
+        loading_ring.visible = True
+        login_btn.disabled = True
+        error_text.value = ""
+        page.update()
+        
+        try:
+            res = requests.post(f"{api_base}/auth/login", json={
+                "username": user_input.value,
+                "password": pass_input.value
+            }, timeout=5)
+            if res.status_code == 200:
+                data = res.json()
+                user_profile = data["user"]
+                token = data["token"]
+
+                if user_profile["role"] not in ["SUPERVISOR", "ADMIN"]:
+                    error_text.value = "访问被拒绝: 权限不足"
+                    loading_ring.visible = False
+                    login_btn.disabled = False
+                    page.update()
+                    return
+                
+                if remember_me.value:
+                    os.makedirs(os.path.dirname(session_file), exist_ok=True)
+                    with open(session_file, "w", encoding="utf-8") as f:
+                        json.dump({"username": user_input.value, "password": pass_input.value, "role": "ADMIN"}, f)
+
+                page.clean()
+                start_admin_interface(page, user_profile, server_base, api_base, token)
+            else:
+                error_text.value = "验证失败: 账号或密钥错误"
+                loading_ring.visible = False
+                login_btn.disabled = False
+                page.update()
+        except Exception as err:
+            error_text.value = f"网关超时: 无法连接服务器"
+            loading_ring.visible = False
+            login_btn.disabled = False
+            page.update()
+
+    page.add(
+        ft.Container(
+            content=ft.Column([
+                ft.Icon(ft.icons.SECURITY, size=60, color=ft.colors.BLUE_400),
+                ft.Text("管理控制中心", size=28, weight=ft.FontWeight.BOLD, letter_spacing=2),
+                ft.Text("安全管理与监控门户", size=12, color=ft.colors.BLUE_GREY_400),
+                ft.Divider(height=30, color=ft.colors.TRANSPARENT),
+                user_input,
+                pass_input,
+                ft.Row([remember_me], alignment=ft.MainAxisAlignment.START, width=320),
+                error_text,
+                login_btn,
+            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+            padding=40, bgcolor="#14213D", border_radius=20, border=ft.border.all(1, ft.colors.WHITE10)
+        )
+    )
+
+def start_admin_interface(page: ft.Page, user_profile: dict, server_base: str, api_base: str, token: str):
+    my_name = user_profile["real_name"]
+    my_dept = user_profile["department"]
+    my_role = user_profile["role"]
+
+    page.title = f"Smart-CS Admin Center - {my_name} ({my_role})"
     page.bgcolor = "#101922" 
     page.padding = 0
     page.window_min_width = 1200 
     page.window_min_height = 700
+    page.window_maximized = True
 
     # Initialize Views
     dashboard_view = DataCockpit()
@@ -103,7 +194,8 @@ def main(page: ft.Page):
 
     # Connect
     try:
-        connect_url = f"{server_base}/ws/admin?dept={my_dept}"
+        # If ADMIN, use SuperAdmin to see everything
+        connect_url = f"{server_base}/ws/admin?token={token}"
         client = SocketClient(connect_url, on_message=on_server_message)
         client.start()
     except: pass

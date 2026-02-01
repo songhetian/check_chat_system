@@ -1,7 +1,7 @@
 import flet as ft
 import requests
 
-class ProductSearchOverlay(ft.UserControl):
+class ProductSearchOverlay(ft.Control):
     def __init__(self, page: ft.Page, department: str = "General"):
         super().__init__()
         self.page = page

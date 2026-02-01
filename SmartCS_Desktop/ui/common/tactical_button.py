@@ -1,6 +1,6 @@
 import flet as ft
 
-class TacticalButton(ft.UserControl):
+class TacticalButton(ft.Control):
     def __init__(self, icon, color, tooltip, on_click, hotkey_text=""):
         super().__init__()
         self.icon = icon

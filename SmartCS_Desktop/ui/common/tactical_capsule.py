@@ -2,7 +2,7 @@ import flet as ft
 import time
 import threading
 
-class TacticalCapsule(ft.UserControl):
+class TacticalCapsule(ft.Control):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page

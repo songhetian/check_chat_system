@@ -6,7 +6,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['pynput.keyboard._darwin', 'pynput.mouse._darwin'],
+    hiddenimports=['pynput.keyboard._win32', 'pynput.mouse._win32', 'requests', 'pyperclip'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -35,10 +35,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-)
-app = BUNDLE(
-    exe,
-    name='SmartCS_Agent.app',
-    icon=None,
-    bundle_identifier=None,
 )

@@ -3,7 +3,7 @@ from datetime import datetime
 import threading
 import time
 
-class MissionScheduler(ft.UserControl):
+class MissionScheduler(ft.Control):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page

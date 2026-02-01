@@ -1,7 +1,7 @@
 import flet as ft
 import requests
 
-class GuidanceOverlay(ft.UserControl):
+class GuidanceOverlay(ft.Control):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page

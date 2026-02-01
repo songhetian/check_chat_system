@@ -1,7 +1,7 @@
 import flet as ft
 import requests
 
-class StatsView(ft.UserControl):
+class StatsView(ft.Control):
     def __init__(self):
         super().__init__()
         self.api_url = "http://localhost:8000/api"

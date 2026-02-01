@@ -11,3 +11,5 @@ Pillow>=10.2.0
 python-dotenv>=1.0.0
 redis>=5.0.0
 pymysql>=1.1.0
+pyperclip>=1.8.2
+pyinstaller>=6.4.0

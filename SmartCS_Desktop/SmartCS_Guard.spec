@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['core/guard_service.py'],
+    ['core\\guard_service.py'],
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=['requests'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -35,10 +35,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-)
-app = BUNDLE(
-    exe,
-    name='SmartCS_Guard.app',
-    icon=None,
-    bundle_identifier=None,
 )

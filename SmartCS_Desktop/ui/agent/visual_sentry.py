@@ -6,7 +6,7 @@ import requests
 from io import BytesIO
 from PIL import ImageGrab
 
-class VisualSentry(ft.UserControl):
+class VisualSentry(ft.Control):
     def __init__(self, page: ft.Page, agent_id: str, on_keyword_found=None):
         super().__init__()
         self.page = page

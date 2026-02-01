@@ -1,6 +1,6 @@
 import flet as ft
 
-class HonorRollView(ft.UserControl):
+class HonorRollView(ft.Control):
     def __init__(self, dept):
         super().__init__()
         self.dept = dept

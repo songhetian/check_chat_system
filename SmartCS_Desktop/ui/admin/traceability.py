@@ -1,6 +1,6 @@
 import flet as ft
 
-class TraceabilityView(ft.UserControl):
+class TraceabilityView(ft.Control):
     def __init__(self):
         super().__init__()
 

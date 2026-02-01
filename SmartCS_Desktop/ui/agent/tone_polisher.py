@@ -1,7 +1,7 @@
 import flet as ft
 import random
 
-class TonePolisher(ft.UserControl):
+class TonePolisher(ft.Control):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page

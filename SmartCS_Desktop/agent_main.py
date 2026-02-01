@@ -19,15 +19,135 @@ from ui.agent.video_analyzer import VideoAnalyzer
 from ui.agent.mini_task import MiniTask
 from ui.agent.customer_hud import CustomerHUD
 
+import os
+
 def main(page: ft.Page):
-    # Load Config
+    # Load Basic Config
     app_config = load_client_config()
+    api_base = app_config.get("api_url", "http://localhost:8000/api")
     server_base = app_config.get("server_url", "ws://localhost:8000")
-    my_dept = app_config.get("department", "General")
+    
+    # Improved Session Path for Packaged EXE
+    from core.config_loader import get_base_path
+    base_path = get_base_path()
+    session_file = os.path.join(base_path, "assets", ".session")
+
+    page.title = "Smart-CS Tactical Link"
+    page.window_width = 400
+    page.window_height = 550
+    page.window_center()
+    page.bgcolor = "#0a0b10"
+    page.padding = 0
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+    # --- UI 组件 ---
+    user_input = ft.TextField(
+        label="操作员账号", 
+        prefix_icon=ft.icons.PERSON_OUTLINED, 
+        width=320, 
+        border_color="#1e293b",
+        focused_border_color=ft.colors.CYAN_400
+    )
+    pass_input = ft.TextField(
+        label="访问密码", 
+        prefix_icon=ft.icons.LOCK_OUTLINED, 
+        password=True, 
+        can_reveal_password=True, 
+        width=320, 
+        border_color="#1e293b",
+        focused_border_color=ft.colors.CYAN_400
+    )
+    remember_me = ft.Checkbox(label="保持登录状态 (下次自动填充)", value=True, label_style=ft.TextStyle(size=12, color=ft.colors.BLUE_GREY_400))
+    error_text = ft.Text("", color=ft.colors.RED_400, size=12)
+    loading_ring = ft.ProgressRing(width=20, height=20, stroke_width=2, visible=False)
+    login_btn = ft.ElevatedButton(
+        content=ft.Row([ft.Text("初始化系统链路"), loading_ring], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
+        on_click=lambda e: perform_login(None), 
+        width=320, 
+        height=50,
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=8),
+            bgcolor={"": ft.colors.CYAN_800, "hovered": ft.colors.CYAN_700},
+            color=ft.colors.WHITE
+        )
+    )
+
+    def set_loading(is_loading):
+        loading_ring.visible = is_loading
+        login_btn.disabled = is_loading
+        user_input.disabled = is_loading
+        pass_input.disabled = is_loading
+        page.update()
+
+    def perform_login(saved_session=None):
+        set_loading(True)
+        error_text.value = ""
+        
+        payload = {"username": user_input.value, "password": pass_input.value}
+
+        try:
+            res = requests.post(f"{api_base}/auth/login", json=payload, timeout=5)
+            if res.status_code == 200:
+                data = res.json()
+                user_profile = data["user"]
+                token = data["token"]
+                
+                if user_profile["role"] != "AGENT":
+                    error_text.value = "错误: 权限不足，该账号无法登录坐席端"
+                    set_loading(False)
+                    return
+
+                # 保存会话
+                if remember_me.value:
+                    os.makedirs(os.path.dirname(session_file), exist_ok=True)
+                    with open(session_file, "w", encoding="utf-8") as f:
+                        json.dump({"username": user_input.value, "password": pass_input.value, "role": "AGENT"}, f)
+
+                page.clean()
+                start_agent_interface(page, user_profile, server_base, api_base, token)
+            else:
+                error_text.value = "登录失败: 账号或密码错误"
+                set_loading(False)
+        except Exception as err:
+            error_text.value = "链路故障: 无法连接至服务器"
+            set_loading(False)
+
+    # --- 界面布局 ---
+    login_view = ft.Container(
+        content=ft.Column([
+            ft.Container(
+                content=ft.Icon(ft.icons.TERMINAL, size=40, color=ft.colors.CYAN_400),
+                padding=20,
+                border_radius=50,
+                bgcolor=ft.colors.with_opacity(0.1, ft.colors.CYAN_400)
+            ),
+            ft.Text("智能客服战术端", size=20, weight=ft.FontWeight.BOLD, letter_spacing=3),
+            ft.Text("系统版本 9.5.0 正式版", size=10, color=ft.colors.BLUE_GREY_600),
+            ft.Divider(height=40, color=ft.colors.TRANSPARENT),
+            user_input,
+            pass_input,
+            ft.Row([remember_me], alignment=ft.MainAxisAlignment.START, width=320),
+            error_text,
+            ft.Container(height=10),
+            login_btn,
+            ft.Text("安全加密传输通道已开启", size=9, color=ft.colors.BLUE_GREY_700)
+        ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10),
+        padding=40,
+        alignment=ft.alignment.center
+    )
+    
+    page.add(login_view)
+
+def start_agent_interface(page: ft.Page, user_profile: dict, server_base: str, api_base: str, token: str):
+    # Original Main logic starts here, but using user_profile data
+    my_name = user_profile["real_name"]
+    my_dept = user_profile["department"]
+    agent_id = f"Agent-{user_profile['real_name']}"
     local_db = LocalDB()
 
-    # 1. Page Configuration
-    page.title = f"Smart-CS Pro ({my_dept})"
+    # 1. Page Configuration (Restore tactical look)
+    page.title = f"Smart-CS Pro ({my_dept}) - {my_name}"
     page.bgcolor = ft.colors.TRANSPARENT
     page.window_bgcolor = ft.colors.TRANSPARENT
     page.window_width = 550
@@ -38,33 +158,31 @@ def main(page: ft.Page):
     
     # 2. Initialize Components
     island = TacticalCapsule(page)
-    island.setup_layout() # NEW: Setup inner row after container init
+    island.setup_layout()
     
-    agent_id = f"Agent-{random.randint(100, 999)}" 
+    # Update island to show current user
+    island.detail_text.value = f"User: {my_name}"
+    island.detail_text.visible = True
     
-    # --- HONOR SYSTEM: Elite Check ---
-    # In a real app, fetch from /api/stats/leaderboard
-    is_elite = random.random() > 0.7 # 30% chance to be elite for demo
-    if is_elite:
-        island.status_icon.name = ft.icons.VERIFIED_USER
-        island.status_icon.color = ft.colors.AMBER_400
-        island.status_text.value = "GOLDEN GUARDIAN"
-        island.status_text.color = ft.colors.AMBER_100
-        island.container.border = ft.border.all(1, ft.colors.AMBER_700)
-        island.container.shadow.color = ft.colors.with_opacity(0.3, ft.colors.AMBER_700)
-
-    # Overlays
+    # Overlays (Update with logged in profile)
     customer_hud = CustomerHUD(page, agent_id, my_dept)
+    customer_hud.api_url = api_base # Sync API URL
     page.overlay.append(customer_hud.get_overlay_control())
+    
     helper = IntelliHelper(page, agent_id)
     page.overlay.append(helper.get_overlay_control())
+    
     guidance = GuidanceOverlay(page)
+    
     product_search = ProductSearchOverlay(page, department=my_dept)
     page.overlay.append(product_search.get_overlay_control())
+    
     polisher = TonePolisher(page)
     page.overlay.append(polisher.get_overlay_control())
+    
     video_tool = VideoAnalyzer(page)
     page.overlay.append(video_tool.get_overlay_control())
+    
     todo_list = MiniTask(page)
     page.overlay.append(todo_list.get_overlay_control())
     
@@ -177,7 +295,7 @@ def main(page: ft.Page):
         page.snack_bar.open = True
         page.update()
 
-    connect_url = f"{server_base}/ws/agent/{agent_id}?dept={my_dept}"
+    connect_url = f"{server_base}/ws/agent/{agent_id}?token={token}"
     client = SocketClient(connect_url, on_message=on_server_message)
     client.start()
 
@@ -235,7 +353,7 @@ def main(page: ft.Page):
         print("📥 Refreshing Risk Configuration...")
         try:
             # 1. Fetch Sensitive Words
-            res_words = requests.get(f"http://localhost:8000/api/config/sensitive-words") # Use config URL in prod
+            res_words = requests.get(f"{api_base}/config/sensitive-words") 
             if res_words.status_code == 200:
                 words = res_words.json().get("words", [])
                 

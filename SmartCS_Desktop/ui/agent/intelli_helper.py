@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 from PIL import ImageGrab
 
-class IntelliHelper(ft.UserControl):
+class IntelliHelper(ft.Control):
     def __init__(self, page: ft.Page, agent_id: str):
         super().__init__()
         self.page = page

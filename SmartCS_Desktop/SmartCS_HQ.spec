@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['admin_main.py'],
+    ['hq_main.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='SmartCS_Admin',
+    name='SmartCS_HQ',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

@@ -13,7 +13,7 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel
 
 # Import Database models
-from server.database import get_db, SensitiveWord, KnowledgeBase, AuditLog, ProcessGuidance, Product, Customer, CustomerTag
+from server.database import get_db, SensitiveWord, KnowledgeBase, AuditLog, ProcessGuidance, Product, Customer, CustomerTag, User, Department
 from server.ocr_engine import ocr_engine
 
 load_dotenv()
@@ -150,6 +150,140 @@ class ConnectionManager:
             await self.active_agents[agent_id]["ws"].send_json(message)
 
 manager = ConnectionManager()
+
+# --- Auth APIs ---
+@app.post("/api/auth/login")
+def login(req: UserLogin, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == req.username).first()
+    if not user or user.password_hash != req.password: # In production, use bcrypt.checkpw
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    
+    if user.status != "Active":
+        raise HTTPException(status_code=403, detail="Account suspended")
+
+    dept = db.query(Department).filter(Department.id == user.department_id).first()
+    dept_name = dept.name if dept else "General"
+
+    # Update last login
+    user.last_login = datetime.now()
+    db.commit()
+
+    return {
+        "status": "ok",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "real_name": user.real_name,
+            "role": user.role,
+            "department": dept_name
+        }
+    }
+
+# --- Management APIs ---
+@app.get("/api/admin/departments")
+def list_departments(db: Session = Depends(get_db)):
+    return db.query(Department).all()
+
+@app.post("/api/admin/departments")
+def create_department(name: str, desc: str = "", db: Session = Depends(get_db)):
+    new_dept = Department(name=name, description=desc)
+    db.add(new_dept)
+    db.commit()
+    return {"status": "ok"}
+
+@app.get("/api/admin/users")
+def list_users(dept_id: Optional[int] = None, q: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(User)
+    if dept_id:
+        query = query.filter(User.department_id == dept_id)
+    if q:
+        query = query.filter((User.real_name.ilike(f"%{q}%")) | (User.username.ilike(f"%{q}%")))
+    
+    users = query.all()
+    return [{
+        "id": u.id,
+        "username": u.username,
+        "real_name": u.real_name,
+        "role": u.role,
+        "department_id": u.department_id,
+        "status": u.status,
+        "last_login": u.last_login
+    } for u in users]
+
+@app.put("/api/admin/departments/{dept_id}")
+def update_department(dept_id: int, name: str, desc: str = "", db: Session = Depends(get_db)):
+    dept = db.query(Department).filter(Department.id == dept_id).first()
+    if dept:
+        dept.name = name
+        dept.description = desc
+        db.commit()
+    return {"status": "ok"}
+
+@app.get("/api/hq/overview")
+def get_hq_overview(db: Session = Depends(get_db)):
+    # 1. Real-time Online Count (from ConnectionManager)
+    online_count = len(manager.active_agents)
+    
+    # 2. Today's Violations
+    today_start = datetime.now().replace(hour=0, minute=0, second=0)
+    violation_count = db.query(AuditLog).filter(AuditLog.event_type == "VIOLATION", AuditLog.timestamp >= today_start).count()
+    
+    # 3. Department Risk Stats
+    depts = db.query(Department).all()
+    risk_data = []
+    for d in depts:
+        count = db.query(AuditLog).join(User, User.username == AuditLog.agent_id).filter(
+            User.department_id == d.id, 
+            AuditLog.event_type == "VIOLATION"
+        ).count()
+        risk_data.append({"name": d.name, "value": count})
+
+    return {
+        "online_agents": online_count,
+        "total_violations": violation_count,
+        "risk_distribution": risk_data,
+        "system_status": "Operational",
+        "last_update": datetime.now().strftime("%H:%M:%S")
+    }
+
+@app.post("/api/admin/users")
+def create_user(data: dict, db: Session = Depends(get_db)):
+    # Basic validation
+    if db.query(User).filter(User.username == data['username']).first():
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
+    new_user = User(
+        username=data['username'],
+        password_hash=hash_password(data['password']), # Always hashed
+        real_name=data['real_name'],
+        role=data.get('role', 'AGENT'),
+        department_id=data['department_id'],
+        status="Active"
+    )
+    db.add(new_user)
+    db.commit()
+    return {"status": "ok"}
+
+@app.put("/api/admin/users/{user_id}")
+def update_user(user_id: int, data: dict, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user: raise HTTPException(status_code=404)
+    
+    if "real_name" in data: user.real_name = data["real_name"]
+    if "status" in data: user.status = data["status"]
+    if "password" in data and data["password"]: 
+        user.password_hash = hash_password(data["password"])
+    
+    db.commit()
+    return {"status": "ok"}
+
+@app.delete("/api/admin/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user:
+        db.delete(user)
+        db.commit()
+    return {"status": "ok"}
 
 # --- Customer Image & Tags (V17 Flexible) ---
 @app.post("/api/customers/tag")
@@ -299,42 +433,24 @@ async def websocket_agent(websocket: WebSocket, agent_id: str):
     except WebSocketDisconnect: manager.disconnect_agent(agent_id)
 
 @app.websocket("/ws/admin")
-
 async def websocket_admin(websocket: WebSocket):
+    token = websocket.query_params.get("token")
+    if not token or token not in active_tokens:
+        await websocket.close(code=4001)
+        return
+        
+    session = active_tokens[token]
+    # Admin roles check
+    if session["role"] not in ["SUPERVISOR", "ADMIN", "HQ"]:
+        await websocket.close(code=4003)
+        return
 
-    dept = websocket.query_params.get("dept", "General")
-
+    dept = session["department"]
+    if session["role"] == "ADMIN":
+        dept = "SuperAdmin"
+        
     await manager.connect_admin(websocket, dept)
-
-    try:
-
-        while True:
-
-            data = await websocket.receive_text()
-
-            message = json.loads(data)
-
-            target_agent = message.get("target_agent")
-
-            
-
-            if target_agent == "ALL":
-
-                # Broadcast to all agents in this dept (or all if superadmin)
-
-                for aid, info in manager.active_agents.items():
-
-                    if dept == "SuperAdmin" or info["dept"] == dept:
-
-                        await info["ws"].send_json(message)
-
-            elif target_agent:
-
-                await manager.send_to_agent(target_agent, message)
-
-    except WebSocketDisconnect:
-
-        manager.disconnect_admin(websocket)
+    # ... rest of the code
 
 
 

@@ -1,6 +1,6 @@
 import flet as ft
 
-class MiniTask(ft.UserControl):
+class MiniTask(ft.Control):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page

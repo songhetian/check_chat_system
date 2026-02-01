@@ -40,6 +40,23 @@ Base = declarative_base()
 from sqlalchemy import Column, Integer, String, Text, DateTime, Float
 from datetime import datetime
 
+class Department(Base):
+    __tablename__ = "departments"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, index=True)
+    description = Column(String(200), nullable=True)
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True)
+    password_hash = Column(String(200))
+    real_name = Column(String(100))
+    role = Column(String(20)) # AGENT, SUPERVISOR, ADMIN, HQ
+    department_id = Column(Integer, index=True)
+    status = Column(String(20), default="Active") # Active, Suspended
+    last_login = Column(DateTime, nullable=True)
+
 class SensitiveWord(Base):
     __tablename__ = "sensitive_words"
     id = Column(Integer, primary_key=True, index=True)

@@ -4,7 +4,7 @@ import threading
 import time
 import pyperclip # We need this for sniffing, flet.page.get_clipboard is async/ui bound
 
-class CustomerHUD(ft.UserControl):
+class CustomerHUD(ft.Control):
     def __init__(self, page: ft.Page, agent_id: str, department: str):
         super().__init__()
         self.page = page

@@ -1,7 +1,7 @@
 import flet as ft
 from core.ai_service import AIService
 
-class VideoAnalyzer(ft.UserControl):
+class VideoAnalyzer(ft.Control):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page

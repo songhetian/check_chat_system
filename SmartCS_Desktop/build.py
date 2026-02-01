@@ -48,28 +48,31 @@ if __name__ == "__main__":
     build_executable(
         "agent_main.py", 
         "SmartCS_Agent",
-        hidden_imports=["pynput.keyboard._darwin", "pynput.mouse._darwin"] if sys.platform == "darwin" else ["pynput.keyboard._win32", "pynput.mouse._win32"],
-        noconsole=True # Silent
+        hidden_imports=["pynput.keyboard._win32", "pynput.mouse._win32", "requests", "pyperclip"],
+        noconsole=True 
     )
 
-    # 2. Build Guard (NEW)
+    # 2. Build Guard
     build_executable(
         "core/guard_service.py",
         "SmartCS_Guard",
-        noconsole=True # Totally Hidden
+        hidden_imports=["requests"],
+        noconsole=True 
     )
 
-    # 3. Build Admin (Supervisor)
+    # 3. Build Admin
     build_executable(
         "admin_main.py",
-        "SmartCS_Admin"
+        "SmartCS_Admin",
+        hidden_imports=["requests"]
     )
 
-    # 4. Build HQ (Global Vision) - NEW
+    # 4. Build HQ
     build_executable(
         "hq_main.py",
         "SmartCS_HQ",
-        noconsole=False # Keep console for HQ to see raw data flow if needed
+        hidden_imports=["requests"],
+        noconsole=False 
     )
 
     # 5. Build Server
