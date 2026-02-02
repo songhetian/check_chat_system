@@ -13,8 +13,8 @@ export const CONFIG = {
 // 异步初始化方法，用于在应用启动时同步最新的局域网配置
 export const initDynamicConfig = async () => {
   try {
-    if (window.api && (window.api as any).getServerConfig) {
-      const serverConfig = await (window.api as any).getServerConfig();
+    if (window.api && window.api.getServerConfig) {
+      const serverConfig = await window.api.getServerConfig();
       const centralUrl = serverConfig?.network?.central_server_url;
       
       if (centralUrl) {

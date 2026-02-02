@@ -9,4 +9,7 @@ interface Window {
       invoke(channel: string, ...args: any[]): Promise<any>
     }
   }
+  api: {
+    getServerConfig: () => Promise<any>
+  }
 }

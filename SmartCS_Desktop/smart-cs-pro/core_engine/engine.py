@@ -35,18 +35,19 @@ async def init_db_pool(retries=5, delay=3):
     user = os.getenv("DB_USER", "root")
     password = os.getenv("DB_PASSWORD", "123456")
     db_name = os.getenv("DB_NAME", "smart_cs")
+    port = int(os.getenv("DB_PORT", 3306))
     
     for i in range(retries):
         try:
             db_pool = await aiomysql.create_pool(
                 host=host,
-                port=int(os.getenv("DB_PORT", 3306)),
+                port=port,
                 user=user,
                 password=password,
                 db=db_name,
                 autocommit=True
             )
-            logger.info(f"✅ 中央战术库已连接 (Node: {host})")
+            logger.info(f"✅ 中央战术库已连接 (Node: {host}:{port}, User: {user})")
             return True
         except Exception as e:
             logger.warning(f"⚠️ 数据库链路建立失败 ({i+1}/{retries}): {e}")

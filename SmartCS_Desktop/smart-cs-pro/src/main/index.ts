@@ -5,17 +5,38 @@ import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
 
 function createWindow(): void {
-  // 读取局域网配置
-  const configPath = join(app.getAppPath(), 'server_config.json')
+  // 核心：从 .env 加载并覆盖 server_config.json
+  const appPath = app.getAppPath()
+  const envPath = join(appPath, '.env')
+  const configPath = join(appPath, 'server_config.json')
+  
   let serverConfig = { network: { central_server_url: 'http://127.0.0.1:8000/api' } }
   
+  // 1. 读取基础 JSON
   try {
     if (fs.existsSync(configPath)) {
       serverConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
     }
-  } catch (e) {
-    console.error('Failed to load server_config.json', e)
-  }
+  } catch (e) { console.error('Base config load failed', e) }
+
+  // 2. 解析 .env 并覆盖关键字段 (局域网支持)
+  try {
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf-8')
+      const env: Record<string, string> = {}
+      envContent.split('\n').forEach(line => {
+        const [key, val] = line.split('=')
+        if (key && val) env[key.trim()] = val.trim().split('#')[0].trim()
+      })
+
+      const host = env['DB_HOST'] || '127.0.0.1'
+      const port = env['SERVER_PORT'] || '8000'
+      
+      // 动态重构中央指挥部地址
+      serverConfig.network.central_server_url = `http://${host}:${port}/api`
+      console.log(`🌐 [LAN] 已通过 .env 注入指挥中心: ${serverConfig.network.central_server_url}`)
+    }
+  } catch (e) { console.error('Env override failed', e) }
 
   // 暴露配置给前端
   ipcMain.handle('get-server-config', () => serverConfig)
