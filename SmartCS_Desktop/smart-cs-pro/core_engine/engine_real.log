@@ -99,3 +99,65 @@ INFO:     192.168.2.184:51637 - "GET /api HTTP/1.1" 404 Not Found
   self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
 /Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
   self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py:254: DeprecationWarning: The parameter `use_angle_cls` has been deprecated and will be removed in the future. Please use `use_textline_orientation` instead.
+  self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)

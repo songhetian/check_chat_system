@@ -10,148 +10,32 @@ from PIL import ImageGrab
 from dotenv import load_dotenv
 import platform
 
+from contextlib import asynccontextmanager
+
 # --- 1. 环境初始化 ---
 load_dotenv()
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await init_db_pool()
+    await ai_analyzer.check_health()
+    if not ai_analyzer.is_healthy:
+        logger.warning(f"🚨 [智脑预警] 无法连接到 Ollama")
+    else:
+        logger.info(f"🧠 [智脑就绪] Ollama 服务连接正常")
+    yield
+    # Shutdown
+    if db_pool: await db_pool.terminate()
+
+app = FastAPI(lifespan=lifespan)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex="http://.*", # 允许局域网内所有 HTTP 源
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-logger = logging.getLogger("SmartCS")
-logger.setLevel(logging.INFO)
-handler = RotatingFileHandler("app.log", maxBytes=10*1024*1024, backupCount=5)
-logger.addHandler(handler)
-
-# 跨平台窗口库兼容
-win32gui = None
-if platform.system() == "Windows":
-    try: import win32gui
-    except: pass
-
-# --- 2. 异步连接池与配置 ---
-db_pool = None
-
-async def init_db_pool(retries=5, delay=3):
-    global db_pool
-    host = os.getenv("DB_HOST", "127.0.0.1")
-    user = os.getenv("DB_USER", "root")
-    password = os.getenv("DB_PASSWORD", "123456")
-    db_name = os.getenv("DB_NAME", "smart_cs")
-    port = int(os.getenv("DB_PORT", 3306))
-    
-    for i in range(retries):
-        try:
-            db_pool = await aiomysql.create_pool(
-                host=host,
-                port=port,
-                user=user,
-                password=password,
-                db=db_name,
-                autocommit=True
-            )
-            logger.info(f"✅ 中央战术库已连接 (Node: {host}:{port}, User: {user})")
-            return True
-        except Exception as e:
-            logger.warning(f"⚠️ 数据库链路建立失败 ({i+1}/{retries}): {e}")
-            await asyncio.sleep(delay)
-    
-    logger.error("❌ 严重错误：无法建立中央库连接，系统将运行在离线受限模式")
-    return False
-
-import subprocess
-import shutil
-
-# --- 3. 智脑分析引擎 (Ollama Integration & Auto-Lifecycle) ---
-class AIAnalyzer:
-    def __init__(self):
-        self.api_url = os.getenv("AI_URL", "http://127.0.0.1:11434/api/chat")
-        self.model = os.getenv("AI_MODEL", "qwen2:1.5b")
-        self.is_healthy = False
-
-    def _start_ollama_service(self):
-        """静默拉起 Ollama 后台服务 (支持 macOS/Windows)"""
-        try:
-            # 检测是否已安装 ollama
-            if not shutil.which("ollama"):
-                logger.error("❌ 系统未发现 Ollama 可执行程序，请前往 ollama.com 安装")
-                return False
-            
-            # 尝试拉起服务 (macOS 示例，Windows 通常为 ollama app)
-            logger.info("⏳ 正在尝试自动激活 Ollama 服务层...")
-            subprocess.Popen(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return True
-        except Exception as e:
-            logger.error(f"启动 Ollama 失败: {e}")
-            return False
-
-    async def check_health(self):
-        try:
-            async with httpx.AsyncClient(timeout=2.0) as client:
-                base_url = self.api_url.split('/api')[0]
-                resp = await client.get(base_url)
-                self.is_healthy = resp.status_code == 200
-        except:
-            # 如果不通，尝试自动拉起一次
-            if self._start_ollama_service():
-                await asyncio.sleep(3) # 给服务 3 秒初始化时间
-                return await self.check_health()
-            self.is_healthy = False
-        
-        # 如果服务健康，确保模型已加载
-        if self.is_healthy:
-            asyncio.create_task(self.ensure_model_loaded())
-        return self.is_healthy
-
-    async def ensure_model_loaded(self):
-        """确保战术模型已 pull 并驻留内存"""
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                # 检查模型列表
-                resp = await client.get(self.api_url.replace('/chat', '/tags'))
-                models = [m['name'] for m in resp.json().get('models', [])]
-                
-                if self.model not in models and f"{self.model}:latest" not in models:
-                    logger.info(f"📡 正在下载战术模型 {self.model} (首次运行需耗时)...")
-                    # 这里可以发送 WS 通知给前端显示下载进度
-                    subprocess.Popen(["ollama", "pull", self.model])
-        except: pass
-
-    async def analyze_sentiment(self, context):
-        if not self.is_healthy: 
-            if not await self.check_health(): return None
-        
-        prompt = f"作为战术指挥官，分析以下对话内容：\"{context}\"。请以 JSON 格式输出：{{ \"risk_score\": (0-10), \"sentiment_score\": (-10 to 10), \"strategy\": \"建议\", \"voice_alert\": \"语音内容\" }}"
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                payload = {
-                    "model": self.model,
-                    "messages": [{"role": "user", "content": prompt}],
-                    "stream": False,
-                    "format": "json"
-                }
-                resp = await client.post(self.api_url, json=payload)
-                if resp.status_code == 200:
-                    return json.loads(resp.json()['message']['content'])
-        except Exception as e:
-            logger.error(f"AI_ANALYSIS_FAILED: {e}")
-        return None
-
-ai_analyzer = AIAnalyzer()
-
-# --- 4. 核心 API 接口 ---
-@app.on_event("startup")
-async def startup_event():
-    await init_db_pool()
-    # 启动时检测 AI 状态
-    is_ai_ok = await ai_analyzer.check_health()
-    if not is_ai_ok:
-        logger.warning(f"🚨 [智脑预警] 无法连接到 Ollama，请执行 'ollama run {ai_analyzer.model}'")
-    else:
-        logger.info(f"🧠 [智脑就绪] Ollama 服务连接正常 ({ai_analyzer.model})")
 
 @app.get("/api/health")
 async def health_check():

@@ -1,7 +1,7 @@
 // 核心：动态战术配置中心
 // 能够根据当前环境自动切换指挥中心地址 (LAN Support)
 
-const defaultIp = '192.168.2.184'; // 从 server_config.json 获取的默认值
+const defaultIp = '127.0.0.1'; 
 
 export const CONFIG = {
   API_BASE: `http://${defaultIp}:8000/api`,
@@ -21,15 +21,16 @@ export const initDynamicConfig = async () => {
   try {
     if (window.api && window.api.getServerConfig) {
       const serverConfig = await window.api.getServerConfig();
-      const centralUrl = serverConfig?.network?.central_server_url;
+      let centralUrl = serverConfig?.network?.central_server_url;
       
+      // 增加容错：如果 centralUrl 是本地 IP 的变体，且连接失败，允许手动干预或自动切换
       if (centralUrl) {
+        // 规范化：确保没有结尾斜杠
+        if (centralUrl.endsWith('/')) centralUrl = centralUrl.slice(0, -1);
+        
         CONFIG.API_BASE = centralUrl;
-        // 修正：从 http://...:8000/api 转换为 ws://...:8000/ws
         CONFIG.WS_BASE = centralUrl.replace('/api', '/ws').replace('http', 'ws');
-        console.log(`🌐 [动态配置] 成功同步指挥中心: ${CONFIG.API_BASE}`);
-      } else {
-        console.warn('⚠️ [动态配置] server_config.json 中缺少 central_server_url');
+        console.log(`🌐 [动态配置] 已加载目标地址: ${CONFIG.API_BASE}`);
       }
 
       // 同步品牌自定义信息
@@ -39,10 +40,8 @@ export const initDynamicConfig = async () => {
         CONFIG.BRANDING.subName = serverConfig.branding.system_sub_name;
         CONFIG.BRANDING.logoText = serverConfig.branding.logo_text;
       }
-      
-      console.log(`🚀 [战术链路] 已同步配置，当前系统: ${CONFIG.BRANDING.name}`);
     }
   } catch (e) {
-    console.warn('⚠️ 无法获取动态配置，将使用默认硬编码地址');
+    console.warn('⚠️ 无法获取动态配置，将使用回环地址');
   }
 };
