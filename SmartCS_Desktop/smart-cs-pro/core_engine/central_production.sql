@@ -24,9 +24,27 @@ CREATE TABLE IF NOT EXISTS users (
     department_id INT,
     authorized_device_id VARCHAR(100), -- 绑定的硬件指纹
     status TINYINT DEFAULT 1,          -- 1: 活跃, 0: 禁用
-    streak_days INT DEFAULT 0,         -- 连续安全天数 (成长轨迹核心)
-    rank_level VARCHAR(20) DEFAULT 'NOVICE', -- 战术等级 (NOVICE, VETERAN, ELITE)
+    streak_days INT DEFAULT 0,
+    rank_level VARCHAR(20) DEFAULT 'NOVICE',
+    graduated_at TIMESTAMP NULL,       -- 毕业授勋时间
     last_login TIMESTAMP,
+    -- ...
+) ENGINE=InnoDB;
+
+-- 10. 智能带教知识库 (中枢化管理)
+CREATE TABLE IF NOT EXISTS knowledge_base (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    keyword VARCHAR(100) NOT NULL,    -- 触发关键词 (如: 发货, 价格)
+    answer TEXT NOT NULL,             -- 教官标准话术
+    category VARCHAR(50),             -- 类别 (物流, 售后, 话术)
+    is_active TINYINT DEFAULT 1
+) ENGINE=InnoDB;
+
+-- 插入初始带教数据
+INSERT IGNORE INTO knowledge_base (keyword, answer, category) VALUES 
+('发货', '标准回复：48小时内顺丰发出。话术：亲，您的宝贝已进入优先发货链路。', '物流'),
+('便宜', '标准回复：强调价值而非价格。话术：亲，一分价钱一分货，我们采用的是...项目...', '商务');
+
     FOREIGN KEY (department_id) REFERENCES departments(id),
     INDEX idx_user (username)
 ) ENGINE=InnoDB;

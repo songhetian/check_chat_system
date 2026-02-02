@@ -92,21 +92,36 @@ export default function BigScreen() {
               </div>
            </div>
 
-           <div className="bg-red-500/5 border border-red-500/20 rounded-[48px] p-10 backdrop-blur-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-10 opacity-5"><ShieldAlert size={120} /></div>
-              <h3 className="text-xl font-black uppercase mb-8 text-red-500 flex items-center gap-3">
-                <Activity size={24} /> 紧急取证流
+           <div className="bg-slate-900/40 border border-white/10 rounded-[48px] p-8 backdrop-blur-xl relative overflow-hidden flex flex-col">
+              <h3 className="text-xl font-black uppercase mb-6 text-amber-500 flex items-center gap-3">
+                <Trophy size={24} /> 新兵营毕业荣誉榜
               </h3>
-              <div className="space-y-4">
-                 {[1, 2, 3].map(i => (
-                   <div key={i} className="p-5 bg-red-500/10 rounded-3xl border border-red-500/20">
-                      <div className="flex justify-between text-[10px] font-black text-red-400 mb-1">
-                         <span>AGENT-00{i}</span>
-                         <span>CRITICAL</span>
+              <div className="flex-1 space-y-4">
+                 {[
+                   { name: '王小二', dept: '销售一部', rank: 'Elite Operator' },
+                   { name: '李萌萌', dept: '售后组', rank: 'Veteran' },
+                   { name: '周杰', dept: '技术支持', rank: 'Elite Operator' }
+                 ].map((hero, i) => (
+                   <motion.div 
+                     key={i}
+                     initial={{ x: 50, opacity: 0 }}
+                     animate={{ x: 0, opacity: 1 }}
+                     transition={{ delay: i * 0.2 }}
+                     className="p-4 bg-gradient-to-r from-amber-500/10 to-transparent rounded-2xl border-l-4 border-amber-500 flex justify-between items-center"
+                   >
+                      <div className="flex flex-col">
+                         <span className="text-sm font-black text-white">{hero.name}</span>
+                         <span className="text-[8px] text-slate-500 font-bold uppercase">{hero.dept}</span>
                       </div>
-                      <p className="text-sm font-bold text-white leading-none">敏感词命中: "私下转账"</p>
-                   </div>
+                      <div className="text-right">
+                         <div className="text-[10px] font-black text-amber-400 italic">授勋: {hero.rank}</div>
+                         <div className="text-[7px] text-slate-600">GRADUATED JUST NOW</div>
+                      </div>
+                   </motion.div>
                  ))}
+              </div>
+              <div className="mt-6 pt-4 border-t border-white/5 text-center">
+                 <span className="text-[9px] font-black text-slate-500 tracking-[0.3em] uppercase">Honor. Loyalty. Excellence.</span>
               </div>
            </div>
         </div>
