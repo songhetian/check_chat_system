@@ -9,6 +9,13 @@ description: Smart-CS Pro (数智化运营治理平台) 专用开发与维护 Sk
 
 ## 1. 核心开发工作流
 
+### 数据持久化与同步策略 (Data Sync Policy)
+本项目采用 **“边缘缓存 - 云端同步”** 架构，所有业务功能必须遵循：
+1. **优先上云**: 新产生的业务数据（违规记录、画像变更、审计日志）必须第一时间尝试写入中心 MySQL。
+2. **本地缓冲**: 若 MySQL 连接失败，数据必须暂存至本地 SQLite (`buffer.db`) 的 `pending_sync` 表中。
+3. **静默补传**: 必须通过后台协程 (`run_sync_worker`) 定时检查本地缓冲，并在网络恢复后自动补传至 MySQL。
+4. **HQ 全局可见**: 确保总部 (HQ) 角色调取的永远是全量 MySQL 数据，不依赖特定坐席的在线状态。
+
 ### 新增一个战术指令 (Action Loop)
 当你需要新增一个触发式功能（如：检测到客户骂人自动禁言）时，请遵循以下路径：
 1. **Python 引擎层**: 在 `core_engine/engine.py` 的 `RiskEngine` 或 `SmartScanner` 中添加识别逻辑。
