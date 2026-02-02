@@ -37,6 +37,18 @@ CREATE TABLE IF NOT EXISTS pending_logs (
     timestamp DOUBLE
 );
 
+-- 5. 系统用户表 (RBAC)
+CREATE TABLE IF NOT EXISTS users (
+    username VARCHAR(50) PRIMARY KEY,
+    password VARCHAR(100) NOT NULL,
+    real_name VARCHAR(100),
+    role VARCHAR(20) DEFAULT 'AGENT', -- 'AGENT', 'ADMIN', 'HQ'
+    department VARCHAR(100),
+    is_active TINYINT DEFAULT 1
+);
+
+
+
 -- 插入默认监控目标
 INSERT IGNORE INTO platforms (name, window_keyword) VALUES ('WeChat', '微信');
 INSERT IGNORE INTO platforms (name, window_keyword) VALUES ('DingTalk', '钉钉');

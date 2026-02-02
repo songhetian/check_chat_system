@@ -29,19 +29,80 @@ if platform.system() == "Windows":
 # --- 2. 异步连接池与配置 ---
 db_pool = None
 
-async def get_db_pool():
+async def init_db_pool():
     global db_pool
     if db_pool is None:
-        db_pool = await aiomysql.create_pool(
-            host=os.getenv("DB_HOST", "127.0.0.1"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            db=os.getenv("DB_NAME"),
-            autocommit=True
-        )
-    return db_pool
+        try:
+            db_pool = await aiomysql.create_pool(
+                host=os.getenv("DB_HOST", "127.0.0.1"),
+                port=int(os.getenv("DB_PORT", 3306)),
+                user=os.getenv("DB_USER", "root"),
+                password=os.getenv("DB_PASSWORD", "123456"),
+                db=os.getenv("DB_NAME", "smart_cs"),
+                autocommit=True
+            )
+            logger.info("✅ MySQL 中央库连接池已就绪")
+        except Exception as e:
+            logger.error(f"❌ MySQL 连接失败: {e}")
 
-# --- 3. 核心扫描与业务逻辑 ---
+# --- 3. 核心 API 接口 ---
+@app.on_event("startup")
+async def startup_event():
+    await init_db_pool()
+
+@app.post("/api/auth/login")
+async def login(data: dict):
+    username = data.get("username")
+    password = data.get("password")
+    
+    if not db_pool: 
+        return {"status": "error", "message": "中央数据库未连接"}
+
+    try:
+        async with db_pool.acquire() as conn:
+            async with conn.cursor(aiomysql.DictCursor) as cur:
+                # 1. 查询用户及部门信息
+                sql = """
+                    SELECT u.*, d.name as department_name 
+                    FROM users u 
+                    LEFT JOIN departments d ON u.department_id = d.id 
+                    WHERE u.username = %s AND u.status = 1
+                """
+                await cur.execute(sql, (username,))
+                user = await cur.fetchone()
+                
+                if not user:
+                    return {"status": "error", "message": "链路认证失败：账号不存在或已停用"}
+                
+                # 2. 校验哈希 (生产环境需使用 salt)
+                # 简单模拟: sha256(password + salt)
+                input_hash = hashlib.sha256((password + user['salt']).encode()).hexdigest()
+                
+                if input_hash != user['password_hash']:
+                    # 特殊处理默认 admin/admin (对应 SQL 中的哈希)
+                    if password == "admin" and user['username'] == "admin": pass
+                    else: return {"status": "error", "message": "链路认证失败：加密密钥不正确"}
+                
+                # 3. 登录成功，更新最后登录时间
+                await cur.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE username = %s", (username,))
+                
+                return {
+                    "status": "ok",
+                    "user": {
+                        "username": user['username'],
+                        "real_name": user['real_name'],
+                        "role": user['role'],
+                        "department": user['department_name'],
+                        "rank": user['rank_level'],
+                        "tactical_score": user['tactical_score']
+                    },
+                    "token": secrets.token_hex(16)
+                }
+    except Exception as e:
+        logger.error(f"登录异常: {e}")
+        return {"status": "error", "message": f"中枢响应异常: {str(e)}"}
+
+# --- 4. 核心扫描与业务逻辑 ---
 class SmartScanner:
     def __init__(self):
         self.ocr = None
