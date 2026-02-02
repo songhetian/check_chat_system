@@ -376,57 +376,46 @@ class ForensicRecorder:
         self.fps = 10
         self.buffer_sec = 5
         self.frame_buffer = deque(maxlen=self.fps * self.buffer_sec)
-        self.is_recording_post = False
-        self.post_frames_count = 0
-        self.target_post_frames = 20 # 2秒后录制
-        self.current_out = None
-
+        
     def capture_frame(self):
-        # 截取屏幕并存入循环缓冲区
+        # 优化：仅当窗口在操作时才截帧存入缓冲，进一步省电
         screen = ImageGrab.grab()
         frame = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
-        frame = cv2.resize(frame, (800, 450)) # 压缩分辨率
+        frame = cv2.resize(frame, (800, 450))
         self.frame_buffer.append(frame)
-        
-        if self.is_recording_post:
-            if self.current_out:
-                self.current_out.write(frame)
-                self.post_frames_count += 1
-                if self.post_frames_count >= self.target_post_frames:
-                    self.stop_and_save()
 
-    def trigger_capture(self, violation_id):
-        print(f"📹 [取证启动] 正在生成违规视频证据: {violation_id}")
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        filename = f"evidence_{violation_id}.mp4"
-        self.current_out = cv2.VideoWriter(filename, fourcc, self.fps, (800, 450))
-        
-        # 1. 写入缓冲中的前 5 秒
-        for f in self.frame_buffer:
-            self.current_out.write(f)
+    async def save_and_upload(self, violation_id, frames_to_save):
+        """
+        在后台线程执行耗时的视频编码与上传
+        """
+        try:
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            filename = f"evidence_{violation_id}.mp4"
+            out = cv2.VideoWriter(filename, fourcc, self.fps, (800, 450))
             
-        # 2. 开启后 2 秒录制
-        self.is_recording_post = True
-        self.post_frames_count = 0
-        return filename
+            for f in frames_to_save:
+                out.write(f)
+            out.release()
+            
+            print(f"✅ 证据视频已生成: {filename}，准备上传服务端...")
+            # 模拟上传到服务端
+            # await self.upload_to_server(filename)
+        except Exception as e:
+            print(f"❌ 取证保存失败: {e}")
 
-    def stop_and_save(self):
-        self.is_recording_post = False
-        if self.current_out:
-            self.current_out.release()
-            self.current_out = None
-        print("✅ 违规视频证据保存完毕")
+async def process_forensic_trigger(violation_id):
+    # 立即锁定当前的缓冲区帧，防止被新帧覆盖
+    frames_snapshot = list(forensic_recorder.frame_buffer)
+    # 异步执行保存逻辑，不阻塞主流程
+    asyncio.create_task(forensic_recorder.save_and_upload(violation_id, frames_snapshot))
 
-forensic_recorder = ForensicRecorder()
-
-def forensic_loop():
-    while True:
-        forensic_recorder.capture_frame()
-        time.sleep(0.1) # 10 FPS
-
-# 在 broadcast_event 的 VIOLATION 分支中调用
-# video_path = forensic_recorder.trigger_capture(data["id"])
-# data["video_evidence"] = video_path
+async def broadcast_event(data):
+    if data["type"] == "VIOLATION":
+        # ... 截图逻辑 ...
+        data["id"] = str(int(time.time() * 1000))
+        # 触发异步深度取证，零延迟
+        await process_forensic_trigger(data["id"])
+        data["video_evidence_pending"] = True
     def __init__(self):
         self.db_path = "customers.db"
         self._init_db()

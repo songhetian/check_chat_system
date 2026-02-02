@@ -111,25 +111,46 @@ export default function ViolationsPage() {
               </div>
 
               <div className="flex-1 p-6 overflow-y-auto space-y-6">
-                {/* 截图容器 - 关键：红框标注逻辑 */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">现场截图证据</span>
-                  <div className="relative rounded-2xl border-4 border-slate-100 overflow-hidden bg-slate-200 aspect-video group">
-                    <img 
-                      src={selectedViolation.screenshot || 'https://via.placeholder.com/800x450/f1f5f9/64748b?text=Evidence+Screenshot'} 
-                      className="w-full h-full object-cover"
-                    />
-                    {/* 模拟红框标注：利用 CSS 绝对定位在文字识别处画框 */}
-                    <motion.div 
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="absolute border-4 border-red-500 shadow-[0_0_0_4000px_rgba(0,0,0,0.4)]"
-                      style={{ top: '40%', left: '30%', width: '120px', height: '40px' }}
-                    >
-                      <div className="absolute -top-8 left-0 bg-red-500 text-white text-[10px] px-2 py-1 font-bold rounded flex items-center gap-1">
-                        命中：{selectedViolation.keyword}
-                      </div>
-                    </motion.div>
+                {/* 截图/视频 容器 */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">现场取证复盘 (截图+视频)</span>
+                    {selectedViolation.video_path && (
+                      <span className="px-2 py-0.5 bg-cyan-500 text-white text-[9px] font-black rounded-full animate-pulse">
+                        VIDEO EVIDENCE READY
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* 截图展示 */}
+                    <div className="relative rounded-2xl border-2 border-slate-100 overflow-hidden bg-slate-200 aspect-video">
+                      <img 
+                        src={selectedViolation.screenshot || 'https://via.placeholder.com/800x450/f1f5f9/64748b?text=Evidence+Screenshot'} 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 left-2 bg-slate-900/50 text-[8px] text-white px-1.5 py-0.5 rounded font-bold">静态取证</div>
+                    </div>
+
+                    {/* 视频回放 (新增) */}
+                    <div className="relative rounded-2xl border-2 border-slate-100 overflow-hidden bg-slate-900 aspect-video flex items-center justify-center">
+                      {selectedViolation.video_path ? (
+                        <video 
+                          controls 
+                          className="w-full h-full"
+                          poster={selectedViolation.screenshot}
+                        >
+                          <source src={`http://127.0.0.1:8000/api/evidence/video/${selectedViolation.id}`} type="video/mp4" />
+                          您的系统不支持视频播放
+                        </video>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 text-slate-600">
+                          <VideoOff size={24} />
+                          <span className="text-[10px] font-bold">无视频证据留存</span>
+                        </div>
+                      )}
+                      <div className="absolute top-2 left-2 bg-cyan-600/80 text-[8px] text-white px-1.5 py-0.5 rounded font-bold">视频回放链路</div>
+                    </div>
                   </div>
                 </div>
 
