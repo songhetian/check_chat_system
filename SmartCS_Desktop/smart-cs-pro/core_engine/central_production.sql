@@ -1,63 +1,88 @@
--- [Smart-CS Pro] 中央指挥部 MySQL 数据库初始化脚本
--- 适用环境: 生产服务器 (192.168.2.184)
+-- [Smart-CS Pro] 中央指挥部 MySQL 数据库初始化脚本 - 最终完全体
+-- 包含: 组织架构、账号鉴权、设备准入、监控取证、战术物料
 
 CREATE DATABASE IF NOT EXISTS smart_cs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE smart_cs;
 
--- 1. 全球敏感词库 (坐席端 SQLite 只下载 active=1 的子集)
-CREATE TABLE IF NOT EXISTS sensitive_words (
+-- 1. 部门表 (用于行政层级隔离)
+CREATE TABLE IF NOT EXISTS departments (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    word VARCHAR(100) UNIQUE NOT NULL,
-    category VARCHAR(50) DEFAULT 'GENERAL', -- 政治, 暴恐, 违规交易等
-    risk_level INT DEFAULT 5,               -- 1-10 风险等级
-    is_active TINYINT DEFAULT 1,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    parent_id INT DEFAULT 0,
+    manager_name VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 2. 全量违规取证记录 (这是最核心的数据资产，SQLite 不留存历史)
-CREATE TABLE IF NOT EXISTS violation_records (
-    id VARCHAR(50) PRIMARY KEY,
-    agent_id VARCHAR(50) NOT NULL,          -- 哪个坐席违规
-    keyword VARCHAR(100),                   -- 命中的词
-    context TEXT,                           -- 上下文内容
-    risk_score INT,                         -- AI 评分
-    ai_reason TEXT,                         -- AI 给出的原因
-    screenshot_url VARCHAR(255),            -- 截图在服务器的路径
-    video_path VARCHAR(255),                -- 证据视频在服务器的路径
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_agent (agent_id),
-    INDEX idx_time (timestamp)
-) ENGINE=InnoDB;
-
--- 3. 全景客户画像表 (全公司共享)
-CREATE TABLE IF NOT EXISTS customers (
-    name VARCHAR(100) PRIMARY KEY,
-    level VARCHAR(20) DEFAULT 'NEW',
-    tags TEXT,                              -- 逗号分隔的标签
-    ltv DECIMAL(12,2) DEFAULT 0.00,         -- 终身价值
-    frequency INT DEFAULT 1,                -- 累计沟通次数
-    is_risk TINYINT DEFAULT 0,              -- 是否黑名单
-    last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-
--- 4. 战术目标平台管理
-CREATE TABLE IF NOT EXISTS platforms (
+-- 2. 用户表 (包含加盐哈希密码与角色)
+CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) UNIQUE,
-    window_keyword VARCHAR(100),
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(128) NOT NULL,
+    salt VARCHAR(32) NOT NULL,
+    real_name VARCHAR(50),
+    role ENUM('AGENT', 'ADMIN', 'HQ') DEFAULT 'AGENT',
+    department_id INT,
+    authorized_device_id VARCHAR(100), -- 绑定的硬件指纹
+    status TINYINT DEFAULT 1,          -- 1: 活跃, 0: 禁用
+    last_login TIMESTAMP,
+    FOREIGN KEY (department_id) REFERENCES departments(id),
+    INDEX idx_user (username)
+) ENGINE=InnoDB;
+
+-- 3. 硬件设备白名单 (用于设备准入控制)
+CREATE TABLE IF NOT EXISTS devices (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    hwid VARCHAR(100) NOT NULL UNIQUE,
+    user_id INT,
+    status ENUM('PENDING', 'APPROVED', 'BLOCKED') DEFAULT 'PENDING',
+    device_info TEXT,                  -- CPU/Disk 详细信息
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+-- 4. 敏感词库
+CREATE TABLE IF NOT EXISTS sensitive_words (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    word VARCHAR(100) UNIQUE NOT NULL,
+    category VARCHAR(50),
+    risk_level INT DEFAULT 5,
     is_active TINYINT DEFAULT 1
 ) ENGINE=InnoDB;
 
--- 5. 全局合规审计日志 (记录主管和管理员的操作)
-CREATE TABLE IF NOT EXISTS audit_logs (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    operator VARCHAR(50) NOT NULL,
-    action VARCHAR(50) NOT NULL,
-    target VARCHAR(100),
-    details TEXT,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- 5. 违规取证记录
+CREATE TABLE IF NOT EXISTS violation_records (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id INT NOT NULL,
+    keyword VARCHAR(100),
+    context TEXT,
+    risk_score INT,
+    screenshot_url VARCHAR(255),
+    video_path VARCHAR(255),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
--- 初始化默认数据
-INSERT IGNORE INTO platforms (name, window_keyword) VALUES ('WeChat', '微信'), ('DingTalk', '钉钉');
-INSERT IGNORE INTO sensitive_words (word, category, risk_level) VALUES ('加微信', '私单', 8), ('转账', '交易', 9), ('投诉', '纠纷', 7);
+-- 6. 全景客户画像
+CREATE TABLE IF NOT EXISTS customers (
+    name VARCHAR(100) PRIMARY KEY,
+    level VARCHAR(20) DEFAULT 'NEW',
+    tags TEXT,
+    ltv DECIMAL(12,2) DEFAULT 0.00,
+    frequency INT DEFAULT 1,
+    last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 7. 战术广播日志 (强制已读广播)
+CREATE TABLE IF NOT EXISTS broadcasts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255),
+    content TEXT,
+    sender_id INT,
+    target_dept_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 初始化基础数据
+INSERT IGNORE INTO departments (name) VALUES ('总经办'), ('销售一部'), ('技术部');
+-- 演示账号: admin / admin (实际哈希和盐值需由 init_system 生成)
+INSERT IGNORE INTO users (username, password_hash, salt, real_name, role, department_id) 
+VALUES ('admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '超级管理员', 'HQ', 1);
