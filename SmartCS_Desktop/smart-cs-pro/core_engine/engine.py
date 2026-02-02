@@ -23,6 +23,7 @@ import win32gui
 import httpx
 import pandas as pd
 import io
+import numpy as np
 
 # --- 工业级配置与日志 ---
 app = FastAPI()
@@ -34,88 +35,99 @@ handler = RotatingFileHandler("app.log", maxBytes=10*1024*1024, backupCount=5)
 handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 logger.addHandler(handler)
 
-def load_config():
-    try:
-        with open("../server_config.json", "r") as f:
-            return json.load(f)
-    except:
-        return {"ollama_url": "http://localhost:11434/api/chat", "ai_enabled": True}
-
-CONFIG = load_config()
-
-# --- 核心引擎类 ---
-class RiskEngine:
+# --- 战术画像引擎 (SQLite 闭环) ---
+class PersonaEngine:
     def __init__(self):
-        self.sensitive_words = ["转账", "加微信", "投诉", "报警"]
-        self.char_buffer = deque(maxlen=50)
-        self.active_connections = []
+        self.db_path = "customers.db"
+        self._init_db()
 
-    def add_char(self, char):
-        self.char_buffer.append(char)
-        return self.check_text()
+    def _init_db(self):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS customers (
+                    name TEXT PRIMARY KEY,
+                    level TEXT,
+                    tags TEXT,
+                    ltv REAL,
+                    frequency INTEGER,
+                    is_risk BOOLEAN,
+                    last_seen REAL
+                )
+            """)
 
-    def check_text(self):
-        raw_text = "".join(self.char_buffer)
-        for word in self.sensitive_words:
-            if word in raw_text:
-                return {"type": "VIOLATION", "keyword": word, "context": raw_text}
-        return None
+    def get_or_create_persona(self, raw_name):
+        # 语义清洗：去掉微信括号等杂质
+        clean_name = re.sub(r'\(.*?\)|\[.*?\]|\（.*?\）', '', raw_name).strip()
+        if len(clean_name) < 2: return None
 
-engine = RiskEngine()
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM customers WHERE name=?", (clean_name,))
+            row = cursor.fetchone()
+            if row:
+                conn.execute("UPDATE customers SET frequency = frequency + 1, last_seen = ? WHERE name = ?", (time.time(), clean_name))
+                return { "name": row[0], "level": row[1], "tags": row[2].split(','), "ltv": row[3], "frequency": row[4] + 1, "isRisk": bool(row[5]) }
+            else:
+                conn.execute("INSERT INTO customers VALUES (?, 'NEW', '首次咨询', 0, 1, 0, ?)", (clean_name, time.time()))
+                logger.info(f"🆕 自动为新客户建档: {clean_name}")
+                return { "name": clean_name, "level": "NEW", "tags": ["首次咨询"], "ltv": 0, "frequency": 1, "isRisk": False }
 
-# --- AI 超脑分析 ---
-SYSTEM_PROMPT = """
-你是一个顶级的数智战术指挥专家。请分析坐席与客户的对话，按 JSON 格式输出深度分析报告。
-必须包含：
-1. risk_score: 0-10 风险分。
-2. sentiment_score: 0-100 客户情绪分 (0极怒, 100极信任)。
-3. persona: { "profession": "职业倾向", "personality": "性格标签", "loyalty": "忠诚度建议" }。
-4. strategy: "建议采用的战术策略"。
-5. suggestion: "具体的一键采用话术"。
-"""
+persona_engine = PersonaEngine()
 
-async def analyze_with_llm_ultra(text: str):
-    if not CONFIG.get("ai_enabled"): return
-    async with httpx.AsyncClient() as client:
-        try:
-            payload = {
-                "model": "qwen2:1.5b",
-                "messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": text}],
-                "stream": False, "format": "json"
-            }
-            res = await client.post(CONFIG["ollama_url"], json=payload, timeout=3.0)
-            content = json.loads(res.json()['message']['content'])
-            await broadcast_event({"type": "AI_ULTRA_ANALYSIS", "data": content, "context": text})
-        except: pass
-
-# --- 视频取证与缓冲 ---
-class ForensicRecorder:
+# --- 核心扫描器 ---
+class SmartScanner:
     def __init__(self):
-        self.frame_buffer = deque(maxlen=50) # 5秒缓冲
-    def capture_frame(self):
+        self.ocr = None
+        self.last_customer = ""
+        self.regions = {"name_area": (450, 50, 800, 100), "chat_area": (400, 150, 900, 700)}
+
+    def _ensure_ocr(self):
+        if self.ocr is None:
+            from paddleocr import PaddleOCR
+            self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+
+    def scan_screen(self):
+        self._ensure_ocr()
         try:
-            img = ImageGrab.grab()
-            img = img.resize((800, 450))
-            self.frame_buffer.append(np.array(img))
-        except: pass
-    async def save_evidence(self, vid):
-        # 模拟保存
-        logger.info(f"📹 视频取证已生成: {vid}")
+            full_img = ImageGrab.grab()
+            # 识别姓名
+            name_crop = full_img.crop(self.regions["name_area"])
+            res = self.ocr.ocr(np.array(name_crop), cls=True)
+            if res and res[0]:
+                raw_name = res[0][0][1][0]
+                data = persona_engine.get_or_create_persona(raw_name)
+                if data and data["name"] != self.last_customer:
+                    self.last_customer = data["name"]
+                    asyncio.run_coroutine_threadsafe(broadcast_event({"type": "trigger-customer", "detail": data}), main_loop)
+        except Exception as e:
+            logger.error(f"扫描异常: {e}")
 
-forensic_recorder = ForensicRecorder()
+scanner = SmartScanner()
 
-# --- 通信逻辑 ---
+# --- 通信总线 (含 Redis 预留) ---
 async def broadcast_event(data):
-    # 模拟数据丰富
-    if data["type"] == "VIOLATION":
-        data["timestamp"] = time.time() * 1000
-        data["id"] = str(int(time.time() * 1000))
-        asyncio.create_task(forensic_recorder.save_evidence(data["id"]))
-    
+    # 这里可以扩展推送给 Redis: redis_client.publish('tactical_events', json.dumps(data))
     for conn in engine.active_connections:
         try: await conn.send_text(json.dumps(data))
         except: pass
 
+class RiskEngine:
+    def __init__(self):
+        self.sensitive_words = ["转账", "投诉", "报警"]
+        self.char_buffer = deque(maxlen=50)
+        self.active_connections = []
+    def add_char(self, char):
+        self.char_buffer.append(char)
+        return self.check_text()
+    def check_text(self):
+        text = "".join(self.char_buffer)
+        for w in self.sensitive_words:
+            if w in text: return {"type": "VIOLATION", "keyword": w, "context": text}
+        return None
+
+engine = RiskEngine()
+
+# --- WebSocket & API ---
 @app.websocket("/ws/risk")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -126,106 +138,33 @@ async def websocket_endpoint(websocket: WebSocket):
             data = json.loads(msg)
             if data.get("type") == "MUTE_AGENT":
                 await websocket.send_text(json.dumps({"type": "MUTE_CONFIRM"}))
-    except:
-        engine.active_connections.remove(websocket)
+    except: engine.active_connections.remove(websocket)
 
-# --- 业务 API ---
 @app.get("/api/admin/stats")
 async def get_stats():
-    return {
-        "total_risk_today": 42,
-        "ai_correction_rate": "92%",
-        "active_agents": len(engine.active_connections),
-        "avg_response_time": "0.8s",
-        "risk_distribution": [{"name": "语义风险", "value": 45}, {"name": "合规避让", "value": 30}, {"name": "态度问题", "value": 25}]
-    }
+    return { "total_risk_today": 42, "active_agents": len(engine.active_connections) }
 
-class PlatformManager:
-    def __init__(self):
-        self.db_path = "platforms.db"
-        self._init_db()
-
-    def _init_db(self):
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS platforms (
-                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
-                    name TEXT UNIQUE,
-                    window_keyword TEXT,
-                    is_active BOOLEAN,
-                    sync_time REAL
-                )
-            """)
-
-    async def sync_from_remote(self):
-        """
-        [工业级特征] 从中央 MySQL 服务器同步最新的监控策略
-        """
-        try:
-            logger.info("☁️  正在从中央指挥部 (MySQL) 同步战术目标...")
-            # 模拟调用中央 API (实际部署时指向服务器 IP)
-            # async with httpx.AsyncClient() as client:
-            #     res = await client.get(f"{CONFIG['api_url']}/global/platforms")
-            #     remote_data = res.json()
-            
-            # 模拟同步成功逻辑
-            await asyncio.sleep(1) 
-            logger.info("✅ 战术目标同步完成，本地缓存已更新")
-        except Exception as e:
-            logger.error(f"❌ 同步失败，将使用本地 SQLite 缓存运行: {e}")
-
-    def get_active_keywords(self):
-        # ... (原有逻辑)
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT window_keyword FROM platforms WHERE is_active=1")
-            return [r[0] for r in cursor.fetchall()]
-
-platform_manager = PlatformManager()
-
-# ... (在启动部分调用同步)
-if __name__ == "__main__":
-    main_loop = asyncio.new_event_loop()
-    # 异步触发云端同步
-    asyncio.run_coroutine_threadsafe(platform_manager.sync_from_remote(), main_loop)
-    # ... (后续启动)
-
-# --- 监控目标管理 API ---
-@app.get("/api/admin/platforms")
-async def get_platforms():
-    with sqlite3.connect("platforms.db") as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM platforms")
-        return [{"id": r[0], "name": r[1], "keyword": r[2], "active": r[3]} for r in rows]
-
-@app.post("/api/admin/platforms/add")
-async def add_platform(name: str, keyword: str):
-    with sqlite3.connect("platforms.db") as conn:
-        conn.execute("INSERT INTO platforms (name, window_keyword, is_active) VALUES (?, ?, 1)", (name, keyword))
-    return {"status": "ok"}
-
-# 修改扫描逻辑，使用数据库配置
+# --- 循环任务 ---
 def auto_scan_loop():
-    logger.info("👀 工业级窗口感知扫描引擎已启动")
     while True:
         try:
             hwnd = win32gui.GetForegroundWindow()
             title = win32gui.GetWindowText(hwnd)
-            
-            # 动态获取战术目标
-            targets = platform_manager.get_active_keywords()
-            is_target = any(t.lower() in title.lower() for t in targets)
-            
-            if is_target:
+            if any(t in title for t in ["微信", "钉钉", "WeChat"]):
                 scanner.scan_screen()
                 time.sleep(3)
-            else:
-                time.sleep(10) 
+            else: time.sleep(10)
         except: time.sleep(5)
+
+def keyboard_hook():
+    def on_press(key):
+        if hasattr(key, 'char'):
+            res = engine.add_char(key.char)
+            if res: asyncio.run_coroutine_threadsafe(broadcast_event(res), main_loop)
+    with keyboard.Listener(on_press=on_press) as l: l.join()
 
 if __name__ == "__main__":
     main_loop = asyncio.new_event_loop()
     threading.Thread(target=keyboard_hook, daemon=True).start()
-    threading.Thread(target=main_loops, daemon=True).start()
-    # 核心：允许局域网访问
+    threading.Thread(target=auto_scan_loop, daemon=True).start()
     uvicorn.run(app, host="0.0.0.0", port=8000)
