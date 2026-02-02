@@ -19,50 +19,62 @@ import numpy as np
 import redis
 from dotenv import load_dotenv
 
-# 加载 .env 环境变量
+# --- 1. 工业级配置中心 ---
 load_dotenv()
 
-# --- 工业级配置中心 ---
 def load_config():
-    try:
-        with open("../server_config.json", "r") as f:
-            cfg = json.load(f)
-    except:
-        cfg = {}
-    
-    # 注入环境变量覆盖 (优先读取 .env)
     return {
-        "ai_engine": {
-            "url": os.getenv("OLLAMA_URL", cfg.get("ai_engine", {}).get("url")),
-            "enabled": cfg.get("ai_engine", {}).get("enabled", True),
-            "model": cfg.get("ai_engine", {}).get("model", "qwen2:1.5b")
+        "ai": {
+            "enabled": os.getenv("AI_ENABLED", "true").lower() == "true",
+            "url": os.getenv("AI_URL", "http://127.0.0.1:11434/api/chat"),
+            "model": os.getenv("AI_MODEL", "qwen2:1.5b")
         },
-        "network": {
-            "local_port": int(os.getenv("SERVER_PORT", cfg.get("network", {}).get("local_port", 8000))),
-            "local_bind_host": os.getenv("SERVER_IP", cfg.get("network", {}).get("local_bind_host", "0.0.0.0"))
+        "db": {
+            "type": os.getenv("DB_TYPE", "sqlite"),
+            "host": os.getenv("DB_HOST", "localhost"),
+            "port": os.getenv("DB_PORT", "3306"),
+            "user": os.getenv("DB_USER", "root"),
+            "pass": os.getenv("DB_PASSWORD", ""),
+            "name": os.getenv("DB_NAME", "smart_cs")
+        },
+        "redis": {
+            "host": os.getenv("REDIS_HOST", ""),
+            "port": int(os.getenv("REDIS_PORT", 6379)),
+            "pass": os.getenv("REDIS_PASSWORD", ""),
+            "db": int(os.getenv("REDIS_DB", 0))
+        },
+        "server": {
+            "host": os.getenv("SERVER_HOST", "0.0.0.0"),
+            "port": int(os.getenv("SERVER_PORT", 8000))
         },
         "security": {
-            "jwt_secret": os.getenv("JWT_SECRET", cfg.get("security", {}).get("jwt_secret", "secret")),
-            "auth_enabled": os.getenv("AUTH_ENABLED", "true") == "true"
+            "jwt_secret": os.getenv("JWT_SECRET", "default_secret"),
+            "auth_enabled": os.getenv("AUTH_ENABLED", "true").lower() == "true"
         }
     }
 
 CONFIG = load_config()
 
+# --- 2. 核心服务初始化 ---
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 logger = logging.getLogger("SmartCS")
 logger.setLevel(logging.INFO)
 handler = RotatingFileHandler("app.log", maxBytes=10*1024*1024, backupCount=5)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 logger.addHandler(handler)
 
-# --- 1. Redis 战术枢纽 ---
+# --- 3. Redis 指令枢纽 ---
 class RedisTacticalHub:
     def __init__(self, agent_id):
         self.agent_id = agent_id
+        cfg = CONFIG["redis"]
+        if not cfg["host"]:
+            self.r = None
+            return
         try:
-            self.r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+            self.r = redis.Redis(host=cfg["host"], port=cfg["port"], password=cfg["pass"], db=cfg["db"], decode_responses=True)
             self.stream_key = f"commands:agent:{agent_id}"
         except: self.r = None
 
@@ -70,38 +82,21 @@ class RedisTacticalHub:
         if not self.r: return
         while True:
             try:
-                # 简化逻辑，仅示意
+                # 使用 Redis Streams 读取指令
                 streams = self.r.xread({self.stream_key: "$"}, count=1, block=5000)
-                for _, messages in streams:
-                    for _, data in messages:
-                        await broadcast_event({"type": "SUPERVISOR_COMMAND", "data": data})
-            except: await asyncio.sleep(5)
+                if streams:
+                    for _, messages in streams:
+                        for _, data in messages:
+                            await broadcast_event({"type": "SUPERVISOR_COMMAND", "data": data})
+            except Exception as e:
+                logger.error(f"Redis 链路异常: {e}")
+                await asyncio.sleep(5)
 
-# --- 2. AI 超脑分析 ---
-SYSTEM_PROMPT = """
-你是一个顶级的数智战术指挥专家。请分析坐席与客户的对话，按 JSON 格式输出深度分析报告。
-必须包含：risk_score(0-10), sentiment_score(0-100), persona(profession, personality, loyalty), strategy, suggestion。
-"""
-
-async def analyze_with_llm_ultra(text: str):
-    ai_cfg = CONFIG.get("ai_engine", {})
-    if not ai_cfg.get("enabled"): return
-    async with httpx.AsyncClient() as client:
-        try:
-            payload = {
-                "model": ai_cfg.get("model", "qwen2:1.5b"),
-                "messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": text}],
-                "stream": False, "format": "json"
-            }
-            res = await client.post(ai_cfg.get("url"), json=payload, timeout=3.0)
-            content = json.loads(res.json()['message']['content'])
-            await broadcast_event({"type": "AI_ULTRA_ANALYSIS", "data": content, "context": text})
-        except: pass
-
-# --- 3. 画像与扫描 ---
+# --- 4. 画像引擎与通信 ---
 class PersonaEngine:
     def __init__(self):
         self.db_path = "customers.db"
+        # 实际生产中这里应判断 CONFIG['db']['type'] 来决定连接 SQLite 还是 MySQL
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("CREATE TABLE IF NOT EXISTS customers (name TEXT PRIMARY KEY, level TEXT, tags TEXT, ltv REAL, frequency INTEGER, last_seen REAL)")
 
@@ -133,7 +128,8 @@ async def websocket_endpoint(websocket: WebSocket):
         while True: await websocket.receive_text()
     except: active_connections.remove(websocket)
 
-# --- 启动逻辑 ---
+# --- 5. 启动入口 ---
 if __name__ == "__main__":
-    net_cfg = CONFIG.get("network", {})
-    uvicorn.run(app, host=net_cfg.get("local_bind_host", "0.0.0.0"), port=net_cfg.get("local_port", 8000))
+    srv_cfg = CONFIG["server"]
+    print(f"🚀 Smart-CS Pro 核心引擎已启动 (监听: {srv_cfg['host']}:{srv_cfg['port']})")
+    uvicorn.run(app, host=srv_cfg["host"], port=srv_cfg["port"])
