@@ -1,4 +1,7 @@
-Traceback (most recent call last):
-  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 5, in <module>
-    import uvicorn, threading, httpx, numpy as np, aiomysql, aioredis
-ModuleNotFoundError: No module named 'aiomysql'
+INFO:     Started server process [39959]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 48] error while attempting to bind on address ('0.0.0.0', 8000): [errno 48] address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+🚀 [macOS 兼容版] Smart-CS Pro 引擎启动: 0.0.0.0:8000

@@ -5,55 +5,105 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pynput import keyboard
 import uvicorn, threading, httpx, numpy as np, pymysql
+import aiomysql
 from PIL import ImageGrab
 from dotenv import load_dotenv
 import platform
 
-# --- 1. 初始化配置 ---
+# --- 1. 环境初始化 ---
 load_dotenv()
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-# 针对 macOS 的窗口检测兼容处理
-try:
-    if platform.system() == "Windows":
-        import win32gui
-    else:
-        win32gui = None
-except ImportError:
-    win32gui = None
+logger = logging.getLogger("SmartCS")
+logger.setLevel(logging.INFO)
+handler = RotatingFileHandler("app.log", maxBytes=10*1024*1024, backupCount=5)
+logger.addHandler(handler)
 
-def get_foreground_window_title():
-    """获取当前前台窗口标题 (跨平台方案)"""
+# 跨平台窗口库兼容
+win32gui = None
+if platform.system() == "Windows":
+    try: import win32gui
+    except: pass
+
+# --- 2. 异步连接池与配置 ---
+db_pool = None
+
+async def get_db_pool():
+    global db_pool
+    if db_pool is None:
+        db_pool = await aiomysql.create_pool(
+            host=os.getenv("DB_HOST", "127.0.0.1"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            db=os.getenv("DB_NAME"),
+            autocommit=True
+        )
+    return db_pool
+
+# --- 3. 核心扫描与业务逻辑 ---
+class SmartScanner:
+    def __init__(self):
+        self.ocr = None
+        self.last_hash = ""
+        self.regions = {"name_area": (450, 50, 800, 100)}
+
+    def scan_screen(self):
+        try:
+            full_img = ImageGrab.grab()
+            roi = full_img.crop(self.regions["name_area"])
+            cur_hash = hashlib.md5(roi.tobytes()).hexdigest()
+            if cur_hash == self.last_hash: return
+            self.last_hash = cur_hash
+            
+            if self.ocr is None:
+                from paddleocr import PaddleOCR
+                self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+            
+            res = self.ocr.ocr(np.array(roi), cls=True)
+            if res and res[0]:
+                name = re.sub(r'\(.*?\)|\[.*?\]', '', res[0][0][1][0]).strip()
+                if len(name) > 1:
+                    asyncio.run_coroutine_threadsafe(broadcast_event({"type": "trigger-customer", "detail": {"name": name}}), main_loop)
+        except: pass
+
+scanner = SmartScanner()
+
+# --- 4. 通信中枢 ---
+active_connections = []
+
+async def broadcast_event(data):
+    for conn in active_connections:
+        try: await conn.send_text(json.dumps(data))
+        except: pass
+
+@app.websocket("/ws/risk")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    active_connections.append(websocket)
     try:
-        if win32gui:
-            hwnd = win32gui.GetForegroundWindow()
-            return win32gui.GetWindowText(hwnd)
-        # macOS 逻辑暂简化为全量扫描，或使用辅助指令
-        return "微信" # 模拟永远处于激活态
+        while True: await websocket.receive_text()
     except:
-        return ""
+        if websocket in active_connections: active_connections.remove(websocket)
 
-# --- (中间逻辑保持之前的异步高性能版本) ---
-# ... 
-
+# --- 5. 守护线程 ---
 def auto_scan_loop():
     while True:
-        try:
-            title = get_foreground_window_title()
-            # 只有匹配到目标软件才扫描
-            if any(t in title for t in ["微信", "钉钉", "WeChat", "Lark"]):
-                # scanner.scan_screen() # 执行扫描
-                pass
-            time.sleep(3)
-        except: time.sleep(5)
+        # 获取窗口标题逻辑
+        title = "微信" # 默认模拟
+        if win32gui:
+            try: title = win32gui.GetWindowText(win32gui.GetForegroundWindow())
+            except: pass
+        
+        if any(t in title for t in ["微信", "钉钉", "WeChat", "Lark"]):
+            scanner.scan_screen()
+        time.sleep(3)
 
 if __name__ == "__main__":
     main_loop = asyncio.new_event_loop()
-    # 启动扫描与键盘监听
     threading.Thread(target=auto_scan_loop, daemon=True).start()
     
     host = os.getenv("SERVER_HOST", "0.0.0.0")
     port = int(os.getenv("SERVER_PORT", 8000))
-    print(f"🚀 [macOS 兼容版] Smart-CS Pro 引擎启动: {host}:{port}")
+    print(f"🚀 [macOS 兼容版] Smart-CS Pro 引擎已就绪: {host}:{port}")
     uvicorn.run(app, host=host, port=port)

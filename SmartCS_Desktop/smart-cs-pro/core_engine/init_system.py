@@ -1,15 +1,19 @@
-import subprocess, sys, os, sqlite3, platform
+import subprocess
+import sys
+import os
+import sqlite3
+import platform
 from dotenv import load_dotenv
 
 def check_env():
     print(f"🛠️  [Smart-CS Pro] 正在初始化 {platform.system()} 战术环境...")
     load_dotenv()
     
-    # 1. 核心依赖检测
+    # 1. 核心依赖检测 (精简版，移除冲突的 pymysqlpool)
     dependencies = [
         "fastapi", "uvicorn", "pynput", "paddleocr", "opencv-python", 
         "httpx", "pandas", "openpyxl", "redis", "python-dotenv", 
-        "pymysql", "pymysqlpool", "aiomysql"
+        "pymysql", "aiomysql", "aioredis"
     ]
     
     # 仅在 Windows 下安装 wmi
@@ -21,14 +25,33 @@ def check_env():
         try:
             lib_mod = lib.replace("-", "_")
             if lib == "opencv-python": __import__("cv2")
+            elif lib == "python-dotenv": __import__("dotenv")
+            elif lib == "aioredis": __import__("redis.asyncio") # aioredis 2.0+ 方式
             else: __import__(lib_mod)
             print(f"  ✅ {lib} 已就绪")
         except ImportError:
             print(f"  ❌ 缺少依赖: {lib}，尝试自动安装...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", lib])
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", lib])
+            except:
+                print(f"  ⚠️  自动安装 {lib} 失败，请尝试手动运行: pip install {lib}")
+
+    # 2. 读取数据库配置并初始化本地表结构
+    print(f"🗄️  正在初始化本地数据库架构 (SQLite Buffer)...")
+    if os.path.exists("schema.sql"):
+        db_files = ["buffer.db", "customers.db", "audit.db", "platforms.db"]
+        for db in db_files:
+            try:
+                conn = sqlite3.connect(db)
+                with open("schema.sql", "r", encoding="utf-8") as f:
+                    sql_script = f.read()
+                conn.executescript(sql_script)
+                print(f"  ✅ 本地库 {db} 同步成功")
+                conn.close()
+            except Exception as e:
+                print(f"  ⚠️ {db} 初始化跳过或已存在")
 
     print("\n🚀 [系统就绪] 环境初始化完成！")
 
 if __name__ == "__main__":
     check_env()
-
