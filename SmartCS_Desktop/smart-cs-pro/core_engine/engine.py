@@ -314,27 +314,37 @@ async def broadcast_event(data):
 from paddleocr import PaddleOCR
 import numpy as np
 
-# 初始化本地 OCR (初次运行会自动下载模型，约 100MB)
-ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
-
 class SmartScanner:
     def __init__(self):
-        # 模拟不同聊天软件的区域坐标 (实际可通过 win32gui 动态计算)
-        self.regions = {
-            "name_area": (450, 50, 800, 100),  # 顶部名字区域 [左, 上, 右, 下]
-            "chat_area": (400, 150, 900, 700)  # 聊天记录区域
-        }
-        self.last_customer = ""
+        self.ocr = None
+        self.idle_start_time = time.time()
+        self.last_active_time = time.time()
+        # ... (其他初始化不变)
+
+    def _ensure_ocr(self):
+        if self.ocr is None:
+            print("🚀 [性能引擎] 正在按需唤醒本地 OCR 模型...")
+            from paddleocr import PaddleOCR
+            self.ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+        self.last_active_time = time.time()
+
+    def _check_idle_cleanup(self):
+        if self.ocr and (time.time() - self.last_active_time > 600): # 10分钟空闲
+            print("💤 [性能引擎] OCR 处于长期空闲，正在释放内存...")
+            del self.ocr
+            self.ocr = None
+            import gc
+            gc.collect()
 
     def scan_screen(self):
-        """
-        全自动化扫描流程
-        """
+        self._ensure_ocr()
+        # ... (使用 self.ocr 进行扫描)
         full_img = ImageGrab.grab()
-        
-        # 1. 识别客户名字 (谁在跟我聊天)
+        # 识别客户名字
         name_crop = full_img.crop(self.regions["name_area"])
-        name_res = ocr.ocr(np.array(name_crop), cls=True)
+        name_res = self.ocr.ocr(np.array(name_crop), cls=True)
+        # ... (后续 OCR 逻辑保持不变)
+        self._check_idle_cleanup()
         
         if name_res and name_res[0]:
             customer_name = name_res[0][0][1][0] # 提取识别到的第一行文字
