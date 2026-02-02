@@ -1,18 +1,33 @@
 {
-    "description": "Smart-CS Pro 工业级全局配置文件",
+    "config_info": "Smart-CS Pro 工业级全局配置文件 - 战术指挥系统核心配置",
     "ai_engine": {
         "provider": "ollama",
+        "provider_remark": "AI 驱动服务商，目前仅支持 ollama 本地化部署方案",
         "url": "http://127.0.0.1:11434/api/chat",
+        "url_remark": "AI 服务器地址。场景 B 模式下若在服务器本机运行则设为 127.0.0.1",
         "model": "qwen2:1.5b",
-        "enabled": true
+        "model_remark": "调用的模型名称，推荐使用 qwen2:1.5b 以获得最佳性能平衡",
+        "enabled": true,
+        "enabled_remark": "是否激活 AI 超脑分析功能，关闭后系统仅进行关键词基础拦截"
     },
     "network": {
         "local_bind_host": "0.0.0.0",
+        "local_bind_host_remark": "后端服务绑定地址。0.0.0.0 表示允许局域网内所有客服主机连接",
         "local_port": 8000,
-        "central_server_url": "http://192.168.1.100:8000/api"
+        "local_port_remark": "后端 WebSocket 和 API 服务端口，请确保防火墙已开放此端口",
+        "central_server_url": "http://192.168.1.100:8000/api",
+        "central_server_url_remark": "中央 MySQL 服务器地址，用于全局数据同步和总部审计"
     },
     "security": {
         "jwt_secret": "smart-cs-secure-key-2024",
-        "auth_enabled": true
+        "jwt_secret_remark": "系统身份加密密钥，生产环境部署时必须修改此项",
+        "auth_enabled": true,
+        "auth_enabled_remark": "是否开启 WebSocket 握手鉴权，开启后连接需携带合法 token"
+    },
+    "environment": {
+        "mode": "production",
+        "mode_remark": "运行环境模式：development (开发) / production (生产)",
+        "sync_interval": 300,
+        "sync_interval_remark": "本地数据同步到云端的时间间隔，单位为秒"
     }
 }

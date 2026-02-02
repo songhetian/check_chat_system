@@ -14,7 +14,10 @@ export const useRiskSocket = () => {
     const maxRetries = 10;
 
     const connect = () => {
-      socket = new WebSocket('ws://127.0.0.1:8000/ws/risk')
+      // 在场景 B 中，这里应该是服务器的局域网真实 IP
+      // 实际生产中可以通过 Electron 的 IPC 传进来，或者读取配置文件
+      const serverIp = '127.0.0.1'; // 演示先用本机，部署时改为服务器 IP
+      socket = new WebSocket(`ws://${serverIp}:8000/ws/risk?token=mock-token-123`)
 
       socket.onopen = () => {
         console.log('✅ 战术链路已建立')
