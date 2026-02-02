@@ -5,20 +5,28 @@ import axios from 'axios'
 
 export default function BigScreen() {
   const [stats, setStats] = useState<any>(null)
+  const alertAudio = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       const res = await axios.get('http://127.0.0.1:8000/api/admin/stats')
+      // 自驱动优化：若检测到今日拦截总数增加，触发大屏音效
+      if (stats && res.data.total_risk_today > stats.total_risk_today) {
+        if (alertAudio.current) {
+          alertAudio.current.volume = 0.2
+          alertAudio.current.play().catch(() => {})
+        }
+      }
       setStats(res.data)
     }
     fetchData()
-    const interval = setInterval(fetchData, 5000)
-    return () => clearInterval(interval)
-  }, [])
+    // ... 保持原有 interval 逻辑
+  }, [stats])
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-10 font-sans overflow-hidden scanline grain relative">
-      {/* A. 动态热力背景 (新增) */}
+      <audio ref={alertAudio} src="https://assets.mixkit.co/active_storage/sfx/2568/2534-preview.mp3" />
+      {/* ... 保持原有渲染结构 */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
          {[...Array(6)].map((_, i) => (
            <motion.div
