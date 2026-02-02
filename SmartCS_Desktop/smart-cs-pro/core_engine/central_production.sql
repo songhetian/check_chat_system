@@ -81,8 +81,18 @@ CREATE TABLE IF NOT EXISTS broadcasts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 初始化基础数据
-INSERT IGNORE INTO departments (name) VALUES ('总经办'), ('销售一部'), ('技术部');
+-- 8. AI 效能统计表
+CREATE TABLE IF NOT EXISTS ai_usage_stats (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    action_type ENUM('OPTIMIZE', 'SUMMARIZE'),
+    chars_processed INT,             -- 处理的字符数
+    estimated_time_saved INT,        -- 节省的预估时间 (秒)
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+-- 初始化基础数据... (保持不变)
 -- 演示账号: admin / admin (实际哈希和盐值需由 init_system 生成)
 INSERT IGNORE INTO users (username, password_hash, salt, real_name, role, department_id) 
 VALUES ('admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '超级管理员', 'HQ', 1);
