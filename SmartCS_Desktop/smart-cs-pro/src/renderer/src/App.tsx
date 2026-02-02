@@ -42,6 +42,10 @@ function App() {
   useEffect(() => {
     if (isRedAlert && alertAudioRef.current) {
       alertAudioRef.current.play().catch(() => {})
+      // 自驱动优化：播放红色警报语音
+      const utter = new SpeechSynthesisUtterance('警报，检测到严重违规，战术证据已实时留存。');
+      utter.lang = 'zh-CN'; utter.rate = 0.85;
+      window.speechSynthesis.speak(utter);
     } else if (alertAudioRef.current) {
       alertAudioRef.current.pause()
       alertAudioRef.current.currentTime = 0
