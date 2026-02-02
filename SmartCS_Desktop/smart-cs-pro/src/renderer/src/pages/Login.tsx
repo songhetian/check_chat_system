@@ -88,9 +88,19 @@ export default function Login() {
       }, token)
       
       navigate('/')
-    } catch (err) {
-      setError('无法连接到战术中枢，请检查引擎状态')
-      speak('警告，无法建立远程连接。')
+    } catch (err: any) {
+      if (err.response) {
+        // 服务器返回了错误 (如 401, 404, 500)
+        const msg = err.response.data?.message || '指挥中枢拒绝了访问请求'
+        setError(`链路错误: ${msg}`)
+        speak('身份核验未通过。')
+      } else if (err.request) {
+        // 请求发出了但没收到响应 (网络断了或引擎没开)
+        setError('无法建立战术连接：中枢服务器脱机')
+        speak('警告，无法建立远程连接。')
+      } else {
+        setError('初始化失败：本地环境异常')
+      }
     } finally {
       setIsLoading(false)
     }
