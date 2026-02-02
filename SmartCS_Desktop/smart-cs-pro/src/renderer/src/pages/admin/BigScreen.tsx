@@ -29,34 +29,31 @@ export default function BigScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-8 font-sans overflow-hidden">
+    <div className="min-h-screen bg-slate-950 text-white p-8 font-sans overflow-hidden scanline">
       {/* 顶部标题栏 */}
-      <div className="flex justify-between items-center mb-12">
+      <div className="flex justify-between items-center mb-12 relative z-10">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-cyan-500 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.5)]">
-            <BarChart3 size={28} />
+          <div className="w-14 h-14 bg-cyan-500 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(6,182,212,0.6)]">
+            <BarChart3 size={32} />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tighter italic">SMART-CS <span className="text-cyan-500">TACTICAL BI</span></h1>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.4em]">数智化实时战术决策大屏</p>
+            <h1 className="text-5xl font-black tracking-tighter italic">SMART-CS <span className="text-cyan-500">TACTICAL BI</span></h1>
+            <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.5em] mt-1 ml-1 opacity-50">数智化实时战术决策中心</p>
           </div>
         </div>
         
         <div className="flex gap-4">
           <button 
             onClick={handleExport}
-            className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-black hover:bg-white/10 transition-all uppercase"
+            className="flex items-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-black hover:bg-cyan-500/10 hover:border-cyan-500/50 transition-all uppercase tracking-widest"
           >
-            <Download size={16} className="text-cyan-400" /> 导出战术详表 (Excel)
+            <Download size={16} className="text-cyan-400" /> Export Tactical Data
           </button>
-          <div className="px-6 py-3 bg-cyan-500 text-slate-900 rounded-2xl text-xs font-black uppercase">
-            Live Stream Online
-          </div>
         </div>
       </div>
 
-      {/* 核心 KPI 矩阵 */}
-      <div className="grid grid-cols-4 gap-8 mb-12">
+      {/* 核心 KPI 矩阵 - 增加 3D 悬浮感 */}
+      <div className="grid grid-cols-4 gap-8 mb-12 relative z-10">
         <StatCard title="今日拦截总数" value={stats?.total_risk_today || 0} unit="次" trend="+12.5%" />
         <StatCard title="AI 纠偏成功率" value={stats?.ai_correction_rate || '0%'} color="text-cyan-400" />
         <StatCard title="活跃坐席链路" value={stats?.active_agents || 0} unit="LINE" />

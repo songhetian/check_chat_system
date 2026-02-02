@@ -6,44 +6,54 @@
   :root {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
     --primary: 188.7 94.5% 42.7%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
     --ring: 188.7 94.5% 42.7%;
-    --radius: 0.75rem;
   }
 }
 
 body {
-  @apply bg-transparent text-foreground antialiased overflow-hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  @apply bg-slate-950 text-foreground antialiased overflow-hidden;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* 玻璃拟态全局优化 */
-.glass {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+/* 1. 科幻扫描线效果 */
+.scanline::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 200;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  opacity: 0.3;
 }
 
-/* 自定义滚动条 */
-::-webkit-scrollbar {
-  width: 6px;
+/* 2. 霓虹边框流光 */
+.neon-border {
+  position: relative;
+  overflow: hidden;
 }
-::-webkit-scrollbar-track {
-  @apply bg-transparent;
+.neon-border::after {
+  content: "";
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(transparent, #06b6d4, transparent 30%);
+  animation: rotate 4s linear infinite;
+  z-index: -1;
 }
-::-webkit-scrollbar-thumb {
-  @apply bg-slate-800 rounded-full hover:bg-slate-700 transition-colors;
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
+
+/* 3. 玻璃拟态增强 */
+.glass-heavy {
+  @apply bg-slate-900/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)];
+}
+
+/* 4. 数字雨滚动条 */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { @apply bg-cyan-500/30 rounded-full; }

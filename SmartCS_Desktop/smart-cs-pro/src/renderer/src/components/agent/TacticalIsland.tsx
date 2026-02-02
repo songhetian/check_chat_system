@@ -26,7 +26,14 @@ export const TacticalIsland = () => {
   return (
     <div className="h-screen w-screen flex items-start justify-center pt-4 overflow-hidden">
       <audio ref={audioRef} src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" preload="auto" />
-      <motion.div layout className={cn("bg-slate-900/95 border border-white/20 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col select-none rounded-[32px]")} style={{ width: isAlerting ? 420 : isExpanded ? 550 : 240 }}>
+      <motion.div 
+        layout 
+        className={cn(
+          "bg-slate-900/95 border border-white/20 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col select-none rounded-[32px] scanline",
+          lastAiAnalysis && "ring-2 ring-cyan-500/50"
+        )} 
+        style={{ width: isAlerting ? 420 : isExpanded ? 550 : 240 }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 h-12 shrink-0 border-b border-white/5 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
           <div className="flex items-center gap-3">
