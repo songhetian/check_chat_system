@@ -65,7 +65,8 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      webSecurity: false // 关键：关闭 Web 安全限制，允许局域网 HTTP 跨域请求
     }
   })
 
