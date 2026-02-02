@@ -82,3 +82,36 @@ INFO:     connection closed
 INFO:     127.0.0.1:59662 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
 INFO:     connection rejected (403 Forbidden)
 INFO:     connection closed
+INFO:     127.0.0.1:60101 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60102 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60103 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60104 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60105 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60108 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60109 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60110 - "WebSocket /ws/risk?token=mock-token-123&username=admin1" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60111 - "WebSocket /ws/risk?token=mock-token-123&username=admin1" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60114 - "WebSocket /ws/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:60115 - "WebSocket /ws/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
