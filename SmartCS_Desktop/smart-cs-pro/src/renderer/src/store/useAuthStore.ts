@@ -6,6 +6,8 @@ interface User {
   role: 'AGENT' | 'ADMIN' | 'HQ'
   real_name: string
   department: string
+  rank?: string
+  score?: number
 }
 
 interface AuthState {

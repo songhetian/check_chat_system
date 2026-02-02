@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useRiskStore } from '../store/useRiskStore'
 import { useAuthStore } from '../store/useAuthStore'
+import { CONFIG } from '../lib/config'
 
 export const useRiskSocket = () => {
   const addViolation = useRiskStore((s) => s.addViolation)
@@ -15,9 +16,10 @@ export const useRiskSocket = () => {
 
     const connect = () => {
       const currentUser = useAuthStore.getState().user;
-      const serverIp = '127.0.0.1'; 
-      // 核心：在连接时携带身份，支持后端精准推送
-      socket = new WebSocket(`ws://${serverIp}:8000/ws/risk?token=mock-token-123&username=${currentUser?.username}`)
+      if (!currentUser) return;
+
+      // 核心：从统一配置中获取 WS 基准地址
+      socket = new WebSocket(`${CONFIG.WS_BASE}/risk?token=mock-token-123&username=${currentUser.username}`)
 
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data)

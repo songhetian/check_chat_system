@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Shield, Cpu, Activity, Lock, User, Minus, X, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
+import { CONFIG } from '../lib/config'
 import axios from 'axios'
 
 export default function Login() {
@@ -27,8 +28,8 @@ export default function Login() {
   }
 
   useEffect(() => {
-    // 登录页需要大窗口展示
-    window.electron.ipcRenderer.send('resize-window', { width: 1000, height: 800 })
+    // 登录页需要大窗口展示并居中
+    window.electron.ipcRenderer.send('resize-window', { width: 1000, height: 800, center: true })
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -39,7 +40,7 @@ export default function Login() {
 
     try {
       // 1. 发起中枢链路认证请求
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/login', {
+      const response = await axios.post(`${CONFIG.API_BASE}/auth/login`, {
         username: formData.username,
         password: formData.password
       })
@@ -51,7 +52,7 @@ export default function Login() {
         return
       }
 
-      const { user, token } = response.data
+      const { user, token } = response.data.data
 
       // 2. 启动仪式感序列
       setBootStatus('正在建立加密隧道...')
@@ -69,7 +70,7 @@ export default function Login() {
           setBootStatus('注入战术安全外壳...')
           speak('正在挂载战术外壳。')
         }
-        await new Promise(r => setTimeout(r, 20))
+        await new Promise(r => setTimeout(r, 15))
       }
 
       speak(`欢迎进入系统，${user.real_name}。全链路已就绪。`)
@@ -81,7 +82,7 @@ export default function Login() {
         role: user.role, 
         department: user.department,
         rank: user.rank,
-        score: user.tactical_score
+        score: user.score
       }, token)
       
       navigate('/')

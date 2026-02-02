@@ -6,32 +6,32 @@ import icon from '../../resources/icon.png?asset'
 function createWindow(): void {
   // 核心：创建独立、透明、置顶的战术岛窗口
   const mainWindow = new BrowserWindow({
-    width: 240,
-    height: 48,
+    width: 260,
+    height: 52,
     show: false,
     frame: false,
     transparent: true,
-    alwaysOnTop: false, // 修改：默认不再置顶，避免遮挡其他应用
+    alwaysOnTop: false,
     autoHideMenuBar: true,
+    backgroundColor: '#00000000', // 确保 macOS 下透明背景不会闪烁
+    hasShadow: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false
     }
   })
 
   // 窗口控制逻辑
-  ipcMain.on('minimize-window', () => {
-    mainWindow.minimize()
-  })
-
-  ipcMain.on('close-window', () => {
-    mainWindow.close()
-  })
+  ipcMain.on('minimize-window', () => mainWindow.minimize())
+  ipcMain.on('close-window', () => mainWindow.close())
 
   // 响应前端尺寸变化
-  ipcMain.on('resize-window', (_, { width, height }) => {
+  ipcMain.on('resize-window', (_, { width, height, center }) => {
     mainWindow.setSize(width, height, true)
+    if (center) mainWindow.center()
   })
 
   // 切换至大屏模式逻辑

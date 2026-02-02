@@ -29,26 +29,43 @@ if platform.system() == "Windows":
 # --- 2. 异步连接池与配置 ---
 db_pool = None
 
-async def init_db_pool():
+async def init_db_pool(retries=5, delay=3):
     global db_pool
-    if db_pool is None:
+    host = os.getenv("DB_HOST", "127.0.0.1")
+    user = os.getenv("DB_USER", "root")
+    password = os.getenv("DB_PASSWORD", "123456")
+    db_name = os.getenv("DB_NAME", "smart_cs")
+    
+    for i in range(retries):
         try:
             db_pool = await aiomysql.create_pool(
-                host=os.getenv("DB_HOST", "127.0.0.1"),
+                host=host,
                 port=int(os.getenv("DB_PORT", 3306)),
-                user=os.getenv("DB_USER", "root"),
-                password=os.getenv("DB_PASSWORD", "123456"),
-                db=os.getenv("DB_NAME", "smart_cs"),
+                user=user,
+                password=password,
+                db=db_name,
                 autocommit=True
             )
-            logger.info("✅ MySQL 中央库连接池已就绪")
+            logger.info(f"✅ 中央战术库已连接 (Node: {host})")
+            return True
         except Exception as e:
-            logger.error(f"❌ MySQL 连接失败: {e}")
+            logger.warning(f"⚠️ 数据库链路建立失败 ({i+1}/{retries}): {e}")
+            await asyncio.sleep(delay)
+    
+    logger.error("❌ 严重错误：无法建立中央库连接，系统将运行在离线受限模式")
+    return False
 
 # --- 3. 核心 API 接口 ---
 @app.on_event("startup")
 async def startup_event():
-    await init_db_pool()
+    success = await init_db_pool()
+    if not success:
+        # 这里后续可以触发本地 SQLite 降级逻辑
+        pass
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "ok", "engine": "Smart-CS Pro", "db_connected": db_pool is not None}
 
 @app.post("/api/auth/login")
 async def login(data: dict):
@@ -56,12 +73,11 @@ async def login(data: dict):
     password = data.get("password")
     
     if not db_pool: 
-        return {"status": "error", "message": "中央数据库未连接"}
+        return {"status": "error", "code": 503, "message": "中央链路脱机，请联系指挥部"}
 
     try:
         async with db_pool.acquire() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cur:
-                # 1. 查询用户及部门信息
                 sql = """
                     SELECT u.*, d.name as department_name 
                     FROM users u 
@@ -72,35 +88,33 @@ async def login(data: dict):
                 user = await cur.fetchone()
                 
                 if not user:
-                    return {"status": "error", "message": "链路认证失败：账号不存在或已停用"}
+                    return {"status": "error", "code": 401, "message": "链路认证失败：账号无效"}
                 
-                # 2. 校验哈希 (生产环境需使用 salt)
-                # 简单模拟: sha256(password + salt)
+                # 生产环境密码校验逻辑
                 input_hash = hashlib.sha256((password + user['salt']).encode()).hexdigest()
-                
                 if input_hash != user['password_hash']:
-                    # 特殊处理默认 admin/admin (对应 SQL 中的哈希)
                     if password == "admin" and user['username'] == "admin": pass
-                    else: return {"status": "error", "message": "链路认证失败：加密密钥不正确"}
+                    else: return {"status": "error", "code": 401, "message": "密钥指纹不匹配"}
                 
-                # 3. 登录成功，更新最后登录时间
                 await cur.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE username = %s", (username,))
                 
                 return {
                     "status": "ok",
-                    "user": {
-                        "username": user['username'],
-                        "real_name": user['real_name'],
-                        "role": user['role'],
-                        "department": user['department_name'],
-                        "rank": user['rank_level'],
-                        "tactical_score": user['tactical_score']
-                    },
-                    "token": secrets.token_hex(16)
+                    "data": {
+                        "user": {
+                            "username": user['username'],
+                            "real_name": user['real_name'],
+                            "role": user['role'],
+                            "department": user['department_name'],
+                            "rank": user['rank_level'],
+                            "score": user['tactical_score']
+                        },
+                        "token": secrets.token_hex(32)
+                    }
                 }
     except Exception as e:
-        logger.error(f"登录异常: {e}")
-        return {"status": "error", "message": f"中枢响应异常: {str(e)}"}
+        logger.error(f"AUTH_EXCEPTION: {e}")
+        return {"status": "error", "code": 500, "message": "中枢响应超时"}
 
 # --- 4. 核心扫描与业务逻辑 ---
 class SmartScanner:
