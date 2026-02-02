@@ -1,8 +1,18 @@
 {
-    "local_port": 8000,
-    "central_api_url": "http://192.168.1.100:8000/api",
-    "ollama_url": "http://localhost:11434/api/chat",
-    "ai_enabled": true,
-    "sync_enabled": true,
-    "environment": "production"
+    "description": "Smart-CS Pro 工业级全局配置文件",
+    "ai_engine": {
+        "provider": "ollama",
+        "url": "http://127.0.0.1:11434/api/chat",
+        "model": "qwen2:1.5b",
+        "enabled": true
+    },
+    "network": {
+        "local_bind_host": "0.0.0.0",
+        "local_port": 8000,
+        "central_server_url": "http://192.168.1.100:8000/api"
+    },
+    "security": {
+        "jwt_secret": "smart-cs-secure-key-2024",
+        "auth_enabled": true
+    }
 }
