@@ -17,17 +17,35 @@ import win32gui
 import httpx
 import numpy as np
 import redis
+from dotenv import load_dotenv
+
+# 加载 .env 环境变量
+load_dotenv()
 
 # --- 工业级配置中心 ---
 def load_config():
     try:
         with open("../server_config.json", "r") as f:
-            return json.load(f)
+            cfg = json.load(f)
     except:
-        return {
-            "ai_engine": {"url": "http://127.0.0.1:11434/api/chat", "enabled": True, "model": "qwen2:1.5b"},
-            "network": {"local_port": 8000, "local_bind_host": "0.0.0.0"}
+        cfg = {}
+    
+    # 注入环境变量覆盖 (优先读取 .env)
+    return {
+        "ai_engine": {
+            "url": os.getenv("OLLAMA_URL", cfg.get("ai_engine", {}).get("url")),
+            "enabled": cfg.get("ai_engine", {}).get("enabled", True),
+            "model": cfg.get("ai_engine", {}).get("model", "qwen2:1.5b")
+        },
+        "network": {
+            "local_port": int(os.getenv("SERVER_PORT", cfg.get("network", {}).get("local_port", 8000))),
+            "local_bind_host": os.getenv("SERVER_IP", cfg.get("network", {}).get("local_bind_host", "0.0.0.0"))
+        },
+        "security": {
+            "jwt_secret": os.getenv("JWT_SECRET", cfg.get("security", {}).get("jwt_secret", "secret")),
+            "auth_enabled": os.getenv("AUTH_ENABLED", "true") == "true"
         }
+    }
 
 CONFIG = load_config()
 
