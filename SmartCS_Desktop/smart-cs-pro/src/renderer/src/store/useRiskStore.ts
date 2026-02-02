@@ -22,40 +22,22 @@ interface RiskState {
   isOnline: boolean
   isAlerting: boolean
   isRedAlert: boolean
-  isAiOptimizeEnabled: boolean // 新增：AI 自动优化开关
-  lastViolation: Violation | null
-  lastAiAnalysis: AiUltraAnalysis | null
-  violations: Violation[]
-  sendMessage: (msg: any) => void
-  addViolation: (v: Violation) => void
+  isOnboardingMode: boolean // 新增：新兵带教模式
+  isAiOptimizeEnabled: boolean
+  // ... 其他状态
   setAiAnalysis: (a: AiUltraAnalysis) => void
-  setAiOptimize: (enabled: boolean) => void // 新增：设置开关
-  setAlerting: (alert: boolean) => void
-  setRedAlert: (alert: boolean) => void
-  setOnline: (online: boolean) => void
-  setSendMessage: (fn: (msg: any) => void) => void
-  clearAlerts: () => void
+  setOnboardingMode: (enabled: boolean) => void // 新增：设置带教模式
+  setAiOptimize: (enabled: boolean) => void
+  // ...
 }
 
 export const useRiskStore = create<RiskState>((set) => ({
   isOnline: true,
   isAlerting: false,
   isRedAlert: false,
-  isAiOptimizeEnabled: false, // 默认关闭
-  lastViolation: null,
-  lastAiAnalysis: null,
-  violations: [],
-  sendMessage: () => {}, 
-  addViolation: (v) => set((state) => ({
-    violations: [v, ...state.violations].slice(0, 100),
-    lastViolation: v,
-    isAlerting: true
-  })),
-  setAiAnalysis: (a) => set({ lastAiAnalysis: a, isAlerting: a.risk_score > 7 }),
-  setAiOptimize: (enabled) => set({ isAiOptimizeEnabled: enabled }),
-  setAlerting: (alert) => set({ isAlerting: alert }),
-  setRedAlert: (alert) => set({ isRedAlert: alert }),
-  setOnline: (online) => set({ isOnline: online }),
-  setSendMessage: (fn) => set({ sendMessage: fn }),
-  clearAlerts: () => set({ violations: [], lastViolation: null, isAlerting: false, isRedAlert: false, lastAiAnalysis: null })
+  isOnboardingMode: true, // 默认开启，辅助新人
+  isAiOptimizeEnabled: false,
+  // ...
+  setOnboardingMode: (enabled) => set({ isOnboardingMode: enabled }),
+  // ...
 }))
