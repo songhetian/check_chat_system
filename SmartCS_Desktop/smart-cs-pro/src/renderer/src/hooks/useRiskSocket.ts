@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useRiskStore } from '../store/useRiskStore'
-import { useToast } from '../components/ui/use-toast' // 假设已安装 shadcn toast
+import { useAuthStore } from '../store/useAuthStore'
 
 export const useRiskSocket = () => {
   const addViolation = useRiskStore((s) => s.addViolation)
@@ -33,12 +33,13 @@ export const useRiskSocket = () => {
         if (data.type === 'AI_ULTRA_ANALYSIS') {
           useRiskStore.getState().setAiAnalysis(data.data)
         }
-        // ... 其他现有逻辑
-      }
+        
+        if (data.type === 'VIOLATION') {
           addViolation(data)
           setAlerting(true)
           setTimeout(() => setAlerting(false), 5000)
         }
+
         if (data.type === 'MUTE_CONFIRM') {
            window.dispatchEvent(new CustomEvent('trigger-toast', { 
              detail: { title: '战术拦截', message: '坐席已进入静音保护模式', type: 'success' } 

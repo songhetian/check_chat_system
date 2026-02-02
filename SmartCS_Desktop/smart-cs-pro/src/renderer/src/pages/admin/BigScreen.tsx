@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { BarChart3, ShieldAlert, TrendingUp, Target, Activity, Download, Trophy, Star, Medal } from 'lucide-react'
 
 export default function BigScreen() {
@@ -161,11 +162,11 @@ export default function BigScreen() {
               </div>
            </div>
         </div>
-      </div>
-    </div>
-  )
-}
-
+              </div>
+            </div>
+          </div>
+        )
+      }
 function StatCard({ title, value, unit, trend, color = "text-white" }: any) {
   return (
     <motion.div 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { BrainCircuit, Save, Wifi, Power } from 'lucide-react'
+import { BrainCircuit, Save, Wifi, Power, Volume2, PlayCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import axios from 'axios'
 
@@ -96,9 +96,6 @@ export default function GlobalPolicyPage() {
             { name: '常规提醒 (Level 5-7)', text: '提醒，当前对话存在合规风险，建议参考智脑纠偏。' }
           ].map((p, i) => (
             <div key={i} className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex flex-col gap-3">
-import { BrainCircuit, Save, Wifi, Power, Volume2, PlayCircle } from 'lucide-react'
-
-// ... (在 map 循环内部)
                <div className="flex justify-between items-center">
                   <span className="text-[10px] font-black text-cyan-600 uppercase tracking-widest">{p.name}</span>
                   <button 

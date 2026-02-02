@@ -1,17 +1,19 @@
-import { FileSpreadsheet, Plus, Search, Copy, Edit3, Trash2, Target, Zap, Tag, Loader2 } from 'lucide-react'
-import axios from 'axios'
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  Package, 
+  FileSpreadsheet, 
+  Plus, 
   Search, 
   Copy, 
   Edit3, 
   Trash2, 
-  Target,
-  Zap,
-  Tag
+  Target, 
+  Zap, 
+  Tag, 
+  Loader2,
+  Package 
 } from 'lucide-react'
+import axios from 'axios'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '../../lib/utils'
 
 interface Product {

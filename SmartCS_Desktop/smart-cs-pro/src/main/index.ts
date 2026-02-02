@@ -50,7 +50,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  electronApp.setAppId('com.smartcs.pro')
+  electronApp.setAppUserModelId('com.smartcs.pro')
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })

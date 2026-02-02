@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   AlertTriangle, 
@@ -9,7 +10,9 @@ import {
   User, 
   Search,
   Filter,
-  ArrowRight
+  ArrowRight,
+  BrainCircuit,
+  VideoOff
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { cn } from '../../lib/utils'

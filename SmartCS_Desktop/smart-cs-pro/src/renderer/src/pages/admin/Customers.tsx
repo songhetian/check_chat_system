@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search, UserPlus, Filter, MoreHorizontal, Download, UserCircle2 } from 'lucide-react'
 import { Card } from '../../components/ui/card'
+import { cn } from '../../lib/utils'
 
 export default function CustomersPage() {
   const [customers] = useState([

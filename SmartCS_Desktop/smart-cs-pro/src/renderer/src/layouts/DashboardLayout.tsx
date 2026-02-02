@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -15,6 +15,15 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
+
+const menu = [
+  { path: '/', icon: LayoutDashboard, label: '指挥概览' },
+  { path: '/alerts', icon: ShieldAlert, label: '紧急响应' },
+  { path: '/customers', icon: Contact2, label: '客户画像' },
+  { path: '/products', icon: Package, label: '商品战术' },
+  { path: '/tools', icon: Wrench, label: '提效工具' },
+  { path: '/global-policy', icon: Settings, label: '全局策略' },
+]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuthStore()

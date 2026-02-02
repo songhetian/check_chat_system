@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-interface Violation {
+export interface Violation {
   id: string
   agent: string
   keyword: string
@@ -8,9 +8,12 @@ interface Violation {
   timestamp: number
   screenshot?: string
   reason?: string
+  // Add other fields if needed based on usage
+  type?: string
+  risk_level?: string
 }
 
-interface AiUltraAnalysis {
+export interface AiUltraAnalysis {
   risk_score: number
   sentiment_score: number
   persona: { profession: string; personality: string; loyalty: string }
@@ -22,22 +25,38 @@ interface RiskState {
   isOnline: boolean
   isAlerting: boolean
   isRedAlert: boolean
-  isOnboardingMode: boolean // 新增：新兵带教模式
+  isOnboardingMode: boolean
   isAiOptimizeEnabled: boolean
-  // ... 其他状态
-  setAiAnalysis: (a: AiUltraAnalysis) => void
-  setOnboardingMode: (enabled: boolean) => void // 新增：设置带教模式
+  violations: Violation[]
+  lastAiAnalysis: AiUltraAnalysis | null
+  sendMessage: ((msg: any) => void) | null
+
+  setOnline: (isOnline: boolean) => void
+  setAlerting: (isAlerting: boolean) => void
+  setRedAlert: (isRedAlert: boolean) => void
+  setOnboardingMode: (enabled: boolean) => void
   setAiOptimize: (enabled: boolean) => void
-  // ...
+  setAiAnalysis: (analysis: AiUltraAnalysis) => void
+  addViolation: (violation: Violation) => void
+  setSendMessage: (fn: (msg: any) => void) => void
 }
 
 export const useRiskStore = create<RiskState>((set) => ({
   isOnline: true,
   isAlerting: false,
   isRedAlert: false,
-  isOnboardingMode: true, // 默认开启，辅助新人
+  isOnboardingMode: true,
   isAiOptimizeEnabled: false,
-  // ...
-  setOnboardingMode: (enabled) => set({ isOnboardingMode: enabled }),
-  // ...
+  violations: [],
+  lastAiAnalysis: null,
+  sendMessage: null,
+
+  setOnline: (isOnline) => set({ isOnline }),
+  setAlerting: (isAlerting) => set({ isAlerting }),
+  setRedAlert: (isRedAlert) => set({ isRedAlert }),
+  setOnboardingMode: (isOnboardingMode) => set({ isOnboardingMode }),
+  setAiOptimize: (isAiOptimizeEnabled) => set({ isAiOptimizeEnabled }),
+  setAiAnalysis: (lastAiAnalysis) => set({ lastAiAnalysis }),
+  addViolation: (violation) => set((state) => ({ violations: [violation, ...state.violations] })),
+  setSendMessage: (sendMessage) => set({ sendMessage }),
 }))
