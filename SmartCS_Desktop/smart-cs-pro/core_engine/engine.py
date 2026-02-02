@@ -56,22 +56,63 @@ async def init_db_pool(retries=5, delay=3):
     logger.error("❌ 严重错误：无法建立中央库连接，系统将运行在离线受限模式")
     return False
 
-# --- 3. 智脑分析引擎 (Ollama Integration) ---
+import subprocess
+import shutil
+
+# --- 3. 智脑分析引擎 (Ollama Integration & Auto-Lifecycle) ---
 class AIAnalyzer:
     def __init__(self):
         self.api_url = os.getenv("AI_URL", "http://127.0.0.1:11434/api/chat")
         self.model = os.getenv("AI_MODEL", "qwen2:1.5b")
         self.is_healthy = False
 
+    def _start_ollama_service(self):
+        """静默拉起 Ollama 后台服务 (支持 macOS/Windows)"""
+        try:
+            # 检测是否已安装 ollama
+            if not shutil.which("ollama"):
+                logger.error("❌ 系统未发现 Ollama 可执行程序，请前往 ollama.com 安装")
+                return False
+            
+            # 尝试拉起服务 (macOS 示例，Windows 通常为 ollama app)
+            logger.info("⏳ 正在尝试自动激活 Ollama 服务层...")
+            subprocess.Popen(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return True
+        except Exception as e:
+            logger.error(f"启动 Ollama 失败: {e}")
+            return False
+
     async def check_health(self):
         try:
             async with httpx.AsyncClient(timeout=2.0) as client:
-                # 尝试访问 Ollama 基础路径 (注意：AI_URL 可能包含 /api/chat)
                 base_url = self.api_url.split('/api')[0]
                 resp = await client.get(base_url)
                 self.is_healthy = resp.status_code == 200
-        except: self.is_healthy = False
+        except:
+            # 如果不通，尝试自动拉起一次
+            if self._start_ollama_service():
+                await asyncio.sleep(3) # 给服务 3 秒初始化时间
+                return await self.check_health()
+            self.is_healthy = False
+        
+        # 如果服务健康，确保模型已加载
+        if self.is_healthy:
+            asyncio.create_task(self.ensure_model_loaded())
         return self.is_healthy
+
+    async def ensure_model_loaded(self):
+        """确保战术模型已 pull 并驻留内存"""
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                # 检查模型列表
+                resp = await client.get(self.api_url.replace('/chat', '/tags'))
+                models = [m['name'] for m in resp.json().get('models', [])]
+                
+                if self.model not in models and f"{self.model}:latest" not in models:
+                    logger.info(f"📡 正在下载战术模型 {self.model} (首次运行需耗时)...")
+                    # 这里可以发送 WS 通知给前端显示下载进度
+                    subprocess.Popen(["ollama", "pull", self.model])
+        except: pass
 
     async def analyze_sentiment(self, context):
         if not self.is_healthy: 
