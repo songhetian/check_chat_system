@@ -13,8 +13,8 @@ import {
   Activity,
   MousePointer2,
   TrendingUp,
-  BarChart,
-  PieChart as PieIcon
+  Target,
+  Radar
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -26,31 +26,31 @@ export const TacticalIsland = () => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'AI' | 'HISTORY' | 'STATS'>('AI')
 
-  // 核心：同步 Electron 窗口尺寸
   useEffect(() => {
     const width = isAlerting ? 420 : isExpanded ? 550 : 240
-    const height = isExpanded ? 550 : 48 // 增加高度以容纳饼图
+    const height = isExpanded ? 580 : 48
     window.electron.ipcRenderer.send('resize-window', { width, height })
   }, [isExpanded, isAlerting])
 
-  // 战术数据处理：计算记录分布
-  const violationStats = useMemo(() => {
-    if (!violations.length) return null
-    const counts: Record<string, number> = {}
-    violations.forEach(v => {
-      counts[v.keyword] = (counts[v.keyword] || 0) + 1
-    })
-    return Object.entries(counts).map(([name, value]) => ({ 
-      name, 
-      value, 
-      percent: Math.round((value / violations.length) * 100) 
-    })).sort((a, b) => b.value - a.value).slice(0, 3) // 只展示前三名
-  }, [violations])
+  // --- 核心：战术雷达数据计算逻辑 ---
+  const radarData = useMemo(() => {
+    // 模拟五个战术维度：合规、情绪、战术、透明、效率
+    const base = [65, 80, 45, 90, 70]
+    if (violations.length > 0) {
+      // 动态根据违规数量降低合规分
+      base[0] = Math.max(20, 100 - violations.length * 10)
+    }
+    if (lastAiAnalysis) {
+      base[1] = lastAiAnalysis.sentiment_score
+      base[2] = 100 - lastAiAnalysis.risk_score * 10
+    }
+    return base
+  }, [violations, lastAiAnalysis])
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     window.dispatchEvent(new CustomEvent('trigger-toast', { 
-      detail: { title: '战术同步', message: '纠偏话术已就绪', type: 'success' } 
+      detail: { title: '战术同步', message: '话术已就绪', type: 'success' } 
     }))
   }
 
@@ -59,30 +59,21 @@ export const TacticalIsland = () => {
       <motion.div
         layout
         className={cn(
-          "bg-slate-900/95 border border-white/20 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col select-none",
-          "rounded-[32px]",
+          "bg-slate-900/95 border border-white/20 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col select-none rounded-[32px]",
           lastAiAnalysis && "ring-2 ring-cyan-500/50"
         )}
         style={{ width: isAlerting ? 420 : isExpanded ? 550 : 240 }}
       >
-        {/* Header (可拖拽) */}
-        <div 
-          className="flex items-center justify-between px-5 h-12 shrink-0 border-b border-white/5 cursor-move"
-          style={{ WebkitAppRegion: 'drag' } as any}
-        >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 h-12 shrink-0 border-b border-white/5 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
           <div className="flex items-center gap-3">
             <div className={cn("p-1.5 rounded-lg", isAlerting ? "bg-white text-red-600" : "bg-cyan-500/20 text-cyan-400")}>
               <Shield size={16} />
             </div>
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">
-              {isAlerting ? '🚨 拦截警报' : '🛡️ SMART-CS PRO'}
-            </span>
+            <span className="text-[10px] font-black text-white uppercase tracking-widest">TACTICAL LINK PRO</span>
           </div>
           <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
-             <button 
-               onClick={() => setIsExpanded(!isExpanded)}
-               className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-             >
+             <button onClick={() => setIsExpanded(!isExpanded)} className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center transition-colors">
                <MousePointer2 size={12} className={cn("text-white transition-transform", isExpanded && "rotate-180")} />
              </button>
           </div>
@@ -93,67 +84,53 @@ export const TacticalIsland = () => {
           {isExpanded && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col overflow-hidden">
               <div className="flex p-2 bg-black/20 gap-1 shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
-                 <TabButton id="AI" active={activeTab} set={setActiveTab} icon={<BrainCircuit size={12}/>} label="超脑建议" />
-                 <TabButton id="HISTORY" active={activeTab} set={setActiveTab} icon={<History size={12}/>} label="记录分析" />
-                 <TabButton id="STATS" active={activeTab} set={setActiveTab} icon={<Activity size={12}/>} label="战术数据" />
+                 <TabButton id="AI" active={activeTab} set={setActiveTab} icon={<BrainCircuit size={12}/>} label="超脑" />
+                 <TabButton id="HISTORY" active={activeTab} set={setActiveTab} icon={<Radar size={12}/>} label="战术雷达" />
+                 <TabButton id="STATS" active={activeTab} set={setActiveTab} icon={<Activity size={12}/>} label="全景" />
               </div>
 
               <div className="flex-1 p-5 overflow-y-auto custom-scrollbar" style={{ WebkitAppRegion: 'no-drag' } as any}>
                  {activeTab === 'HISTORY' && (
                    <div className="space-y-6">
-                      {/* 战术分析饼图部分 */}
-                      {violationStats ? (
-                        <div className="bg-white/5 rounded-[24px] p-5 border border-white/5 flex items-center gap-6">
-                           {/* CSS Conic-Gradient Pie */}
-                           <div className="relative w-24 h-24 shrink-0">
-                              <div 
-                                className="w-full h-full rounded-full" 
-                                style={{ 
-                                  background: `conic-gradient(
-                                    #06b6d4 0% ${violationStats[0]?.percent || 0}%, 
-                                    #f43f5e ${violationStats[0]?.percent || 0}% ${(violationStats[0]?.percent || 0) + (violationStats[1]?.percent || 0)}%, 
-                                    #475569 ${(violationStats[0]?.percent || 0) + (violationStats[1]?.percent || 0)}% 100%
-                                  )` 
-                                }}
-                              />
-                              <div className="absolute inset-2 bg-slate-900 rounded-full flex flex-col items-center justify-center">
-                                 <span className="text-[8px] font-black text-slate-500 uppercase">风险度</span>
-                                 <span className="text-sm font-black text-white">{violations.length}</span>
-                              </div>
-                           </div>
-                           
-                           <div className="flex-1 space-y-3">
-                              <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1">
-                                <PieIcon size={10} /> 违规构成分析
-                              </h4>
-                              {violationStats.map((item, i) => (
-                                <div key={i} className="flex items-center justify-between">
-                                   <div className="flex items-center gap-2">
-                                      <div className={cn("w-1.5 h-1.5 rounded-full", i===0?"bg-cyan-500":i===1?"bg-rose-500":"bg-slate-500")} />
-                                      <span className="text-[10px] font-bold text-slate-300">{item.name}</span>
-                                   </div>
-                                   <span className="text-[10px] font-mono font-black text-white">{item.percent}%</span>
-                                </div>
-                              ))}
-                           </div>
-                        </div>
-                      ) : null}
+                      {/* 1. 战术多面体雷达图 */}
+                      <div className="bg-white/5 rounded-[32px] p-6 border border-white/5 relative flex flex-col items-center">
+                         <div className="absolute top-4 left-6 flex flex-col">
+                            <span className="text-[10px] font-black text-cyan-500 uppercase">实时综合评估</span>
+                            <span className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Tactical Multi-Face</span>
+                         </div>
+                         
+                         {/* SVG Radar implementation */}
+                         <div className="relative w-48 h-48 mt-4">
+                            <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+                               {/* 背景网格线 */}
+                               {[0.2, 0.4, 0.6, 0.8, 1].map((r, idx) => (
+                                 <polygon key={idx} points={getRadarPoints(r * 40)} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+                               ))}
+                               {/* 轴线 */}
+                               <RadarLines />
+                               {/* 数据多面体 */}
+                               <motion.polygon 
+                                 initial={{ opacity: 0, scale: 0.5 }}
+                                 animate={{ opacity: 1, scale: 1 }}
+                                 points={getDataPoints(radarData)} 
+                                 fill="rgba(6, 182, 212, 0.2)" 
+                                 stroke="#06b6d4" 
+                                 strokeWidth="1.5" 
+                               />
+                            </svg>
+                            {/* 维度文字标签 */}
+                            <RadarLabel top="-10%" left="50%" text="合规" />
+                            <RadarLabel top="25%" left="105%" text="情绪" />
+                            <RadarLabel top="85%" left="85%" text="战术" />
+                            <RadarLabel top="85%" left="15%" text="透明" />
+                            <RadarLabel top="25%" left="-5%" text="效率" />
+                         </div>
+                      </div>
 
-                      {/* 详细记录流 */}
-                      <div className="space-y-2">
-                         <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] block px-1">最近拦截轨迹</span>
-                         {violations.length > 0 ? violations.slice(0, 5).map((v, i) => (
-                           <div key={i} className="p-3 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group hover:bg-white/10 transition-colors">
-                              <div className="flex flex-col">
-                                 <span className="text-[10px] font-black text-red-400 uppercase">{v.keyword}</span>
-                                 <span className="text-[9px] text-slate-500 italic truncate w-40">"{v.context}"</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                 <div className="w-1 h-1 rounded-full bg-slate-700" />
-                                 <span className="text-[8px] font-mono text-slate-600">JUST NOW</span>
-                              </div>
-                           </div>
-                         )) : <EmptyState text="战术环境安全" />}
+                      {/* 维度解析看板 */}
+                      <div className="grid grid-cols-2 gap-3">
+                         <DimensionCard label="情绪稳定性" value={radarData[1] + '%'} status="良好" />
+                         <DimensionCard label="战术采用率" value={radarData[2] + '%'} status="优秀" color="text-green-400" />
                       </div>
                    </div>
                  )}
@@ -162,34 +139,12 @@ export const TacticalIsland = () => {
                  {activeTab === 'AI' && (
                    <div className="space-y-4">
                       {lastAiAnalysis ? (
-                        <div className="bg-cyan-500/10 p-5 rounded-[32px] border border-cyan-500/20 relative group">
-                           <div className="flex justify-between items-center mb-3">
-                              <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest flex items-center gap-2"><BrainCircuit size={14}/> 纠偏方案</h4>
-                              <div className="px-2 py-0.5 bg-cyan-500 text-slate-900 text-[8px] font-black rounded uppercase">AI Active</div>
-                           </div>
+                        <div className="bg-cyan-500/10 p-5 rounded-[32px] border border-cyan-500/20">
+                           <h4 className="text-[10px] font-black text-cyan-400 uppercase mb-3 flex items-center gap-2"><BrainCircuit size={14}/> 实时实战方案</h4>
                            <p className="text-[13px] text-white font-medium leading-relaxed mb-5 italic">"{lastAiAnalysis.suggestion}"</p>
-                           <button onClick={(e) => { e.stopPropagation(); copyToClipboard(lastAiAnalysis.suggestion); }} className="w-full py-3 bg-cyan-600 text-white rounded-2xl text-[11px] font-black uppercase shadow-[0_10px_20px_rgba(6,182,212,0.3)] active:scale-95 transition-all">执行修正话术</button>
+                           <button onClick={(e) => { e.stopPropagation(); copyToClipboard(lastAiAnalysis.suggestion); }} className="w-full py-3 bg-cyan-600 text-white rounded-2xl text-[11px] font-black uppercase active:scale-95 transition-all">执行建议</button>
                         </div>
-                      ) : <EmptyState text="正在深度分析对话语义..." />}
-                   </div>
-                 )}
-
-                 {activeTab === 'STATS' && (
-                   <div className="space-y-5">
-                      <div className="grid grid-cols-2 gap-3">
-                         <StatTile title="今日纠偏" value="12" sub="RANK #1" icon={<Trophy size={14} className="text-amber-400"/>} />
-                         <StatTile title="平均情绪分" value="82%" sub="极度信任" icon={<TrendingUp size={14} className="text-green-400"/>} />
-                      </div>
-                      <div className="bg-white/5 rounded-3xl p-5 border border-white/5">
-                         <div className="flex justify-between items-center mb-4">
-                            <span className="text-[10px] font-black text-slate-500 uppercase flex items-center gap-2"><BarChart size={12}/> 纠偏负荷趋势</span>
-                         </div>
-                         <div className="h-24 flex items-end gap-2 px-2">
-                            {[40, 70, 45, 90, 65, 80, 50, 30].map((h, i) => (
-                              <motion.div key={i} initial={{ height: 0 }} animate={{ height: `${h}%` }} className={cn("flex-1 rounded-t-lg", h > 80 ? "bg-red-500" : "bg-cyan-500/40")} />
-                            ))}
-                         </div>
-                      </div>
+                      ) : <EmptyState text="战术大脑静默中" />}
                    </div>
                  )}
               </div>
@@ -201,15 +156,53 @@ export const TacticalIsland = () => {
   )
 }
 
-function StatTile({ title, value, sub, icon }: any) {
+// --- 雷达图坐标辅助函数 ---
+function getRadarPoints(radius: number) {
+  const points = []
+  for (let i = 0; i < 5; i++) {
+    const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2
+    points.push(`${50 + radius * Math.cos(angle)},${50 + radius * Math.sin(angle)}`)
+  }
+  return points.join(' ')
+}
+
+function getDataPoints(data: number[]) {
+  const points = []
+  for (let i = 0; i < 5; i++) {
+    const radius = (data[i] / 100) * 40
+    const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2
+    points.push(`${50 + radius * Math.cos(angle)},${50 + radius * Math.sin(angle)}`)
+  }
+  return points.join(' ')
+}
+
+function RadarLines() {
   return (
-    <div className="bg-white/5 p-4 rounded-3xl border border-white/5 relative overflow-hidden">
-       <div className="flex justify-between items-start mb-1">
-          <span className="text-[8px] text-slate-500 font-black uppercase">{title}</span>
-          {icon}
+    <>
+      {[0, 1, 2, 3, 4].map(i => {
+        const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2
+        return <line key={i} x1="50" y1="50" x2={50 + 40 * Math.cos(angle)} y2={50 + 40 * Math.sin(angle)} stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+      })}
+    </>
+  )
+}
+
+function RadarLabel({ top, left, text }: any) {
+  return (
+    <div className="absolute text-[8px] font-black text-slate-500 uppercase tracking-tighter" style={{ top, left, transform: 'translateX(-50%)' }}>
+      {text}
+    </div>
+  )
+}
+
+function DimensionCard({ label, value, status, color = "text-cyan-400" }: any) {
+  return (
+    <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
+       <div className="text-[8px] text-slate-500 font-bold uppercase mb-1">{label}</div>
+       <div className="flex items-baseline gap-2">
+          <span className={cn("text-lg font-black", color)}>{value}</span>
+          <span className="text-[8px] font-bold text-slate-600 uppercase">{status}</span>
        </div>
-       <div className="text-2xl font-black text-white tracking-tighter">{value}</div>
-       <div className="text-[8px] font-bold text-cyan-500 mt-1 uppercase">{sub}</div>
     </div>
   )
 }
