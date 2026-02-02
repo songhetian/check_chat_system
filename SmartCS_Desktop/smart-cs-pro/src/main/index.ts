@@ -66,7 +66,8 @@ function createWindow(): void {
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false,
-      webSecurity: false // 关键：关闭 Web 安全限制，允许局域网 HTTP 跨域请求
+      webSecurity: false, // 允许跨域
+      allowRunningInsecureContent: true // 允许在 HTTPS 页面中运行 HTTP 内容
     }
   })
 
