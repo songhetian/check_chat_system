@@ -115,6 +115,20 @@ export default function BigScreen() {
               </div>
            </div>
 
+        {/* 紧急取证流 / 异常告警 (自驱动优化) */}
+        <div className="flex flex-col gap-8">
+           <div className="bg-red-600/10 border-2 border-red-600 rounded-[48px] p-8 backdrop-blur-xl animate-pulse">
+              <h3 className="text-xl font-black uppercase mb-4 text-red-500 flex items-center gap-3">
+                <ShieldAlert size={24} /> 篡改检测告警
+              </h3>
+              <div className="space-y-2">
+                 <div className="text-sm font-black text-white">坐席 AGENT-005 链路不稳定</div>
+                 <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest">
+                   疑似监控进程被强行关闭 (已尝试自愈 3 次)
+                 </p>
+              </div>
+           </div>
+
            <div className="bg-slate-900/40 border border-white/10 rounded-[48px] p-8 backdrop-blur-xl relative overflow-hidden flex flex-col">
               <h3 className="text-xl font-black uppercase mb-6 text-amber-500 flex items-center gap-3">
                 <Trophy size={24} /> 新兵营毕业荣誉榜
