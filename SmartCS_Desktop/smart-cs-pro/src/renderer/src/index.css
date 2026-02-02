@@ -6,54 +6,60 @@
   :root {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    --primary: 188.7 94.5% 42.7%;
-    --ring: 188.7 94.5% 42.7%;
   }
 }
 
 body {
-  @apply bg-slate-950 text-foreground antialiased overflow-hidden;
-  font-family: 'Inter', system-ui, sans-serif;
+  /* 字体清晰度增强：抗锯齿 + 优化间距 */
+  @apply bg-slate-950 text-slate-50 antialiased overflow-hidden tracking-tight;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
-/* 1. 科幻扫描线效果 */
+/* 1. 物理颗粒感 (Grain) */
+.grain::after {
+  content: "";
+  position: fixed;
+  top: -150%; left: -150%; width: 300%; height: 300%;
+  background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Resolution_White_Noise_Video_Texture.png");
+  opacity: 0.03; /* 极低透明度，增加质感而不干扰阅读 */
+  pointer-events: none;
+  animation: noise 0.2s infinite;
+  z-index: 500;
+}
+
+@keyframes noise {
+  0% { transform: translate(0,0) }
+  10% { transform: translate(-1%,-1%) }
+  20% { transform: translate(-2%,1%) }
+  30% { transform: translate(1%,-2%) }
+  40% { transform: translate(-1%,2%) }
+  50% { transform: translate(-2%,-2%) }
+  60% { transform: translate(-1%,1%) }
+  70% { transform: translate(1%,-2%) }
+  80% { transform: translate(1%,1%) }
+  90% { transform: translate(-2%,1%) }
+  100% { transform: translate(1%,-1%) }
+}
+
+/* 2. 战术字体增强 */
+.text-tactical-glow {
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.5), 0 0 20px rgba(6, 182, 212, 0.2);
+}
+
+.text-critical-glow {
+  text-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+}
+
+/* 3. 扫描线滤镜优化 (降低透明度确保文字清晰) */
 .scanline::before {
   content: " ";
   display: block;
   position: absolute;
   top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
   z-index: 200;
-  background-size: 100% 2px, 3px 100%;
+  background-size: 100% 4px;
   pointer-events: none;
-  opacity: 0.3;
+  opacity: 0.15;
 }
-
-/* 2. 霓虹边框流光 */
-.neon-border {
-  position: relative;
-  overflow: hidden;
-}
-.neon-border::after {
-  content: "";
-  position: absolute;
-  top: -50%; left: -50%;
-  width: 200%; height: 200%;
-  background: conic-gradient(transparent, #06b6d4, transparent 30%);
-  animation: rotate 4s linear infinite;
-  z-index: -1;
-}
-
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* 3. 玻璃拟态增强 */
-.glass-heavy {
-  @apply bg-slate-900/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)];
-}
-
-/* 4. 数字雨滚动条 */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { @apply bg-cyan-500/30 rounded-full; }

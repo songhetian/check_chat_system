@@ -35,9 +35,21 @@ function App() {
   const [activeCommand, setActiveCommand] = useState<any>(null)
   const [toast, setToast] = useState<any>(null)
 
+  const alertAudioRef = useRef<HTMLAudioElement | null>(null)
+
   useRiskSocket()
 
   useEffect(() => {
+    if (isRedAlert && alertAudioRef.current) {
+      alertAudioRef.current.play().catch(() => {})
+    } else if (alertAudioRef.current) {
+      alertAudioRef.current.pause()
+      alertAudioRef.current.currentTime = 0
+    }
+  }, [isRedAlert])
+
+  useEffect(() => {
+    // ... 原有监听逻辑保持不变
     const onSuggestion = (e: any) => setActiveSuggestion(e.detail)
     const onFireworks = () => setShowFireworks(true)
     const onSop = (e: any) => setSopSteps(e.detail)
@@ -46,15 +58,21 @@ function App() {
     const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
     const onRedAlert = () => { setRedAlert(true); setTimeout(() => setRedAlert(false), 8000) }
 
-    window.addEventListener('trigger-suggestion', onSuggestion); window.addEventListener('trigger-fireworks', onFireworks)
-    window.addEventListener('trigger-sop', onSop); window.addEventListener('trigger-customer', onCustomer)
-    window.addEventListener('trigger-command', onCommand); window.addEventListener('trigger-toast', onToast)
+    window.addEventListener('trigger-suggestion', onSuggestion); 
+    window.addEventListener('trigger-fireworks', onFireworks)
+    window.addEventListener('trigger-sop', onSop); 
+    window.addEventListener('trigger-customer', onCustomer)
+    window.addEventListener('trigger-command', onCommand); 
+    window.addEventListener('trigger-toast', onToast)
     window.addEventListener('trigger-red-alert', onRedAlert)
 
     return () => {
-      window.removeEventListener('trigger-suggestion', onSuggestion); window.removeEventListener('trigger-fireworks', onFireworks)
-      window.removeEventListener('trigger-sop', onSop); window.removeEventListener('trigger-customer', onCustomer)
-      window.removeEventListener('trigger-command', onCommand); window.removeEventListener('trigger-toast', onToast)
+      window.removeEventListener('trigger-suggestion', onSuggestion); 
+      window.removeEventListener('trigger-fireworks', onFireworks)
+      window.removeEventListener('trigger-sop', onSop); 
+      window.removeEventListener('trigger-customer', onCustomer)
+      window.removeEventListener('trigger-command', onCommand); 
+      window.removeEventListener('trigger-toast', onToast)
       window.removeEventListener('trigger-red-alert', onRedAlert)
     }
   }, [])
@@ -62,17 +80,9 @@ function App() {
   if (user?.role === 'AGENT') {
     return (
       <Router>
-        <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600", activeCommand && "bg-slate-950/80 backdrop-blur-md")}>
-          <AnimatePresence>
-            {toast && (
-              <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="fixed top-20 left-1/2 -translate-x-1/2 z-[300]">
-                <div className={cn("px-6 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-md", toast.type === 'error' ? "bg-red-600/90 border-red-400 text-white" : "bg-slate-900/90 border-cyan-500/50 text-cyan-400")}>
-                  {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
-                  <div className="flex flex-col"><span className="text-[10px] font-black uppercase tracking-widest opacity-50">{toast.title}</span><span className="text-sm font-bold">{toast.message}</span></div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600", activeCommand && "bg-slate-950/80 backdrop-blur-md")}>
+          <audio ref={alertAudioRef} src="https://assets.mixkit.co/active_storage/sfx/2534/2534-preview.mp3" loop />
+          {/* ... */}
           <TacticalIsland />
           <AnimatePresence>
             {activeSuggestion && <SuggestionPopup products={activeSuggestion} onDismiss={() => setActiveSuggestion(null)} />}

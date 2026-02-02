@@ -41,7 +41,7 @@ export default function Login() {
           <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mb-6 border border-cyan-500/30 group">
             <Shield className="text-cyan-400 w-10 h-10 group-hover:scale-110 transition-transform" />
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tighter italic">SMART-CS <span className="text-cyan-500">PRO</span></h1>
+          <h1 className="text-3xl font-black text-white tracking-tighter italic text-tactical-glow">SMART-CS <span className="text-cyan-500">PRO</span></h1>
           <div className="flex items-center gap-2 mt-2">
              <Activity size={12} className="text-green-500" />
              <span className="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em]">Neural Tactical Interface</span>
