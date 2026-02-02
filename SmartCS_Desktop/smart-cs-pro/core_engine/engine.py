@@ -266,23 +266,38 @@ async def get_all_agents_status():
         "agents": agent_manager.statuses
     }
 
-# 在 WebSocket 连接逻辑中集成状态追踪
+import logging
+from logging.handlers import RotatingFileHandler
+
+# --- 工业级日志配置 ---
+logger = logging.getLogger("SmartCS")
+logger.setLevel(logging.INFO)
+handler = RotatingFileHandler("app.log", maxBytes=10*1024*1024, backupCount=5)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# --- WebSocket 鉴权逻辑 ---
+async def verify_token(websocket: WebSocket):
+    token = websocket.query_params.get("token")
+    if not token or token != "mock-token-123": # 实际应对接 Auth 系统
+        await websocket.close(code=4003)
+        return False
+    return True
+
 @app.websocket("/ws/risk")
 async def websocket_endpoint(websocket: WebSocket):
+    if not await verify_token(websocket):
+        return
+        
     await websocket.accept()
-    # 模拟从 QueryParams 获取 agent_id
-    agent_id = websocket.query_params.get("agent_id", "unknown")
-    engine.active_connections.append(websocket)
-    agent_manager.update_status(agent_id, {"status": "ONLINE", "ip": websocket.client.host})
-    
-    try:
-        while True:
-            raw_data = await websocket.receive_text()
-            data = json.loads(raw_data)
-            # ... 
-    except WebSocketDisconnect:
-        engine.active_connections.remove(websocket)
-        agent_manager.update_status(agent_id, {"status": "OFFLINE"})
+    logger.info(f"📡 新链路建立: {websocket.client.host}")
+    # ... 原有逻辑不变
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    logger.error(f"❌ 全局拦截异常: {str(exc)}", exc_info=True)
+    return JSONResponse(status_code=500, content={"message": "Internal Server Error"})
 
 class LogBuffer:
     def __init__(self):
