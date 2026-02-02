@@ -16,6 +16,7 @@ import ProductsPage from './pages/admin/Products'
 import ToolsPage from './pages/admin/Tools'
 import CustomersPage from './pages/admin/Customers'
 import AuditStreamPage from './pages/admin/AuditStream'
+import PlatformsPage from './pages/admin/Platforms'
 import BigScreen from './pages/admin/BigScreen'
 import GlobalPolicyPage from './pages/hq/GlobalPolicy'
 import { CheckCircle2, AlertCircle, ShieldAlert, User } from 'lucide-react'
@@ -40,34 +41,19 @@ function App() {
     const onFireworks = () => setShowFireworks(true)
     const onSop = (e: any) => setSopSteps(e.detail)
     const onCustomer = (e: any) => setActiveCustomer(e.detail)
-    const onCommand = (e: any) => {
-      setActiveCommand(e.detail)
-      setTimeout(() => setActiveCommand(null), 10000)
-    }
-    const onToast = (e: any) => {
-      setToast(e.detail)
-      setTimeout(() => setToast(null), 3000)
-    }
-    const onRedAlert = () => {
-      setRedAlert(true)
-      setTimeout(() => setRedAlert(false), 8000)
-    }
+    const onCommand = (e: any) => { setActiveCommand(e.detail); setTimeout(() => setActiveCommand(null), 10000) }
+    const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
+    const onRedAlert = () => { setRedAlert(true); setTimeout(() => setRedAlert(false), 8000) }
 
-    window.addEventListener('trigger-suggestion', onSuggestion)
-    window.addEventListener('trigger-fireworks', onFireworks)
-    window.addEventListener('trigger-sop', onSop)
-    window.addEventListener('trigger-customer', onCustomer)
-    window.addEventListener('trigger-command', onCommand)
-    window.addEventListener('trigger-toast', onToast)
+    window.addEventListener('trigger-suggestion', onSuggestion); window.addEventListener('trigger-fireworks', onFireworks)
+    window.addEventListener('trigger-sop', onSop); window.addEventListener('trigger-customer', onCustomer)
+    window.addEventListener('trigger-command', onCommand); window.addEventListener('trigger-toast', onToast)
     window.addEventListener('trigger-red-alert', onRedAlert)
 
     return () => {
-      window.removeEventListener('trigger-suggestion', onSuggestion)
-      window.removeEventListener('trigger-fireworks', onFireworks)
-      window.removeEventListener('trigger-sop', onSop)
-      window.removeEventListener('trigger-customer', onCustomer)
-      window.removeEventListener('trigger-command', onCommand)
-      window.removeEventListener('trigger-toast', onToast)
+      window.removeEventListener('trigger-suggestion', onSuggestion); window.removeEventListener('trigger-fireworks', onFireworks)
+      window.removeEventListener('trigger-sop', onSop); window.removeEventListener('trigger-customer', onCustomer)
+      window.removeEventListener('trigger-command', onCommand); window.removeEventListener('trigger-toast', onToast)
       window.removeEventListener('trigger-red-alert', onRedAlert)
     }
   }, [])
@@ -75,12 +61,7 @@ function App() {
   if (user?.role === 'AGENT') {
     return (
       <Router>
-        <div className={cn(
-          "bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500",
-          isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600",
-          activeCommand && "bg-slate-950/80 backdrop-blur-md"
-        )}>
-          {/* Toasts & Command Layers */}
+        <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600", activeCommand && "bg-slate-950/80 backdrop-blur-md")}>
           <AnimatePresence>
             {toast && (
               <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="fixed top-20 left-1/2 -translate-x-1/2 z-[300]">
@@ -91,7 +72,6 @@ function App() {
               </motion.div>
             )}
           </AnimatePresence>
-
           <AnimatePresence>
             {activeCommand && (
               <motion.div initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="fixed inset-0 z-[200] flex items-center justify-center p-12">
@@ -104,7 +84,6 @@ function App() {
               </motion.div>
             )}
           </AnimatePresence>
-
           <TacticalIsland />
           <AnimatePresence>
             {activeSuggestion && <SuggestionPopup products={activeSuggestion} onDismiss={() => setActiveSuggestion(null)} />}
@@ -155,6 +134,7 @@ function App() {
                   </div>
                 } />
                 <Route path="/alerts" element={<ViolationsPage />} />
+                <Route path="/platforms" element={<PlatformsPage />} />
                 <Route path="/audit" element={<AuditStreamPage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/tools" element={<ToolsPage />} />

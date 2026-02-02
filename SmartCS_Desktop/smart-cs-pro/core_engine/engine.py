@@ -140,26 +140,69 @@ async def get_stats():
         "risk_distribution": [{"name": "语义风险", "value": 45}, {"name": "合规避让", "value": 30}, {"name": "态度问题", "value": 25}]
     }
 
-# --- 线程循环 ---
-def keyboard_hook():
-    def on_press(key):
-        try:
-            if hasattr(key, 'char'):
-                res = engine.add_char(key.char)
-                if res: asyncio.run_coroutine_threadsafe(broadcast_event(res), main_loop)
-                # 触发 AI 分析
-                if len(engine.char_buffer) >= 20:
-                    asyncio.run_coroutine_threadsafe(analyze_with_llm_ultra("".join(engine.char_buffer)), main_loop)
-        except: pass
-    with keyboard.Listener(on_press=on_press) as l: l.join()
+class PlatformManager:
+    def __init__(self):
+        self.db_path = "platforms.db"
+        self._init_db()
 
-def main_loops():
+    def _init_db(self):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS platforms (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT UNIQUE,
+                    window_keyword TEXT,
+                    is_active BOOLEAN
+                )
+            """)
+            # 初始化默认目标
+            conn.execute("INSERT OR IGNORE INTO platforms (name, window_keyword, is_active) VALUES ('WeChat', '微信', 1)")
+            conn.execute("INSERT OR IGNORE INTO platforms (name, window_keyword, is_active) VALUES ('DingTalk', '钉钉', 1)")
+
+    def get_active_keywords(self):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT window_keyword FROM platforms WHERE is_active=1")
+            return [r[0] for r in cursor.fetchall()]
+
+platform_manager = PlatformManager()
+
+# --- 监控目标管理 API ---
+@app.get("/api/admin/platforms")
+async def get_platforms():
+    with sqlite3.connect("platforms.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM platforms")
+        return [{"id": r[0], "name": r[1], "keyword": r[2], "active": r[3]} for r in rows]
+
+@app.post("/api/admin/platforms/add")
+async def add_platform(name: str, keyword: str):
+    with sqlite3.connect("platforms.db") as conn:
+        conn.execute("INSERT INTO platforms (name, window_keyword, is_active) VALUES (?, ?, 1)", (name, keyword))
+    return {"status": "ok"}
+
+# 修改扫描逻辑，使用数据库配置
+def auto_scan_loop():
+    logger.info("👀 工业级窗口感知扫描引擎已启动")
     while True:
-        forensic_recorder.capture_frame()
-        time.sleep(0.1)
+        try:
+            hwnd = win32gui.GetForegroundWindow()
+            title = win32gui.GetWindowText(hwnd)
+            
+            # 动态获取战术目标
+            targets = platform_manager.get_active_keywords()
+            is_target = any(t.lower() in title.lower() for t in targets)
+            
+            if is_target:
+                scanner.scan_screen()
+                time.sleep(3)
+            else:
+                time.sleep(10) 
+        except: time.sleep(5)
 
 if __name__ == "__main__":
     main_loop = asyncio.new_event_loop()
     threading.Thread(target=keyboard_hook, daemon=True).start()
     threading.Thread(target=main_loops, daemon=True).start()
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    # 核心：允许局域网访问
+    uvicorn.run(app, host="0.0.0.0", port=8000)
