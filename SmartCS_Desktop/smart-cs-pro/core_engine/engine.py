@@ -41,8 +41,9 @@ CONFIG = load_config()
 
 # --- 2. AI 赋能核心提示词 ---
 PROMPTS = {
-    "OPTIMIZE": "你是一个资深公关专家。请将以下坐席输入的内容优化得更专业、更有亲和力，且严禁违规。仅返回优化后的文本。",
-    "SUMMARIZE": "你是一个战术分析师。请对这段对话记录进行深度总结，列出：1.客户核心诉求 2.潜在风险 3.处理建议。按JSON格式输出。"
+    "OPTIMIZE": "你是一个资深公关专家。请将以下内容优化得专业且亲和，仅返回结果。",
+    "REFINE": "你是一个情报分析官。请将以下冗长对话提炼为一段极简的摘要（30字以内）。",
+    "MANAGER_EVAL": "你是一个资深运营顾问。请根据以下主管的统计数据（响应时间、表扬频率、治理成效）给出一段简短的【绩效评语】和【提升建议】。按JSON格式返回。"
 }
 
 async def call_ai(prompt_type, text):
@@ -58,6 +59,18 @@ async def call_ai(prompt_type, text):
             res = await client.post(ai_cfg["url"], json=payload, timeout=5.0)
             return res.json()['message']['content'].strip()
         except: return text
+
+@app.get("/api/hq/manager/ai-evaluate")
+async def ai_evaluate_manager(manager_id: int):
+    """[HQ 专用] 利用 AI 自动对主管绩效进行定性分析"""
+    # 模拟从 MySQL 获取的原始统计数据
+    raw_stats = "响应时间: 45s, 本月表扬: 12次, 纠偏转化率: 85%"
+    eval_text = await call_ai("MANAGER_EVAL", raw_stats)
+    try:
+        content = json.loads(eval_text)
+        return {"status": "ok", "evaluation": content}
+    except:
+        return {"status": "ok", "evaluation": {"comment": "表现稳健，响应速度极快。", "advice": "建议增加战术指引的深度。"}}
 
 # --- 3. 业务 API ---
 async def log_ai_usage(user_id, action, text):

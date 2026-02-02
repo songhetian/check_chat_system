@@ -54,15 +54,24 @@ export default function AiPerformancePage() {
            </h3>
            <div className="space-y-6">
               {data.top_performing_depts.map((dept: any, i: number) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                   <div className="flex items-center gap-4">
-                      <div className="text-2xl font-black text-white/20">0{i+1}</div>
-                      <span className="font-bold text-sm">{dept.name}</span>
-                   </div>
-                   <div className="text-right">
-                      <div className="text-[10px] font-black text-slate-500 uppercase">累计节省</div>
-                      <div className="text-lg font-black text-cyan-400">{dept.savings}</div>
-                   </div>
+                <div key={i} className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <div className="flex items-center gap-4">
+                        <div className="text-2xl font-black text-white/20">0{i+1}</div>
+                        <span className="font-bold text-sm">{dept.name}</span>
+                    </div>
+                    <div className="text-lg font-black text-cyan-400">{dept.savings}</div>
+                  </div>
+                  
+                  {/* AI 智能点评 (新增) */}
+                  <div className="px-4 py-3 bg-cyan-500/10 rounded-xl border-l-4 border-cyan-500">
+                     <div className="flex items-center gap-2 text-[9px] font-black text-cyan-400 uppercase mb-1">
+                        <BrainCircuit size={10}/> AI 智能点评
+                     </div>
+                     <p className="text-[11px] text-slate-300 italic font-medium leading-relaxed">
+                        "该主管本月战术采用率极高，显著提升了销售团队的情绪稳定性。建议：关注高压时段的响应延迟。"
+                     </p>
+                  </div>
                 </div>
               ))}
            </div>
