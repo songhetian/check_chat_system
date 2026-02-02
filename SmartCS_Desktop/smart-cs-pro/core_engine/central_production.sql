@@ -32,14 +32,24 @@ CREATE TABLE IF NOT EXISTS users (
     -- ...
 ) ENGINE=InnoDB;
 
--- 10. 智能带教知识库 (中枢化管理)
-CREATE TABLE IF NOT EXISTS knowledge_base (
+-- 11. 战术等级进阶配置表 (支持完全自定义)
+CREATE TABLE IF NOT EXISTS rank_config (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    keyword VARCHAR(100) NOT NULL,    -- 触发关键词 (如: 发货, 价格)
-    answer TEXT NOT NULL,             -- 教官标准话术
-    category VARCHAR(50),             -- 类别 (物流, 售后, 话术)
-    is_active TINYINT DEFAULT 1
+    rank_name VARCHAR(20) UNIQUE,    -- 等级名称 (NOVICE, VETERAN, ELITE, MASTER)
+    display_name VARCHAR(50),        -- 显示名称 (如: 战术尖兵)
+    min_days INT DEFAULT 0,          -- 所需连续安全天数
+    min_volume INT DEFAULT 0,        -- 所需累计接待量
+    min_ai_adoption INT DEFAULT 0,   -- 所需 AI 采纳量
+    icon_tag VARCHAR(20)             -- 勋章图标标识
 ) ENGINE=InnoDB;
+
+-- 插入默认等级体系
+INSERT IGNORE INTO rank_config (rank_name, display_name, min_days, min_volume, min_ai_adoption, icon_tag) VALUES 
+('NOVICE', '实战学员', 0, 0, 0, 'medal-bronze'),
+('VETERAN', '资深老兵', 3, 50, 20, 'medal-silver'),
+('ELITE', '战术精英', 7, 200, 100, 'medal-gold'),
+('MASTER', '首席指挥官', 30, 1000, 500, 'crown');
+
 
 -- 插入初始带教数据
 INSERT IGNORE INTO knowledge_base (keyword, answer, category) VALUES 
