@@ -15,6 +15,7 @@ import ViolationsPage from './pages/admin/Violations'
 import ProductsPage from './pages/admin/Products'
 import ToolsPage from './pages/admin/Tools'
 import CustomersPage from './pages/admin/Customers'
+import AuditStreamPage from './pages/admin/AuditStream'
 import GlobalPolicyPage from './pages/hq/GlobalPolicy'
 import { CheckCircle2, AlertCircle, ShieldAlert, User, Star, History, TrendingUp, ShoppingBag } from 'lucide-react'
 import { cn } from './lib/utils'
@@ -198,6 +199,7 @@ function App() {
                   </div>
                 } />
                 <Route path="/alerts" element={<ViolationsPage />} />
+                <Route path="/audit" element={<AuditStreamPage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/tools" element={<ToolsPage />} />
                 <Route path="/customers" element={<CustomersPage />} />

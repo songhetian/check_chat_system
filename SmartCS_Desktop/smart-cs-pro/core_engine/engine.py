@@ -650,8 +650,60 @@ def auto_scan_loop():
 
 # ... (在 main 中启动该线程)
 
-# --- 启动服务 ---
-if __name__ == "__main__":
+import hashlib
+import secrets
+
+class AuditManager:
+    def __init__(self):
+        self.db_path = "audit.db"
+        self._init_db()
+
+    def _init_db(self):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS audit_logs (
+                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                    operator TEXT,
+                    action TEXT,
+                    target TEXT,
+                    details TEXT,
+                    timestamp REAL
+                )
+            """)
+
+    def log_action(self, operator, action, target, details=""):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("INSERT INTO audit_logs (operator, action, target, details, timestamp) VALUES (?, ?, ?, ?, ?)",
+                         (operator, action, target, details, time.time()))
+        logger.info(f"🛡️ [审计] {operator} 执行了 {action}，目标: {target}")
+
+audit_manager = AuditManager()
+
+# --- 安全：加盐哈希处理 ---
+def hash_password(password: str, salt: str = None):
+    if not salt:
+        salt = secrets.token_hex(8)
+    # 模拟工业级加盐哈希 (PBKDF2 理念)
+    h = hashlib.sha256((password + salt).encode()).hexdigest()
+    return h, salt
+
+@app.get("/api/admin/audit")
+async def get_audit_logs(role: str):
+    """仅允许 HQ 角色查看全局审计流"""
+    if role != "HQ":
+        return {"status": "forbidden"}
+    with sqlite3.connect("audit.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 100")
+        rows = cursor.fetchall()
+        return [{"id": r[0], "op": r[1], "action": r[2], "target": r[3], "details": r[4], "time": r[5]} for r in rows]
+
+# 在关键指令处集成审计
+@app.post("/api/admin/agent/praise")
+async def praise_agent(agent_id: str, operator: str = "Admin"):
+    audit_manager.log_action(operator, "PRAISE_AGENT", agent_id, "下发了表扬烟花")
+    # ... 原有逻辑
+
     # 在独立线程运行键盘钩子
     threading.Thread(target=start_keyboard_hook, daemon=True).start()
     
