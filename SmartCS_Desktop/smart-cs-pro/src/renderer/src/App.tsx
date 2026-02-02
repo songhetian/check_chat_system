@@ -82,18 +82,57 @@ function App() {
               <Routes>
                 <Route path="/" element={
                   <div className="space-y-6">
-                    <h1 className="text-2xl font-bold text-slate-900">欢迎进入指挥系统</h1>
-                    <p className="text-slate-500 text-sm">请从左侧菜单选择功能模块进行操作。</p>
-                    <div className="grid grid-cols-3 gap-6">
-                       <div className="h-32 rounded-[24px] bg-white border border-slate-200 shadow-sm flex items-center justify-center p-6 gap-4">
-                          <div className="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-600">
-                             <CheckCircle2 />
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">全链路指挥台</h1>
+                        <p className="text-slate-500 text-sm">当前活跃坐席实况监控矩阵</p>
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="bg-green-500/10 text-green-600 px-4 py-2 rounded-xl border border-green-500/20 text-xs font-bold flex items-center gap-2">
+                           <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" /> 系统链路极度稳定
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {/* 模拟状态墙 */}
+                      {['张三', '李四', '王五', '赵六', '陈七'].map((name, i) => (
+                        <motion.div
+                          key={name}
+                          whileHover={{ y: -5 }}
+                          className="bg-white p-5 rounded-[32px] border border-slate-200 shadow-sm relative overflow-hidden group"
+                        >
+                          <div className="flex justify-between items-start mb-4">
+                             <div className={cn(
+                               "w-12 h-12 rounded-2xl flex items-center justify-center",
+                               i === 1 ? "bg-red-500 text-white animate-pulse" : "bg-slate-100 text-slate-400"
+                             )}>
+                                <User size={24} />
+                             </div>
+                             <div className={cn(
+                               "px-2 py-0.5 rounded text-[8px] font-black uppercase",
+                               i === 1 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+                             )}>
+                               {i === 1 ? 'VIOLATION' : 'ONLINE'}
+                             </div>
                           </div>
-                          <div>
-                             <div className="text-xs text-slate-400 font-bold uppercase">系统运行状态</div>
-                             <div className="text-xl font-black text-slate-900">良好 (SAFE)</div>
+                          
+                          <h3 className="font-black text-slate-900">{name}</h3>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-4">ID: AGENT-00{i+1}</p>
+                          
+                          <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
+                             <div className="flex flex-col">
+                                <span className="text-[8px] font-bold text-slate-400 uppercase">当前窗口</span>
+                                <span className="text-[10px] font-black text-slate-700 truncate w-24">
+                                  {i === 1 ? '微信 - 争议处理' : '钉钉 - 客户接待'}
+                                </span>
+                             </div>
+                             <button className="p-2 bg-slate-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all active:scale-90">
+                                <ShieldAlert size={12} />
+                             </button>
                           </div>
-                       </div>
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
                 } />

@@ -218,27 +218,71 @@ def capture_evidence():
     except:
         return ""
 
-# --- WebSocket 实时推送 ---
+import hashlib
+import platform
+import wmi # 需要 pip install wmi (Windows 专用)
+
+class AgentManager:
+    def __init__(self):
+        self.statuses = {} # {agent_id: {"status": "ONLINE", "last_seen": 0, "ip": "", "is_alerting": False}}
+        self.device_registry = {"admin": "MOCK_HWID_123"} # 模拟白名单
+
+    def update_status(self, agent_id, status_data):
+        self.statuses[agent_id] = {
+            **self.statuses.get(agent_id, {}),
+            **status_data,
+            "last_seen": time.time()
+        }
+
+    def get_hardware_id(self):
+        """采集硬件特征码 (Windows 示例)"""
+        try:
+            c = wmi.WMI()
+            cpu = c.Win32_Processor()[0].ProcessorId.strip()
+            disk = c.Win32_DiskDrive()[0].SerialNumber.strip()
+            raw = f"{cpu}-{disk}-{platform.node()}"
+            return hashlib.sha256(raw.encode()).hexdigest()
+        except:
+            return f"GENERIC-{platform.node()}-ID"
+
+agent_manager = AgentManager()
+
+@app.post("/api/auth/verify-device")
+async def verify_device(agent_id: str, hwid: str):
+    # 简单的白名单逻辑
+    if agent_id in agent_manager.device_registry:
+        if agent_manager.device_registry[agent_id] != hwid:
+            return {"status": "forbidden", "message": "设备未授权，请联系主管绑定"}
+    else:
+        # 首次登录自动申请绑定
+        agent_manager.device_registry[agent_id] = hwid
+    return {"status": "ok", "hwid": hwid}
+
+@app.get("/api/admin/agents/status")
+async def get_all_agents_status():
+    """供主管端调用的全量状态接口"""
+    return {
+        "count": len(agent_manager.statuses),
+        "agents": agent_manager.statuses
+    }
+
+# 在 WebSocket 连接逻辑中集成状态追踪
 @app.websocket("/ws/risk")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    # 模拟从 QueryParams 获取 agent_id
+    agent_id = websocket.query_params.get("agent_id", "unknown")
     engine.active_connections.append(websocket)
+    agent_manager.update_status(agent_id, {"status": "ONLINE", "ip": websocket.client.host})
+    
     try:
         while True:
             raw_data = await websocket.receive_text()
             data = json.loads(raw_data)
-            
-            # 处理前端发来的指令
-            if data.get("type") == "MUTE_AGENT":
-                print(f"🚨 [指令收到] 坐席 {data.get('agent_id')} 申请静音保护")
-                # 这里可以扩展调用系统音量控制 API 或 IM 禁言 API
-                await websocket.send_text(json.dumps({
-                    "type": "MUTE_CONFIRM",
-                    "status": "success",
-                    "timestamp": time.time()
-                }))
+            # ... 
     except WebSocketDisconnect:
         engine.active_connections.remove(websocket)
+        agent_manager.update_status(agent_id, {"status": "OFFLINE"})
 
 class LogBuffer:
     def __init__(self):
