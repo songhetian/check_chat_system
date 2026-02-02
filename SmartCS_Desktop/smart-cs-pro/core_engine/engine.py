@@ -287,6 +287,16 @@ class LogBuffer:
 log_buffer = LogBuffer()
 
 async def broadcast_event(data):
+    if data["type"] == "VIOLATION":
+        # 违规时带上截图
+        data["screenshot"] = f"data:image/jpeg;base64,{capture_evidence()}"
+        data["timestamp"] = time.time() * 1000
+        data["id"] = str(int(time.time() * 1000))
+        data["agent"] = "当前坐席"
+        # 触发深度取证
+        video_path = forensic_recorder.trigger_capture(data["id"])
+        data["video_path"] = video_path
+
     if not engine.active_connections:
         # 如果当前没有客户端在线，自动进入缓冲
         if data["type"] in ["VIOLATION", "RED_ALERT", "AI_ANALYSIS"]:
@@ -348,11 +358,65 @@ class SmartScanner:
             last_msg = chat_res[0][-1][1][0]
             self.analyze_intent(last_msg)
 
-import sqlite3
+import cv2
+import numpy as np
 
-# ... (之前的代码保持不变)
+class ForensicRecorder:
+    def __init__(self):
+        self.fps = 10
+        self.buffer_sec = 5
+        self.frame_buffer = deque(maxlen=self.fps * self.buffer_sec)
+        self.is_recording_post = False
+        self.post_frames_count = 0
+        self.target_post_frames = 20 # 2秒后录制
+        self.current_out = None
 
-class PersonaEngine:
+    def capture_frame(self):
+        # 截取屏幕并存入循环缓冲区
+        screen = ImageGrab.grab()
+        frame = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
+        frame = cv2.resize(frame, (800, 450)) # 压缩分辨率
+        self.frame_buffer.append(frame)
+        
+        if self.is_recording_post:
+            if self.current_out:
+                self.current_out.write(frame)
+                self.post_frames_count += 1
+                if self.post_frames_count >= self.target_post_frames:
+                    self.stop_and_save()
+
+    def trigger_capture(self, violation_id):
+        print(f"📹 [取证启动] 正在生成违规视频证据: {violation_id}")
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        filename = f"evidence_{violation_id}.mp4"
+        self.current_out = cv2.VideoWriter(filename, fourcc, self.fps, (800, 450))
+        
+        # 1. 写入缓冲中的前 5 秒
+        for f in self.frame_buffer:
+            self.current_out.write(f)
+            
+        # 2. 开启后 2 秒录制
+        self.is_recording_post = True
+        self.post_frames_count = 0
+        return filename
+
+    def stop_and_save(self):
+        self.is_recording_post = False
+        if self.current_out:
+            self.current_out.release()
+            self.current_out = None
+        print("✅ 违规视频证据保存完毕")
+
+forensic_recorder = ForensicRecorder()
+
+def forensic_loop():
+    while True:
+        forensic_recorder.capture_frame()
+        time.sleep(0.1) # 10 FPS
+
+# 在 broadcast_event 的 VIOLATION 分支中调用
+# video_path = forensic_recorder.trigger_capture(data["id"])
+# data["video_evidence"] = video_path
     def __init__(self):
         self.db_path = "customers.db"
         self._init_db()
@@ -538,6 +602,9 @@ if __name__ == "__main__":
     
     # 启动自动扫描线程
     threading.Thread(target=auto_scan_loop, daemon=True).start()
+
+    # 启动视频取证缓冲线程
+    threading.Thread(target=forensic_loop, daemon=True).start()
 
     # 启动本地缓冲同步任务 (在主异步循环中)
     asyncio.run_coroutine_threadsafe(log_buffer.sync_task(), main_loop)
