@@ -18,7 +18,8 @@ export const useRiskSocket = () => {
 
       socket.onopen = () => {
         console.log('✅ 战术链路已建立')
-        retryCount = 0; // 重置重试次数
+        retryCount = 0;
+        useRiskStore.getState().setOnline(true)
         setSendMessage((msg: any) => {
           if (socket?.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify(msg))
@@ -61,6 +62,7 @@ export const useRiskSocket = () => {
 
       socket.onclose = () => {
         console.warn('⚠️ 战术链路断开')
+        useRiskStore.getState().setOnline(false)
         if (retryCount < maxRetries) {
           const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
           console.log(`正在尝试重连... (${retryCount + 1}/${maxRetries}) 延迟: ${delay}ms`)

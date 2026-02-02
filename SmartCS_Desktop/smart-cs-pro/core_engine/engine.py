@@ -240,16 +240,65 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         engine.active_connections.remove(websocket)
 
-async def broadcast_event(data):
-    if data["type"] == "VIOLATION":
-        # 违规时带上截图
-        data["screenshot"] = f"data:image/jpeg;base64,{capture_evidence()}"
-        data["timestamp"] = time.time() * 1000
-        data["id"] = str(int(time.time() * 1000))
-        data["agent"] = "当前坐席"
+class LogBuffer:
+    def __init__(self):
+        self.db_path = "buffer.db"
+        self._init_db()
 
+    def _init_db(self):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS pending_logs (
+                    id TEXT PRIMARY KEY,
+                    data TEXT,
+                    timestamp REAL
+                )
+            """)
+
+    def push_to_buffer(self, log_type, data):
+        """将发送失败的数据暂存"""
+        log_id = str(int(time.time() * 1000))
+        data["buffer_id"] = log_id
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("INSERT INTO pending_logs VALUES (?, ?, ?)", 
+                         (log_id, json.dumps(data), time.time()))
+        print(f"📦 数据已存入本地缓冲: {log_id}")
+
+    async def sync_task(self):
+        """后台同步任务"""
+        while True:
+            try:
+                if engine.active_connections: # 只有在有连接时才尝试同步
+                    with sqlite3.connect(self.db_path) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT * FROM pending_logs LIMIT 10")
+                        rows = cursor.fetchall()
+                        
+                        for row in rows:
+                            log_id, log_json, _ = row
+                            # 尝试推送到当前所有活跃连接
+                            await broadcast_event(json.loads(log_json))
+                            # 推送成功后删除
+                            conn.execute("DELETE FROM pending_logs WHERE id=?", (log_id,))
+                            print(f"✨ 本地缓冲数据已完成同步: {log_id}")
+            except: pass
+            await asyncio.sleep(10) # 每10秒检查一次重传
+
+log_buffer = LogBuffer()
+
+async def broadcast_event(data):
+    if not engine.active_connections:
+        # 如果当前没有客户端在线，自动进入缓冲
+        if data["type"] in ["VIOLATION", "RED_ALERT", "AI_ANALYSIS"]:
+            log_buffer.push_to_buffer(data["type"], data)
+        return
+
+    # ... (原有发送逻辑不变)
     for conn in engine.active_connections:
-        await conn.send_text(json.dumps(data))
+        try:
+            await conn.send_text(json.dumps(data))
+        except:
+            pass # 个别连接失败不处理，靠重连和整体缓冲保障
 
 # ... (之前的导入保持不变)
 from paddleocr import PaddleOCR
@@ -486,10 +535,14 @@ if __name__ == "__main__":
     
     # 获取异步事件循环
     main_loop = asyncio.new_event_loop()
-    threading.Thread(target=lambda: uvicorn.run(app, host="127.0.0.1", port=8000), daemon=True).start()
     
     # 启动自动扫描线程
     threading.Thread(target=auto_scan_loop, daemon=True).start()
+
+    # 启动本地缓冲同步任务 (在主异步循环中)
+    asyncio.run_coroutine_threadsafe(log_buffer.sync_task(), main_loop)
+    
+    threading.Thread(target=lambda: uvicorn.run(app, host="127.0.0.1", port=8000), daemon=True).start()
     
     print("🚀 Smart-CS Pro 核心引擎已启动 (Port: 8000)")
     while True: time.sleep(1)

@@ -18,21 +18,24 @@ interface AiAnalysis {
 }
 
 interface RiskState {
+  isOnline: boolean // 新增：链路状态
   isAlerting: boolean
   isRedAlert: boolean
   lastViolation: Violation | null
-  lastAiAnalysis: AiAnalysis | null // 新增：AI 实时分析
+  lastAiAnalysis: AiAnalysis | null
   violations: Violation[]
   sendMessage: (msg: any) => void
   addViolation: (v: Violation) => void
-  setAiAnalysis: (a: AiAnalysis) => void // 新增：设置 AI 分析
+  setAiAnalysis: (a: AiAnalysis) => void
   setAlerting: (alert: boolean) => void
   setRedAlert: (alert: boolean) => void
+  setOnline: (online: boolean) => void // 新增：设置在线状态
   setSendMessage: (fn: (msg: any) => void) => void
   clearAlerts: () => void
 }
 
 export const useRiskStore = create<RiskState>((set) => ({
+  isOnline: true,
   isAlerting: false,
   isRedAlert: false,
   lastViolation: null,
@@ -47,6 +50,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   setAiAnalysis: (a) => set({ lastAiAnalysis: a, isAlerting: a.risk_score > 7 }),
   setAlerting: (alert) => set({ isAlerting: alert }),
   setRedAlert: (alert) => set({ isRedAlert: alert }),
+  setOnline: (online) => set({ isOnline: online }),
   setSendMessage: (fn) => set({ sendMessage: fn }),
   clearAlerts: () => set({ violations: [], lastViolation: null, isAlerting: false, isRedAlert: false, lastAiAnalysis: null })
 }))
