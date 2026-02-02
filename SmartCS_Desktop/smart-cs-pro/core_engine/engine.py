@@ -453,11 +453,26 @@ scanner = SmartScanner()
 
 # 在主循环中定时运行扫描 (建议 3-5 秒一次，防止占用 CPU 过高)
 def auto_scan_loop():
+    print("👀 窗口感知扫描引擎已就位")
     while True:
         try:
-            scanner.scan_screen()
-        except: pass
-        time.sleep(3)
+            # 1. 检查当前前台窗口
+            hwnd = win32gui.GetForegroundWindow()
+            title = win32gui.GetWindowText(hwnd)
+            
+            # 2. 定义战术目标窗口 (微信、钉钉等)
+            targets = ["微信", "WeChat", "钉钉", "DingTalk", "飞书", "Lark"]
+            is_target = any(t.lower() in title.lower() for t in targets)
+            
+            if is_target:
+                scanner.scan_screen()
+                time.sleep(3) # 目标窗口在前台，保持标准频率
+            else:
+                # 非目标窗口，进入“节能模式”
+                time.sleep(10) 
+        except Exception as e:
+            print(f"扫描异常: {e}")
+            time.sleep(5)
 
 # ... (在 main 中启动该线程)
 
