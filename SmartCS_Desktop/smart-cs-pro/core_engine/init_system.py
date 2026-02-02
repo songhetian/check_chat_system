@@ -12,7 +12,7 @@ def check_env():
     dependencies = [
         "fastapi", "uvicorn", "pynput", "paddleocr", "opencv-python", 
         "httpx", "wmi", "pandas", "openpyxl", "redis", "python-dotenv", 
-        "pymysql", "pymysqlpool"
+        "pymysql", "pymysqlpool", "aiomysql"
     ]
     print("📦 正在检查核心依赖...")
     for lib in dependencies:
