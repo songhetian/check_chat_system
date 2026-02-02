@@ -14,30 +14,27 @@ export const useRiskSocket = () => {
     const maxRetries = 10;
 
     const connect = () => {
-      // 在场景 B 中，这里应该是服务器的局域网真实 IP
-      // 实际生产中可以通过 Electron 的 IPC 传进来，或者读取配置文件
-      const serverIp = '127.0.0.1'; // 演示先用本机，部署时改为服务器 IP
-      socket = new WebSocket(`ws://${serverIp}:8000/ws/risk?token=mock-token-123`)
-
-      socket.onopen = () => {
-        console.log('✅ 战术链路已建立')
-        retryCount = 0;
-        useRiskStore.getState().setOnline(true)
-        setSendMessage((msg: any) => {
-          if (socket?.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(msg))
-          }
-        })
-      }
+      const currentUser = useAuthStore.getState().user;
+      const serverIp = '127.0.0.1'; 
+      // 核心：在连接时携带身份，支持后端精准推送
+      socket = new WebSocket(`ws://${serverIp}:8000/ws/risk?token=mock-token-123&username=${currentUser?.username}`)
 
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data)
         
+        // 1. 全局语音闭环：只要有 voice_alert 就播报
+        if (data.voice_alert) {
+          const utter = new SpeechSynthesisUtterance(data.voice_alert);
+          utter.lang = 'zh-CN'; utter.rate = 0.9;
+          window.speechSynthesis.speak(utter);
+        }
+
+        // 2. 消息分发逻辑
         if (data.type === 'AI_ULTRA_ANALYSIS') {
           useRiskStore.getState().setAiAnalysis(data.data)
         }
-
-        if (data.type === 'VIOLATION') {
+        // ... 其他现有逻辑
+      }
           addViolation(data)
           setAlerting(true)
           setTimeout(() => setAlerting(false), 5000)
