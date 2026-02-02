@@ -30,11 +30,10 @@ export const useRiskSocket = () => {
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data)
         
-        if (data.type === 'AI_ANALYSIS') {
-          useRiskStore.getState().setAiAnalysis(data)
+        if (data.type === 'AI_ULTRA_ANALYSIS') {
+          useRiskStore.getState().setAiAnalysis(data.data)
         }
 
-        // ... 原有的事件处理逻辑保持不变
         if (data.type === 'VIOLATION') {
           addViolation(data)
           setAlerting(true)

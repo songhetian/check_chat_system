@@ -7,29 +7,30 @@ interface Violation {
   context: string
   timestamp: number
   screenshot?: string
-  reason?: string // 新增大模型识别原因
+  reason?: string
 }
 
-interface AiAnalysis {
+interface AiUltraAnalysis {
   risk_score: number
-  reason: string
+  sentiment_score: number
+  persona: { profession: string; personality: string; loyalty: string }
+  strategy: string
   suggestion: string
-  context: string
 }
 
 interface RiskState {
-  isOnline: boolean // 新增：链路状态
+  isOnline: boolean
   isAlerting: boolean
   isRedAlert: boolean
   lastViolation: Violation | null
-  lastAiAnalysis: AiAnalysis | null
+  lastAiAnalysis: AiUltraAnalysis | null
   violations: Violation[]
   sendMessage: (msg: any) => void
   addViolation: (v: Violation) => void
-  setAiAnalysis: (a: AiAnalysis) => void
+  setAiAnalysis: (a: AiUltraAnalysis) => void
   setAlerting: (alert: boolean) => void
   setRedAlert: (alert: boolean) => void
-  setOnline: (online: boolean) => void // 新增：设置在线状态
+  setOnline: (online: boolean) => void
   setSendMessage: (fn: (msg: any) => void) => void
   clearAlerts: () => void
 }
