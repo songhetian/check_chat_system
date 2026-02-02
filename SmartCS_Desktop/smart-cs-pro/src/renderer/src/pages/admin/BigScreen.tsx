@@ -102,20 +102,14 @@ export default function BigScreen() {
                    { name: '李萌萌', dept: '售后组', rank: 'Veteran' },
                    { name: '周杰', dept: '技术支持', rank: 'Elite Operator' }
                  ].map((hero, i) => (
-                   <motion.div 
-                     key={i}
-                     initial={{ x: 50, opacity: 0 }}
-                     animate={{ x: 0, opacity: 1 }}
-                     transition={{ delay: i * 0.2 }}
-                     className="p-4 bg-gradient-to-r from-amber-500/10 to-transparent rounded-2xl border-l-4 border-amber-500 flex justify-between items-center"
-                   >
+                     <div className="p-4 bg-gradient-to-r from-amber-500/10 to-transparent rounded-2xl border-l-4 border-amber-500 flex justify-between items-center group">
                       <div className="flex flex-col">
-                         <span className="text-sm font-black text-white">{hero.name}</span>
+                         <span className="text-sm font-black text-white group-hover:text-amber-400 transition-colors">{hero.name}</span>
                          <span className="text-[8px] text-slate-500 font-bold uppercase">{hero.dept}</span>
                       </div>
                       <div className="text-right">
                          <div className="text-[10px] font-black text-amber-400 italic">授勋: {hero.rank}</div>
-                         <div className="text-[7px] text-slate-600">GRADUATED JUST NOW</div>
+                         <div className="text-[7px] text-cyan-500 font-bold uppercase">实战量: {i === 0 ? '124' : i === 1 ? '89' : '56'} CASES</div>
                       </div>
                    </motion.div>
                  ))}

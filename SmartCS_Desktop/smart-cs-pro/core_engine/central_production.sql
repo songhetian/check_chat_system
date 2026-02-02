@@ -24,10 +24,11 @@ CREATE TABLE IF NOT EXISTS users (
     department_id INT,
     authorized_device_id VARCHAR(100), -- 绑定的硬件指纹
     status TINYINT DEFAULT 1,          -- 1: 活跃, 0: 禁用
-    streak_days INT DEFAULT 0,
+    streak_days INT DEFAULT 0,         -- 连续安全天数
+    handled_customers_count INT DEFAULT 0, -- 累计实战接待量 (核心考核)
+    ai_adoption_count INT DEFAULT 0,   -- 纠偏话术采纳量
     rank_level VARCHAR(20) DEFAULT 'NOVICE',
-    graduated_at TIMESTAMP NULL,       -- 毕业授勋时间
-    last_login TIMESTAMP,
+    graduated_at TIMESTAMP NULL,
     -- ...
 ) ENGINE=InnoDB;
 

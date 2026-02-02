@@ -1,34 +1,37 @@
-# --- 34. 员工成长进阶 (Growth Engine) ---
+import os, logging, pymysql
+
+def get_db_conn():
+    return pymysql.connect(host=os.getenv("DB_HOST"), user=os.getenv("DB_USER"), password=os.getenv("DB_PASSWORD"), database=os.getenv("DB_NAME"), cursorclass=pymysql.cursors.DictCursor)
 
 class GrowthManager:
     def __init__(self):
-        self.milestone_target = 3 # 目标：连续3天
+        self.day_target = 3        # 至少连续3天零违规
+        self.volume_target = 50    # 至少接待50个客户 (实战硬指标)
 
-    async def check_promotion(self, username):
+    async def check_promotion_advanced(self, username, manager_ref):
         """
-        [工业级成长体系] 检查并触发坐席进阶
+        [工业级进阶算法] 只有当‘天数’和‘实战量’双达标时才允许毕业
         """
         try:
             conn = get_db_conn()
             with conn.cursor() as cursor:
-                # 查询当前连续天数
-                cursor.execute("SELECT streak_days, real_name FROM users WHERE username = %s", (username,))
+                cursor.execute("SELECT streak_days, handled_customers_count, real_name FROM users WHERE username = %s", (username,))
                 user = cursor.fetchone()
                 
-                if user and user['streak_days'] >= self.milestone_target:
-                    # 触发进阶事件
-                    logger.info(f"🎖️ [勋章系统] 坐席 {username} 已达成新兵营毕业条件")
-                    await manager.send_to_user(username, {
-                        "type": "GROWTH_MILESTONE",
-                        "title": "恭喜！新兵营毕业",
-                        "message": f"尊敬的 {user['real_name']}，您已连续 {self.milestone_target} 天保持零违规记录！",
-                        "voice_alert": "恭喜你完成新兵训练营，表现优异，系统建议您切换至专家模式。",
-                        "recommend_action": "DISABLE_ONBOARDING"
-                    })
-                    # 更新等级
-                    cursor.execute("UPDATE users SET rank_level = 'VETERAN' WHERE username = %s", (username,))
-                conn.commit(); conn.close()
+                if user:
+                    has_days = user['streak_days'] >= self.day_target
+                    has_volume = user['handled_customers_count'] >= self.volume_target
+                    
+                    if has_days and has_volume:
+                        # 触发终极毕业
+                        await manager_ref.send_to_user(username, {
+                            "type": "GROWTH_MILESTONE",
+                            "message": f"恭喜毕业！您已达成 {user['handled_customers_count']} 次实战接待且零违规！",
+                            "rank": "ELITE OPERATOR"
+                        })
+                        cursor.execute("UPDATE users SET rank_level = 'ELITE', graduated_at = NOW() WHERE username = %s", (username,))
+            conn.commit(); conn.close()
         except Exception as e:
-            logger.error(f"成长引擎计算异常: {e}")
+            logging.error(f"进阶引擎计算异常: {e}")
 
 growth_manager = GrowthManager()
