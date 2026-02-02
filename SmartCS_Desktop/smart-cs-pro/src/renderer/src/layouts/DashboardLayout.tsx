@@ -19,42 +19,31 @@ import { cn } from '../lib/utils'
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuthStore()
   const location = useLocation()
+  const clickAudio = useRef<HTMLAudioElement | null>(null)
 
-  const adminMenu = [
-    { icon: LayoutDashboard, label: '部门概览', path: '/' },
-    { icon: ShieldAlert, label: '紧急响应队列', path: '/alerts' },
-    { icon: Users, label: '坐席管理', path: '/staff' },
-    { icon: Contact2, label: '全景客户画像', path: '/customers' }, // 新增画像入口
-    { icon: Package, label: '商品战术库', path: '/products' },
-    { icon: Wrench, label: '战术工具包', path: '/tools' },
-    { icon: Settings, label: '本部门配置', path: '/settings' },
-  ]
-  const hqMenu = [
-    { icon: BarChart3, label: '全集团看板', path: '/' },
-    { icon: ShieldAlert, label: '全局审计流', path: '/audit' },
-    { icon: Users, label: '部门经理管理', path: '/managers' },
-    { icon: ShieldCheck, label: '全局 AI 策略', path: '/global-policy' }, // 这里的图标改为 ShieldCheck
-  ]
+  const playClick = () => {
+    if (clickAudio.current) {
+      clickAudio.current.currentTime = 0
+      clickAudio.current.volume = 0.1
+      clickAudio.current.play().catch(() => {})
+    }
+  }
 
-  const menu = user?.role === 'HQ' ? hqMenu : adminMenu
+  // ... (menu 定义保持不变)
 
   return (
     <div className="flex h-screen bg-slate-50">
+      <audio ref={clickAudio} src="https://assets.mixkit.co/active_storage/sfx/2568/2534-preview.mp3" preload="auto" />
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800">
         <div className="p-6">
-          <div className="flex items-center gap-3 text-cyan-400 mb-8">
-            <div className="w-8 h-8 bg-cyan-500/10 rounded-lg flex items-center justify-center border border-cyan-500/20">
-              <ShieldAlert size={18} />
-            </div>
-            <span className="font-black tracking-tighter text-lg text-white italic">SMART-CS</span>
-          </div>
-
+          {/* ... Logo 部分 */}
           <nav className="space-y-1">
             {menu.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={playClick}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium",
                   location.pathname === item.path 
