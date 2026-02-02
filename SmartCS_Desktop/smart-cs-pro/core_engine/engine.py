@@ -83,65 +83,48 @@ async def image_defense(input_path: str, watermark_text: str):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-import requests
+import httpx
+from fastapi import BackgroundTasks
 
-# --- 深度语义风控提示词 (LLM Prompt) ---
-SYSTEM_PROMPT = """
-你是一个专业的客服监控专家。请分析以下坐席的输入内容，并按JSON格式输出结果。
-判断维度：
-1. 态度：是否阴阳怪气、不耐烦或辱骂。
-2. 违规：是否引导私下交易、规避平台规则。
-3. 机会：客户是否表现出明显的购买意向。
+# ... (保持现有导入不变)
 
-输出格式必须是：{"risk_score": 0-10, "is_violation": bool, "reason": "原因", "suggestion": "建议话术"}
-"""
-
-# --- 配置加载逻辑 ---
-def load_config():
-    try:
-        with open("../server_config.json", "r") as f:
-            return json.load(f)
-    except:
-        return {"ollama_url": "http://localhost:11434/api/chat", "ai_enabled": False}
-
-CONFIG = load_config()
-
-async def analyze_with_llm(text):
+async def analyze_with_llm_async(text: str):
     """
-    智能 AI 分析 (方案 A/B 兼容模式)
+    智能 AI 分析 (异步非阻塞模式)
     """
     if not CONFIG.get("ai_enabled", False):
-        return # 方案 A：直接跳过，零资源占用
+        return
 
-    try:
-        url = CONFIG.get("ollama_url")
-        payload = {
-            "model": "qwen2:1.5b",
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": text}
-            ],
-            "stream": False,
-            "format": "json"
-        }
-        # 设置极短超时，防止影响主链路
-        response = requests.post(url, json=payload, timeout=1.5)
-        # ... 后续处理逻辑保持不变
-        result = json.loads(response.json()['message']['content'])
-        
-        if result.get("is_violation"):
-            await broadcast_event({
-                "type": "VIOLATION",
-                "id": str(int(time.time() * 1000)),
-                "agent": "当前坐席",
-                "keyword": "语义风险",
-                "context": text,
-                "reason": result.get("reason"),
-                "screenshot": f"data:image/jpeg;base64,{capture_evidence()}",
-                "timestamp": time.time() * 1000
-            })
-    except:
-        pass # Ollama 未启动时静默跳过
+    async with httpx.AsyncClient() as client:
+        try:
+            url = CONFIG.get("ollama_url")
+            payload = {
+                "model": "qwen2:1.5b",
+                "messages": [
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": text}
+                ],
+                "stream": False,
+                "format": "json"
+            }
+            
+            # 增加超时控制，防止 Ollama 响应慢拖累系统
+            response = await client.post(url, json=payload, timeout=2.0)
+            result = response.json()
+            content = json.loads(result['message']['content'])
+            
+            if content.get("is_violation"):
+                await broadcast_event({
+                    "type": "VIOLATION",
+                    "keyword": "语义风险",
+                    "context": text,
+                    "reason": content.get("reason")
+                })
+        except Exception as e:
+            print(f"⚠️ AI 分析链路异常: {str(e)}")
+
+# 在 check_text 逻辑中调用
+# background_tasks.add_task(analyze_with_llm_async, raw_text)
 
 # 在 check_text 匹配不到关键词时调用大模型
 # threading.Thread(target=lambda: asyncio.run(analyze_with_llm(raw_text))).start()

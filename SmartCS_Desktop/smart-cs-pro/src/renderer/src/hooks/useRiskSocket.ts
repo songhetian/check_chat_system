@@ -8,55 +8,73 @@ export const useRiskSocket = () => {
   const setSendMessage = useRiskStore((s) => s.setSendMessage)
 
   useEffect(() => {
-    const socket = new WebSocket('ws://127.0.0.1:8000/ws/risk')
+    let socket: WebSocket | null = null;
+    let reconnectTimeout: NodeJS.Timeout;
+    let retryCount = 0;
+    const maxRetries = 10;
 
-    socket.onopen = () => {
-      // 绑定发送函数
-      setSendMessage((msg: any) => {
-        if (socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify(msg))
+    const connect = () => {
+      socket = new WebSocket('ws://127.0.0.1:8000/ws/risk')
+
+      socket.onopen = () => {
+        console.log('✅ 战术链路已建立')
+        retryCount = 0; // 重置重试次数
+        setSendMessage((msg: any) => {
+          if (socket?.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(msg))
+          }
+        })
+      }
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data)
+        // ... 原有的事件处理逻辑保持不变
+        if (data.type === 'VIOLATION') {
+          addViolation(data)
+          setAlerting(true)
+          setTimeout(() => setAlerting(false), 5000)
         }
-      })
-    }
-
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-
-      if (data.type === 'VIOLATION') {
-        addViolation(data)
-        setAlerting(true)
-        setTimeout(() => setAlerting(false), 5000)
+        if (data.type === 'MUTE_CONFIRM') {
+           window.dispatchEvent(new CustomEvent('trigger-toast', { 
+             detail: { title: '战术拦截', message: '坐席已进入静音保护模式', type: 'success' } 
+           }))
+        }
+        if (data.type === 'RED_ALERT') {
+          addViolation(data)
+          window.dispatchEvent(new CustomEvent('trigger-red-alert'))
+        }
+        if (data.type === 'PRAISE') {
+          window.dispatchEvent(new CustomEvent('trigger-fireworks'))
+        }
+        if (data.type === 'SOP_GUIDE') {
+          window.dispatchEvent(new CustomEvent('trigger-sop', { detail: data.steps }))
+        }
+        if (data.type === 'PRODUCT_SUGGESTION') {
+          window.dispatchEvent(new CustomEvent('trigger-suggestion', { detail: data.products }))
+        }
       }
 
-      if (data.type === 'MUTE_CONFIRM') {
-         // 收到后端静音确认
-         window.dispatchEvent(new CustomEvent('trigger-toast', { 
-           detail: { title: '战术拦截', message: '坐席已进入静音保护模式', type: 'success' } 
-         }))
+      socket.onclose = () => {
+        console.warn('⚠️ 战术链路断开')
+        if (retryCount < maxRetries) {
+          const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+          console.log(`正在尝试重连... (${retryCount + 1}/${maxRetries}) 延迟: ${delay}ms`)
+          reconnectTimeout = setTimeout(connect, delay);
+          retryCount++;
+        }
       }
 
-      if (data.type === 'RED_ALERT') {
-        addViolation(data)
-        window.dispatchEvent(new CustomEvent('trigger-red-alert'))
-      }
-
-      if (data.type === 'PRAISE') {
-        // 触发全局烟花 (可以使用自定义事件或 Zustand)
-        window.dispatchEvent(new CustomEvent('trigger-fireworks'))
-      }
-
-      if (data.type === 'SOP_GUIDE') {
-        // 触发 SOP 侧边滑出
-        window.dispatchEvent(new CustomEvent('trigger-sop', { detail: data.steps }))
-      }
-
-      if (data.type === 'PRODUCT_SUGGESTION') {
-        window.dispatchEvent(new CustomEvent('trigger-suggestion', { detail: data.products }))
+      socket.onerror = (err) => {
+        console.error('❌ WebSocket 链路故障', err)
+        socket?.close();
       }
     }
 
-    socket.onerror = () => console.error('WebSocket 链路故障')
+    connect();
     
-    return () => socket.close()
+    return () => {
+      socket?.close();
+      clearTimeout(reconnectTimeout);
+    }
   }, [])
 }
