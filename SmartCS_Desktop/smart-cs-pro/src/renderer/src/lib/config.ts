@@ -1,4 +1,4 @@
-// 核心：动态战术配置中心
+// 核心：动态战术配置中心 (全小写强制规范化版)
 // 能够根据当前环境自动切换指挥中心地址 (LAN Support)
 
 const defaultIp = '127.0.0.1'; 
@@ -24,14 +24,13 @@ export const initDynamicConfig = async () => {
       let centralUrl = serverConfig?.network?.central_server_url;
       
       if (centralUrl) {
-        // 规范化：转换为小写、去除空格、去除结尾斜杠
+        // 关键修复：强制全小写并规范化，防止出现 /API 导致的 404
         centralUrl = centralUrl.trim().toLowerCase();
         if (centralUrl.endsWith('/')) centralUrl = centralUrl.slice(0, -1);
         
         CONFIG.API_BASE = centralUrl;
-        // 修正：从 http://...:8000/api 转换为 ws://...:8000/ws
         CONFIG.WS_BASE = centralUrl.replace('/api', '/ws').replace('http', 'ws');
-        console.log(`🌐 [动态配置] 指挥中心已锁定: ${CONFIG.API_BASE}`);
+        console.log(`🌐 [动态配置] 指挥中心已锁定 (全小写强制): ${CONFIG.API_BASE}`);
       }
 
       // 同步品牌自定义信息

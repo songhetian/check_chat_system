@@ -35,15 +35,28 @@ export default function Login() {
 
     // 链路预检
     const checkLink = async () => {
-      const target = `${CONFIG.API_BASE}/health?t=${Date.now()}`;
+      // 再次防御性处理
+      const baseUrl = CONFIG.API_BASE.toLowerCase();
+      const target = `${baseUrl}/health?t=${Date.now()}`;
+
+      console.log(`📡 [链路诊断] 发起探测 | 目标: ${target}`);
+      console.log(`ℹ️ [配置快照] API_BASE="${CONFIG.API_BASE}"`);
+
       try {
-        console.log(`📡 正在探测指挥链路: ${target}`);
         await axios.get(target, { timeout: 5000 });
-        console.log('✅ 指挥链路状态: 正常');
+        console.log('✅ [链路诊断] 握手成功');
       } catch (err: any) {
-        console.error('❌ [链路诊断] 完整错误对象:', err);
-        const errorDetail = err.response ? `中枢拒绝 (${err.response.status})` : (err.request ? '请求无响应 (超时/跨域)' : err.message);
-        setError(`链路脱机：${errorDetail} [目标: ${CONFIG.API_BASE}]`);
+        console.error('❌ [链路诊断] 异常详情:', err);
+
+        let errorShort = err.message;
+        if (err.response) {
+            errorShort = `服务拒绝 (${err.response.status})`;
+        } else if (err.code === 'ERR_NETWORK') {
+            errorShort = `网络不可达 (CORS/Refused)`;
+        }
+
+        const debugInfo = `(Target: ${baseUrl})`;
+        setError(`无法连接中枢: ${errorShort} ${debugInfo}`);
         speak('警告，物理链路脱机。');
       }
     };
@@ -75,7 +88,7 @@ export default function Login() {
       // 2. 启动仪式感序列
       setBootStatus('正在建立加密隧道...')
       speak('身份确认，神经链路启动中。')
-      
+
       for (let i = 0; i <= 100; i += 2) {
         setProgress(i)
         if (i === 20) setBootStatus('正在解析战术协议...')
@@ -92,17 +105,17 @@ export default function Login() {
       }
 
       speak(`欢迎进入系统，${user.real_name}。全链路已就绪。`)
-      
+
       // 3. 持久化至中央状态库
-      setAuth({ 
-        username: user.username, 
-        real_name: user.real_name, 
-        role: user.role, 
+      setAuth({
+        username: user.username,
+        real_name: user.real_name,
+        role: user.role,
         department: user.department,
         rank: user.rank,
         score: user.score
       }, token)
-      
+
       navigate('/')
     } catch (err: any) {
       if (err.response) {
@@ -129,7 +142,7 @@ export default function Login() {
          <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest select-none">
            {CONFIG.BRANDING.company} 安全认证端口 : 443
          </div>
-         
+
          {/* 窗口控制按钮 */}
          <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <button onClick={handleMinimize} className="text-slate-600 hover:text-white transition-colors" title="最小化">
@@ -141,12 +154,12 @@ export default function Login() {
          </div>
       </div>
 
-      <motion.div 
+      <motion.div
         animate={error ? { x: [-10, 10, -10, 10, 0] } : {}}
         className="w-full max-w-[420px] bg-slate-900/40 border-2 border-white/5 p-10 rounded-[40px] backdrop-blur-3xl relative z-10 shadow-2xl"
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
-        
+
         <div className="flex flex-col items-center mb-8" style={{ WebkitAppRegion: 'drag' } as any}>
           <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mb-6 border border-cyan-500/30">
             <span className="text-2xl font-black text-cyan-400">{CONFIG.BRANDING.logoText}</span>
@@ -172,26 +185,26 @@ export default function Login() {
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-1">
             <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><User size={10}/> 操作员账号</label>
-            <input 
+            <input
               value={formData.username}
               onChange={(e) => setFormData({...formData, username: e.target.value})}
-              placeholder="请输入账号" 
-              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-700" 
+              placeholder="请输入账号"
+              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-700"
             />
           </div>
 
           <div className="space-y-1">
             <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><Lock size={10}/> 访问密钥</label>
-            <input 
+            <input
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({...formData, password: e.target.value})}
-              placeholder="请输入密码" 
-              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-700 font-mono tracking-widest" 
+              placeholder="请输入密码"
+              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-700 font-mono tracking-widest"
             />
           </div>
-          
-          <button 
+
+          <button
             type="submit"
             disabled={progress > 0}
             className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-black py-5 rounded-2xl shadow-xl transition-all active:scale-95 flex flex-col items-center gap-1 uppercase tracking-[0.2em] text-[10px] mt-4 disabled:opacity-50"

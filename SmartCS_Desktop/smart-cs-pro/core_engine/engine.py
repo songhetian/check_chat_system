@@ -1,8 +1,9 @@
 import json, time, asyncio, re, hashlib, secrets, os, logging, subprocess, shutil, platform
 from contextlib import asynccontextmanager
 from logging.handlers import RotatingFileHandler
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import uvicorn, threading, httpx, numpy as np, aiomysql
 from PIL import ImageGrab
 from dotenv import load_dotenv
@@ -61,7 +62,7 @@ class AIAnalyzer:
 
 ai_analyzer = AIAnalyzer()
 
-# --- 4. 扫描引擎 (异步隔离) ---
+# --- 4. 扫描引擎 ---
 class SmartScanner:
     def __init__(self):
         self.ocr = None
@@ -81,11 +82,7 @@ class SmartScanner:
             await broadcast_event({"type": "VIOLATION", "keyword": "财务", "context": text})
 
     def scan(self):
-        try:
-            img = ImageGrab.grab().crop(self.regions["chat_area"])
-            # 简化逻辑，此处仅演示结构
-            pass 
-        except: pass
+        pass
 
 scanner = SmartScanner()
 
@@ -98,10 +95,23 @@ async def lifespan(app: FastAPI):
     if db_pool: db_pool.close(); await db_pool.wait_closed()
 
 app = FastAPI(lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+# 极致跨域：手动拦截处理
+@app.middleware("http")
+async def cors_handler(request: Request, call_next):
+    if request.method == "OPTIONS":
+        response = JSONResponse(content="OK")
+    else:
+        response = await call_next(request)
+    
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 @app.get("/api/health")
-async def health(): return {"status": "ok", "ai_ready": ai_analyzer.is_healthy}
+async def health(): 
+    return {"status": "ok", "ai_ready": ai_analyzer.is_healthy}
 
 @app.post("/api/auth/login")
 async def login(data: dict):
