@@ -124,8 +124,21 @@ async def login(data: dict):
             if not user: return {"status": "error", "message": "账号不存在"}
             # admin123 专用校验
             if u == "admin" and p == "admin123":
-                return {"status": "ok", "data": {"user": {"username":u, "real_name":user['real_name'], "role":user['role'], "department": "指挥部"}, "token": "tk_admin"}}
-            return {"status": "error", "message": "密码错误"}
+                return {
+                    "status": "ok", 
+                    "data": {
+                        "user": {
+                            "username": u, 
+                            "real_name": user['real_name'], 
+                            "role": user['role'], 
+                            "department": "指挥中心",
+                            "rank": user.get('rank_level', 'Novice'),
+                            "score": user.get('tactical_score', 0)
+                        }, 
+                        "token": "tk_" + secrets.token_hex(8)
+                    }
+                }
+            return {"status": "error", "message": "密码不匹配"}
 
 # --- 6. 通信与启动 ---
 active_conns = []
