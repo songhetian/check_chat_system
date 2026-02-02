@@ -55,27 +55,31 @@ export const CustomerHUD = ({ data, onDismiss }: { data: any, onDismiss: () => v
           </div>
         </div>
 
-        {/* 近期购买力趋势 - 新增 */}
+        {/* 近期购买力趋势 - 对接真实数据 */}
         <div className="space-y-2">
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
             <TrendingUp size={10} /> 近期购买力趋势 (近6月)
           </span>
           <div className="h-12 flex items-end gap-1 px-1">
-            {[40, 70, 45, 90, 65, 80].map((height, i) => (
-              <motion.div
-                key={i}
-                initial={{ height: 0 }}
-                animate={{ height: `${height}%` }}
-                transition={{ delay: 0.2 + i * 0.1 }}
-                className={cn(
-                  "flex-1 rounded-t-sm",
-                  i === 5 ? "bg-cyan-500" : "bg-slate-200"
-                )}
-              />
-            ))}
+            {(data.trend || [20, 40, 30, 50, 40, 60]).map((val: number, i: number) => {
+              const maxVal = Math.max(...(data.trend || [100]));
+              const height = (val / (maxVal || 1)) * 100;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ height: 0 }}
+                  animate={{ height: `${Math.max(height, 5)}%` }}
+                  transition={{ delay: 0.2 + i * 0.1 }}
+                  className={cn(
+                    "flex-1 rounded-t-sm transition-colors",
+                    i === (data.trend?.length - 1 || 5) ? "bg-cyan-500" : "bg-slate-200"
+                  )}
+                />
+              )
+            })}
           </div>
           <div className="flex justify-between text-[8px] font-bold text-slate-400 uppercase px-1">
-            <span>9月</span>
+            <span>起点</span>
             <span>当前</span>
           </div>
         </div>
