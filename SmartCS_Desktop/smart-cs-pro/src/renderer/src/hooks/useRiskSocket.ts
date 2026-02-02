@@ -58,6 +58,10 @@ export const useRiskSocket = () => {
         if (data.type === 'PRODUCT_SUGGESTION') {
           window.dispatchEvent(new CustomEvent('trigger-suggestion', { detail: data.products }))
         }
+
+        if (data.type === 'SUPERVISOR_COMMAND') {
+          window.dispatchEvent(new CustomEvent('trigger-command', { detail: data }))
+        }
       }
 
       socket.onclose = () => {

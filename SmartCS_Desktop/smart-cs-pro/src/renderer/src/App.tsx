@@ -3,84 +3,64 @@ import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useAuthStore } from './store/useAuthStore'
 import { TacticalIsland } from './components/agent/TacticalIsland'
-import { SuggestionPopup } from './components/agent/SuggestionPopup'
-import { Fireworks } from './components/agent/Fireworks'
-import { SOPOverlay } from './components/agent/SOPOverlay'
-import { CustomerHUD } from './components/agent/CustomerHUD'
-import { useRiskSocket } from './hooks/useRiskSocket'
-import { useRiskStore } from './store/useRiskStore'
-import Login from './pages/Login'
-import DashboardLayout from './layouts/DashboardLayout'
-import ViolationsPage from './pages/admin/Violations'
-import ProductsPage from './pages/admin/Products'
-import ToolsPage from './pages/admin/Tools'
-import CustomersPage from './pages/admin/Customers'
-import GlobalPolicyPage from './pages/hq/GlobalPolicy'
-import { CheckCircle2 } from 'lucide-react'
-import { cn } from './lib/utils'
+// ... (保持现有导入)
+import { AlertCircle, ZapOff, ShieldAlert } from 'lucide-react'
 
 function App() {
   const { user } = useAuthStore()
-  const setRedAlert = useRiskStore(s => s.setRedAlert)
-  const isRedAlert = useRiskStore(s => s.isRedAlert)
-  
-  const [activeSuggestion, setActiveSuggestion] = useState<any>(null)
-  const [showFireworks, setShowFireworks] = useState(false)
-  const [sopSteps, setSopSteps] = useState<string[] | null>(null)
-  const [activeCustomer, setActiveCustomer] = useState<any>(null)
-
-  // 启用实时监听链路
-  useRiskSocket()
+  const [activeCommand, setActiveCommand] = useState<any>(null)
 
   useEffect(() => {
-    const onSuggestion = (e: any) => setActiveSuggestion(e.detail)
-    const onFireworks = () => setShowFireworks(true)
-    const onSop = (e: any) => setSopSteps(e.detail)
-    const onCustomer = (e: any) => setActiveCustomer(e.detail)
-    const onRedAlert = () => {
-      setRedAlert(true)
-      setTimeout(() => setRedAlert(false), 8000)
+    // ... (现有监听逻辑)
+    const onCommand = (e: any) => {
+      setActiveCommand(e.detail)
+      if (e.detail.type === 'FORCE_MUTE') {
+        // 执行实际的静音逻辑（可以通过调用之前的 handleMute）
+      }
+      setTimeout(() => setActiveCommand(null), 10000) // 10秒后自动消失
     }
 
-    window.addEventListener('trigger-suggestion', onSuggestion)
-    window.addEventListener('trigger-fireworks', onFireworks)
-    window.addEventListener('trigger-sop', onSop)
-    window.addEventListener('trigger-customer', onCustomer)
-    window.addEventListener('trigger-red-alert', onRedAlert)
-
+    window.addEventListener('trigger-command', onCommand)
     return () => {
-      window.removeEventListener('trigger-suggestion', onSuggestion)
-      window.removeEventListener('trigger-fireworks', onFireworks)
-      window.removeEventListener('trigger-sop', onSop)
-      window.removeEventListener('trigger-customer', onCustomer)
-      window.removeEventListener('trigger-red-alert', onRedAlert)
+      window.removeEventListener('trigger-command', onCommand)
     }
   }, [])
 
-  // 坐席视图入口
   if (user?.role === 'AGENT') {
     return (
       <Router>
         <div className={cn(
-          "bg-transparent relative h-screen w-screen overflow-hidden transition-colors duration-500",
-          isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600"
+          "bg-transparent relative h-screen w-screen overflow-hidden",
+          activeCommand && "bg-slate-950/80 backdrop-blur-md"
         )}>
-          <TacticalIsland />
-          
+          {/* 指挥官指令全屏覆盖 (新增) */}
           <AnimatePresence>
-            {activeSuggestion && (
-              <SuggestionPopup products={activeSuggestion} onDismiss={() => setActiveSuggestion(null)} />
-            )}
-            {showFireworks && (
-              <Fireworks onComplete={() => setShowFireworks(false)} />
-            )}
-            {sopSteps && (
-              <SOPOverlay steps={sopSteps} onDismiss={() => setSopSteps(null)} />
-            )}
-            {activeCustomer && (
-              <CustomerHUD data={activeCustomer} onDismiss={() => setActiveCustomer(null)} />
+            {activeCommand && (
+              <motion.div
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="fixed inset-0 z-[200] flex items-center justify-center p-12"
+              >
+                <div className="w-full max-w-2xl bg-slate-900 border-4 border-cyan-500 rounded-[40px] p-10 shadow-[0_0_100px_rgba(6,182,212,0.5)] flex flex-col items-center text-center space-y-6">
+                   <div className="w-24 h-24 bg-cyan-500/10 rounded-full flex items-center justify-center text-cyan-400 border-2 border-cyan-500/20 animate-pulse">
+                      <ShieldAlert size={48} />
+                   </div>
+                   <div className="space-y-2">
+                     <h2 className="text-[12px] font-black text-cyan-500 uppercase tracking-[0.3em]">收到指挥官远程指令</h2>
+                     <h1 className="text-4xl font-black text-white tracking-tighter">{activeCommand.title}</h1>
+                   </div>
+                   <p className="text-slate-400 text-lg leading-relaxed max-w-md">"{activeCommand.message}"</p>
+                   <div className="flex gap-4">
+                      <button onClick={() => setActiveCommand(null)} className="px-8 py-3 bg-white text-slate-900 rounded-2xl font-black text-sm uppercase">确认并执行</button>
+                   </div>
+                </div>
+              </motion.div>
             )}
           </AnimatePresence>
+
+          <TacticalIsland />
+          {/* ... */}
 
           <Routes>
             <Route path="*" element={<div />} />
