@@ -59,35 +59,43 @@ function App() {
     const onSop = (e: any) => setSopSteps(e.detail)
     const onCustomer = (e: any) => setActiveCustomer(e.detail)
     const onCommand = (e: any) => { setActiveCommand(e.detail); setTimeout(() => setActiveCommand(null), 10000) }
-        const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
-        const onRedAlert = () => { setRedAlert(true); setTimeout(() => setRedAlert(false), 8000) }
-        const onMilestone = (e: any) => {
-          setShowFireworks(true);
-          window.dispatchEvent(new CustomEvent('trigger-toast', { 
-            detail: { title: '战术授勋', message: e.detail.message, type: 'success' } 
-          }))
-        }
-    
-        window.addEventListener('trigger-suggestion', onSuggestion); 
-        window.addEventListener('trigger-fireworks', onFireworks)
-        window.addEventListener('trigger-sop', onSop); 
-        window.addEventListener('trigger-customer', onCustomer)
-        window.addEventListener('trigger-command', onCommand); 
-        window.addEventListener('trigger-toast', onToast)
-        window.addEventListener('trigger-red-alert', onRedAlert)
-        window.addEventListener('trigger-milestone', onMilestone)
-    
-        return () => {
-          window.removeEventListener('trigger-suggestion', onSuggestion); 
-          window.removeEventListener('trigger-fireworks', onFireworks)
-          window.removeEventListener('trigger-sop', onSop); 
-          window.removeEventListener('trigger-customer', onCustomer)
-          window.removeEventListener('trigger-command', onCommand); 
-          window.removeEventListener('trigger-toast', onToast)
-          window.removeEventListener('trigger-red-alert', onRedAlert)
-          window.removeEventListener('trigger-milestone', onMilestone)
-        }
-  }, [])
+            const onRedAlert = () => { setRedAlert(true); setTimeout(() => setRedAlert(false), 8000) }
+            const [rewardFlow, setRewardFlow] = useState<any>(null)
+        
+            useEffect(() => {
+              // ... 
+              const onReward = (e: any) => {
+                setRewardFlow(e.detail)
+                setTimeout(() => setRewardFlow(null), 2000)
+              }
+              window.addEventListener('trigger-reward', onReward)
+              return () => window.removeEventListener('trigger-reward', onReward)
+            }, [])
+        
+            return (
+              <Router>
+                <div className={cn(...) }>
+                  {/* 战术加分漂浮特效 (新增) */}
+                  <AnimatePresence>
+                    {rewardFlow && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 100, scale: 0.5 }}
+                        animate={{ opacity: 1, y: -200, scale: 1.5 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 flex items-center justify-center pointer-events-none z-[400]"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                           <div className="text-6xl font-black text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] italic">
+                             +{rewardFlow.delta} PTS
+                           </div>
+                           <div className="bg-amber-500 text-slate-900 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
+                             {rewardFlow.msg}
+                           </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  {/* ... */}  }, [])
 
   if (user?.role === 'AGENT') {
     return (
