@@ -3,8 +3,8 @@
     "ai_engine": {
         "provider": "ollama",
         "provider_remark": "AI 驱动服务商，目前仅支持 ollama 本地化部署方案",
-        "url": "http://127.0.0.1:11434/api/chat",
-        "url_remark": "AI 服务器地址。场景 B 模式下若在服务器本机运行则设为 127.0.0.1",
+        "url": "http://192.168.2.184:11434/api/chat",
+        "url_remark": "AI 服务器地址。场景 B 模式下设为中心服务器 IP",
         "model": "qwen2:1.5b",
         "model_remark": "调用的模型名称，推荐使用 qwen2:1.5b 以获得最佳性能平衡",
         "enabled": true,
