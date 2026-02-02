@@ -62,6 +62,10 @@ export const useRiskSocket = () => {
           window.dispatchEvent(new CustomEvent('trigger-command', { detail: data }))
         }
 
+        if (data.type === 'GROWTH_MILESTONE') {
+          window.dispatchEvent(new CustomEvent('trigger-milestone', { detail: data }))
+        }
+
         if (data.type === 'ROLE_CHANGED') {
           const currentUser = useAuthStore.getState().user;
           if (data.target_user === currentUser?.username) {

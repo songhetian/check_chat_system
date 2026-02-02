@@ -59,26 +59,34 @@ function App() {
     const onSop = (e: any) => setSopSteps(e.detail)
     const onCustomer = (e: any) => setActiveCustomer(e.detail)
     const onCommand = (e: any) => { setActiveCommand(e.detail); setTimeout(() => setActiveCommand(null), 10000) }
-    const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
-    const onRedAlert = () => { setRedAlert(true); setTimeout(() => setRedAlert(false), 8000) }
-
-    window.addEventListener('trigger-suggestion', onSuggestion); 
-    window.addEventListener('trigger-fireworks', onFireworks)
-    window.addEventListener('trigger-sop', onSop); 
-    window.addEventListener('trigger-customer', onCustomer)
-    window.addEventListener('trigger-command', onCommand); 
-    window.addEventListener('trigger-toast', onToast)
-    window.addEventListener('trigger-red-alert', onRedAlert)
-
-    return () => {
-      window.removeEventListener('trigger-suggestion', onSuggestion); 
-      window.removeEventListener('trigger-fireworks', onFireworks)
-      window.removeEventListener('trigger-sop', onSop); 
-      window.removeEventListener('trigger-customer', onCustomer)
-      window.removeEventListener('trigger-command', onCommand); 
-      window.removeEventListener('trigger-toast', onToast)
-      window.removeEventListener('trigger-red-alert', onRedAlert)
-    }
+        const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
+        const onRedAlert = () => { setRedAlert(true); setTimeout(() => setRedAlert(false), 8000) }
+        const onMilestone = (e: any) => {
+          setShowFireworks(true);
+          window.dispatchEvent(new CustomEvent('trigger-toast', { 
+            detail: { title: '战术授勋', message: e.detail.message, type: 'success' } 
+          }))
+        }
+    
+        window.addEventListener('trigger-suggestion', onSuggestion); 
+        window.addEventListener('trigger-fireworks', onFireworks)
+        window.addEventListener('trigger-sop', onSop); 
+        window.addEventListener('trigger-customer', onCustomer)
+        window.addEventListener('trigger-command', onCommand); 
+        window.addEventListener('trigger-toast', onToast)
+        window.addEventListener('trigger-red-alert', onRedAlert)
+        window.addEventListener('trigger-milestone', onMilestone)
+    
+        return () => {
+          window.removeEventListener('trigger-suggestion', onSuggestion); 
+          window.removeEventListener('trigger-fireworks', onFireworks)
+          window.removeEventListener('trigger-sop', onSop); 
+          window.removeEventListener('trigger-customer', onCustomer)
+          window.removeEventListener('trigger-command', onCommand); 
+          window.removeEventListener('trigger-toast', onToast)
+          window.removeEventListener('trigger-red-alert', onRedAlert)
+          window.removeEventListener('trigger-milestone', onMilestone)
+        }
   }, [])
 
   if (user?.role === 'AGENT') {

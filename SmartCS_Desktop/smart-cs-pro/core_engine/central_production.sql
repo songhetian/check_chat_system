@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     department_id INT,
     authorized_device_id VARCHAR(100), -- 绑定的硬件指纹
     status TINYINT DEFAULT 1,          -- 1: 活跃, 0: 禁用
+    streak_days INT DEFAULT 0,         -- 连续安全天数 (成长轨迹核心)
+    rank_level VARCHAR(20) DEFAULT 'NOVICE', -- 战术等级 (NOVICE, VETERAN, ELITE)
     last_login TIMESTAMP,
     FOREIGN KEY (department_id) REFERENCES departments(id),
     INDEX idx_user (username)
