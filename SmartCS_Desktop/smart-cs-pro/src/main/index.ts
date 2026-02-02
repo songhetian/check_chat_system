@@ -64,10 +64,19 @@ function createWindow(): void {
   // 窗口控制逻辑
   ipcMain.on('minimize-window', () => mainWindow.minimize())
   ipcMain.on('close-window', () => mainWindow.close())
+  
+  // 动态置顶逻辑
+  ipcMain.on('set-always-on-top', (_, flag: boolean) => {
+    mainWindow.setAlwaysOnTop(flag, 'screen-saver') // 使用 screen-saver 等级确保在 Mac 上真正置顶
+  })
 
   // 响应前端尺寸变化
   ipcMain.on('resize-window', (_, { width, height, center }) => {
-    mainWindow.setSize(width, height, true)
+    // 增加 macOS 阴影缓冲
+    const adjustedWidth = process.platform === 'darwin' ? width + 20 : width
+    const adjustedHeight = process.platform === 'darwin' ? height + 20 : height
+    
+    mainWindow.setSize(adjustedWidth, adjustedHeight, true)
     if (center) mainWindow.center()
   })
 

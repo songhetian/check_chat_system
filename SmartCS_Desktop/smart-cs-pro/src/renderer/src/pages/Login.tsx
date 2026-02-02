@@ -30,6 +30,8 @@ export default function Login() {
   useEffect(() => {
     // 登录页需要大窗口展示并居中
     window.electron.ipcRenderer.send('resize-window', { width: 1000, height: 800, center: true })
+    // 登录页不需要置顶
+    window.electron.ipcRenderer.send('set-always-on-top', false)
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -95,9 +97,9 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 scanline grain overflow-hidden relative text-slate-200 font-sans">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-8 scanline grain overflow-hidden relative text-slate-200 font-sans">
       {/* 顶部全宽拖拽条 */}
-      <div className="absolute top-0 left-0 w-full h-12 z-50 flex items-center justify-between px-6" style={{ WebkitAppRegion: 'drag' } as any}>
+      <div className="absolute top-0 left-0 w-full h-12 z-50 flex items-center justify-between px-8" style={{ WebkitAppRegion: 'drag' } as any}>
          <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest select-none">SmartCS Secure Login Port : 443</div>
          
          {/* 窗口控制按钮 */}

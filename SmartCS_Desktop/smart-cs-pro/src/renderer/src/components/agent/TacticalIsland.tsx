@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Shield, BrainCircuit, Activity, MousePointer2, Radar as RadarIcon, Trophy, BarChart, 
-  ChevronRight, AlertCircle, Zap, Terminal, Target
+  ChevronRight, AlertCircle, Zap, Terminal, Target, LogOut
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -10,37 +10,39 @@ import { cn } from '../../lib/utils'
 
 export const TacticalIsland = () => {
   const { isAlerting, lastAiAnalysis, isOnline, violations } = useRiskStore()
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'AI' | 'RADAR' | 'STATS'>('AI')
 
   useEffect(() => {
-    const width = isAlerting ? 420 : isExpanded ? 500 : 260
-    const height = isExpanded ? 600 : 52
+    const width = isAlerting ? 420 : isExpanded ? 500 : 280
+    const height = isExpanded ? 600 : 64
     window.electron.ipcRenderer.send('resize-window', { width, height })
+    // 灵动岛模式必须置顶
+    window.electron.ipcRenderer.send('set-always-on-top', true)
   }, [isExpanded, isAlerting])
 
   return (
-    <div className="h-screen w-screen flex items-start justify-center pt-4 overflow-hidden pointer-events-none">
+    <div className="h-screen w-screen flex items-start justify-center pt-4 overflow-hidden pointer-events-none p-2">
       <motion.div 
         layout
         className={cn(
-          "pointer-events-auto bg-slate-950/80 border border-white/10 backdrop-blur-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col select-none rounded-[26px] transition-all duration-500",
+          "pointer-events-auto bg-slate-950/85 border border-white/10 backdrop-blur-3xl shadow-[0_0_40px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col select-none rounded-[28px] transition-all duration-500",
           isAlerting && "border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]"
         )}
       >
         {/* 顶部主状态条 */}
         <div 
-          className="flex items-center justify-between px-4 h-[52px] shrink-0 cursor-move relative" 
+          className="flex items-center justify-between px-5 h-[56px] shrink-0 cursor-move relative" 
           style={{ WebkitAppRegion: 'drag' } as any}
         >
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className={cn(
-                "w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-500",
+                "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-500",
                 isAlerting ? "bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.5)]" : "bg-cyan-500/20 text-cyan-400"
               )}>
-                <Shield size={18} />
+                <Shield size={20} />
               </div>
               {!isAlerting && isOnline && (
                 <motion.div 
@@ -57,18 +59,28 @@ export const TacticalIsland = () => {
               <div className="flex items-center gap-1.5">
                 <div className={cn("w-1 h-1 rounded-full", isOnline ? "bg-green-500" : "bg-red-500")} />
                 <span className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">
-                  Node: {user?.username} / Mode: {user?.role}
+                  {user?.real_name}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            <button 
+              onClick={() => {
+                logout();
+                window.location.hash = '/login';
+              }} 
+              className="w-8 h-8 rounded-xl bg-white/5 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition-all text-slate-500"
+              title="断开链路"
+            >
+              <LogOut size={14} />
+            </button>
             <button 
               onClick={() => setIsExpanded(!isExpanded)} 
-              className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all active:scale-90"
+              className="w-8 h-8 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 flex items-center justify-center transition-all active:scale-90"
             >
-              <MousePointer2 size={14} className={cn("text-white/60 transition-transform duration-500", isExpanded && "rotate-180")} />
+              <MousePointer2 size={14} className={cn("transition-transform duration-500", isExpanded && "rotate-180")} />
             </button>
           </div>
         </div>

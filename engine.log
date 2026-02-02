@@ -115,3 +115,84 @@ INFO:     connection closed
 INFO:     127.0.0.1:60115 - "WebSocket /ws/risk?token=mock-token-123&username=123" 403
 INFO:     connection rejected (403 Forbidden)
 INFO:     connection closed
+INFO:     192.168.2.184:62364 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62365 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62367 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62368 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62369 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62370 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62371 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62372 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62373 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62374 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62408 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62409 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62512 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62513 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62516 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62517 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62520 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62521 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62669 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62670 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62673 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62674 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62695 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62696 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62697 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62698 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62699 - "WebSocket /api/risk?token=mock-token-123&username=123" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed

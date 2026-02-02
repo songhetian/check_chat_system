@@ -36,9 +36,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const handleClose = () => window.electron.ipcRenderer.send('close-window')
 
   useEffect(() => {
-    // 确保进入仪表盘时窗口足够大
-    window.electron.ipcRenderer.send('resize-window', { width: 1280, height: 850 })
+    // 确保进入仪表盘时窗口足够大并居中
+    window.electron.ipcRenderer.send('resize-window', { width: 1280, height: 850, center: true })
+    // 管理模式不需要置顶
+    window.electron.ipcRenderer.send('set-always-on-top', false)
   }, [])
+
+  const handleLogout = () => {
+    logout();
+    window.location.hash = '/login';
+  }
 
   const playClick = () => {
     if (clickAudio.current) {
@@ -51,12 +58,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // ... (menu 定义保持不变)
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 overflow-hidden select-none">
       <audio ref={clickAudio} src="https://assets.mixkit.co/active_storage/sfx/2568/2534-preview.mp3" preload="auto" />
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800">
+      <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800 shrink-0">
         <div className="p-6">
-          <div className="flex items-center gap-3 mb-10 px-2" style={{ WebkitAppRegion: 'drag' } as any}>
+          <div className="flex items-center gap-3 mb-10 px-2 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
             <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
               <ShieldAlert className="text-white" size={24} />
             </div>
@@ -93,7 +100,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
           <button 
-            onClick={logout}
+            onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-2 w-full text-slate-500 hover:text-red-400 transition-colors text-xs font-bold"
           >
             <LogOut size={14} /> 退出指挥链路
@@ -104,7 +111,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8" style={{ WebkitAppRegion: 'drag' } as any}>
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
           <div className="relative w-96" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
             <input 
@@ -131,10 +138,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               {/* 窗口控制按钮 */}
               <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
-                <button onClick={handleMinimize} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <button onClick={handleMinimize} className="text-slate-400 hover:text-slate-600 transition-colors" title="最小化">
                   <Minus size={18} />
                 </button>
-                <button onClick={handleClose} className="text-slate-400 hover:text-red-500 transition-colors">
+                <button onClick={handleClose} className="text-slate-400 hover:text-red-500 transition-colors" title="关闭">
                   <X size={18} />
                 </button>
               </div>
