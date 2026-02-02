@@ -123,27 +123,47 @@ export const TacticalIsland = () => {
               className="p-4 pt-0 space-y-4 overflow-hidden"
             >
               {/* AI Suggestion Section */}
-              {lastAiAnalysis && (
-                <div className="bg-white/10 rounded-2xl p-3 border border-white/10 space-y-2">
+                <div className="bg-white/10 rounded-2xl p-3 border border-white/10 space-y-2 relative overflow-hidden group/ai">
+                  {/* 背景装饰动效 */}
+                  <div className="absolute -right-4 -bottom-4 opacity-5 group-hover/ai:scale-125 transition-transform">
+                     <BrainCircuit size={80} />
+                  </div>
+
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest flex items-center gap-1">
-                      <BrainCircuit size={12} /> 实时建议 (风险: {lastAiAnalysis.risk_score})
+                      <BrainCircuit size={12} /> 智脑实时纠偏建议
                     </span>
+                    <div className="flex gap-1">
+                       <div className="w-1 h-1 rounded-full bg-cyan-500 animate-ping" />
+                       <div className="w-1 h-1 rounded-full bg-cyan-500" />
+                    </div>
                   </div>
-                  <p className="text-[11px] text-slate-200 leading-snug line-clamp-2">
-                    {lastAiAnalysis.reason}
+                  
+                  <p className="text-[11px] text-slate-200 leading-snug">
+                    <span className="text-red-400 font-bold">风险：</span>{lastAiAnalysis.reason}
                   </p>
-                  <div className="bg-slate-900/50 p-2 rounded-xl border border-white/5 relative group/advice">
-                    <p className="text-[11px] text-white font-medium italic">"{lastAiAnalysis.suggestion}"</p>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); copyToClipboard(lastAiAnalysis.suggestion); }}
-                      className="absolute right-2 top-2 p-1.5 bg-cyan-600 text-white rounded-lg opacity-0 group-hover/advice:opacity-100 transition-all active:scale-95"
-                    >
-                      <Copy size={12} />
-                    </button>
+
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-slate-900/80 p-2.5 rounded-xl border border-cyan-500/20 relative">
+                      <p className="text-[11px] text-white font-medium italic">"{lastAiAnalysis.suggestion}"</p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); copyToClipboard(lastAiAnalysis.suggestion); }}
+                        className="p-2.5 bg-cyan-600 text-white rounded-xl hover:bg-cyan-500 transition-all active:scale-90"
+                        title="复制话术"
+                      >
+                        <Copy size={14} />
+                      </button>
+                      <button 
+                        className="p-2.5 bg-white text-slate-900 rounded-xl hover:bg-slate-100 transition-all active:scale-90"
+                        title="战术修正"
+                      >
+                        <RefreshCw size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              )}
 
               {/* Tools Grid */}
               <div className="grid grid-cols-2 gap-3">
