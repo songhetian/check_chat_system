@@ -81,16 +81,21 @@ CREATE TABLE IF NOT EXISTS broadcasts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 8. AI 效能统计表
-CREATE TABLE IF NOT EXISTS ai_usage_stats (
+-- 9. 语音预警协议表
+CREATE TABLE IF NOT EXISTS voice_protocols (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    action_type ENUM('OPTIMIZE', 'SUMMARIZE'),
-    chars_processed INT,             -- 处理的字符数
-    estimated_time_saved INT,        -- 节省的预估时间 (秒)
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    min_level INT DEFAULT 1,         -- 触发该语音的最小等级
+    max_level INT DEFAULT 10,        -- 触发该语音的最大等级
+    protocol_name VARCHAR(50),       -- 协议名称 (如: 红色警报, 橙色提醒)
+    voice_text TEXT,                 -- 实际播报的中文文字
+    is_active TINYINT DEFAULT 1
 ) ENGINE=InnoDB;
+
+-- 插入默认语音协议
+INSERT IGNORE INTO voice_protocols (min_level, max_level, protocol_name, voice_text) 
+VALUES (8, 10, '红色特级警报', '警报，检测到严重违规行为，取证系统已实时锁定证据，请立即纠正。');
+INSERT IGNORE INTO voice_protocols (min_level, max_level, protocol_name, voice_text) 
+VALUES (5, 7, '橙色中级提醒', '提醒，当前对话存在合规风险，建议参考智脑纠偏建议。');
 
 -- 初始化基础数据... (保持不变)
 -- 演示账号: admin / admin (实际哈希和盐值需由 init_system 生成)

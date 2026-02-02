@@ -84,6 +84,43 @@ export default function GlobalPolicyPage() {
           </button>
         </CardContent>
       </Card>
+
+      {/* 语音协议管理模块 (新增) */}
+      <div className="mt-10 space-y-4">
+        <h3 className="text-xl font-black text-slate-900 uppercase flex items-center gap-2">
+          <Volume2 size={24} className="text-cyan-600" /> 语音预警协议库
+        </h3>
+        <div className="grid grid-cols-1 gap-4">
+          {[
+            { name: '特级警报 (Level 8-10)', text: '警报，检测到严重违规行为，取证系统已实时锁定证据。' },
+            { name: '常规提醒 (Level 5-7)', text: '提醒，当前对话存在合规风险，建议参考智脑纠偏。' }
+          ].map((p, i) => (
+            <div key={i} className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex flex-col gap-3">
+import { BrainCircuit, Save, Wifi, Power, Volume2, PlayCircle } from 'lucide-react'
+
+// ... (在 map 循环内部)
+               <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-cyan-600 uppercase tracking-widest">{p.name}</span>
+                  <button 
+                    onClick={() => {
+                      const utter = new SpeechSynthesisUtterance(p.text);
+                      utter.lang = 'zh-CN'; utter.rate = 0.9;
+                      window.speechSynthesis.speak(utter);
+                    }}
+                    className="flex items-center gap-1 text-[10px] font-bold text-cyan-500 hover:text-cyan-400 transition-all"
+                  >
+                    <PlayCircle size={14} /> 测试播报
+                  </button>
+               </div>
+               <textarea 
+                 defaultValue={p.text}
+                 className="w-full bg-slate-50 border-none rounded-2xl p-4 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-cyan-500/20"
+                 rows={2}
+               />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
