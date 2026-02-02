@@ -1,7 +1,84 @@
 INFO:     Started server process [40604]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-ERROR:    [Errno 48] error while attempting to bind on address ('0.0.0.0', 8000): [errno 48] address already in use
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-🚀 [macOS 兼容版] Smart-CS Pro 引擎已就绪: 0.0.0.0:8000
+ERROR:    [Errno 48] error while attempting to bind on address ('0.0.0.0INFO:     127.0.0.1:56988 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:56991 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:56995 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:56999 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57000 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57010 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57075 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57078 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57079 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57118 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57121 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57140 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57147 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57225 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:57250 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59553 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59554 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59556 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59557 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59559 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59560 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59583 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59584 - "WebSocket /ws/risk?token=mock-token-123&username=undefined" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59599 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59600 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59661 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     127.0.0.1:59662 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed

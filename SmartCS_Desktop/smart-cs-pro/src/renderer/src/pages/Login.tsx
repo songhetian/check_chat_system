@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Shield, Cpu, Activity } from 'lucide-react'
+import { Shield, Cpu, Activity, Lock, User, Minus, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
 
@@ -9,6 +9,10 @@ export default function Login() {
   const setAuth = useAuthStore((s) => s.setAuth)
   const [bootStatus, setBootStatus] = useState('等待身份验证...')
   const [progress, setProgress] = useState(0)
+  const [formData, setFormData] = useState({ username: '', password: '' })
+
+  const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
+  const handleClose = () => window.electron.ipcRenderer.send('close-window')
 
   // 核心：中文机械语音合成函数
   const speak = (text: string) => {
@@ -19,8 +23,18 @@ export default function Login() {
     window.speechSynthesis.speak(utterance);
   }
 
+  useEffect(() => {
+    // 登录页需要大窗口展示
+    window.electron.ipcRenderer.send('resize-window', { width: 1000, height: 800 })
+  }, [])
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.username || !formData.password) {
+      alert('请输入完整的账号和密码')
+      return
+    }
+
     setBootStatus('正在建立加密隧道...')
     speak('神经链路启动中，正在连接战术中心。')
     
@@ -38,13 +52,35 @@ export default function Login() {
     }
 
     speak('欢迎进入系统，全链路已就绪。')
-    const mockUser = { username: 'admin', real_name: '张主管', role: 'ADMIN' as any, department: '战术指挥部' }
+    // 模拟根据账号分配角色
+    const role = formData.username.includes('admin') ? 'ADMIN' : 'AGENT'
+    const mockUser = { 
+      username: formData.username, 
+      real_name: role === 'ADMIN' ? '指挥官' : '特勤专员', 
+      role: role as any, 
+      department: '战术指挥部' 
+    }
     setAuth(mockUser, 'token-123')
     navigate('/')
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 scanline grain overflow-hidden">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 scanline grain overflow-hidden relative">
+      {/* 顶部全宽拖拽条 */}
+      <div className="absolute top-0 left-0 w-full h-12 z-50 flex items-center justify-between px-6" style={{ WebkitAppRegion: 'drag' } as any}>
+         <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest select-none">SmartCS Secure Login Port : 443</div>
+         
+         {/* 窗口控制按钮 (非拖拽区) */}
+         <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            <button onClick={handleMinimize} className="text-slate-600 hover:text-white transition-colors">
+               <Minus size={16} />
+            </button>
+            <button onClick={handleClose} className="text-slate-600 hover:text-red-500 transition-colors">
+               <X size={16} />
+            </button>
+         </div>
+      </div>
+
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -52,7 +88,7 @@ export default function Login() {
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50" />
         
-        <div className="flex flex-col items-center mb-10">
+        <div className="flex flex-col items-center mb-8" style={{ WebkitAppRegion: 'drag' } as any}>
           <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mb-6 border border-cyan-500/30">
             <Shield className="text-cyan-400 w-10 h-10" />
           </div>
@@ -65,11 +101,27 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-1">
-            <label className="text-[10px] font-black text-cyan-500 uppercase ml-2">Operator ID</label>
-            <input placeholder="请输入操作员编号" className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 transition-all outline-none" />
+            <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><User size={10}/> Account ID</label>
+            <input 
+              value={formData.username}
+              onChange={(e) => setFormData({...formData, username: e.target.value})}
+              placeholder="请输入战术账号 / Username" 
+              className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 transition-all outline-none placeholder:text-slate-600" 
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><Lock size={10}/> Security Key</label>
+            <input 
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              placeholder="请输入加密密钥 / Password" 
+              className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 transition-all outline-none placeholder:text-slate-600 font-mono tracking-widest" 
+            />
           </div>
           
-          <button className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-black py-5 rounded-2xl shadow-[0_0_30px_rgba(6,182,212,0.3)] transition-all active:scale-95 flex flex-col items-center gap-1 uppercase tracking-widest text-xs">
+          <button className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-black py-5 rounded-2xl shadow-[0_0_30px_rgba(6,182,212,0.3)] transition-all active:scale-95 flex flex-col items-center gap-1 uppercase tracking-widest text-xs mt-4">
             {progress > 0 ? (
               <div className="w-full px-10 space-y-2">
                  <div className="flex justify-between text-[8px] font-bold">
@@ -80,7 +132,7 @@ export default function Login() {
                     <motion.div animate={{ width: `${progress}%` }} className="h-full bg-white" />
                  </div>
               </div>
-            ) : "激活战术链路"}
+            ) : "激活战术链路 / LOGIN SYSTEM"}
           </button>
         </form>
 

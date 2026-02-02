@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -11,7 +11,9 @@ import {
   Bell,
   Search,
   Wrench,
-  Contact2 // 引入画像图标
+  Contact2, // 引入画像图标
+  Minus,
+  X
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
@@ -30,6 +32,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const location = useLocation()
   const clickAudio = useRef<HTMLAudioElement | null>(null)
 
+  const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
+  const handleClose = () => window.electron.ipcRenderer.send('close-window')
+
+  useEffect(() => {
+    // 确保进入仪表盘时窗口足够大
+    window.electron.ipcRenderer.send('resize-window', { width: 1280, height: 850 })
+  }, [])
+
   const playClick = () => {
     if (clickAudio.current) {
       clickAudio.current.currentTime = 0
@@ -46,7 +56,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800">
         <div className="p-6">
-          {/* ... Logo 部分 */}
+          <div className="flex items-center gap-3 mb-10 px-2" style={{ WebkitAppRegion: 'drag' } as any}>
+            <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <ShieldAlert className="text-white" size={24} />
+            </div>
+            <span className="text-xl font-black text-white tracking-tighter italic">SMART-CS</span>
+          </div>
           <nav className="space-y-1">
             {menu.map((item) => (
               <Link
@@ -89,8 +104,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
-          <div className="relative w-96">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8" style={{ WebkitAppRegion: 'drag' } as any}>
+          <div className="relative w-96" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
             <input 
               placeholder="搜索坐席、违规词或商品..." 
@@ -98,17 +113,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             />
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <button className="relative p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
               <Bell size={20} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
             </button>
             <div className="h-8 w-[1px] bg-slate-200 mx-2" />
-            <div className="text-right">
-              <div className="text-[10px] font-bold text-slate-400 uppercase leading-none">系统状态</div>
-              <div className="text-[12px] font-bold text-green-600 flex items-center gap-1 mt-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                全链路加密运行中
+            
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-slate-400 uppercase leading-none">系统状态</div>
+                <div className="text-[12px] font-bold text-green-600 flex items-center gap-1 mt-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  全链路加密运行中
+                </div>
+              </div>
+
+              {/* 窗口控制按钮 */}
+              <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
+                <button onClick={handleMinimize} className="text-slate-400 hover:text-slate-600 transition-colors">
+                  <Minus size={18} />
+                </button>
+                <button onClick={handleClose} className="text-slate-400 hover:text-red-500 transition-colors">
+                  <X size={18} />
+                </button>
               </div>
             </div>
           </div>

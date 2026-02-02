@@ -11,13 +11,22 @@ function createWindow(): void {
     show: false,
     frame: false,
     transparent: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false, // 修改：默认不再置顶，避免遮挡其他应用
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
+  })
+
+  // 窗口控制逻辑
+  ipcMain.on('minimize-window', () => {
+    mainWindow.minimize()
+  })
+
+  ipcMain.on('close-window', () => {
+    mainWindow.close()
   })
 
   // 响应前端尺寸变化
