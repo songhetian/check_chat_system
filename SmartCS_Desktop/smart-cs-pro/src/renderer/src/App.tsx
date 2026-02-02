@@ -23,152 +23,112 @@ import AiPerformancePage from './pages/hq/AiPerformance'
 import { CheckCircle2, AlertCircle, ShieldAlert, User } from 'lucide-react'
 import { cn } from './lib/utils'
 
-function App() {
+// 1. 管理后台首页子组件
+const AdminHome = () => {
   const { user } = useAuthStore()
-  const setRedAlert = useRiskStore(s => s.setRedAlert)
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-end">
+        <div><h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">全链路指挥台</h1><p className="text-slate-500 text-sm">当前活跃坐席实况监控矩阵</p></div>
+        <button onClick={() => window.open('#/big-screen', '_blank')} className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 flex items-center gap-2 tracking-widest uppercase">激活指挥大屏</button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {['张三', '李四', '王五', '赵六'].map((name, i) => (
+          <motion.div key={name} whileHover={{ y: -5 }} className="bg-white p-5 rounded-[32px] border border-slate-200 shadow-sm relative overflow-hidden group">
+            {i !== 1 && ( <motion.div className="absolute inset-0 bg-cyan-500/5" animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} /> )}
+            <div className="flex justify-between items-start mb-4 relative z-10">
+               <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", i === 1 ? "bg-red-500 text-white animate-pulse" : "bg-slate-100 text-slate-400")}><User size={24} /></div>
+               <div className={cn("px-2 py-0.5 rounded text-[8px] font-black uppercase", i === 1 ? "BG-RED-100 TEXT-RED-600" : "BG-GREEN-100 TEXT-GREEN-600")}>{i === 1 ? '告警' : '在线'}</div>
+            </div>
+            <h3 className="font-black text-slate-900 relative z-10">{name}</h3>
+            <div className="pt-4 border-t border-slate-50 flex items-center justify-between relative z-10">
+               <span className="text-[10px] font-black text-slate-700 truncate w-24">{i === 1 ? '微信 - 争议' : '钉钉 - 接待'}</span>
+               <button className="p-2 bg-slate-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all active:scale-90"><ShieldAlert size={12} /></button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// 2. 坐席悬浮窗模式容器
+const AgentView = () => {
   const isRedAlert = useRiskStore(s => s.isRedAlert)
-  
   const [activeSuggestion, setActiveSuggestion] = useState<any>(null)
   const [showFireworks, setShowFireworks] = useState(false)
   const [sopSteps, setSopSteps] = useState<string[] | null>(null)
   const [activeCustomer, setActiveCustomer] = useState<any>(null)
-  const [activeCommand, setActiveCommand] = useState<any>(null)
   const [toast, setToast] = useState<any>(null)
-  const [rewardFlow, setRewardFlow] = useState<any>(null)
-
-  const alertAudioRef = useRef<HTMLAudioElement | null>(null)
-  const rewardAudioRef = useRef<HTMLAudioElement | null>(null)
-
-  useRiskSocket()
-
-  useEffect(() => {
-    if (isRedAlert && alertAudioRef.current) {
-      alertAudioRef.current.play().catch(() => {})
-      const utter = new SpeechSynthesisUtterance('警报，检测到严重违规，证据已留存。');
-      utter.lang = 'zh-CN'; utter.rate = 0.85;
-      window.speechSynthesis.speak(utter);
-    } else if (alertAudioRef.current) {
-      alertAudioRef.current.pause(); alertAudioRef.current.currentTime = 0;
-    }
-  }, [isRedAlert])
 
   useEffect(() => {
     const onSuggestion = (e: any) => setActiveSuggestion(e.detail)
     const onFireworks = () => setShowFireworks(true)
     const onSop = (e: any) => setSopSteps(e.detail)
     const onCustomer = (e: any) => setActiveCustomer(e.detail)
-    const onCommand = (e: any) => { setActiveCommand(e.detail); setTimeout(() => setActiveCommand(null), 10000) }
     const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
-    const onRedAlert = () => { setRedAlert(true); setTimeout(() => setRedAlert(false), 8000) }
-    const onReward = (e: any) => {
-      setRewardFlow(e.detail)
-      if (rewardAudioRef.current) {
-        rewardAudioRef.current.currentTime = 0; rewardAudioRef.current.volume = 0.4;
-        rewardAudioRef.current.play().catch(() => {})
-      }
-      // 自驱动同步：通知全系统（包含大屏）
-      window.dispatchEvent(new CustomEvent('trigger-global-reward', { detail: e.detail }))
-      setTimeout(() => setRewardFlow(null), 2000)
-    }
 
     window.addEventListener('trigger-suggestion', onSuggestion); window.addEventListener('trigger-fireworks', onFireworks)
     window.addEventListener('trigger-sop', onSop); window.addEventListener('trigger-customer', onCustomer)
-    window.addEventListener('trigger-command', onCommand); window.addEventListener('trigger-toast', onToast)
-    window.addEventListener('trigger-red-alert', onRedAlert); window.addEventListener('trigger-reward', onReward)
+    window.addEventListener('trigger-toast', onToast)
 
     return () => {
       window.removeEventListener('trigger-suggestion', onSuggestion); window.removeEventListener('trigger-fireworks', onFireworks)
       window.removeEventListener('trigger-sop', onSop); window.removeEventListener('trigger-customer', onCustomer)
-      window.removeEventListener('trigger-command', onCommand); window.removeEventListener('trigger-toast', onToast)
-      window.removeEventListener('trigger-red-alert', onRedAlert); window.removeEventListener('trigger-reward', onReward)
+      window.removeEventListener('trigger-toast', onToast)
     }
   }, [])
 
-  if (user?.role === 'AGENT') {
-    return (
-      <Router>
-        <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600", activeCommand && "bg-slate-950/80 backdrop-blur-md")}>
-          <audio ref={alertAudioRef} src="https://assets.mixkit.co/active_storage/sfx/2534/2534-preview.mp3" loop />
-          <audio ref={rewardAudioRef} src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" />
-          
-          <AnimatePresence>
-            {rewardFlow && (
-              <motion.div initial={{ opacity: 0, y: 100, scale: 0.5 }} animate={{ opacity: 1, y: -200, scale: 1.5 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center pointer-events-none z-[400]">
-                <div className="flex flex-col items-center gap-2">
-                   <div className="text-6xl font-black text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] italic">+{rewardFlow.delta} PTS</div>
-                   <div className="bg-amber-500 text-slate-900 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">{rewardFlow.msg}</div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+  return (
+    <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600")}>
+      <TacticalIsland />
+      <AnimatePresence>
+        {activeSuggestion && <SuggestionPopup products={activeSuggestion} onDismiss={() => setActiveSuggestion(null)} />}
+        {showFireworks && <Fireworks onComplete={() => setShowFireworks(false)} />}
+        {sopSteps && <SOPOverlay steps={sopSteps} onDismiss={() => setSopSteps(null)} />}
+        {activeCustomer && <CustomerHUD data={activeCustomer} onDismiss={() => setActiveCustomer(null)} />}
+        {toast && (
+          <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="fixed top-20 left-1/2 -translate-x-1/2 z-[300]">
+            <div className={cn("px-6 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-md", toast.type === 'error' ? "bg-red-600/90 border-red-400 text-white" : "bg-slate-900/90 border-cyan-500/50 text-cyan-400")}>
+              {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+              <div className="flex flex-col"><span className="text-[10px] font-black uppercase tracking-widest opacity-50">{toast.title}</span><span className="text-sm font-bold">{toast.message}</span></div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
 
-          <AnimatePresence>
-            {toast && (
-              <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="fixed top-20 left-1/2 -translate-x-1/2 z-[300]">
-                <div className={cn("px-6 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-md", toast.type === 'error' ? "bg-red-600/90 border-red-400 text-white" : "bg-slate-900/90 border-cyan-500/50 text-cyan-400")}>
-                  {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
-                  <div className="flex flex-col"><span className="text-[10px] font-black uppercase tracking-widest opacity-50">{toast.title}</span><span className="text-sm font-bold">{toast.message}</span></div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <TacticalIsland />
-          <AnimatePresence>
-            {activeSuggestion && <SuggestionPopup products={activeSuggestion} onDismiss={() => setActiveSuggestion(null)} />}
-            {showFireworks && <Fireworks onComplete={() => setShowFireworks(false)} />}
-            {sopSteps && <SOPOverlay steps={sopSteps} onDismiss={() => setSopSteps(null)} />}
-            {activeCustomer && <CustomerHUD data={activeCustomer} onDismiss={() => setActiveCustomer(null)} />}
-          </AnimatePresence>
-          <Routes><Route path="*" element={<div />} /></Routes>
-        </div>
-      </Router>
-    )
-  }
+function App() {
+  const { user } = useAuthStore()
+  useRiskSocket()
 
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/big-screen" element={<BigScreen />} />
-        <Route path="/" element={
-          user ? (
-            <DashboardLayout>
-              <Routes>
-                <Route path="/" element={
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-end">
-                      <div><h1 className="text-3xl font-black text-slate-900 tracking-tight">全链路指挥台</h1><p className="text-slate-500 text-sm">当前活跃坐席实况监控矩阵</p></div>
-                      <button onClick={() => window.open('#/big-screen', '_blank')} className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 flex items-center gap-2 tracking-widest uppercase">激活指挥大屏</button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {['张三', '李四', '王五', '赵六'].map((name, i) => (
-                        <motion.div key={name} whileHover={{ y: -5 }} className="bg-white p-5 rounded-[32px] border border-slate-200 shadow-sm relative overflow-hidden group">
-                          {i !== 1 && ( <motion.div className="absolute inset-0 bg-cyan-500/5" animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} /> )}
-                          <div className="flex justify-between items-start mb-4 relative z-10">
-                             <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", i === 1 ? "bg-red-500 text-white animate-pulse" : "bg-slate-100 text-slate-400")}><User size={24} /></div>
-                             <div className={cn("px-2 py-0.5 rounded text-[8px] font-black uppercase", i === 1 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600")}>{i === 1 ? 'VIOLATION' : 'ONLINE'}</div>
-                          </div>
-                          <h3 className="font-black text-slate-900 relative z-10">{name}</h3>
-                          <div className="pt-4 border-t border-slate-50 flex items-center justify-between relative z-10">
-                             <span className="text-[10px] font-black text-slate-700 truncate w-24">{i === 1 ? '微信 - 争议' : '钉钉 - 接待'}</span>
-                             <button className="p-2 bg-slate-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all active:scale-90"><ShieldAlert size={12} /></button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                } />
-                <Route path="/alerts" element={<ViolationsPage />} />
-                <Route path="/platforms" element={<PlatformsPage />} />
-                <Route path="/audit" element={<AuditStreamPage />} />
-                <Route path="/hq/ai-performance" element={<AiPerformancePage />} />
-                <Route path="/products" element={<ProductsPage />} />
-                <Route path="/tools" element={<ToolsPage />} />
-                <Route path="/customers" element={<CustomersPage />} />
-                <Route path="/global-policy" element={<GlobalPolicyPage />} />
-              </Routes>
-            </DashboardLayout>
-          ) : ( <Navigate to="/login" /> )
+        
+        {/* 核心路由逻辑：根据角色进入完全不同的视图 */}
+        <Route path="/*" element={
+          !user ? <Navigate to="/login" /> : (
+            user.role === 'AGENT' ? <AgentView /> : (
+              <DashboardLayout>
+                <Routes>
+                  <Route path="/" element={<AdminHome />} />
+                  <Route path="/alerts" element={<ViolationsPage />} />
+                  <Route path="/platforms" element={<PlatformsPage />} />
+                  <Route path="/audit" element={<AuditStreamPage />} />
+                  <Route path="/hq/ai-performance" element={<AiPerformancePage />} />
+                  <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/tools" element={<ToolsPage />} />
+                  <Route path="/customers" element={<CustomersPage />} />
+                  <Route path="/global-policy" element={<GlobalPolicyPage />} />
+                </Routes>
+              </DashboardLayout>
+            )
+          )
         } />
       </Routes>
     </Router>

@@ -56,66 +56,69 @@ export default function Login() {
     checkLink();
   }, [])
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (isLoading) return
-    setError('')
-    setIsLoading(true)
-
-    try {
-      // 1. 通过战术桥接发起认证请求 (绕过所有 CORS)
-      const res = await window.api.callApi({
-        url: `${CONFIG.API_BASE}/auth/login`,
-        method: 'POST',
-        data: {
-          username: formData.username,
-          password: formData.password
+    const handleLogin = async (e: React.FormEvent) => {
+      e.preventDefault()
+      if (isLoading) return
+      setError('')
+      setIsLoading(true)
+  
+      try {
+        // 登录前先物理注销，确保状态干净
+        useAuthStore.getState().logout();
+  
+        // 1. 通过战术桥接发起认证请求 (绕过所有 CORS)
+        const res = await window.api.callApi({
+          url: `${CONFIG.API_BASE}/auth/login`,
+          method: 'POST',
+          data: {
+            username: formData.username,
+            password: formData.password
+          }
+        });
+  
+        if (res.status !== 200 || res.data.status !== 'ok') {
+          setError(res.data?.message || res.error || '认证链路被拦截');
+          speak('身份核验未通过。');
+          setIsLoading(false)
+          return
         }
-      });
-
-      if (res.status !== 200 || res.data.status !== 'ok') {
-        setError(res.data?.message || res.error || '认证链路被拦截');
-        speak('身份核验未通过。');
-        setIsLoading(false)
-        return
-      }
-
-      const { user, token } = res.data.data
-
-      // 2. 启动仪式感序列
-      setBootStatus('正在建立加密隧道...')
-      speak('身份确认，神经链路启动中。')
-
-      for (let i = 0; i <= 100; i += 2) {
-        setProgress(i)
-        if (i === 20) setBootStatus('正在解析战术协议...')
-        if (i === 40) {
-          setBootStatus('权限包已下发...')
-          speak('权限包校验通过。')
+  
+        const { user, token } = res.data.data
+  
+        // 2. 启动仪式感序列
+        setBootStatus('正在建立加密隧道...')
+        speak('身份确认，神经链路启动中。')
+        
+        for (let i = 0; i <= 100; i += 2) {
+          setProgress(i)
+          if (i === 20) setBootStatus('正在解析战术协议...')
+          if (i === 40) {
+            setBootStatus('权限包已下发...')
+            speak('权限包校验通过。')
+          }
+          if (i === 60) setBootStatus('正在同步全域雷达...')
+          if (i === 80) {
+            setBootStatus('注入战术安全外壳...')
+            speak('正在挂载战术外壳。')
+          }
+          await new Promise(r => setTimeout(r, 15))
         }
-        if (i === 60) setBootStatus('正在同步全域雷达...')
-        if (i === 80) {
-          setBootStatus('注入战术安全外壳...')
-          speak('正在挂载战术外壳。')
-        }
-        await new Promise(r => setTimeout(r, 15))
-      }
-
-      speak(`欢迎进入系统，${user.real_name}。全链路已就绪。`)
-
-      // 3. 持久化至中央状态库
-      setAuth({
-        username: user.username,
-        real_name: user.real_name,
-        role: user.role,
-        department: user.department,
-        rank: user.rank,
-        score: user.score
-      }, token)
-
-      navigate('/')
-    } catch (err: any) {
-      if (err.response) {
+  
+        speak(`欢迎进入系统，${user.real_name}。全链路已就绪。`)
+        
+        // 3. 持久化至中央状态库
+        setAuth({ 
+          username: user.username, 
+          real_name: user.real_name, 
+          role: user.role, 
+          department: user.department,
+          rank: user.rank,
+          score: user.score
+        }, token)
+        
+        // 强制使用 replace 导航，防止返回键导致的逻辑混乱
+        navigate('/', { replace: true })
+      } catch (err: any) {      if (err.response) {
         // 服务器返回了错误 (如 401, 404, 500)
         const msg = err.response.data?.message || '指挥中枢拒绝了访问请求'
         setError(`链路错误: ${msg}`)
