@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Shield, BrainCircuit, Activity, MousePointer2, Radar as RadarIcon, Trophy, BarChart, 
@@ -191,7 +191,6 @@ export const TacticalIsland = () => {
       </motion.div>
     </div>
   )
-}
 }
 
 function StatTile({ title, value, sub, icon }: any) {

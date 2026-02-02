@@ -13,7 +13,13 @@ import platform
 # --- 1. 环境初始化 ---
 load_dotenv()
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex="http://.*", # 允许局域网内所有 HTTP 源
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 logger = logging.getLogger("SmartCS")
 logger.setLevel(logging.INFO)

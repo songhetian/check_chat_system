@@ -32,6 +32,19 @@ export default function Login() {
     window.electron.ipcRenderer.send('resize-window', { width: 1000, height: 800, center: true })
     // 登录页不需要置顶
     window.electron.ipcRenderer.send('set-always-on-top', false)
+
+    // 链路预检
+    const checkLink = async () => {
+      try {
+        console.log(`📡 正在探测中枢链路: ${CONFIG.API_BASE}/health`);
+        await axios.get(`${CONFIG.API_BASE}/health`);
+        console.log('✅ 中枢链路状态: 正常');
+      } catch (e) {
+        setError(`链路预检失败：无法访问指挥中枢 (${CONFIG.API_BASE})`);
+        speak('警告，物理链路脱机。');
+      }
+    };
+    checkLink();
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -96,10 +109,10 @@ export default function Login() {
         speak('身份核验未通过。')
       } else if (err.request) {
         // 请求发出了但没收到响应 (网络断了或引擎没开)
-        setError('无法建立战术连接：中枢服务器脱机')
+        setError(`无法建立战术连接：中枢服务器脱机 (目标: ${CONFIG.API_BASE})`)
         speak('警告，无法建立远程连接。')
       } else {
-        setError('初始化失败：本地环境异常')
+        setError(`初始化失败: ${err.message}`)
       }
     } finally {
       setIsLoading(false)

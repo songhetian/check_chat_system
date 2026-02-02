@@ -25,7 +25,11 @@ export const initDynamicConfig = async () => {
       
       if (centralUrl) {
         CONFIG.API_BASE = centralUrl;
-        CONFIG.WS_BASE = centralUrl.replace('http', 'ws');
+        // 修正：从 http://...:8000/api 转换为 ws://...:8000/ws
+        CONFIG.WS_BASE = centralUrl.replace('/api', '/ws').replace('http', 'ws');
+        console.log(`🌐 [动态配置] 成功同步指挥中心: ${CONFIG.API_BASE}`);
+      } else {
+        console.warn('⚠️ [动态配置] server_config.json 中缺少 central_server_url');
       }
 
       // 同步品牌自定义信息

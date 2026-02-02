@@ -24,9 +24,14 @@ function createWindow(): void {
     if (fs.existsSync(envPath)) {
       const envContent = fs.readFileSync(envPath, 'utf-8')
       const env: Record<string, string> = {}
-      envContent.split('\n').forEach(line => {
-        const [key, val] = line.split('=')
-        if (key && val) env[key.trim()] = val.trim().split('#')[0].trim()
+      envContent.split(/\r?\n/).forEach(line => {
+        const trimmedLine = line.trim()
+        if (!trimmedLine || trimmedLine.startsWith('#')) return
+        const firstEquals = trimmedLine.indexOf('=')
+        if (firstEquals === -1) return
+        const key = trimmedLine.slice(0, firstEquals).trim()
+        const value = trimmedLine.slice(firstEquals + 1).split('#')[0].trim()
+        env[key] = value
       })
 
       const host = env['DB_HOST'] || '127.0.0.1'
@@ -34,7 +39,10 @@ function createWindow(): void {
       
       // 动态重构中央指挥部地址
       serverConfig.network.central_server_url = `http://${host}:${port}/api`
-      console.log(`🌐 [LAN] 已通过 .env 注入指挥中心: ${serverConfig.network.central_server_url}`)
+      console.log(`🌐 [配置系统] 已加载环境: ${envPath}`)
+      console.log(`🌐 [配置系统] 指挥中心定向为: ${serverConfig.network.central_server_url}`)
+    } else {
+      console.warn(`⚠️ [配置系统] 未找到 .env 文件: ${envPath}`)
     }
   } catch (e) { console.error('Env override failed', e) }
 
