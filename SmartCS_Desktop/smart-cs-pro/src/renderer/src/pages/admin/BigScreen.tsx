@@ -6,10 +6,12 @@ import { BarChart3, ShieldAlert, TrendingUp, Target, Activity, Trophy, Medal } f
 function StatCard({ title, value, unit, color = "text-white" }: any) {
   return (
     <motion.div 
-      whileHover={{ y: -5 }}
-      className="bg-slate-900/40 border border-white/10 p-10 rounded-[48px] backdrop-blur-xl relative overflow-hidden group"
+      whileHover={{ y: -5, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => alert(`[战术下钻] 正在调取 ${title} 的历史原始链路数据...`)}
+      className="bg-slate-900/40 border border-white/10 p-10 rounded-[48px] backdrop-blur-xl relative overflow-hidden group cursor-pointer"
     >
-      <div className="absolute -right-4 -bottom-4 p-4 opacity-5 group-hover:scale-110 transition-transform text-white">
+      <div className="absolute -right-4 -bottom-4 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-20 transition-all text-white">
         <TrendingUp size={100} />
       </div>
       <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">{title}</h4>
@@ -28,16 +30,23 @@ export default function BigScreen() {
   const [highlighter, setHighlighter] = useState<any>(null)
   const alertAudio = useRef<HTMLAudioElement | null>(null)
 
+  // 模拟从后端获取实时数据
   useEffect(() => {
-    // 监听全网奖励广播
-    const onGlobalReward = (e: any) => {
-      if (e.detail.delta >= 50) {
-        setHighlighter(e.detail)
-        setTimeout(() => setHighlighter(null), 5000)
-      }
-    }
-    window.addEventListener('trigger-reward', onGlobalReward)
-    return () => window.removeEventListener('trigger-reward', onGlobalReward)
+    const timer = setInterval(() => {
+      // 随机波动数据
+      setStats({
+        total_risk_today: 12 + Math.floor(Math.random() * 5),
+        ai_correction_rate: '94%',
+        active_agents: 4,
+        avg_response_time: '0.7s',
+        risk_distribution: [
+          {name: '违规引流', value: 40 + Math.floor(Math.random() * 10)},
+          {name: '消极怠工', value: 25},
+          {name: '敏感词汇', value: 35}
+        ]
+      })
+    }, 3000)
+    return () => clearInterval(timer)
   }, [])
 
   return (

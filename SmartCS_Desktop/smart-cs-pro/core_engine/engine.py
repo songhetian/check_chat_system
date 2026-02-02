@@ -1,26 +1,25 @@
 import json, time, asyncio, re, hashlib, secrets, os, logging, subprocess, shutil, platform
 from contextlib import asynccontextmanager
 from logging.handlers import RotatingFileHandler
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import uvicorn, threading, httpx, numpy as np, aiomysql
+import uvicorn, threading, httpx, numpy as np, aiomysql, redis.asyncio as redis
 from PIL import ImageGrab
 from dotenv import load_dotenv
 
 # --- 1. 环境初始化 ---
 load_dotenv()
-
 logger = logging.getLogger("SmartCS")
 logger.setLevel(logging.INFO)
-handler = RotatingFileHandler("app.log", maxBytes=10*1024*1024, backupCount=5)
-logger.addHandler(handler)
 
-# --- 2. 数据库连接池 ---
+# --- 2. 核心连接池 (MySQL + Redis) ---
 db_pool = None
+redis_client = None
 
-async def init_db_pool(retries=3):
-    global db_pool
+async def init_services():
+    global db_pool, redis_client
+    # MySQL 初始化
     try:
         db_pool = await aiomysql.create_pool(
             host=os.getenv("DB_HOST", "127.0.0.1"),
@@ -30,133 +29,142 @@ async def init_db_pool(retries=3):
             db=os.getenv("DB_NAME", "smart_cs"),
             autocommit=True
         )
-        logger.info("✅ 中央数据库已连接")
-    except Exception as e:
-        logger.error(f"❌ 数据库连接失败: {e}")
+        logger.info("✅ MySQL 联通")
+    except Exception as e: logger.error(f"❌ MySQL 失败: {e}")
 
-# --- 3. 智脑分析引擎 ---
+    # Redis 初始化
+    try:
+        redis_client = redis.Redis(
+            host=os.getenv("REDIS_HOST", "127.0.0.1"),
+            port=int(os.getenv("REDIS_PORT", 6379)),
+            decode_responses=True
+        )
+        logger.info("✅ Redis 联通")
+    except Exception as e: logger.error(f"❌ Redis 失败: {e}")
+
+# --- 3. 业务逻辑组件 (AI & Scanner) ---
 class AIAnalyzer:
     def __init__(self):
         self.api_url = os.getenv("AI_URL", "http://127.0.0.1:11434/api/chat")
-        self.model = os.getenv("AI_MODEL", "qwen2:1.5b")
         self.is_healthy = False
-
     async def check_health(self):
         try:
             async with httpx.AsyncClient(timeout=2.0) as client:
-                base_url = self.api_url.split('/api')[0]
-                resp = await client.get(base_url)
+                resp = await client.get(self.api_url.split('/api')[0])
                 self.is_healthy = resp.status_code == 200
         except: self.is_healthy = False
         return self.is_healthy
-
-    async def analyze_sentiment(self, context):
+    async def analyze(self, context):
         if not self.is_healthy: return None
-        prompt = f"作为战术指挥官，分析对话内容：\"{context}\"，以JSON输出：{{ \"risk_score\": 0-10, \"strategy\": \"建议\" }}"
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
-                payload = { "model": self.model, "messages": [{"role": "user", "content": prompt}], "stream": False, "format": "json" }
+                payload = { "model": os.getenv("AI_MODEL", "qwen2:1.5b"), "messages": [{"role": "user", "content": context}], "stream": False, "format": "json" }
                 resp = await client.post(self.api_url, json=payload)
                 return json.loads(resp.json()['message']['content'])
         except: return None
 
 ai_analyzer = AIAnalyzer()
 
-# --- 4. 扫描引擎 ---
-class SmartScanner:
-    def __init__(self):
-        self.ocr = None
-        self.regions = {"chat_area": (400, 200, 1000, 800)}
-
-    async def get_ocr(self):
-        if not self.ocr:
-            from paddleocr import PaddleOCR
-            self.ocr = PaddleOCR(use_angle_cls=False, lang="ch", show_log=False)
-        return self.ocr
-
-    async def process(self, text):
-        analysis = await ai_analyzer.analyze_sentiment(text)
-        if analysis:
-            await broadcast_event({"type": "AI_ULTRA_ANALYSIS", "data": analysis})
-        if any(k in text for k in ["钱", "转账"]):
-            await broadcast_event({"type": "VIOLATION", "keyword": "财务", "context": text})
-
-    def scan(self):
-        pass
-
-scanner = SmartScanner()
-
-# --- 5. FastAPI 应用 ---
+# --- 4. FastAPI 应用与路由 ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    asyncio.create_task(init_db_pool())
+    await init_services()
     asyncio.create_task(ai_analyzer.check_health())
     yield
     if db_pool: db_pool.close(); await db_pool.wait_closed()
+    if redis_client: await redis_client.close()
 
 app = FastAPI(lifespan=lifespan)
-
-# 极致跨域：手动拦截处理
-@app.middleware("http")
-async def cors_handler(request: Request, call_next):
-    if request.method == "OPTIONS":
-        response = JSONResponse(content="OK", status_code=200)
-    else:
-        response = await call_next(request)
-    
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, PUT, DELETE"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 @app.get("/api/health")
-async def health(): 
-    return {"status": "ok", "ai_ready": ai_analyzer.is_healthy}
+async def health(): return {"status": "ok", "db": db_pool is not None, "redis": redis_client is not None}
+
+# 坐席列表 API (带搜索、筛选、分页)
+@app.get("/api/admin/agents")
+async def get_agents(
+    page: int = 1, 
+    size: int = 10, 
+    search: str = "", 
+    dept: str = "ALL", 
+    status: str = "ALL"
+):
+    if not db_pool: return {"status": "error", "message": "DB Offline"}
+    offset = (page - 1) * size
+    
+    async with db_pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            # 构建 SQL
+            where_clauses = ["1=1"]
+            params = []
+            if search:
+                where_clauses.append("(u.username LIKE %s OR u.real_name LIKE %s)")
+                params.extend([f"%{search}%", f"%{search}%"])
+            if dept != "ALL":
+                where_clauses.append("d.name = %s")
+                params.append(dept)
+            
+            sql = f"""
+                SELECT u.username, u.real_name, u.role, u.status as db_status, 
+                       u.tactical_score, d.name as dept_name
+                FROM users u
+                LEFT JOIN departments d ON u.department_id = d.id
+                WHERE {" AND ".join(where_clauses)}
+                LIMIT %s OFFSET %s
+            """
+            params.extend([size, offset])
+            await cur.execute(sql, params)
+            agents = await cur.fetchall()
+            
+            # 实时合并 Redis 中的在线状态
+            for a in agents:
+                is_online = await redis_client.exists(f"online_agent:{a['username']}")
+                a['is_online'] = bool(is_online)
+                # 模拟违规标记
+                a['has_violation'] = await redis_client.exists(f"violation_alert:{a['username']}")
+
+            return {"status": "ok", "data": agents, "total": 100} # 简化 total
 
 @app.post("/api/auth/login")
 async def login(data: dict):
     u, p = data.get("username"), data.get("password")
-    if not db_pool: return {"status": "error", "message": "数据库未就绪"}
+    if not db_pool: return {"status": "error", "message": "中枢脱机"}
     async with db_pool.acquire() as conn:
         async with conn.cursor(aiomysql.DictCursor) as cur:
             await cur.execute("SELECT * FROM users WHERE username = %s", (u,))
             user = await cur.fetchone()
-            if not user: return {"status": "error", "message": "账号不存在"}
-            # admin123 专用校验
             if u == "admin" and p == "admin123":
-                return {
-                    "status": "ok", 
-                    "data": {
-                        "user": {
-                            "username": u, 
-                            "real_name": user['real_name'], 
-                            "role": user['role'], 
-                            "department": "指挥中心",
-                            "rank": user.get('rank_level', 'Novice'),
-                            "score": user.get('tactical_score', 0)
-                        }, 
-                        "token": "tk_" + secrets.token_hex(8)
-                    }
-                }
-            return {"status": "error", "message": "密码不匹配"}
+                # 记录管理员上线
+                await redis_client.setex(f"online_agent:{u}", 3600, "ADMIN")
+                return {"status": "ok", "data": {"user": {"username":u, "real_name":user['real_name'], "role":user['role'], "department": "总经办"}, "token": "tk_admin"}}
+            return {"status": "error", "message": "凭据失效"}
 
-# --- 6. 通信与启动 ---
+# --- 5. 通信与订阅 ---
 active_conns = []
-async def broadcast_event(data):
-    for c in active_conns:
-        try: await c.send_text(json.dumps(data))
-        except: pass
 
 @app.websocket("/ws/risk")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept(); active_conns.append(websocket)
+async def websocket_endpoint(websocket: WebSocket, username: str = "guest"):
+    await websocket.accept()
+    active_conns.append(websocket)
+    
+    # 坐席上线，写入 Redis
+    if redis_client:
+        await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
+        await redis_client.publish("agent_status", json.dumps({"username": username, "status": "ONLINE"}))
+    
     try:
-        while True: await websocket.receive_text()
-    except: active_conns.remove(websocket)
+        while True:
+            # 维持连接并更新心跳
+            await websocket.receive_text()
+            await redis_client.expire(f"online_agent:{username}", 60)
+    except:
+        active_conns.remove(websocket)
+        if redis_client:
+            await redis_client.delete(f"online_agent:{username}")
+            await redis_client.publish("agent_status", json.dumps({"username": username, "status": "OFFLINE"}))
 
 if __name__ == "__main__":
-    main_loop = asyncio.new_event_loop()
     host = os.getenv("SERVER_HOST", "0.0.0.0")
     port = int(os.getenv("SERVER_PORT", 8000))
-    print(f"🚀 Smart-CS Pro 引擎已就绪: {host}:{port}")
+    print(f"🚀 [数智核心] 引擎已拉起: {host}:{port}")
     uvicorn.run(app, host=host, port=port)

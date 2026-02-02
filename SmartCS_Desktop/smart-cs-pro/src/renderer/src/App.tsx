@@ -20,33 +20,160 @@ import PlatformsPage from './pages/admin/Platforms'
 import BigScreen from './pages/admin/BigScreen'
 import GlobalPolicyPage from './pages/hq/GlobalPolicy'
 import AiPerformancePage from './pages/hq/AiPerformance'
-import { CheckCircle2, AlertCircle, ShieldAlert, User } from 'lucide-react'
+import { 
+  CheckCircle2, 
+  AlertCircle, 
+  ShieldAlert, 
+  User, 
+  Search, 
+  Filter, 
+  ChevronLeft, 
+  ChevronRight, 
+  Activity, 
+  Globe, 
+  ShieldCheck, 
+  Users 
+} from 'lucide-react'
 import { cn } from './lib/utils'
+import { CONFIG } from './lib/config'
 
-// 1. 管理后台首页子组件
+// 1. 工业级管理后台首页
 const AdminHome = () => {
-  const { user } = useAuthStore()
+  const [agents, setAgents] = useState<any[]>([])
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [dept, setDept] = useState('ALL')
+  const [loading, setLoading] = useState(false)
+
+  const fetchAgents = async () => {
+    setLoading(true)
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/agents?page=${page}&search=${search}&dept=${dept}`,
+        method: 'GET'
+      })
+      if (res.status === 200) setAgents(res.data.data)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchAgents() }, [page, dept])
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-end">
-        <div><h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">全链路指挥台</h1><p className="text-slate-500 text-sm">当前活跃坐席实况监控矩阵</p></div>
-        <button onClick={() => window.open('#/big-screen', '_blank')} className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 flex items-center gap-2 tracking-widest uppercase">激活指挥大屏</button>
+    <div className="space-y-6 h-full flex flex-col">
+      {/* 战术工具栏 */}
+      <div className="flex justify-between items-center bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
+        <div className="flex items-center gap-6 flex-1">
+          <div className="relative w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <input 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && fetchAgents()}
+              placeholder="搜索操作员姓名或编号..." 
+              className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-cyan-500/20"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter size={14} className="text-slate-400" />
+            <select 
+              value={dept}
+              onChange={(e) => setDept(e.target.value)}
+              className="bg-transparent border-none text-sm font-bold text-slate-600 focus:ring-0 cursor-pointer"
+            >
+              <option value="ALL">全域部门</option>
+              <option value="销售一部">销售一部</option>
+              <option value="技术中心">技术中心</option>
+            </select>
+          </div>
+        </div>
+        <button onClick={() => window.open('#/big-screen', '_blank')} className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 flex items-center gap-2 tracking-widest uppercase">
+          <Globe size={14} /> 激活实时大屏
+        </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {['张三', '李四', '王五', '赵六'].map((name, i) => (
-          <motion.div key={name} whileHover={{ y: -5 }} className="bg-white p-5 rounded-[32px] border border-slate-200 shadow-sm relative overflow-hidden group">
-            {i !== 1 && ( <motion.div className="absolute inset-0 bg-cyan-500/5" animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} /> )}
-            <div className="flex justify-between items-start mb-4 relative z-10">
-               <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", i === 1 ? "bg-red-500 text-white animate-pulse" : "bg-slate-100 text-slate-400")}><User size={24} /></div>
-               <div className={cn("px-2 py-0.5 rounded text-[8px] font-black uppercase", i === 1 ? "BG-RED-100 TEXT-RED-600" : "BG-GREEN-100 TEXT-GREEN-600")}>{i === 1 ? '告警' : '在线'}</div>
+
+      {/* 高密度监控列表 */}
+      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <div className="overflow-y-auto flex-1">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
+                <th className="px-8 py-4">操作员节点</th>
+                <th className="px-6 py-4">所属部门</th>
+                <th className="px-6 py-4">当前状态</th>
+                <th className="px-6 py-4">战术评分</th>
+                <th className="px-6 py-4">异常记录</th>
+                <th className="px-8 py-4 text-right">链路操作</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {agents.map((agent) => (
+                <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors">
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm",
+                        agent.is_online ? "bg-cyan-500/10 text-cyan-600" : "bg-slate-100 text-slate-400"
+                      )}>
+                        {agent.real_name[0]}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-black text-slate-900">{agent.real_name}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">ID: {agent.username}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">{agent.dept_name || '未归类'}</span>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-2">
+                      <div className={cn("w-2 h-2 rounded-full", agent.is_online ? "bg-green-500 animate-pulse" : "bg-slate-300")} />
+                      <span className={cn("text-xs font-bold", agent.is_online ? "text-green-600" : "text-slate-400")}>
+                        {agent.is_online ? '在线监听中' : '脱机'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-1 text-sm font-black text-slate-700 italic">
+                      <Activity size={14} className="text-cyan-500" /> {agent.tactical_score}
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    {agent.has_violation ? (
+                      <span className="px-2 py-1 bg-red-100 text-red-600 text-[10px] font-black rounded flex items-center gap-1 w-fit">
+                        <AlertCircle size={10} /> 发现高危行为
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-slate-400 font-bold">无异常</span>
+                    )}
+                  </td>
+                  <td className="px-8 py-5 text-right">
+                    <button className="p-2 text-slate-400 hover:text-cyan-600 transition-colors hover:bg-cyan-50 rounded-lg">
+                      <ShieldCheck size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {agents.length === 0 && !loading && (
+            <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-2">
+              <Users size={48} strokeWidth={1} />
+              <p className="text-sm font-medium">未发现匹配的操作员节点</p>
             </div>
-            <h3 className="font-black text-slate-900 relative z-10">{name}</h3>
-            <div className="pt-4 border-t border-slate-50 flex items-center justify-between relative z-10">
-               <span className="text-[10px] font-black text-slate-700 truncate w-24">{i === 1 ? '微信 - 争议' : '钉钉 - 接待'}</span>
-               <button className="p-2 bg-slate-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all active:scale-90"><ShieldAlert size={12} /></button>
-            </div>
-          </motion.div>
-        ))}
+          )}
+        </div>
+
+        {/* 分页控制器 */}
+        <div className="p-6 bg-slate-50/50 border-t flex justify-between items-center shrink-0">
+          <span className="text-xs font-bold text-slate-400">显示第 1-10 条，共 100 条记录</span>
+          <div className="flex gap-2">
+            <button className="p-2 bg-white border rounded-xl hover:bg-slate-50 disabled:opacity-30" disabled><ChevronLeft size={16} /></button>
+            <button className="p-2 bg-white border rounded-xl hover:bg-slate-50 shadow-sm"><ChevronRight size={16} /></button>
+          </div>
+        </div>
       </div>
     </div>
   )
