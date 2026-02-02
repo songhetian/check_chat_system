@@ -102,16 +102,21 @@ export default function BigScreen() {
                    { name: '李萌萌', dept: '售后组', rank: 'Veteran' },
                    { name: '周杰', dept: '技术支持', rank: 'Elite Operator' }
                  ].map((hero, i) => (
-                     <div className="p-4 bg-gradient-to-r from-amber-500/10 to-transparent rounded-2xl border-l-4 border-amber-500 flex justify-between items-center group">
+                   <div className="p-4 bg-gradient-to-r from-amber-500/10 to-transparent rounded-2xl border-l-4 border-amber-500 flex justify-between items-center group">
                       <div className="flex flex-col">
                          <span className="text-sm font-black text-white group-hover:text-amber-400 transition-colors">{hero.name}</span>
-                         <span className="text-[8px] text-slate-500 font-bold uppercase">{hero.dept}</span>
+                         <div className="flex items-center gap-2">
+                            <span className="text-[8px] text-slate-500 font-bold uppercase">{hero.dept}</span>
+                            <span className="text-[7px] bg-red-500/20 text-red-400 px-1 rounded">风险对冲已扣除</span>
+                         </div>
                       </div>
                       <div className="text-right">
-                         <div className="text-[10px] font-black text-amber-400 italic">授勋: {hero.rank}</div>
-                         <div className="text-[7px] text-cyan-500 font-bold uppercase">实战量: {i === 0 ? '124' : i === 1 ? '89' : '56'} CASES</div>
+                         <div className="text-lg font-black text-amber-400 italic tracking-tighter">
+                           {i === 0 ? '2,450' : i === 1 ? '1,820' : '940'} <span className="text-[8px] opacity-50">PTS</span>
+                         </div>
+                         <div className="text-[7px] text-cyan-500 font-bold uppercase">综合评分: EXCELLENT</div>
                       </div>
-                   </motion.div>
+                   </div>
                  ))}
               </div>
               <div className="mt-6 pt-4 border-t border-white/5 text-center">
