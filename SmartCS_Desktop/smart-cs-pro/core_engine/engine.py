@@ -239,7 +239,18 @@ async def websocket_endpoint(websocket: WebSocket):
     engine.active_connections.append(websocket)
     try:
         while True:
-            await websocket.receive_text()
+            raw_data = await websocket.receive_text()
+            data = json.loads(raw_data)
+            
+            # 处理前端发来的指令
+            if data.get("type") == "MUTE_AGENT":
+                print(f"🚨 [指令收到] 坐席 {data.get('agent_id')} 申请静音保护")
+                # 这里可以扩展调用系统音量控制 API 或 IM 禁言 API
+                await websocket.send_text(json.dumps({
+                    "type": "MUTE_CONFIRM",
+                    "status": "success",
+                    "timestamp": time.time()
+                }))
     except WebSocketDisconnect:
         engine.active_connections.remove(websocket)
 

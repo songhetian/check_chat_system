@@ -15,9 +15,11 @@ interface RiskState {
   isRedAlert: boolean // 新增 315 全屏警报状态
   lastViolation: Violation | null
   violations: Violation[]
+  sendMessage: (msg: any) => void // 新增：发送 WebSocket 消息
   addViolation: (v: Violation) => void
   setAlerting: (alert: boolean) => void
   setRedAlert: (alert: boolean) => void
+  setSendMessage: (fn: (msg: any) => void) => void // 新增：设置发送函数
   clearAlerts: () => void
 }
 
@@ -26,6 +28,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   isRedAlert: false,
   lastViolation: null,
   violations: [],
+  sendMessage: () => {}, 
   addViolation: (v) => set((state) => ({
     violations: [v, ...state.violations].slice(0, 100),
     lastViolation: v,
@@ -33,5 +36,6 @@ export const useRiskStore = create<RiskState>((set) => ({
   })),
   setAlerting: (alert) => set({ isAlerting: alert }),
   setRedAlert: (alert) => set({ isRedAlert: alert }),
+  setSendMessage: (fn) => set({ sendMessage: fn }),
   clearAlerts: () => set({ violations: [], lastViolation: null, isAlerting: false, isRedAlert: false })
 }))

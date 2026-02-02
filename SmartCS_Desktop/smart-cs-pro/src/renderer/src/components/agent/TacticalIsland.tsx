@@ -1,14 +1,19 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, AlertCircle, MessageSquare, Package, ChevronRight } from 'lucide-react'
+import { Shield, AlertCircle, MessageSquare, Package, ChevronRight, Zap, Video, VolumeX } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { cn } from '../../lib/utils'
+import axios from 'axios'
 
 export const TacticalIsland = () => {
-  const { isAlerting, lastViolation } = useRiskStore()
+  const { isAlerting, lastViolation, sendMessage } = useRiskStore()
   const { user } = useAuthStore()
   const [isExpanded, setIsExpanded] = useState(false)
+
+  const handleMute = () => {
+    sendMessage({ type: 'MUTE_AGENT', agent_id: user?.username, timestamp: Date.now() })
+  }
 
   const handleDoubleClick = () => {
     // 调用 Electron 主进程切换窗口尺寸
@@ -90,6 +95,7 @@ export const TacticalIsland = () => {
                 <h4 className="text-[10px] uppercase font-bold text-slate-500 tracking-wider flex items-center gap-1">
                   <Zap size={10} /> 快速战术行动
                 </h4>
+                <ToolButton icon={<VolumeX size={14} />} label="一键静音拦截" onClick={handleMute} />
                 <ToolButton icon={<MessageSquare size={14} />} label="常用话术库" onClick={handleCopyScript} />
                 <ToolButton icon={<Video size={14} />} label={isConverting ? "转码中..." : "视频格式转换"} onClick={handleVideoConvert} />
                 <div className="h-[1px] bg-white/5 my-1" />
