@@ -1,5 +1,5 @@
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from './store/useAuthStore'
 import { TacticalIsland } from './components/agent/TacticalIsland'
@@ -34,75 +34,84 @@ function App() {
   const [activeCustomer, setActiveCustomer] = useState<any>(null)
   const [activeCommand, setActiveCommand] = useState<any>(null)
   const [toast, setToast] = useState<any>(null)
+  const [rewardFlow, setRewardFlow] = useState<any>(null)
 
   const alertAudioRef = useRef<HTMLAudioElement | null>(null)
+  const rewardAudioRef = useRef<HTMLAudioElement | null>(null)
 
   useRiskSocket()
 
   useEffect(() => {
     if (isRedAlert && alertAudioRef.current) {
       alertAudioRef.current.play().catch(() => {})
-      // 自驱动优化：播放红色警报语音
-      const utter = new SpeechSynthesisUtterance('警报，检测到严重违规，战术证据已实时留存。');
+      const utter = new SpeechSynthesisUtterance('警报，检测到严重违规，证据已留存。');
       utter.lang = 'zh-CN'; utter.rate = 0.85;
       window.speechSynthesis.speak(utter);
     } else if (alertAudioRef.current) {
-      alertAudioRef.current.pause()
-      alertAudioRef.current.currentTime = 0
+      alertAudioRef.current.pause(); alertAudioRef.current.currentTime = 0;
     }
   }, [isRedAlert])
 
   useEffect(() => {
-    // ... 原有监听逻辑保持不变
     const onSuggestion = (e: any) => setActiveSuggestion(e.detail)
     const onFireworks = () => setShowFireworks(true)
     const onSop = (e: any) => setSopSteps(e.detail)
     const onCustomer = (e: any) => setActiveCustomer(e.detail)
     const onCommand = (e: any) => { setActiveCommand(e.detail); setTimeout(() => setActiveCommand(null), 10000) }
-            const onRedAlert = () => { setRedAlert(true); setTimeout(() => setRedAlert(false), 8000) }
-            const [rewardFlow, setRewardFlow] = useState<any>(null)
-        
-            useEffect(() => {
-              // ... 
-              const onReward = (e: any) => {
-                setRewardFlow(e.detail)
-                setTimeout(() => setRewardFlow(null), 2000)
-              }
-              window.addEventListener('trigger-reward', onReward)
-              return () => window.removeEventListener('trigger-reward', onReward)
-            }, [])
-        
-            return (
-              <Router>
-                <div className={cn(...) }>
-                  {/* 战术加分漂浮特效 (新增) */}
-                  <AnimatePresence>
-                    {rewardFlow && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 100, scale: 0.5 }}
-                        animate={{ opacity: 1, y: -200, scale: 1.5 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 flex items-center justify-center pointer-events-none z-[400]"
-                      >
-                        <div className="flex flex-col items-center gap-2">
-                           <div className="text-6xl font-black text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] italic">
-                             +{rewardFlow.delta} PTS
-                           </div>
-                           <div className="bg-amber-500 text-slate-900 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
-                             {rewardFlow.msg}
-                           </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  {/* ... */}  }, [])
+    const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
+    const onRedAlert = () => { setRedAlert(true); setTimeout(() => setRedAlert(false), 8000) }
+    const onReward = (e: any) => {
+      setRewardFlow(e.detail)
+      if (rewardAudioRef.current) {
+        rewardAudioRef.current.currentTime = 0; rewardAudioRef.current.volume = 0.4;
+        rewardAudioRef.current.play().catch(() => {})
+      }
+      // 自驱动同步：通知全系统（包含大屏）
+      window.dispatchEvent(new CustomEvent('trigger-global-reward', { detail: e.detail }))
+      setTimeout(() => setRewardFlow(null), 2000)
+    }
+
+    window.addEventListener('trigger-suggestion', onSuggestion); window.addEventListener('trigger-fireworks', onFireworks)
+    window.addEventListener('trigger-sop', onSop); window.addEventListener('trigger-customer', onCustomer)
+    window.addEventListener('trigger-command', onCommand); window.addEventListener('trigger-toast', onToast)
+    window.addEventListener('trigger-red-alert', onRedAlert); window.addEventListener('trigger-reward', onReward)
+
+    return () => {
+      window.removeEventListener('trigger-suggestion', onSuggestion); window.removeEventListener('trigger-fireworks', onFireworks)
+      window.removeEventListener('trigger-sop', onSop); window.removeEventListener('trigger-customer', onCustomer)
+      window.removeEventListener('trigger-command', onCommand); window.removeEventListener('trigger-toast', onToast)
+      window.removeEventListener('trigger-red-alert', onRedAlert); window.removeEventListener('trigger-reward', onReward)
+    }
+  }, [])
 
   if (user?.role === 'AGENT') {
     return (
       <Router>
         <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600", activeCommand && "bg-slate-950/80 backdrop-blur-md")}>
           <audio ref={alertAudioRef} src="https://assets.mixkit.co/active_storage/sfx/2534/2534-preview.mp3" loop />
-          {/* ... */}
+          <audio ref={rewardAudioRef} src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" />
+          
+          <AnimatePresence>
+            {rewardFlow && (
+              <motion.div initial={{ opacity: 0, y: 100, scale: 0.5 }} animate={{ opacity: 1, y: -200, scale: 1.5 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center pointer-events-none z-[400]">
+                <div className="flex flex-col items-center gap-2">
+                   <div className="text-6xl font-black text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] italic">+{rewardFlow.delta} PTS</div>
+                   <div className="bg-amber-500 text-slate-900 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">{rewardFlow.msg}</div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {toast && (
+              <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="fixed top-20 left-1/2 -translate-x-1/2 z-[300]">
+                <div className={cn("px-6 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-md", toast.type === 'error' ? "bg-red-600/90 border-red-400 text-white" : "bg-slate-900/90 border-cyan-500/50 text-cyan-400")}>
+                  {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+                  <div className="flex flex-col"><span className="text-[10px] font-black uppercase tracking-widest opacity-50">{toast.title}</span><span className="text-sm font-bold">{toast.message}</span></div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <TacticalIsland />
           <AnimatePresence>
             {activeSuggestion && <SuggestionPopup products={activeSuggestion} onDismiss={() => setActiveSuggestion(null)} />}
@@ -134,15 +143,7 @@ function App() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       {['张三', '李四', '王五', '赵六'].map((name, i) => (
                         <motion.div key={name} whileHover={{ y: -5 }} className="bg-white p-5 rounded-[32px] border border-slate-200 shadow-sm relative overflow-hidden group">
-                          {/* 自驱动优化：增加背景扫描脉冲 (与坐席端同步) */}
-                          {i !== 1 && (
-                            <motion.div 
-                              className="absolute inset-0 bg-cyan-500/5"
-                              animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] }}
-                              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                            />
-                          )}
-                          
+                          {i !== 1 && ( <motion.div className="absolute inset-0 bg-cyan-500/5" animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} /> )}
                           <div className="flex justify-between items-start mb-4 relative z-10">
                              <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", i === 1 ? "bg-red-500 text-white animate-pulse" : "bg-slate-100 text-slate-400")}><User size={24} /></div>
                              <div className={cn("px-2 py-0.5 rounded text-[8px] font-black uppercase", i === 1 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600")}>{i === 1 ? 'VIOLATION' : 'ONLINE'}</div>

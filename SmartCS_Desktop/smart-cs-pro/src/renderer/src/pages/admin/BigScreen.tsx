@@ -1,30 +1,53 @@
 import { motion } from 'framer-motion'
-import { BarChart3, ShieldAlert, TrendingUp, Target, Activity, Download } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { BarChart3, ShieldAlert, TrendingUp, Target, Activity, Download, Trophy, Star, Medal } from 'lucide-react'
 
 export default function BigScreen() {
   const [stats, setStats] = useState<any>(null)
+  const [highlighter, setHighlighter] = useState<any>(null)
   const alertAudio = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
-    const fetchData = async () => {
-      const res = await axios.get('http://127.0.0.1:8000/api/admin/stats')
-      // 自驱动优化：若检测到今日拦截总数增加，触发大屏音效
-      if (stats && res.data.total_risk_today > stats.total_risk_today) {
-        if (alertAudio.current) {
-          alertAudio.current.volume = 0.2
-          alertAudio.current.play().catch(() => {})
-        }
+    // 模拟监听全网奖励广播 (实际应通过 WebSocket 监听 REWARD_NOTIFY)
+    const onGlobalReward = (e: any) => {
+      if (e.detail.delta >= 50) { // 只展示大额奖励
+        setHighlighter(e.detail)
+        setTimeout(() => setHighlighter(null), 5000)
       }
-      setStats(res.data)
     }
-    fetchData()
-    // ... 保持原有 interval 逻辑
-  }, [stats])
+    window.addEventListener('trigger-reward', onGlobalReward)
+    return () => window.removeEventListener('trigger-reward', onGlobalReward)
+  }, [])
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-10 font-sans overflow-hidden scanline grain relative">
+      {/* 自驱动优化：高光战报浮层 */}
+      <AnimatePresence>
+        {highlighter && (
+          <motion.div 
+            initial={{ x: 300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 300, opacity: 0 }}
+            className="fixed right-10 top-10 z-[200] w-80"
+          >
+            <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-[2px] rounded-[32px] shadow-[0_0_50px_rgba(245,158,11,0.3)]">
+               <div className="bg-slate-950 rounded-[30px] p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                     <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500 border border-amber-500/30">
+                        <Medal size={24} />
+                     </div>
+                     <div>
+                        <div className="text-[10px] font-black text-amber-500 uppercase tracking-widest">高光战报推送</div>
+                        <h4 className="text-sm font-black text-white">{highlighter.username} 斩获勋章</h4>
+                     </div>
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-medium">"{highlighter.msg}"</p>
+                  <div className="text-2xl font-black text-amber-400 italic">+{highlighter.delta} PTS</div>
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <audio ref={alertAudio} src="https://assets.mixkit.co/active_storage/sfx/2568/2534-preview.mp3" />
       {/* ... 保持原有渲染结构 */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
