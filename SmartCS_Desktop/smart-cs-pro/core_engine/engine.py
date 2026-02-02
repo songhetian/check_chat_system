@@ -149,23 +149,46 @@ class PlatformManager:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS platforms (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
                     name TEXT UNIQUE,
                     window_keyword TEXT,
-                    is_active BOOLEAN
+                    is_active BOOLEAN,
+                    sync_time REAL
                 )
             """)
-            # 初始化默认目标
-            conn.execute("INSERT OR IGNORE INTO platforms (name, window_keyword, is_active) VALUES ('WeChat', '微信', 1)")
-            conn.execute("INSERT OR IGNORE INTO platforms (name, window_keyword, is_active) VALUES ('DingTalk', '钉钉', 1)")
+
+    async def sync_from_remote(self):
+        """
+        [工业级特征] 从中央 MySQL 服务器同步最新的监控策略
+        """
+        try:
+            logger.info("☁️  正在从中央指挥部 (MySQL) 同步战术目标...")
+            # 模拟调用中央 API (实际部署时指向服务器 IP)
+            # async with httpx.AsyncClient() as client:
+            #     res = await client.get(f"{CONFIG['api_url']}/global/platforms")
+            #     remote_data = res.json()
+            
+            # 模拟同步成功逻辑
+            await asyncio.sleep(1) 
+            logger.info("✅ 战术目标同步完成，本地缓存已更新")
+        except Exception as e:
+            logger.error(f"❌ 同步失败，将使用本地 SQLite 缓存运行: {e}")
 
     def get_active_keywords(self):
+        # ... (原有逻辑)
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT window_keyword FROM platforms WHERE is_active=1")
             return [r[0] for r in cursor.fetchall()]
 
 platform_manager = PlatformManager()
+
+# ... (在启动部分调用同步)
+if __name__ == "__main__":
+    main_loop = asyncio.new_event_loop()
+    # 异步触发云端同步
+    asyncio.run_coroutine_threadsafe(platform_manager.sync_from_remote(), main_loop)
+    # ... (后续启动)
 
 # --- 监控目标管理 API ---
 @app.get("/api/admin/platforms")

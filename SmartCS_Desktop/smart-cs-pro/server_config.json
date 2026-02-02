@@ -1,6 +1,8 @@
 {
-    "api_url": "http://127.0.0.1:8000/api",
-    "server_url": "ws://127.0.0.1:8000",
+    "local_port": 8000,
+    "central_api_url": "http://192.168.1.100:8000/api",
     "ollama_url": "http://localhost:11434/api/chat",
-    "ai_enabled": false
+    "ai_enabled": true,
+    "sync_enabled": true,
+    "environment": "production"
 }
