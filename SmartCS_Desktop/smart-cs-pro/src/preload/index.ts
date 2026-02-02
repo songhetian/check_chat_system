@@ -2,7 +2,9 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // 自定义 API，暴露给渲染进程 (window.api)
-const api = {}
+const api = {
+  getServerConfig: () => ipcRenderer.invoke('get-server-config')
+}
 
 if (process.contextIsolated) {
   try {

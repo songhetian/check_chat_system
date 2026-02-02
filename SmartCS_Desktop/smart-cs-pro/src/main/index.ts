@@ -2,8 +2,24 @@ import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import fs from 'fs'
 
 function createWindow(): void {
+  // 读取局域网配置
+  const configPath = join(app.getAppPath(), 'server_config.json')
+  let serverConfig = { network: { central_server_url: 'http://127.0.0.1:8000/api' } }
+  
+  try {
+    if (fs.existsSync(configPath)) {
+      serverConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+    }
+  } catch (e) {
+    console.error('Failed to load server_config.json', e)
+  }
+
+  // 暴露配置给前端
+  ipcMain.handle('get-server-config', () => serverConfig)
+
   // 核心：创建独立、透明、置顶的战术岛窗口
   const mainWindow = new BrowserWindow({
     width: 260,
