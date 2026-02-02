@@ -101,6 +101,15 @@ export default function ViolationsPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <button 
+                    onClick={async () => {
+                      const res = await axios.post('http://127.0.0.1:8000/api/ai/summarize', { context: selectedViolation.context })
+                      alert(`【AI 战术综述】\n${res.data.summary}`)
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-cyan-500 text-cyan-600 rounded-xl text-xs font-black hover:bg-cyan-50 transition-all"
+                  >
+                    <BrainCircuit size={14} /> AI 智能提炼
+                  </button>
                   <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-900/20 active:scale-95">
                     <Trophy size={14} /> 表现优异，一键表扬
                   </button>

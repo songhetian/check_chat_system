@@ -22,12 +22,14 @@ interface RiskState {
   isOnline: boolean
   isAlerting: boolean
   isRedAlert: boolean
+  isAiOptimizeEnabled: boolean // 新增：AI 自动优化开关
   lastViolation: Violation | null
   lastAiAnalysis: AiUltraAnalysis | null
   violations: Violation[]
   sendMessage: (msg: any) => void
   addViolation: (v: Violation) => void
   setAiAnalysis: (a: AiUltraAnalysis) => void
+  setAiOptimize: (enabled: boolean) => void // 新增：设置开关
   setAlerting: (alert: boolean) => void
   setRedAlert: (alert: boolean) => void
   setOnline: (online: boolean) => void
@@ -39,6 +41,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   isOnline: true,
   isAlerting: false,
   isRedAlert: false,
+  isAiOptimizeEnabled: false, // 默认关闭
   lastViolation: null,
   lastAiAnalysis: null,
   violations: [],
@@ -49,6 +52,7 @@ export const useRiskStore = create<RiskState>((set) => ({
     isAlerting: true
   })),
   setAiAnalysis: (a) => set({ lastAiAnalysis: a, isAlerting: a.risk_score > 7 }),
+  setAiOptimize: (enabled) => set({ isAiOptimizeEnabled: enabled }),
   setAlerting: (alert) => set({ isAlerting: alert }),
   setRedAlert: (alert) => set({ isRedAlert: alert }),
   setOnline: (online) => set({ isOnline: online }),
