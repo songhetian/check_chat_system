@@ -23,14 +23,14 @@ export const initDynamicConfig = async () => {
       const serverConfig = await window.api.getServerConfig();
       let centralUrl = serverConfig?.network?.central_server_url;
       
-      // 增加容错：如果 centralUrl 是本地 IP 的变体，且连接失败，允许手动干预或自动切换
       if (centralUrl) {
         // 规范化：确保没有结尾斜杠
         if (centralUrl.endsWith('/')) centralUrl = centralUrl.slice(0, -1);
         
         CONFIG.API_BASE = centralUrl;
+        // 修正：从 http://...:8000/api 转换为 ws://...:8000/ws
         CONFIG.WS_BASE = centralUrl.replace('/api', '/ws').replace('http', 'ws');
-        console.log(`🌐 [动态配置] 已加载目标地址: ${CONFIG.API_BASE}`);
+        console.log(`🌐 [动态配置] 指挥中心已锁定: ${CONFIG.API_BASE}`);
       }
 
       // 同步品牌自定义信息
@@ -42,6 +42,6 @@ export const initDynamicConfig = async () => {
       }
     }
   } catch (e) {
-    console.warn('⚠️ 无法获取动态配置，将使用回环地址');
+    console.error('❌ [动态配置] 获取失败，请检查配置文件');
   }
 };

@@ -30,11 +30,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# 核心：工业级局域网跨域放行策略
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # 允许局域网内所有主机
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=False, # 注意：当 origins 为 * 时，此处必须为 False
 )
 
 @app.get("/api/health")

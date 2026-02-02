@@ -33,24 +33,19 @@ export default function Login() {
     // 登录页不需要置顶
     window.electron.ipcRenderer.send('set-always-on-top', false)
 
-    // 链路预检与智能降级
+    // 链路预检
     const checkLink = async () => {
       try {
-        console.log(`📡 正在探测首选链路: ${CONFIG.API_BASE}/health`);
-        await axios.get(`${CONFIG.API_BASE}/health`, { timeout: 3000 });
-        console.log('✅ 首选链路状态: 正常');
-      } catch (e) {
-        console.warn(`⚠️ 首选链路 (${CONFIG.API_BASE}) 无法访问，尝试回退到本地链路...`);
-        const localUrl = 'http://127.0.0.1:8000/api';
-        try {
-          await axios.get(`${localUrl}/health`, { timeout: 2000 });
-          CONFIG.API_BASE = localUrl;
-          CONFIG.WS_BASE = localUrl.replace('http', 'ws');
-          console.log('🚀 已自动切换至本地回环链路 (127.0.0.1)');
-        } catch (localErr) {
-          setError(`全链路脱机：无法建立与指挥中枢的连接`);
-          speak('警告，物理链路脱机。');
-        }
+        console.log(`📡 正在探测指挥链路: ${CONFIG.API_BASE}/health`);
+        await axios.get(`${CONFIG.API_BASE}/health`, { 
+          timeout: 5000,
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        console.log('✅ 指挥链路状态: 正常');
+      } catch (err: any) {
+        const errorDetail = err.response ? `中枢拒绝 (${err.response.status})` : (err.request ? '请求无响应 (超时/跨域)' : err.message);
+        setError(`链路脱机：${errorDetail} [目标: ${CONFIG.API_BASE}]`);
+        speak('警告，物理链路脱机。');
       }
     };
     checkLink();
