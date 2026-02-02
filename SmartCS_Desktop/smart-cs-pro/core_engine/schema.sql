@@ -1,42 +1,42 @@
--- Smart-CS Pro 战术系统数据库 Schema
+-- Smart-CS Pro 战术系统通用数据库 Schema (兼容 MySQL/SQLite)
 
 -- 1. 客户画像表
 CREATE TABLE IF NOT EXISTS customers (
-    name TEXT PRIMARY KEY,
-    level TEXT DEFAULT 'NEW',
+    name VARCHAR(100) PRIMARY KEY,
+    level VARCHAR(20) DEFAULT 'NEW',
     tags TEXT,
-    ltv REAL DEFAULT 0,
+    ltv DECIMAL(10,2) DEFAULT 0,
     frequency INTEGER DEFAULT 1,
-    is_risk BOOLEAN DEFAULT 0,
-    last_seen REAL
+    is_risk TINYINT DEFAULT 0,
+    last_seen DOUBLE
 );
 
 -- 2. 战术目标平台表
 CREATE TABLE IF NOT EXISTS platforms (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE,
-    window_keyword TEXT,
-    is_active BOOLEAN DEFAULT 1,
-    sync_time REAL
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) UNIQUE,
+    window_keyword VARCHAR(100),
+    is_active TINYINT DEFAULT 1,
+    sync_time DOUBLE
 );
 
 -- 3. 全局审计日志表
 CREATE TABLE IF NOT EXISTS audit_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    operator TEXT,
-    action TEXT,
-    target TEXT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    operator VARCHAR(50),
+    action VARCHAR(50),
+    target VARCHAR(100),
     details TEXT,
-    timestamp REAL
+    timestamp DOUBLE
 );
 
 -- 4. 离线缓冲表
 CREATE TABLE IF NOT EXISTS pending_logs (
-    id TEXT PRIMARY KEY,
+    id VARCHAR(50) PRIMARY KEY,
     data TEXT,
-    timestamp REAL
+    timestamp DOUBLE
 );
 
 -- 插入默认监控目标
-INSERT OR IGNORE INTO platforms (name, window_keyword) VALUES ('WeChat', '微信');
-INSERT OR IGNORE INTO platforms (name, window_keyword) VALUES ('DingTalk', '钉钉');
+INSERT IGNORE INTO platforms (name, window_keyword) VALUES ('WeChat', '微信');
+INSERT IGNORE INTO platforms (name, window_keyword) VALUES ('DingTalk', '钉钉');
