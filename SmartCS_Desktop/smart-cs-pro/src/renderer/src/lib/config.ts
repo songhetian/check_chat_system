@@ -24,7 +24,8 @@ export const initDynamicConfig = async () => {
       let centralUrl = serverConfig?.network?.central_server_url;
       
       if (centralUrl) {
-        // 规范化：确保没有结尾斜杠
+        // 规范化：转换为小写、去除空格、去除结尾斜杠
+        centralUrl = centralUrl.trim().toLowerCase();
         if (centralUrl.endsWith('/')) centralUrl = centralUrl.slice(0, -1);
         
         CONFIG.API_BASE = centralUrl;

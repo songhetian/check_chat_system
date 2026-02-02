@@ -35,14 +35,13 @@ export default function Login() {
 
     // 链路预检
     const checkLink = async () => {
+      const target = `${CONFIG.API_BASE}/health?t=${Date.now()}`;
       try {
-        console.log(`📡 正在探测指挥链路: ${CONFIG.API_BASE}/health`);
-        await axios.get(`${CONFIG.API_BASE}/health`, { 
-          timeout: 5000,
-          headers: { 'Cache-Control': 'no-cache' }
-        });
+        console.log(`📡 正在探测指挥链路: ${target}`);
+        await axios.get(target, { timeout: 5000 });
         console.log('✅ 指挥链路状态: 正常');
       } catch (err: any) {
+        console.error('❌ [链路诊断] 完整错误对象:', err);
         const errorDetail = err.response ? `中枢拒绝 (${err.response.status})` : (err.request ? '请求无响应 (超时/跨域)' : err.message);
         setError(`链路脱机：${errorDetail} [目标: ${CONFIG.API_BASE}]`);
         speak('警告，物理链路脱机。');
