@@ -64,6 +64,20 @@ export const useRiskSocket = () => {
         if (data.type === 'SUPERVISOR_COMMAND') {
           window.dispatchEvent(new CustomEvent('trigger-command', { detail: data }))
         }
+
+        if (data.type === 'ROLE_CHANGED') {
+          const currentUser = useAuthStore.getState().user;
+          if (data.target_user === currentUser?.username) {
+            window.dispatchEvent(new CustomEvent('trigger-toast', { 
+              detail: { title: '权限变更', message: data.message, type: 'error' } 
+            }))
+            // 3秒后强制重载系统
+            setTimeout(() => {
+              useAuthStore.getState().logout();
+              window.location.hash = '/login';
+            }, 3000);
+          }
+        }
       }
 
       socket.onclose = () => {

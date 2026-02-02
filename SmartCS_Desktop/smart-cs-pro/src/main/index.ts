@@ -1,28 +1,53 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import icon from '../../resources/icon.png?asset'
 
-// ... (省略中间代码)
-
-// 监听从悬浮岛点击“打开大屏”
-ipcMain.on('open-big-screen', () => {
-  const win = BrowserWindow.getFocusedWindow()
-  if (win) {
-    win.setSize(1280, 850, true)
-    win.setResizable(true)
-    win.setAlwaysOnTop(false)
-    win.center()
-  }
-})
-
-// 监听文件选择请求
-ipcMain.handle('select-video-file', async () => {
-  const result = await dialog.showOpenDialog({
-    properties: ['openFile'],
-    filters: [{ name: 'Videos', extensions: ['mov', 'avi', 'wmv', 'mp4'] }]
+function createWindow(): void {
+  // 核心：创建独立、透明、置顶的战术岛窗口
+  const mainWindow = new BrowserWindow({
+    width: 240,
+    height: 48,
+    show: false,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    autoHideMenuBar: true,
+    ...(process.platform === 'linux' ? { icon } : {}),
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
   })
-  return result.filePaths[0]
-})
+
+  // 响应前端尺寸变化
+  ipcMain.on('resize-window', (_, { width, height }) => {
+    mainWindow.setSize(width, height, true)
+  })
+
+  // 切换至大屏模式逻辑
+  ipcMain.on('open-big-screen', () => {
+    mainWindow.setSize(1280, 850, true)
+    mainWindow.center()
+    mainWindow.setResizable(true)
+    mainWindow.setAlwaysOnTop(false)
+  })
+
+  mainWindow.on('ready-to-show', () => {
+    mainWindow.show()
+  })
+
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
+    return { action: 'deny' }
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  } else {
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+  }
+}
 
 app.whenReady().then(() => {
   electronApp.setAppId('com.smartcs.pro')
@@ -30,7 +55,7 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  createWindow() // 默认先启动登录窗口形态
+  createWindow()
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
