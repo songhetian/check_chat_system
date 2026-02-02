@@ -56,13 +56,55 @@ async def init_db_pool(retries=5, delay=3):
     logger.error("❌ 严重错误：无法建立中央库连接，系统将运行在离线受限模式")
     return False
 
-# --- 3. 核心 API 接口 ---
+# --- 3. 智脑分析引擎 (Ollama Integration) ---
+class AIAnalyzer:
+    def __init__(self):
+        self.api_url = os.getenv("AI_URL", "http://127.0.0.1:11434/api/chat")
+        self.model = os.getenv("AI_MODEL", "qwen2:1.5b")
+        self.is_healthy = False
+
+    async def check_health(self):
+        try:
+            async with httpx.AsyncClient(timeout=2.0) as client:
+                # 尝试访问 Ollama 基础路径 (注意：AI_URL 可能包含 /api/chat)
+                base_url = self.api_url.split('/api')[0]
+                resp = await client.get(base_url)
+                self.is_healthy = resp.status_code == 200
+        except: self.is_healthy = False
+        return self.is_healthy
+
+    async def analyze_sentiment(self, context):
+        if not self.is_healthy: 
+            if not await self.check_health(): return None
+        
+        prompt = f"作为战术指挥官，分析以下对话内容：\"{context}\"。请以 JSON 格式输出：{{ \"risk_score\": (0-10), \"sentiment_score\": (-10 to 10), \"strategy\": \"建议\", \"voice_alert\": \"语音内容\" }}"
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                payload = {
+                    "model": self.model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "stream": False,
+                    "format": "json"
+                }
+                resp = await client.post(self.api_url, json=payload)
+                if resp.status_code == 200:
+                    return json.loads(resp.json()['message']['content'])
+        except Exception as e:
+            logger.error(f"AI_ANALYSIS_FAILED: {e}")
+        return None
+
+ai_analyzer = AIAnalyzer()
+
+# --- 4. 核心 API 接口 ---
 @app.on_event("startup")
 async def startup_event():
-    success = await init_db_pool()
-    if not success:
-        # 这里后续可以触发本地 SQLite 降级逻辑
-        pass
+    await init_db_pool()
+    # 启动时检测 AI 状态
+    is_ai_ok = await ai_analyzer.check_health()
+    if not is_ai_ok:
+        logger.warning(f"🚨 [智脑预警] 无法连接到 Ollama，请执行 'ollama run {ai_analyzer.model}'")
+    else:
+        logger.info(f"🧠 [智脑就绪] Ollama 服务连接正常 ({ai_analyzer.model})")
 
 @app.get("/api/health")
 async def health_check():
@@ -117,17 +159,36 @@ async def login(data: dict):
         logger.error(f"AUTH_EXCEPTION: {e}")
         return {"status": "error", "code": 500, "message": "中枢响应超时"}
 
-# --- 4. 核心扫描与业务逻辑 ---
+# --- 5. 核心扫描与业务逻辑 ---
 class SmartScanner:
     def __init__(self):
         self.ocr = None
         self.last_hash = ""
-        self.regions = {"name_area": (450, 50, 800, 100)}
+        self.regions = {"name_area": (450, 50, 800, 100), "chat_area": (400, 200, 1000, 800)}
+
+    async def process_ocr_result(self, text):
+        # 1. AI 深度分析
+        analysis = await ai_analyzer.analyze_sentiment(text)
+        if analysis:
+            await broadcast_event({
+                "type": "AI_ULTRA_ANALYSIS",
+                "data": analysis,
+                "voice_alert": analysis.get("voice_alert")
+            })
+        
+        # 2. 基础关键词拦截 (Fallback)
+        if any(kw in text for kw in ["钱", "转账", "加微信", "投诉"]):
+            await broadcast_event({
+                "type": "VIOLATION",
+                "keyword": "高危敏感词",
+                "context": text,
+                "voice_alert": "警报：检测到高危对话内容，请注意合规。"
+            })
 
     def scan_screen(self):
         try:
             full_img = ImageGrab.grab()
-            roi = full_img.crop(self.regions["name_area"])
+            roi = full_img.crop(self.regions["chat_area"])
             cur_hash = hashlib.md5(roi.tobytes()).hexdigest()
             if cur_hash == self.last_hash: return
             self.last_hash = cur_hash
@@ -138,10 +199,10 @@ class SmartScanner:
             
             res = self.ocr.ocr(np.array(roi), cls=True)
             if res and res[0]:
-                name = re.sub(r'\(.*?\)|\[.*?\]', '', res[0][0][1][0]).strip()
-                if len(name) > 1:
-                    asyncio.run_coroutine_threadsafe(broadcast_event({"type": "trigger-customer", "detail": {"name": name}}), main_loop)
-        except: pass
+                full_text = " ".join([line[1][0] for line in res[0]])
+                asyncio.run_coroutine_threadsafe(self.process_ocr_result(full_text), main_loop)
+        except Exception as e:
+            logger.error(f"SCAN_ERROR: {e}")
 
 scanner = SmartScanner()
 
