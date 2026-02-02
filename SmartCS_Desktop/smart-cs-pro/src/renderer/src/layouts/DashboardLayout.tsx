@@ -17,14 +17,15 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
+import { CONFIG } from '../lib/config'
 
 const menu = [
-  { path: '/', icon: LayoutDashboard, label: '指挥概览' },
-  { path: '/alerts', icon: ShieldAlert, label: '紧急响应' },
-  { path: '/customers', icon: Contact2, label: '客户画像' },
-  { path: '/products', icon: Package, label: '商品战术' },
-  { path: '/tools', icon: Wrench, label: '提效工具' },
-  { path: '/global-policy', icon: Settings, label: '全局策略' },
+  { path: '/', icon: LayoutDashboard, label: '指挥中心概览' },
+  { path: '/alerts', icon: ShieldAlert, label: '风险拦截审计' },
+  { path: '/customers', icon: Contact2, label: '客户画像分析' },
+  { path: '/products', icon: Package, label: '商品战术话术' },
+  { path: '/tools', icon: Wrench, label: '全域提效工具' },
+  { path: '/global-policy', icon: Settings, label: '全局 AI 策略' },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -64,10 +65,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800 shrink-0">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-10 px-2 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
-            <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
-              <ShieldAlert className="text-white" size={24} />
+            <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20 font-black text-white">
+              {CONFIG.BRANDING.logoText}
             </div>
-            <span className="text-xl font-black text-white tracking-tighter italic">SMART-CS</span>
+            <span className="text-xl font-black text-white tracking-tighter italic uppercase">{CONFIG.BRANDING.name}</span>
           </div>
           <nav className="space-y-1">
             {menu.map((item) => (
@@ -91,8 +92,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <div className="mt-auto p-6 border-t border-white/5 space-y-4">
           <div className="flex items-center gap-3 px-2">
-            <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] text-cyan-400 font-bold">
-              {user?.username[0].toUpperCase()}
+            <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] text-cyan-400 font-bold uppercase">
+              {user?.username[0]}
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-bold text-white leading-none">{user?.real_name}</span>
@@ -103,7 +104,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-2 w-full text-slate-500 hover:text-red-400 transition-colors text-xs font-bold"
           >
-            <LogOut size={14} /> 退出指挥链路
+            <LogOut size={14} /> 退出战术链路
           </button>
         </div>
       </aside>
@@ -115,7 +116,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="relative w-96" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
             <input 
-              placeholder="搜索坐席、违规词或商品..." 
+              placeholder="搜索坐席、违规词或商品战术..." 
               className="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-cyan-500/20 transition-all"
             />
           </div>
@@ -129,10 +130,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             
             <div className="flex items-center gap-6">
               <div className="text-right">
-                <div className="text-[10px] font-bold text-slate-400 uppercase leading-none">系统状态</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase leading-none">{CONFIG.BRANDING.company}</div>
                 <div className="text-[12px] font-bold text-green-600 flex items-center gap-1 mt-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  全链路加密运行中
+                  链路加密运行中
                 </div>
               </div>
 

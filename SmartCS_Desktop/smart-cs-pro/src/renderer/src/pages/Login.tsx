@@ -110,14 +110,16 @@ export default function Login() {
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-8 scanline grain overflow-hidden relative text-slate-200 font-sans">
       {/* 顶部全宽拖拽条 */}
       <div className="absolute top-0 left-0 w-full h-12 z-50 flex items-center justify-between px-8" style={{ WebkitAppRegion: 'drag' } as any}>
-         <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest select-none">SmartCS Secure Login Port : 443</div>
+         <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest select-none">
+           {CONFIG.BRANDING.company} 安全认证端口 : 443
+         </div>
          
          {/* 窗口控制按钮 */}
          <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-            <button onClick={handleMinimize} className="text-slate-600 hover:text-white transition-colors">
+            <button onClick={handleMinimize} className="text-slate-600 hover:text-white transition-colors" title="最小化">
                <Minus size={16} />
             </button>
-            <button onClick={handleClose} className="text-slate-600 hover:text-red-500 transition-colors">
+            <button onClick={handleClose} className="text-slate-600 hover:text-red-500 transition-colors" title="关闭">
                <X size={16} />
             </button>
          </div>
@@ -131,12 +133,16 @@ export default function Login() {
         
         <div className="flex flex-col items-center mb-8" style={{ WebkitAppRegion: 'drag' } as any}>
           <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mb-6 border border-cyan-500/30">
-            <Shield className="text-cyan-400 w-10 h-10" />
+            <span className="text-2xl font-black text-cyan-400">{CONFIG.BRANDING.logoText}</span>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tighter italic text-tactical-glow uppercase">SmartCS <span className="text-cyan-500">Pro</span></h1>
+          <h1 className="text-3xl font-black text-white tracking-tighter italic text-tactical-glow uppercase">
+            {CONFIG.BRANDING.name}
+          </h1>
           <div className="flex items-center gap-2 mt-2">
              <Activity size={12} className="text-cyan-500 animate-pulse" />
-             <span className="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em]">Neural Tactical Interface</span>
+             <span className="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em]">
+               {CONFIG.BRANDING.subName}
+             </span>
           </div>
         </div>
 
@@ -149,22 +155,22 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-1">
-            <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><User size={10}/> Operator ID</label>
+            <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><User size={10}/> 操作员账号</label>
             <input 
               value={formData.username}
               onChange={(e) => setFormData({...formData, username: e.target.value})}
-              placeholder="战术账号" 
+              placeholder="请输入账号" 
               className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-700" 
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><Lock size={10}/> Encryption Key</label>
+            <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><Lock size={10}/> 访问密钥</label>
             <input 
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({...formData, password: e.target.value})}
-              placeholder="访问密码" 
+              placeholder="请输入密码" 
               className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-700 font-mono tracking-widest" 
             />
           </div>
@@ -184,13 +190,13 @@ export default function Login() {
                     <motion.div animate={{ width: `${progress}%` }} className="h-full bg-white shadow-[0_0_10px_#fff]" />
                  </div>
               </div>
-            ) : "Establish Tactical Link"}
+            ) : "建立战术链路 / LOGIN"}
           </button>
         </form>
 
         <div className="mt-10 flex justify-between items-center opacity-30 text-[8px] font-black text-slate-500 uppercase tracking-widest">
-          <div className="flex items-center gap-1"><Cpu size={10}/> Quantum Cryptography Active</div>
-          <span>Secure Port: 8000</span>
+          <div className="flex items-center gap-1"><Cpu size={10}/> 量子加密协议已激活</div>
+          <span>版本: {CONFIG.APP_VERSION}</span>
         </div>
       </motion.div>
     </div>

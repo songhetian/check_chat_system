@@ -7,7 +7,13 @@ export const CONFIG = {
   API_BASE: `http://${defaultIp}:8000/api`,
   WS_BASE: `ws://${defaultIp}:8000/ws`,
   APP_VERSION: '1.2.5-Stable',
-  SYNC_INTERVAL: 5000
+  SYNC_INTERVAL: 5000,
+  BRANDING: {
+    company: '数智化运营部',
+    name: 'Smart-CS Pro',
+    subName: '数智化运营治理平台',
+    logoText: 'S-CS'
+  }
 };
 
 // 异步初始化方法，用于在应用启动时同步最新的局域网配置
@@ -20,8 +26,17 @@ export const initDynamicConfig = async () => {
       if (centralUrl) {
         CONFIG.API_BASE = centralUrl;
         CONFIG.WS_BASE = centralUrl.replace('http', 'ws');
-        console.log(`🚀 [战术链路] 已同步指挥中心地址: ${CONFIG.API_BASE}`);
       }
+
+      // 同步品牌自定义信息
+      if (serverConfig?.branding) {
+        CONFIG.BRANDING.company = serverConfig.branding.company_name;
+        CONFIG.BRANDING.name = serverConfig.branding.system_name;
+        CONFIG.BRANDING.subName = serverConfig.branding.system_sub_name;
+        CONFIG.BRANDING.logoText = serverConfig.branding.logo_text;
+      }
+      
+      console.log(`🚀 [战术链路] 已同步配置，当前系统: ${CONFIG.BRANDING.name}`);
     }
   } catch (e) {
     console.warn('⚠️ 无法获取动态配置，将使用默认硬编码地址');

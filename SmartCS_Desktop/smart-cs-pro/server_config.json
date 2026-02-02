@@ -29,5 +29,11 @@
         "mode_remark": "运行环境模式：development (开发) / production (生产)",
         "sync_interval": 300,
         "sync_interval_remark": "本地数据同步到云端的时间间隔，单位为秒"
+    },
+    "branding": {
+        "company_name": "数智化运营部",
+        "system_name": "雷犀AI客服系统",
+        "system_sub_name": "数智化运营治理平台",
+        "logo_text": "雷犀"
     }
 }
