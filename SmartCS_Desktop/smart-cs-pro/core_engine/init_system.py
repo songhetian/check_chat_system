@@ -7,7 +7,7 @@ def check_env():
     print("🛠️  [Smart-CS Pro] 正在初始化工业级战术环境...")
     
     # 1. 检查 Python 依赖
-    dependencies = ["fastapi", "uvicorn", "pynput", "paddleocr", "opencv-python", "httpx", "wmi", "pandas", "openpyxl"]
+    dependencies = ["fastapi", "uvicorn", "pynput", "paddleocr", "opencv-python", "httpx", "wmi", "pandas", "openpyxl", "redis"]
     print("📦 正在检查核心依赖...")
     for lib in dependencies:
         try:
