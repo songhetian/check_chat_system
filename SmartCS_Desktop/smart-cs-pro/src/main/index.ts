@@ -49,6 +49,22 @@ function createWindow(): void {
   // 暴露配置给前端
   ipcMain.handle('get-server-config', () => serverConfig)
 
+  // 核心：战术 API 转发桥 (解决局域网 CORS/Network Error 的终极方案)
+  ipcMain.handle('call-api', async (_, { url, method, data }) => {
+    try {
+      // 在 Node.js 环境下发起请求，不经过浏览器沙箱
+      const response = await fetch(url, {
+        method: method || 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        body: data ? JSON.stringify(data) : undefined
+      })
+      const result = await response.json()
+      return { status: response.status, data: result }
+    } catch (e: any) {
+      return { status: 500, error: e.message }
+    }
+  })
+
   // 核心：创建独立、透明、置顶的战术岛窗口
   const mainWindow = new BrowserWindow({
     width: 260,

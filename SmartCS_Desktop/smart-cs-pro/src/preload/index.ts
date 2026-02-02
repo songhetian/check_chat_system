@@ -3,7 +3,8 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // 自定义 API，暴露给渲染进程 (window.api)
 const api = {
-  getServerConfig: () => ipcRenderer.invoke('get-server-config')
+  getServerConfig: () => ipcRenderer.invoke('get-server-config'),
+  callApi: (payload: { url: string, method?: string, data?: any }) => ipcRenderer.invoke('call-api', payload)
 }
 
 if (process.contextIsolated) {

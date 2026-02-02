@@ -33,30 +33,23 @@ export default function Login() {
     // 登录页不需要置顶
     window.electron.ipcRenderer.send('set-always-on-top', false)
 
-    // 链路预检
+    // 链路预检 (使用主进程桥接)
     const checkLink = async () => {
-      // 再次防御性处理
       const baseUrl = CONFIG.API_BASE.toLowerCase();
-      const target = `${baseUrl}/health?t=${Date.now()}`;
-
-      console.log(`📡 [链路诊断] 发起探测 | 目标: ${target}`);
-      console.log(`ℹ️ [配置快照] API_BASE="${CONFIG.API_BASE}"`);
-
+      const target = `${baseUrl}/health`;
+      
       try {
-        await axios.get(target, { timeout: 5000 });
-        console.log('✅ [链路诊断] 握手成功');
-      } catch (err: any) {
-        console.error('❌ [链路诊断] 异常详情:', err);
-
-        let errorShort = err.message;
-        if (err.response) {
-            errorShort = `服务拒绝 (${err.response.status})`;
-        } else if (err.code === 'ERR_NETWORK') {
-            errorShort = `网络不可达 (CORS/Refused)`;
+        console.log(`📡 正在通过战术桥接探测链路: ${target}`);
+        const res = await window.api.callApi({ url: target });
+        
+        if (res.status === 200) {
+          console.log('✅ 指挥链路状态: 正常');
+        } else {
+          throw new Error(res.error || `HTTP ${res.status}`);
         }
-
-        const debugInfo = `(Target: ${baseUrl})`;
-        setError(`无法连接中枢: ${errorShort} ${debugInfo}`);
+      } catch (err: any) {
+        console.error('❌ [链路诊断] 桥接探测失败:', err);
+        setError(`无法连接中枢: 指挥链路阻塞 (TARGET: ${baseUrl.toUpperCase()})`);
         speak('警告，物理链路脱机。');
       }
     };
@@ -70,20 +63,24 @@ export default function Login() {
     setIsLoading(true)
 
     try {
-      // 1. 发起中枢链路认证请求
-      const response = await axios.post(`${CONFIG.API_BASE}/auth/login`, {
-        username: formData.username,
-        password: formData.password
-      })
+      // 1. 通过战术桥接发起认证请求 (绕过所有 CORS)
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/auth/login`,
+        method: 'POST',
+        data: {
+          username: formData.username,
+          password: formData.password
+        }
+      });
 
-      if (response.data.status !== 'ok') {
-        setError(response.data.message || '访问被拒绝：认证链路异常')
-        speak('链路认证失败，访问请求已被系统拦截。')
+      if (res.status !== 200 || res.data.status !== 'ok') {
+        setError(res.data?.message || res.error || '认证链路被拦截');
+        speak('身份核验未通过。');
         setIsLoading(false)
         return
       }
 
-      const { user, token } = response.data.data
+      const { user, token } = res.data.data
 
       // 2. 启动仪式感序列
       setBootStatus('正在建立加密隧道...')
