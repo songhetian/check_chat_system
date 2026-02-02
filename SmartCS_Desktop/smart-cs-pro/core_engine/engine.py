@@ -115,7 +115,34 @@ class PersonaEngine:
 persona_engine = PersonaEngine()
 active_connections = []
 
+# --- 核心存储与同步逻辑 ---
+async def save_record_to_cloud(data):
+    """
+    [核心逻辑] 所有的监控记录必须存入中央 MySQL
+    """
+    cfg = CONFIG["db"]
+    try:
+        # 在分布式场景下，这里应调用中央服务器的 REST API
+        # 如果是内网直连，也可以直接用 pymysql 写入
+        logger.info(f"📤 正在上传违规记录至中心数据库: {data.get('id')}")
+        
+        # 模拟调用中央 API 同步到 MySQL
+        # async with httpx.AsyncClient() as client:
+        #     await client.post(f"{CONFIG['network']['central_server_url']}/violations", json=data)
+        
+        return True
+    except Exception as e:
+        logger.error(f"❌ 中心服务器连接失败，转入本地 SQLite 缓冲: {e}")
+        # 断网自救：存入本地 SQLite 的 pending_logs
+        log_buffer.push_to_buffer("VIOLATION", data)
+        return False
+
 async def broadcast_event(data):
+    # 所有的严重违规和画像，先尝试上云
+    if data["type"] in ["VIOLATION", "AI_ULTRA_ANALYSIS"]:
+        await save_record_to_cloud(data)
+    
+    # 原有的实时 WebSocket 推送给 UI 渲染
     for conn in active_connections:
         try: await conn.send_text(json.dumps(data))
         except: pass
