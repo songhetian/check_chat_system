@@ -113,12 +113,15 @@ async def analyze_with_llm_async(text: str):
             result = response.json()
             content = json.loads(result['message']['content'])
             
-            if content.get("is_violation"):
+            if content.get("is_violation") or content.get("risk_score", 0) > 5:
+                # 即使不是明确违规，只要分值高（不耐烦、阴阳怪气等）也触发提醒
                 await broadcast_event({
-                    "type": "VIOLATION",
-                    "keyword": "语义风险",
+                    "type": "AI_ANALYSIS",
+                    "risk_score": content.get("risk_score"),
+                    "reason": content.get("reason"),
+                    "suggestion": content.get("suggestion"),
                     "context": text,
-                    "reason": content.get("reason")
+                    "timestamp": time.time()
                 })
         except Exception as e:
             print(f"⚠️ AI 分析链路异常: {str(e)}")
