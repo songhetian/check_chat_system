@@ -104,12 +104,21 @@ function App() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       {['张三', '李四', '王五', '赵六'].map((name, i) => (
                         <motion.div key={name} whileHover={{ y: -5 }} className="bg-white p-5 rounded-[32px] border border-slate-200 shadow-sm relative overflow-hidden group">
-                          <div className="flex justify-between items-start mb-4">
+                          {/* 自驱动优化：增加背景扫描脉冲 (与坐席端同步) */}
+                          {i !== 1 && (
+                            <motion.div 
+                              className="absolute inset-0 bg-cyan-500/5"
+                              animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] }}
+                              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                          )}
+                          
+                          <div className="flex justify-between items-start mb-4 relative z-10">
                              <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", i === 1 ? "bg-red-500 text-white animate-pulse" : "bg-slate-100 text-slate-400")}><User size={24} /></div>
                              <div className={cn("px-2 py-0.5 rounded text-[8px] font-black uppercase", i === 1 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600")}>{i === 1 ? 'VIOLATION' : 'ONLINE'}</div>
                           </div>
-                          <h3 className="font-black text-slate-900">{name}</h3>
-                          <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
+                          <h3 className="font-black text-slate-900 relative z-10">{name}</h3>
+                          <div className="pt-4 border-t border-slate-50 flex items-center justify-between relative z-10">
                              <span className="text-[10px] font-black text-slate-700 truncate w-24">{i === 1 ? '微信 - 争议' : '钉钉 - 接待'}</span>
                              <button className="p-2 bg-slate-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all active:scale-90"><ShieldAlert size={12} /></button>
                           </div>

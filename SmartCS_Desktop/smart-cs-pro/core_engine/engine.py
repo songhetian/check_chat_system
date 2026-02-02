@@ -41,10 +41,12 @@ class SmartScanner:
         try:
             full_img = ImageGrab.grab()
             roi = full_img.crop(self.regions["name_area"])
-            # 增量比对：像素哈希
             cur_hash = hashlib.md5(roi.tobytes()).hexdigest()
             if cur_hash == self.last_hash: return
             self.last_hash = cur_hash
+            
+            # 自驱动优化：广播活跃脉冲
+            asyncio.run_coroutine_threadsafe(broadcast_event({"type": "SCAN_HEARTBEAT"}), main_loop)
             
             self._ensure_ocr()
             res = self.ocr.ocr(np.array(roi), cls=True)
