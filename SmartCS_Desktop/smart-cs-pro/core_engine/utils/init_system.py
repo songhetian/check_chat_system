@@ -38,12 +38,13 @@ def check_env():
 
     # 2. 读取数据库配置并初始化本地表结构
     print(f"🗄️  正在初始化本地数据库架构 (SQLite Buffer)...")
-    if os.path.exists("schema.sql"):
+    schema_path = os.path.join(os.path.dirname(__file__), "..", "database", "schema.sql")
+    if os.path.exists(schema_path):
         db_files = ["buffer.db", "customers.db", "audit.db", "platforms.db"]
         for db in db_files:
             try:
                 conn = sqlite3.connect(db)
-                with open("schema.sql", "r", encoding="utf-8") as f:
+                with open(schema_path, "r", encoding="utf-8") as f:
                     sql_script = f.read()
                 conn.executescript(sql_script)
                 print(f"  ✅ 本地库 {db} 同步成功")

@@ -17,26 +17,26 @@ export default function AuditStreamPage() {
       </div>
 
       <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full">
+        <table className="w-full text-center border-collapse">
           <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
-              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">操作时间</th>
-              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">操作员</th>
-              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">战术动作</th>
-              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">目标对象</th>
-              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">详细载荷</th>
+              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">操作时间</th>
+              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">操作员</th>
+              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">战术动作</th>
+              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">目标对象</th>
+              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">详细载荷</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
             {logs.map((log) => (
               <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                  <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-500">
                     <Clock size={12} /> {log.time}
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-cyan-100 flex items-center justify-center text-[10px] text-cyan-600 font-bold">
                       {log.op[0]}
                     </div>
@@ -44,12 +44,14 @@ export default function AuditStreamPage() {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="px-2 py-1 bg-slate-900 text-white text-[9px] font-black rounded uppercase tracking-tighter">
-                    {log.action}
-                  </span>
+                  <div className="flex justify-center">
+                    <span className="px-2 py-1 bg-slate-900 text-white text-[9px] font-black rounded uppercase tracking-tighter">
+                      {log.action}
+                    </span>
+                  </div>
                 </td>
-                <td className="px-6 py-4 text-xs font-bold text-slate-600">{log.target}</td>
-                <td className="px-6 py-4 text-xs text-slate-400 italic">"{log.details}"</td>
+                <td className="px-6 py-4 text-xs font-bold text-slate-600 text-center">{log.target}</td>
+                <td className="px-6 py-4 text-xs text-slate-400 italic text-center">"{log.details}"</td>
               </tr>
             ))}
           </tbody>

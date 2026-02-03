@@ -1291,3 +1291,9 @@ Traceback (most recent call last):
     raise error
 redis.exceptions.AuthenticationError: Authentication required.
 INFO:     connection closed
+INFO:     192.168.2.184:58135 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58135 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58771 - "GET /api/admin HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:58773 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58773 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58773 - "GET /api/health HTTP/1.1" 200 OK

@@ -11,11 +11,11 @@ interface TacticalTableProps {
 export const TacticalTable = ({ headers, children, className }: TacticalTableProps) => {
   return (
     <div className={cn("w-full overflow-hidden flex flex-col", className)}>
-      <table className="w-full text-left border-collapse">
+      <table className="w-full text-center border-collapse">
         <thead>
           <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
             {headers.map((h, i) => (
-              <th key={i} className="px-8 py-4">{h}</th>
+              <th key={i} className="px-8 py-4 text-center">{h}</th>
             ))}
           </tr>
         </thead>

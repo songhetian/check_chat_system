@@ -129,14 +129,14 @@ const AdminHome = () => {
 
       <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-y-auto flex-1 custom-scrollbar">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-center border-collapse">
             <thead>
               <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
-                <th className="px-8 py-4">节点 ID</th>
-                <th className="px-6 py-4">所属部门</th>
-                <th className="px-6 py-4">状态</th>
-                <th className="px-6 py-4">效能</th>
-                <th className="px-6 py-4">异常分类 (风险值)</th>
+                <th className="px-8 py-4 text-center">节点 ID</th>
+                <th className="px-6 py-4 text-center">所属部门</th>
+                <th className="px-6 py-4 text-center">状态</th>
+                <th className="px-6 py-4 text-center">效能</th>
+                <th className="px-6 py-4 text-center">异常分类 (风险值)</th>
                 <th className="px-8 py-4 text-right">管理</th>
               </tr>
             </thead>
@@ -144,30 +144,34 @@ const AdminHome = () => {
               {agents.map((agent) => (
                 <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors">
                   <td className="px-8 py-5">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center gap-3">
                       <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm", agent.is_online ? "bg-cyan-500/10 text-cyan-600 border border-cyan-500/20" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div>
-                      <div className="flex flex-col"><span className="text-sm font-black text-slate-900">{agent.real_name}</span><span className="text-[9px] text-slate-400 font-mono">@{agent.username}</span></div>
+                      <div className="flex flex-col text-left"><span className="text-sm font-black text-slate-900">{agent.real_name}</span><span className="text-[9px] text-slate-400 font-mono">@{agent.username}</span></div>
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full uppercase">{agent.dept_name || '未归类'}</span>
+                    <div className="flex justify-center">
+                      <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full uppercase">{agent.dept_name || '未归类'}</span>
+                    </div>
                   </td>
                   <td className="px-6 py-5">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center gap-2">
                       <div className={cn("w-2 h-2 rounded-full", agent.is_online ? "bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-slate-300")} />
                       <span className={cn("text-[10px] font-black uppercase", agent.is_online ? "text-green-600" : "text-slate-400")}>{agent.is_online ? 'CONN' : 'OFFLINE'}</span>
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <div className="flex items-center gap-1 text-sm font-black text-slate-700 italic"><Activity size={12} className="text-cyan-500" /> {agent.tactical_score}</div>
+                    <div className="flex items-center justify-center gap-1 text-sm font-black text-slate-700 italic"><Activity size={12} className="text-cyan-500" /> {agent.tactical_score}</div>
                   </td>
                   <td className="px-6 py-5">
-                    {agent.last_violation_type ? (
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-1 bg-red-500/10 text-red-600 text-[10px] font-black rounded-md border border-red-500/20 flex items-center gap-1 w-fit"><AlertCircle size={10} /> {agent.last_violation_type}</span>
-                        <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", agent.last_risk_score >= 9 ? "bg-red-600 text-white" : "bg-slate-900 text-white")}>LV.{agent.last_risk_score}</span>
-                      </div>
-                    ) : <span className="text-[9px] text-slate-300 font-bold uppercase tracking-widest">Safe Context</span>}
+                    <div className="flex justify-center">
+                      {agent.last_violation_type ? (
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-1 bg-red-500/10 text-red-600 text-[10px] font-black rounded-md border border-red-500/20 flex items-center gap-1 w-fit"><AlertCircle size={10} /> {agent.last_violation_type}</span>
+                          <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", agent.last_risk_score >= 9 ? "bg-red-600 text-white" : "bg-slate-900 text-white")}>LV.{agent.last_risk_score}</span>
+                        </div>
+                      ) : <span className="text-[9px] text-slate-300 font-bold uppercase tracking-widest">Safe Context</span>}
+                    </div>
                   </td>
                   <td className="px-8 py-5 text-right">
                     <button className="p-2 text-slate-400 hover:text-cyan-600 transition-all hover:bg-cyan-50 rounded-xl"><ShieldCheck size={18} /></button>

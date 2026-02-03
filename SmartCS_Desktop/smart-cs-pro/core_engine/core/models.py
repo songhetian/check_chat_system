@@ -22,11 +22,28 @@ class User(BaseModel):
     role = fields.CharField(max_length=20, default="AGENT")
     tactical_score = fields.IntField(default=0)
     status = fields.IntField(default=1)
+    
+    # Growth related fields
+    streak_days = fields.IntField(default=0)
+    handled_customers_count = fields.IntField(default=0)
+    rank_level = fields.CharField(max_length=20, default="NOVICE")
+    graduated_at = fields.DatetimeField(null=True)
+    
     # 外键关联
     department = fields.ForeignKeyField('models.Department', related_name='users', null=True)
 
     class Meta:
         table = "users"
+
+class KnowledgeBase(BaseModel):
+    id = fields.IntField(pk=True)
+    keyword = fields.CharField(max_length=100)
+    answer = fields.TextField()
+    category = fields.CharField(max_length=50)
+    is_active = fields.IntField(default=1)
+
+    class Meta:
+        table = "knowledge_base"
 
 class ViolationRecord(BaseModel):
     id = fields.CharField(max_length=50, pk=True)
