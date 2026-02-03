@@ -41,10 +41,32 @@ class User(BaseModel):
     class Meta:
         table = "users"
 
+class UserReward(BaseModel):
+    id = fields.IntField(pk=True)
+    user = fields.ForeignKeyField('models.User', related_name='rewards')
+    type = fields.CharField(max_length=20)
+    title = fields.CharField(max_length=100)
+    value = fields.IntField(default=0)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "user_rewards"
+
+class TrainingSession(BaseModel):
+    id = fields.IntField(pk=True)
+    user = fields.ForeignKeyField('models.User', related_name='training_sessions')
+    mode = fields.CharField(max_length=50, default="SOP_GUIDE")
+    progress = fields.IntField(default=0)
+    is_completed = fields.IntField(default=0)
+    updated_at = fields.DatetimeField(auto_now=True)
+
+    class Meta:
+        table = "training_sessions"
+
 class PolicyCategory(BaseModel):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=50)
-    type = fields.CharField(max_length=20) # SENSITIVE or KNOWLEDGE
+    type = fields.CharField(max_length=20)
     description = fields.CharField(max_length=200, null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
 
@@ -56,6 +78,7 @@ class SensitiveWord(BaseModel):
     word = fields.CharField(max_length=100, unique=True)
     category = fields.ForeignKeyField('models.PolicyCategory', related_name='sensitive_words')
     risk_level = fields.IntField(default=5)
+    custom_audio_path = fields.CharField(max_length=255, null=True) # 支持自定义声音
     is_active = fields.IntField(default=1)
 
     class Meta:

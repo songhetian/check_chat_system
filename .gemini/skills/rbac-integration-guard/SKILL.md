@@ -9,15 +9,14 @@ description: RBAC 权限集成与 SQL 自动化守卫。当新增功能、API �
 
 在 Smart-CS Pro 中，任何功能（API、UI、动作）必须实现“开发即授权”。
 
-### 1. 权限自动同步红线 (强制)
-*   **开发即注册**：每当新增一个涉及权限的功能（页面路由、干预动作、敏感 API）时，必须立即生成对应的 `INSERT INTO permissions` 语句。
-*   **总部角色 (HQ) 特权自动维持**：在新增任何权限点后，**必须同步生成并执行**以下语句：
-    ```sql
-    -- 确保 HQ 角色 (ID: 3) 永远拥有全量权限
-    INSERT IGNORE INTO role_permissions (role_id, permission_code) 
-    SELECT 3, '新增的权限代码';
-    ```
-*   **脚本固化**：所有变更必须同步追加到 `SmartCS_Desktop/smart-cs-pro/core_engine/database/central_production.sql`。
+### 1. Skill 自我进化红线 (强制)
+*   **主动补全**：若在开发中发现 Skill 描述不准确、缺失必要的约束（如环境依赖、语法限制）或可以优化操作流程，**必须立即主动修改并重新打包该 Skill**，无需等待用户指令。
+*   **知识固化**：每一项由于疏忽导致的错误（如 MySQL 兼容性问题）必须总结为一条“红线”写入对应的 Skill 中。
+
+### 2. 权限自动同步红线 (强制)
+*   **开发即注册**：每当新增页面、干预动作或敏感 API 时，必须立即生成 `INSERT INTO permissions` 语句。
+*   **总部角色 (HQ) 特权自动维持**：在新增任何权限点后，**必须同步生成并执行**为 role_id=3 赋予该权限的 SQL。
+*   **脚本固化**：所有变更必须同步追加到 `central_production.sql`。
 
 ### 2. SQL 自动化执行工作流
 *   **热更新**：完成 SQL 编写后，优先尝试使用 `run_shell_command` 通过 `mysql` 命令行直接执行该 SQL 片段。

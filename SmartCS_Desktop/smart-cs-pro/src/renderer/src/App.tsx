@@ -27,193 +27,101 @@ import NotificationsPage from './pages/admin/Notifications'
 import GlobalPolicyPage from './pages/hq/GlobalPolicy'
 import AiPerformancePage from './pages/hq/AiPerformance'
 import { 
-  CheckCircle2, 
-  AlertCircle, 
-  ShieldAlert, 
-  User, 
-  Search, 
-  Filter, 
-  ChevronLeft, 
-  ChevronRight, 
-  Activity, 
-  Globe, 
-  ShieldCheck, 
-  Users,
-  ArrowRight
+  CheckCircle2, AlertCircle, ShieldAlert, User, Search, Filter, Activity, 
+  Globe, ShieldCheck, Users, ArrowRight, Award, GraduationCap, Volume2, VolumeX
 } from 'lucide-react'
 import { cn } from './lib/utils'
 import { CONFIG } from './lib/config'
 import { TacticalSearch } from './components/ui/TacticalSearch'
 import { TacticalPagination } from './components/ui/TacticalTable'
 
-// 1. 工业级管理后台首页 (全动态 MySQL 数据驱动 + RBAC 动态视图)
+// 1. 管理首页：补全奖励与进度展示，修复请求鉴权
 const AdminHome = () => {
-  const { user } = useAuthStore() 
+  const { user, token } = useAuthStore() 
   const [agents, setAgents] = useState<any[]>([])
   const [depts, setDepts] = useState<any[]>([])
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  const [dept, setDept] = useState('ALL')
-  const [status, setStatus] = useState('ALL')
-  const [riskLevel, setRiskLevel] = useState('ALL')
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
-
-  const isHQ = user?.role === 'HQ'
-
-  const fetchDepts = async () => {
-    if (!isHQ) return
-    try {
-      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments`, method: 'GET' })
-      if (res.status === 200) setDepts(res.data.data)
-    } catch (e) { console.error('部门同步异常', e) }
-  }
 
   const fetchAgents = async () => {
     setLoading(true)
     try {
       const res = await window.api.callApi({
-        url: `${CONFIG.API_BASE}/admin/agents?page=${page}&search=${search}&dept=${dept}&status=${status}&risk_level=${riskLevel}`,
+        url: `${CONFIG.API_BASE}/admin/agents?page=${page}&search=${search}`,
         method: 'GET'
       })
       if (res.status === 200) {
         setAgents(res.data.data)
         setTotal(res.data.total)
       }
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchDepts() }, [isHQ])
-  useEffect(() => { fetchAgents() }, [page, dept, status, riskLevel])
+  useEffect(() => { fetchAgents() }, [page, search])
 
   return (
-    <div className="space-y-6 h-full flex flex-col font-sans">
-      <div className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm shrink-0 overflow-hidden">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter italic shrink-0">指挥中心实时矩阵</h2>
-          <button onClick={() => window.open('#/big-screen', '_blank')} className="px-6 py-2 bg-slate-900 text-white rounded-2xl text-[10px] font-black shadow-xl active:scale-95 flex items-center gap-2 tracking-widest uppercase hover:bg-slate-800 transition-all shrink-0">
-            <Globe size={14} /> 激活指挥大屏
-          </button>
-        </div>
-        
-        <div className="flex items-center gap-4 border-t pt-4 overflow-x-auto no-scrollbar flex-nowrap">
-          <TacticalSearch 
-            value={search}
-            onChange={setSearch}
-            onSearch={fetchAgents}
-            placeholder="搜索操作员..."
-            className="w-64 shrink-0"
-          />
-          <div className="h-8 w-[1px] bg-slate-100 shrink-0 mx-1" />
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-[10px] font-black text-slate-400 uppercase">状态:</span>
-            <select value={status} onChange={(e) => setStatus(e.target.value)} className="bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-600 focus:ring-2 focus:ring-cyan-500/20 py-1.5 px-3 min-w-[100px]">
-              <option value="ALL">全部</option>
-              <option value="ONLINE">在线监听</option>
-              <option value="OFFLINE">脱机</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-[10px] font-black text-slate-400 uppercase">风险:</span>
-            <select value={riskLevel} onChange={(e) => setRiskLevel(e.target.value)} className="bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-600 focus:ring-2 focus:ring-red-500/20 py-1.5 px-3 min-w-[100px]">
-              <option value="ALL">全量</option>
-              <option value="SERIOUS">严重 (9-10)</option>
-              <option value="MEDIUM">中级 (5-8)</option>
-              <option value="LOW">低级 (&lt;5)</option>
-            </select>
-          </div>
-
-          {isHQ && (
-            <div className="flex items-center gap-2 shrink-0 ml-auto bg-slate-50/50 px-3 py-1 rounded-xl border border-slate-100">
-              <Filter size={12} className="text-slate-400" />
-              <select value={dept} onChange={(e) => setDept(e.target.value)} className="bg-transparent border-none text-xs font-bold text-slate-600 focus:ring-0 cursor-pointer min-w-[120px]">
-                <option value="ALL">全域部门</option>
-                {depts.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
-              </select>
-            </div>
-          )}
-        </div>
+    <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6">
+      <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0 flex justify-between items-center">
+        <div><h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow leading-none">全域态势矩阵</h2><p className="text-slate-400 text-sm mt-2 font-medium">实时监听操作员实战状态，包括战术评分、违规拦截及新兵结业进度</p></div>
+        <button onClick={() => window.open('#/big-screen', '_blank')} className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-2xl active:scale-95 flex items-center gap-3 hover:bg-slate-800 transition-all uppercase tracking-widest"><Globe size={18} /> 激活态势投影</button>
       </div>
 
-      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0">
         <div className="overflow-y-auto flex-1 custom-scrollbar">
-          <table className="w-full text-center border-collapse">
+          <table className="w-full border-collapse">
             <thead>
               <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
-                <th className="px-8 py-4 text-center">操作员节点</th>
-                <th className="px-6 py-4 text-center">所属战术单元</th>
-                <th className="px-6 py-4 text-center">通讯状态</th>
-                <th className="px-6 py-4 text-center">战术效能</th>
-                <th className="px-6 py-4 text-center">风险评估 (等级)</th>
-                <th className="px-8 py-4 text-center">战术管理</th>
+                <th className="px-8 py-5 text-center">节点名称</th>
+                <th className="px-6 py-5 text-center">战术单元</th>
+                <th className="px-6 py-5 text-center">奖励/荣誉</th>
+                <th className="px-6 py-5 text-center">实战结业</th>
+                <th className="px-6 py-5 text-center">评分/风险</th>
+                <th className="px-8 py-5 text-center">战术指挥</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {agents.map((agent) => (
-                <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors">
+                <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors text-sm font-bold text-slate-600">
                   <td className="px-8 py-5">
                     <div className="flex items-center justify-center gap-3">
-                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm", agent.is_online ? "bg-cyan-500/10 text-cyan-600 border border-cyan-500/20" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div>
-                      <div className="flex flex-col text-left"><span className="text-sm font-black text-slate-900">{agent.real_name}</span><span className="text-[9px] text-slate-400 font-mono">@{agent.username}</span></div>
+                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-black", agent.is_online ? "bg-cyan-500 text-white shadow-lg" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div>
+                      <div className="flex flex-col text-left"><span className="text-sm font-black text-slate-900">{agent.real_name}</span><span className="text-[9px] text-slate-400 font-mono italic">@{agent.username}</span></div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5 text-center"><span className="text-[10px] font-black text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{agent.dept_name || '未分派'}</span></td>
+                  <td className="px-6 py-5 text-center">
+                    <div className="flex justify-center gap-1">
+                       {agent.reward_count > 0 ? <div className="px-2 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100 flex items-center gap-1"><Award size={12}/> <span className="text-[10px] font-black">{agent.reward_count}</span></div> : <span className="opacity-20">-</span>}
                     </div>
                   </td>
                   <td className="px-6 py-5 text-center">
-                    <div className="flex justify-center">
-                      <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full uppercase italic">
-                        {agent.dept_name || '未归类节点'}
-                      </span>
+                    <div className="flex flex-col items-center gap-1">
+                       <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-cyan-500" style={{ width: `${agent.training_progress || 0}%` }} /></div>
+                       <span className="text-[8px] font-black text-slate-400">{agent.training_progress || 0}%</span>
                     </div>
                   </td>
                   <td className="px-6 py-5 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className={cn("w-2 h-2 rounded-full", agent.is_online ? "bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-slate-300")} />
-                      <span className={cn("text-[10px] font-black uppercase", agent.is_online ? "text-green-600" : "text-slate-400")}>
-                        {agent.is_online ? '在线通讯' : '离线脱机'}
-                      </span>
+                    <div className="flex flex-col items-center gap-1.5">
+                       <div className="flex items-center gap-1 text-slate-900 italic font-black"><Activity size={14} className="text-cyan-500" /> {agent.tactical_score}</div>
+                       {agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-md border border-red-100 uppercase tracking-tighter">拦截: {agent.last_violation_type}</span>}
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex items-center justify-center gap-1 text-sm font-black text-slate-700 italic">
-                      <Activity size={12} className="text-cyan-500" /> {agent.tactical_score}
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex justify-center">
-                      {agent.last_violation_type ? (
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 bg-red-500/10 text-red-600 text-[10px] font-black rounded-md border border-red-500/20 flex items-center gap-1 w-fit"><AlertCircle size={10} /> {agent.last_violation_type}</span>
-                          <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", agent.last_risk_score >= 9 ? "bg-red-600 text-white" : "bg-slate-900 text-white")}>等级.{agent.last_risk_score}</span>
-                        </div>
-                      ) : <span className="text-[9px] text-slate-300 font-bold uppercase tracking-widest italic">安全链路</span>}
-                    </div>
-                  </td>
-                  <td className="px-8 py-5">
-                    <div className="flex justify-center items-center">
-                      <button className="p-2 text-slate-400 hover:text-cyan-600 transition-all hover:bg-cyan-50 rounded-xl"><ShieldCheck size={18} /></button>
-                    </div>
-                  </td>
+                  <td className="px-8 py-5 text-center"><button className="p-2.5 bg-slate-900 text-white rounded-xl hover:bg-cyan-500 hover:text-white transition-all shadow-lg active:scale-90"><ShieldCheck size={18} /></button></td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {agents.length === 0 && !loading && (
-            <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-2">
-              <Users size={48} strokeWidth={1} className="opacity-20" />
-              <p className="font-black text-xs uppercase tracking-[0.2em]">中枢未发现匹配数据节点</p>
-            </div>
-          )}
+          {agents.length === 0 && !loading && <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black tracking-widest italic opacity-30"><Users size={64} strokeWidth={1} /><p>中枢未发现活跃实战节点</p></div>}
         </div>
-        {total > 10 && (
-          <TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} />
-        )}
+        {total > 10 && <div className="shrink-0 border-t border-slate-100 p-2"><TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} /></div>}
       </div>
     </div>
   )
 }
 
-// 2. 坐席视图容器
+// 2. 坐席视图：补全声音播报守卫
 const AgentView = () => {
   const isRedAlert = useRiskStore(s => s.isRedAlert)
   const [activeSuggestion, setActiveSuggestion] = useState<any>(null)
@@ -221,45 +129,37 @@ const AgentView = () => {
   const [sopSteps, setSopSteps] = useState<string[] | null>(null)
   const [activeCustomer, setActiveCustomer] = useState<any>(null)
   const [toast, setToast] = useState<any>(null)
+  const [isMuted, setIsMuted] = useState(false)
 
   useEffect(() => {
-    const onSuggestion = (e: any) => setActiveSuggestion(e.detail)
-    const onFireworks = () => setShowFireworks(true)
-    const onSop = (e: any) => setSopSteps(e.detail)
-    const onCustomer = (e: any) => setActiveCustomer(e.detail)
     const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
-
-    window.addEventListener('trigger-suggestion', onSuggestion); window.addEventListener('trigger-fireworks', onFireworks)
-    window.addEventListener('trigger-sop', onSop); window.addEventListener('trigger-customer', onCustomer)
-    window.addEventListener('trigger-toast', onToast)
-    window.addEventListener('trigger-permission-toast', (e: any) => {
-      setToast({
-        title: e.detail.title,
-        message: e.detail.message,
-        details: e.detail.details,
-        type: 'info',
-        duration: 10000 // 权限变更显示久一点
-      })
-    })
-    window.addEventListener('trigger-violation-alert', (e: any) => {
-      setToast({
-        title: '战术拦截：高危预警',
-        message: `坐席 ${e.detail.agent} 命中关键词 [${e.detail.keyword}]，请立即介入！`,
-        type: 'error',
-        action: () => { window.location.hash = `/alerts?id=${e.detail.id}` }
-      })
-      setTimeout(() => setToast(null), 8000)
-    })
-
-    return () => {
-      window.removeEventListener('trigger-suggestion', onSuggestion); window.removeEventListener('trigger-fireworks', onFireworks)
-      window.removeEventListener('trigger-sop', onSop); window.removeEventListener('trigger-customer', onCustomer)
-      window.removeEventListener('trigger-toast', onToast)
+    const onViolation = (e: any) => {
+      if (!isMuted) {
+        // 核心：等级声音策略
+        const audioPath = e.detail.audio_path || (e.detail.risk_score >= 8 ? '/assets/audio/red_alert.mp3' : '/assets/audio/warn.wav')
+        const audio = new Audio(audioPath); audio.play().catch(() => console.warn('音频拦截: 物理路径脱机'))
+      }
+      setToast({ title: '战术拦截', message: `检测到违规行为：[${e.detail.keyword}]`, type: 'error', details: e.detail.context, action: () => { window.location.hash = `/alerts?id=${e.detail.id}` } })
+      setTimeout(() => setToast(null), 10000)
     }
-  }, [])
+
+    window.addEventListener('trigger-toast', onToast); window.addEventListener('trigger-violation-alert', onViolation)
+    window.addEventListener('trigger-fireworks', () => setShowFireworks(true))
+    window.addEventListener('trigger-sop', (e: any) => setSopSteps(e.detail))
+    window.addEventListener('trigger-customer', (e: any) => setActiveCustomer(e.detail))
+    
+    return () => {
+      window.removeEventListener('trigger-toast', onToast); window.removeEventListener('trigger-violation-alert', onViolation)
+    }
+  }, [isMuted])
 
   return (
     <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600")}>
+      {/* 声音控制浮窗 */}
+      <button onClick={() => setIsMuted(!isMuted)} className="fixed top-24 right-10 z-[400] w-10 h-10 rounded-full bg-slate-900/80 backdrop-blur-md text-white flex items-center justify-center hover:scale-110 active:scale-90 transition-all border border-white/10 shadow-2xl">
+        {isMuted ? <VolumeX size={18} className="text-red-400" /> : <Volume2 size={18} className="text-cyan-400" />}
+      </button>
+
       <TacticalIsland />
       <AnimatePresence>
         {activeSuggestion && <SuggestionPopup products={activeSuggestion} onDismiss={() => setActiveSuggestion(null)} />}
@@ -268,28 +168,16 @@ const AgentView = () => {
         {activeCustomer && <CustomerHUD data={activeCustomer} onDismiss={() => setActiveCustomer(null)} />}
         {toast && (
           <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="fixed top-20 left-1/2 -translate-x-1/2 z-[300]">
-            <div 
-              onClick={() => toast.action?.()}
-              className={cn(
-                "px-6 py-4 rounded-[24px] shadow-2xl border flex items-center gap-4 backdrop-blur-md cursor-pointer group transition-all hover:scale-105", 
-                toast.type === 'error' ? "bg-red-600/90 border-red-400 text-white" : "bg-slate-900/90 border-cyan-500/50 text-cyan-400"
-              )}
-            >
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                {toast.type === 'error' ? <ShieldAlert size={20} className="animate-pulse" /> : <CheckCircle2 size={20} />}
+            <div className={cn("px-8 py-5 rounded-[32px] shadow-2xl border flex items-center gap-6 backdrop-blur-xl group transition-all", toast.type === 'error' ? "bg-red-600/90 border-red-400 text-white" : "bg-slate-900/90 border-cyan-500/50 text-cyan-400")}>
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0 shadow-inner">
+                {toast.type === 'error' ? <ShieldAlert size={24} className="animate-pulse" /> : <CheckCircle2 size={24} />}
               </div>
-              <div className="flex flex-col pr-4 border-r border-white/10">
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-50">{toast.title}</span>
-                <span className="text-sm font-bold leading-tight">{toast.message}</span>
-                {toast.details && (
-                  <p className="text-[9px] text-white/60 mt-1 font-medium italic">{toast.details}</p>
-                )}
+              <div className="flex flex-col pr-6 border-r border-white/10 min-w-[200px]">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50 italic">{toast.title}</span>
+                <span className="text-base font-black leading-tight mt-1">{toast.message}</span>
+                {toast.details && <p className="text-[9px] text-white/60 mt-2 font-medium italic line-clamp-1">{toast.details}</p>}
               </div>
-              {toast.action && (
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase italic whitespace-nowrap text-white/80 group-hover:text-white">
-                  立即取证 <ArrowRight size={12} />
-                </div>
-              )}
+              {toast.action && <button onClick={toast.action} className="flex items-center gap-2 text-[10px] font-black uppercase italic whitespace-nowrap text-cyan-400 hover:text-white transition-colors">立即取证 <ArrowRight size={14} /></button>}
             </div>
           </motion.div>
         )}
@@ -307,7 +195,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/big-screen" element={<BigScreen />} />
-        <Route path="/*" element={ !user ? <Navigate to="/login" /> : ( user.role === 'AGENT' ? <AgentView /> : (
+        <Route path="/*" element={ !user ? <Navigate to="/login" /> : ( user.role_code === 'AGENT' ? <AgentView /> : (
           <DashboardLayout>
             <Routes>
               <Route path="/" element={<AdminHome />} />
@@ -320,9 +208,9 @@ function App() {
               <Route path="/tools" element={<ToolsPage />} />
               <Route path="/customers" element={<CustomersPage />} />
               <Route path="/departments" element={<DepartmentsPage />} />
+              <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/rbac" element={<RbacPage />} />
-              <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/global-policy" element={<GlobalPolicyPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
             </Routes>

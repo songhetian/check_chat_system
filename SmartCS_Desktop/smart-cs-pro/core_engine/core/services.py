@@ -46,6 +46,31 @@ async def execute_violation_workflow(username: str, keyword: str, context: str, 
         logger.error(f"❌ [事务失败] 违规处理回滚: {e}")
         return False
 
+async def grant_user_reward(user_id: int, type: str, title: str, value: int):
+    """
+    [实战奖励] 为操作员注入战术奖励 (积分/勋章)
+    """
+    from core.models import UserReward
+    async with in_transaction() as conn:
+        user = await User.select_for_update().get(id=user_id)
+        # 如果是积分奖励
+        if type == 'SCORE':
+            user.tactical_score = min(100, user.tactical_score + value)
+            await user.save(using_db=conn)
+        
+        await UserReward.create(
+            user=user, type=type, title=title, value=value, using_db=conn
+        )
+    return True
+
+async def start_recruit_training(user_id: int):
+    """
+    [培训模式] 激活新兵 SOP 引导链路
+    """
+    from core.models import TrainingSession
+    session, _ = await TrainingSession.get_or_create(user_id=user_id, defaults={"mode": "SOP_GUIDE"})
+    return session
+
 class SmartScanner:
     def __init__(self):
         self.ocr = None

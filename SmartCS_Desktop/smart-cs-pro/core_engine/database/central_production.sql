@@ -216,16 +216,41 @@ CREATE TABLE IF NOT EXISTS policy_categories (
     UNIQUE INDEX idx_name_type (name, type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 19. 风险敏感词库
+-- 19. 风险敏感词库 (增强版：支持特制声音)
 CREATE TABLE IF NOT EXISTS sensitive_words (
     id INT PRIMARY KEY AUTO_INCREMENT,
     word VARCHAR(100) UNIQUE NOT NULL,
-    category_id INT NOT NULL, -- 强制关联分类 ID
+    category_id INT NOT NULL,
     risk_level INT DEFAULT 5,
+    custom_audio_path VARCHAR(255) COMMENT '特制声音文件路径 (mp3/wav)',
     is_active TINYINT DEFAULT 1,
     is_deleted TINYINT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES policy_categories(id)
+) ENGINE=InnoDB;
+
+-- 21. 员工战术奖励记录表
+CREATE TABLE IF NOT EXISTS user_rewards (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    type ENUM('SCORE', 'BADGE', 'PRIVILEGE') NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    value INT DEFAULT 0,
+    operator_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+-- 22. 新兵培训实战模式记录
+CREATE TABLE IF NOT EXISTS training_sessions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    mode VARCHAR(50) DEFAULT 'SOP_GUIDE',
+    progress INT DEFAULT 0,
+    is_completed TINYINT DEFAULT 0,
+    last_step VARCHAR(100),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
 -- 20. 智能带教知识库
