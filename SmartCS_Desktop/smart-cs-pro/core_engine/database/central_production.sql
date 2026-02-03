@@ -196,7 +196,7 @@ VALUES (5, 7, '橙色中级提醒', '提醒，当前对话存在合规风险，�
 INSERT IGNORE INTO users (username, password_hash, salt, real_name, role, department_id) 
 VALUES ('admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '超级管理员', 'HQ', 1);
 
--- 14. 菜单配置表 (RBAC 核心)
+-- 14. 菜单配置表
 CREATE TABLE IF NOT EXISTS menu_config (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
@@ -207,9 +207,40 @@ CREATE TABLE IF NOT EXISTS menu_config (
     UNIQUE INDEX idx_path (path)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 15. 权限功能定义表
+CREATE TABLE IF NOT EXISTS permissions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(50) NOT NULL UNIQUE, -- 如 'user:delete', 'command:lock'
+    name VARCHAR(100) NOT NULL,
+    module VARCHAR(50), -- 所属模块
+    is_deleted TINYINT DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 16. 角色权限关联表
+CREATE TABLE IF NOT EXISTS role_permissions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    role VARCHAR(20) NOT NULL,
+    permission_code VARCHAR(50) NOT NULL,
+    FOREIGN KEY (permission_code) REFERENCES permissions(code),
+    UNIQUE INDEX idx_role_perm (role, permission_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 注册初始战术模块
 INSERT IGNORE INTO menu_config (name, path, icon_name, min_role) VALUES 
 ('战术指挥台', '/command', 'Zap', 'ADMIN'),
 ('部门架构', '/departments', 'Building2', 'HQ'),
-('成员矩阵', '/users', 'UserCog', 'HQ');
+('成员矩阵', '/users', 'UserCog', 'HQ'),
+('权限中心', '/rbac', 'Shield', 'HQ');
+
+-- 初始化基础权限点
+INSERT IGNORE INTO permissions (code, name, module) VALUES 
+('input:lock', '一键输入锁定', '实时指挥'),
+('tactical:assist', '话术弹射协助', '实时指挥'),
+('dept:manage', '组织架构管理', '后台管理'),
+('user:manage', '操作员矩阵管理', '后台管理');
+
+-- 默认权限分配：主管拥有指挥权限
+INSERT IGNORE INTO role_permissions (role, permission_code) VALUES 
+('ADMIN', 'input:lock'),
+('ADMIN', 'tactical:assist');
 

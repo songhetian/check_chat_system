@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog
+  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog, Shield
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
@@ -22,8 +22,9 @@ const menu = [
   { path: '/command', icon: Zap, label: '实时战术指挥' },
   { path: '/alerts', icon: ShieldAlert, label: '风险拦截审计' },
   { path: '/notifications', icon: Bell, label: '通知消息中枢' },
+  { path: '/rbac', icon: Shield, label: '权责矩阵定义' },
   { path: '/departments', icon: Building2, label: '部门架构管理' },
-  { path: '/users', icon: UserCog, label: '员工权限矩阵' },
+  { path: '/users', icon: UserCog, label: '成员权限矩阵' },
   { path: '/customers', icon: Contact2, label: '客户画像分析' },
   { path: '/products', icon: Package, label: '商品战术话术' },
   { path: '/tools', icon: Wrench, label: '全域提效工具' },

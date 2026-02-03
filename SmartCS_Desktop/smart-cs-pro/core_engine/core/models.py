@@ -79,3 +79,20 @@ class Notification(BaseModel):
 
     class Meta:
         table = "notifications"
+
+class Permission(BaseModel):
+    id = fields.IntField(pk=True)
+    code = fields.CharField(max_length=50, unique=True)
+    name = fields.CharField(max_length=100)
+    module = fields.CharField(max_length=50)
+
+    class Meta:
+        table = "permissions"
+
+class RolePermission(BaseModel):
+    id = fields.IntField(pk=True)
+    role = fields.CharField(max_length=20)
+    permission_code = fields.CharField(max_length=50)
+
+    class Meta:
+        table = "role_permissions"

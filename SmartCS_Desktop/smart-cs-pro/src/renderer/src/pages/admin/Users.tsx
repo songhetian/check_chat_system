@@ -41,7 +41,7 @@ export default function UsersPage() {
 
   // --- 修复：下载导入模板逻辑 ---
   const handleDownloadTemplate = () => {
-    const headers = "用户名,真实姓名,角色(AGENT/ADMIN/HQ),部门ID\n"
+    const headers = "用户名,真实姓名,部门ID,角色(坐席/主管/总部)\n"
     const blob = new Blob(["\ufeff" + headers], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement("a")
     const url = URL.createObjectURL(blob)
