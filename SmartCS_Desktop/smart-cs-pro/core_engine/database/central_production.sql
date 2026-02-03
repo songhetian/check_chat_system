@@ -342,17 +342,12 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 ('admin:dept:manage', '部门增删改查', '组织架构'),
 ('admin:user:manage', '操作员矩阵管理', '成员权限'),
 ('admin:rbac:config', '权责矩阵定义', '权限中心'),
+('admin:policy:category', '策略分类中枢', 'AI 决策中心'),
+('admin:ai:policy', '全域 AI 策略配置', 'AI 决策中心'),
 -- 系统工具
 ('tool:secure_img:gen', '安全图片生成', '全域提效');
 
--- 预配主管(ADMIN)权限：赋予核心指挥与审计权
-INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES 
-(2, 'command:input:lock'),
-(2, 'command:assist:push'),
-(2, 'command:voice:alert'),
-(2, 'audit:violation:view');
-
--- 预配总部(HQ)权限：赋予全量权限
+-- 总部角色 (HQ) 特权自动维持：确保超级管理员拥有全量权限
 INSERT IGNORE INTO role_permissions (role_id, permission_code) 
 SELECT 3, code FROM permissions;
 

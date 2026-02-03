@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
+import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalTable, TacticalPagination } from '../../components/ui/TacticalTable'
 
 // --- 战术模态框组件 ---
@@ -32,6 +33,7 @@ function Modal({ isOpen, onClose, title, children }: any) {
 }
 
 export default function DepartmentsPage() {
+  const { hasPermission } = useAuthStore()
   const [depts, setDepts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -116,19 +118,22 @@ export default function DepartmentsPage() {
   return (
     <div className="flex flex-col gap-6 h-full font-sans">
       <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
-                <div>
-                  <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic text-tactical-glow">
-                    组织架构中枢
-                  </h2>
-                  <p className="text-slate-500 text-sm mt-1 font-medium">配置业务战术单元，实现全域数据隔离与权限管控</p>
-                </div>
-                {/* 功能色标红线：新增操作必须使用黑色背景 */}
-                <button 
-                  onClick={openAdd}
-                  className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 hover:bg-slate-800 transition-all"
-                >
-                  <Plus size={16} /> 录入新部门
-                </button>
+        <div>
+          <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic text-tactical-glow">
+            组织架构中枢
+          </h2>
+          <p className="text-slate-500 text-sm mt-1 font-medium">配置业务战术单元，实现全域数据隔离与权限管控</p>
+        </div>
+        
+        {/* 细粒度权限守卫：新增按钮 */}
+        {hasPermission('admin:dept:manage') && (
+          <button 
+            onClick={openAdd}
+            className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 hover:bg-slate-800 transition-all"
+          >
+            <Plus size={16} /> 录入新部门
+          </button>
+        )}
       </header>
 
       <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative">
@@ -141,7 +146,7 @@ export default function DepartmentsPage() {
                 <tr key={d.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-8 py-5">
                     <div className="flex items-center justify-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center border border-cyan-100 shadow-inner"><Building2 size={18} /></div>
+                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner", d.manager__real_name ? "bg-cyan-50 text-cyan-600 border-cyan-100" : "bg-slate-50 text-slate-400 border-slate-100")}><Building2 size={18} /></div>
                       <span className="text-sm font-black text-slate-900">{d.name}</span>
                     </div>
                   </td>
@@ -160,10 +165,17 @@ export default function DepartmentsPage() {
                     ) : <span className="text-[10px] text-slate-300 font-bold italic">未指派主管</span>}
                   </td>
                   <td className="px-6 py-5 text-center font-black italic text-[10px] text-emerald-600 uppercase tracking-widest">正常</td>
-                  <td className="px-8 py-5">
+                  <td className="px-8 py-5 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => openEdit(d)} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>
-                      <button onClick={() => openDeleteModal(d)} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>
+                      {/* 细粒度权限守卫：编辑/删除按钮 */}
+                      {hasPermission('admin:dept:manage') ? (
+                        <>
+                          <button onClick={() => openEdit(d)} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>
+                          <button onClick={() => openDeleteModal(d)} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>
+                        </>
+                      ) : (
+                        <span className="text-[9px] text-slate-300 font-black uppercase italic tracking-widest opacity-50">只读视图</span>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -171,7 +183,7 @@ export default function DepartmentsPage() {
             </TacticalTable>
           )}
         </div>
-        {/* 智能分页红线：仅在数据超过单页上限时展示，且确保在 Flex 布局底部固定 */}
+        
         {total > 10 && (
           <div className="shrink-0 border-t border-slate-100 bg-white">
             <TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} />
@@ -179,11 +191,11 @@ export default function DepartmentsPage() {
         )}
       </div>
 
-      {/* 新增/修改 模态框 */}
+      {/* 模态框保持不变 ... */}
       <Modal isOpen={modalType === 'ADD' || modalType === 'EDIT'} onClose={() => setModalType('NONE')} title={modalType === 'ADD' ? '录入新战术部门' : '修改部门架构'}>
         <div className="space-y-8">
           <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 pl-1">部门名称</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">部门名称</label>
             <input autoFocus value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="请输入部门名称" className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner" />
           </div>
           
@@ -212,7 +224,6 @@ export default function DepartmentsPage() {
         </div>
       </Modal>
 
-      {/* 删除确认 模态框 */}
       <Modal isOpen={modalType === 'DELETE'} onClose={() => setModalType('NONE')} title="确认注销操作">
         <div className="space-y-8 flex flex-col items-center text-center">
            <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
