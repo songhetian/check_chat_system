@@ -37,6 +37,7 @@ import {
 } from 'lucide-react'
 import { cn } from './lib/utils'
 import { CONFIG } from './lib/config'
+import { TacticalSearch } from './components/ui/TacticalSearch'
 
 // 1. 工业级管理后台首页
 const AdminHome = () => {
@@ -66,16 +67,13 @@ const AdminHome = () => {
       {/* 战术工具栏 */}
       <div className="flex justify-between items-center bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
         <div className="flex items-center gap-6 flex-1">
-          <div className="relative w-80">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <input 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && fetchAgents()}
-              placeholder="搜索操作员姓名或编号..." 
-              className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm text-slate-900 focus:ring-2 focus:ring-cyan-500/20"
-            />
-          </div>
+          <TacticalSearch 
+            value={search}
+            onChange={setSearch}
+            onSearch={fetchAgents}
+            placeholder="搜索操作员姓名或编号..."
+            className="w-80"
+          />
           <div className="flex items-center gap-2">
             <Filter size={14} className="text-slate-400" />
             <select 

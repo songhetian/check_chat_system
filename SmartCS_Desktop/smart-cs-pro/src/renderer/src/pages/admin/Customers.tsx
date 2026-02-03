@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, UserPlus, Filter, MoreHorizontal, Download, UserCircle2, Loader2, Calendar } from 'lucide-react'
 import { Card } from '../../components/ui/card'
+import { TacticalSearch } from '../../components/ui/TacticalSearch'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 
@@ -59,16 +60,13 @@ export default function CustomersPage() {
 
       {/* 搜索过滤条 */}
       <div className="bg-white p-4 rounded-[24px] border border-slate-200 shadow-sm flex gap-4 shrink-0">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-          <input 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && fetchCustomers()}
-            placeholder="搜索客户姓名、标签或特征码..." 
-            className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm text-slate-900 focus:ring-2 focus:ring-cyan-500/20 transition-all font-medium" 
-          />
-        </div>
+        <TacticalSearch 
+          value={search}
+          onChange={setSearch}
+          onSearch={fetchCustomers}
+          placeholder="搜索客户姓名、标签或特征码..."
+          className="flex-1"
+        />
         <button 
           onClick={fetchCustomers}
           className="px-6 bg-cyan-500 text-white rounded-2xl text-xs font-black hover:bg-cyan-600 flex items-center gap-2 transition-all"
