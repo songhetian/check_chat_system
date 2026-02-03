@@ -329,7 +329,7 @@ INSERT IGNORE INTO menu_config (name, path, icon_name, min_role_id) VALUES
 ('风险审计', '/alerts', 'ShieldAlert', 2),
 ('消息中枢', '/notifications', 'Bell', 1);
 
--- 注册全量功能权限点 (细粒度)
+-- 注册全量功能权限点 (细粒度 - 全量同步版)
 INSERT IGNORE INTO permissions (code, name, module) VALUES 
 -- 实时指挥
 ('command:input:lock', '实时输入锁定', '实时指挥'),
@@ -340,7 +340,9 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 ('audit:evidence:export', '证据包导出', '风险拦截'),
 -- 后台管理
 ('admin:dept:manage', '部门增删改查', '组织架构'),
+('admin:dept:delete', '部门风险注销', '组织架构'),
 ('admin:user:manage', '操作员矩阵管理', '成员权限'),
+('admin:user:import', '操作员批量导入', '成员权限'),
 ('admin:rbac:config', '权责矩阵定义', '权限中心'),
 ('admin:policy:category', '策略分类中枢', 'AI 决策中心'),
 ('admin:ai:policy', '全域 AI 策略配置', 'AI 决策中心'),
