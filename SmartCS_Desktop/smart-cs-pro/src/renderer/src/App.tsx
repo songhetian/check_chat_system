@@ -18,6 +18,7 @@ import CustomersPage from './pages/admin/Customers'
 import AuditStreamPage from './pages/admin/AuditStream'
 import PlatformsPage from './pages/admin/Platforms'
 import BigScreen from './pages/admin/BigScreen'
+import NotificationsPage from './pages/admin/Notifications'
 import GlobalPolicyPage from './pages/hq/GlobalPolicy'
 import AiPerformancePage from './pages/hq/AiPerformance'
 import { 
@@ -252,6 +253,7 @@ function App() {
                   <Route path="/tools" element={<ToolsPage />} />
                   <Route path="/customers" element={<CustomersPage />} />
                   <Route path="/global-policy" element={<GlobalPolicyPage />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>
               </DashboardLayout>
             )

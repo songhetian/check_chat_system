@@ -140,6 +140,16 @@ CREATE TABLE IF NOT EXISTS ai_usage_stats (
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
+-- 13. 系统通知中心表 (新增)
+CREATE TABLE IF NOT EXISTS notifications (
+    id VARCHAR(50) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT,
+    type VARCHAR(50) DEFAULT 'INFO',
+    is_read TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
 -- ==========================================
 -- 初始数据填充
 -- ==========================================
