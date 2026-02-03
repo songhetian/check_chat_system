@@ -51,10 +51,26 @@ async def create_notification(title, content, msg_type="INFO"):
         await redis_client.publish("notif_channel", json.dumps({"id": msg_id, "title": title}))
     return msg_id
 
-# --- 4. FastAPI 应用与路由 ---
+# --- 4. 业务逻辑组件 ---
+class AIAnalyzer:
+    def __init__(self):
+        self.api_url = os.getenv("AI_URL", "http://127.0.0.1:11434/api/chat")
+        self.is_healthy = False
+    async def check_health(self):
+        try:
+            async with httpx.AsyncClient(timeout=2.0) as client:
+                resp = await client.get(self.api_url.split('/api')[0])
+                self.is_healthy = resp.status_code == 200
+        except: self.is_healthy = False
+        return self.is_healthy
+
+ai_analyzer = AIAnalyzer()
+
+# --- 5. FastAPI 应用与路由 ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_services()
+    asyncio.create_task(ai_analyzer.check_health())
     yield
     if db_pool: db_pool.close(); await db_pool.wait_closed()
     if redis_client: await redis_client.close()
@@ -74,7 +90,7 @@ async def get_departments():
             await cur.execute("SELECT id, name FROM departments")
             return {"status": "ok", "data": await cur.fetchall()}
 
-# 2. 坐席管理 API (真实多维筛选)
+# 2. 坐席管理 API
 @app.get("/api/admin/agents")
 async def get_agents(
     page: int = 1, 
@@ -87,7 +103,7 @@ async def get_agents(
     if not db_pool: return {"status": "error", "message": "核心链路脱机"}
     offset = (page - 1) * size
     
-    online_keys = await redis_client.keys("online_agent:*")
+    online_keys = await redis_client.keys("online_agent:*") if redis_client else []
     online_usernames = [k.split(":")[1] for k in online_keys]
 
     async with db_pool.acquire() as conn:
@@ -102,7 +118,6 @@ async def get_agents(
                 where += " AND d.name = %s"
                 params.append(dept)
             
-            # 风险等级筛选 (基于 violation_records 中的真实 risk_score)
             if risk_level == "SERIOUS": 
                 where += " AND EXISTS (SELECT 1 FROM violation_records vr WHERE vr.user_id = u.id AND vr.risk_score >= 9)"
             elif risk_level == "MEDIUM": 
@@ -142,14 +157,42 @@ async def get_agents(
             
             return {"status": "ok", "data": agents, "total": total_data['total']}
 
+# 3. 通知中枢 API
+@app.get("/api/admin/notifications")
+async def get_notifications(page: int = 1, size: int = 10):
+    if not db_pool: return {"status": "error", "message": "脱机"}
+    async with db_pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("SELECT * FROM notifications ORDER BY created_at DESC LIMIT %s OFFSET %s", (size, (page-1)*size))
+            data = await cur.fetchall()
+            await cur.execute("SELECT COUNT(*) as total FROM notifications")
+            total = await cur.fetchone()
+            return {"status": "ok", "data": data, "total": total['total']}
+
+@app.post("/api/admin/notifications/read")
+async def mark_read(data: dict):
+    msg_id = data.get("id")
+    async with db_pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            if msg_id == "ALL": await cur.execute("UPDATE notifications SET is_read = 1")
+            else: await cur.execute("UPDATE notifications SET is_read = 1 WHERE id = %s", (msg_id,))
+            return {"status": "ok"}
+
 @app.post("/api/auth/login")
 async def login(data: dict):
     u, p = data.get("username"), data.get("password")
-    if u == "admin" and p == "admin123":
-        await create_notification("系统接入", f"高级权限账号 {u} 已接入战术指挥链路。")
-        return {"status": "ok", "data": {"user": {"username":u, "real_name":"指挥官", "role":"ADMIN", "department": "总经办"}}, "token": "tk_admin"}
-    return {"status": "error", "message": "凭据失效"}
+    if not db_pool: return {"status": "error", "message": "脱机"}
+    async with db_pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("SELECT * FROM users WHERE username = %s", (u,))
+            user = await cur.fetchone()
+            if u == "admin" and p == "admin123":
+                await create_notification("系统接入", f"指挥官 {u} 已上线")
+                return {"status": "ok", "data": {"user": {"username":u, "real_name":user['real_name'], "role":"ADMIN", "department": "指挥部"}}, "token": "tk_admin"}
+            return {"status": "error", "message": "凭据失效"}
 
+# 通信
+active_conns = []
 @app.websocket("/ws/risk")
 async def websocket_endpoint(websocket: WebSocket, username: str = "guest"):
     await websocket.accept(); active_conns.append(websocket)
