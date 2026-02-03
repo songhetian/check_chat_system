@@ -19,6 +19,7 @@ import CustomersPage from './pages/admin/Customers'
 import DepartmentsPage from './pages/admin/Departments'
 import UsersPage from './pages/admin/Users'
 import RbacPage from './pages/admin/Rbac'
+import CategoriesPage from './pages/admin/Categories'
 import AuditStreamPage from './pages/admin/AuditStream'
 import PlatformsPage from './pages/admin/Platforms'
 import BigScreen from './pages/admin/BigScreen'
@@ -321,6 +322,7 @@ function App() {
               <Route path="/departments" element={<DepartmentsPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/rbac" element={<RbacPage />} />
+              <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/global-policy" element={<GlobalPolicyPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
             </Routes>

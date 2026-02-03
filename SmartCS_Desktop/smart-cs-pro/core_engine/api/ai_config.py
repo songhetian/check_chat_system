@@ -1,98 +1,80 @@
 from fastapi import APIRouter, Depends, Request
-from core.models import SensitiveWord, KnowledgeBase
+from core.models import SensitiveWord, KnowledgeBase, PolicyCategory
 from api.auth import get_current_user
 import json
 
 router = APIRouter(prefix="/api/ai", tags=["AI Policy"])
 
+# --- 1. 策略分类管理 ---
+@router.get("/categories")
+async def get_categories(type: str = None, current_user: dict = Depends(get_current_user)):
+    query = PolicyCategory.filter(is_deleted=0)
+    if type: query = query.filter(type=type)
+    data = await query.all().values()
+    return {"status": "ok", "data": data}
+
+@router.post("/categories")
+async def save_category(data: dict, current_user: dict = Depends(get_current_user)):
+    if current_user["role_code"] != "HQ": return {"status": "error", "message": "权限不足"}
+    cat_id = data.get("id")
+    payload = {"name": data.get("name"), "type": data.get("type"), "description": data.get("description")}
+    if cat_id: await PolicyCategory.filter(id=cat_id).update(**payload)
+    else: await PolicyCategory.create(**payload)
+    return {"status": "ok"}
+
+# --- 2. 敏感词管理 (实体关联版) ---
 @router.get("/sensitive-words")
 async def get_sensitive_words(current_user: dict = Depends(get_current_user)):
-    words = await SensitiveWord.filter(is_deleted=0).all().values()
+    # 关联查询分类名称
+    words = await SensitiveWord.filter(is_deleted=0).select_related("category").all().values(
+        "id", "word", "risk_level", "is_active", "category__name", "category_id"
+    )
     return {"status": "ok", "data": words}
 
 @router.post("/sensitive-words")
 async def save_sensitive_word(data: dict, request: Request, current_user: dict = Depends(get_current_user)):
-    if current_user["role_code"] != "HQ":
-        return {"status": "error", "message": "权限不足：仅限总部管理员配置"}
-    
+    if current_user["role_code"] != "HQ": return {"status": "error", "message": "权限不足"}
     word_id = data.get("id")
     payload = {
         "word": data.get("word"),
-        "category": data.get("category"),
+        "category_id": data.get("category_id"),
         "risk_level": data.get("risk_level", 5),
         "is_active": data.get("is_active", 1)
     }
-
-    if word_id:
-        await SensitiveWord.filter(id=word_id).update(**payload)
-    else:
-        await SensitiveWord.create(**payload)
+    if word_id: await SensitiveWord.filter(id=word_id).update(**payload)
+    else: await SensitiveWord.create(**payload)
     
-    # 同步至 Redis 战术缓存，供扫描引擎秒级调用
+    # 同步 Redis 战术缓存
     redis = request.app.state.redis
     if redis:
         all_words = await SensitiveWord.filter(is_active=1, is_deleted=0).values("word", "risk_level")
         await redis.set("cache:sensitive_words", json.dumps(all_words))
-        await redis.publish("notif_channel", json.dumps({"type": "AI_POLICY_UPDATED", "module": "SENSITIVE_WORDS"}))
-
     return {"status": "ok"}
 
+# --- 3. 智能话术管理 (实体关联版) ---
 @router.get("/knowledge-base")
 async def get_knowledge_base(current_user: dict = Depends(get_current_user)):
-    items = await KnowledgeBase.filter(is_deleted=0).all().values()
+    items = await KnowledgeBase.filter(is_deleted=0).select_related("category").all().values(
+        "id", "keyword", "answer", "is_active", "category__name", "category_id"
+    )
     return {"status": "ok", "data": items}
 
-@router.post("/sensitive-words/import")
-async def import_sensitive_words(data: dict, request: Request, current_user: dict = Depends(get_current_user)):
-    if current_user["role_code"] != "HQ":
-        return {"status": "error", "message": "权限不足"}
-    
-    items = data.get("items", [])
-    if not items: return {"status": "error", "message": "导入清单为空"}
+@router.post("/knowledge-base")
+async def save_knowledge_item(data: dict, request: Request, current_user: dict = Depends(get_current_user)):
+    if current_user["role_code"] != "HQ": return {"status": "error", "message": "权限不足"}
+    item_id = data.get("id")
+    payload = {
+        "keyword": data.get("keyword"),
+        "answer": data.get("answer"),
+        "category_id": data.get("category_id"),
+        "is_active": data.get("is_active", 1)
+    }
+    if item_id: await KnowledgeBase.filter(id=item_id).update(**payload)
+    else: await KnowledgeBase.create(**payload)
 
-    for item in items:
-        await SensitiveWord.get_or_create(
-            word=item.get("word"),
-            defaults={
-                "category": item.get("category", "未分类"),
-                "risk_level": item.get("risk_level", 5),
-                "is_active": 1
-            }
-        )
-    
-    # 同步 Redis 缓存
-    redis = request.app.state.redis
-    if redis:
-        all_words = await SensitiveWord.filter(is_active=1, is_deleted=0).values("word", "risk_level")
-        await redis.set("cache:sensitive_words", json.dumps(all_words))
-        await redis.publish("notif_channel", json.dumps({"type": "AI_POLICY_UPDATED", "module": "SENSITIVE_WORDS"}))
-
-    return {"status": "ok", "count": len(items)}
-
-@router.post("/knowledge-base/import")
-async def import_knowledge_base(data: dict, request: Request, current_user: dict = Depends(get_current_user)):
-    if current_user["role_code"] != "HQ":
-        return {"status": "error", "message": "权限不足"}
-    
-    items = data.get("items", [])
-    if not items: return {"status": "error", "message": "导入清单为空"}
-
-    for item in items:
-        await KnowledgeBase.get_or_create(
-            keyword=item.get("keyword"),
-            defaults={
-                "answer": item.get("answer"),
-                "category": item.get("category", "标准话术"),
-                "is_active": 1
-            }
-        )
-    
     # 同步 Redis
     redis = request.app.state.redis
     if redis:
         kb_data = await KnowledgeBase.filter(is_active=1, is_deleted=0).values("keyword", "answer")
         await redis.set("cache:knowledge_base", json.dumps(kb_data))
-        await redis.publish("notif_channel", json.dumps({"type": "AI_POLICY_UPDATED", "module": "KNOWLEDGE_BASE"}))
-
-    return {"status": "ok", "count": len(items)}
-
+    return {"status": "ok"}

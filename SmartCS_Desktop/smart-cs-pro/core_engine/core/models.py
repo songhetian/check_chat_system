@@ -29,22 +29,47 @@ class User(BaseModel):
     password_hash = fields.CharField(max_length=128)
     salt = fields.CharField(max_length=32)
     real_name = fields.CharField(max_length=50)
-    # 外键关联 Role
     role = fields.ForeignKeyField('models.Role', related_name='users')
     tactical_score = fields.IntField(default=0)
     status = fields.IntField(default=1)
-    
-    # Growth related fields
     streak_days = fields.IntField(default=0)
     handled_customers_count = fields.IntField(default=0)
     rank_level = fields.CharField(max_length=20, default="NOVICE")
     graduated_at = fields.DatetimeField(null=True)
-    
-    # 外键关联 Department
     department = fields.ForeignKeyField('models.Department', related_name='users', null=True)
 
     class Meta:
         table = "users"
+
+class PolicyCategory(BaseModel):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=50)
+    type = fields.CharField(max_length=20) # SENSITIVE or KNOWLEDGE
+    description = fields.CharField(max_length=200, null=True)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "policy_categories"
+
+class SensitiveWord(BaseModel):
+    id = fields.IntField(pk=True)
+    word = fields.CharField(max_length=100, unique=True)
+    category = fields.ForeignKeyField('models.PolicyCategory', related_name='sensitive_words')
+    risk_level = fields.IntField(default=5)
+    is_active = fields.IntField(default=1)
+
+    class Meta:
+        table = "sensitive_words"
+
+class KnowledgeBase(BaseModel):
+    id = fields.IntField(pk=True)
+    keyword = fields.CharField(max_length=100)
+    answer = fields.TextField()
+    category = fields.ForeignKeyField('models.PolicyCategory', related_name='knowledge_items')
+    is_active = fields.IntField(default=1)
+
+    class Meta:
+        table = "knowledge_base"
 
 class Permission(BaseModel):
     id = fields.IntField(pk=True)
@@ -86,61 +111,12 @@ class Customer(BaseModel):
         table = "customers"
 
 class Notification(BaseModel):
-
     id = fields.CharField(max_length=50, pk=True)
-
     title = fields.CharField(max_length=255)
-
     content = fields.TextField()
-
     type = fields.CharField(max_length=50, default="INFO")
-
     is_read = fields.IntField(default=0)
-
     created_at = fields.DatetimeField(auto_now_add=True)
 
-
-
     class Meta:
-
         table = "notifications"
-
-
-
-class SensitiveWord(BaseModel):
-
-    id = fields.IntField(pk=True)
-
-    word = fields.CharField(max_length=100, unique=True)
-
-    category = fields.CharField(max_length=50)
-
-    risk_level = fields.IntField(default=5) # 1-10
-
-    is_active = fields.IntField(default=1)
-
-
-
-    class Meta:
-
-        table = "sensitive_words"
-
-
-
-class KnowledgeBase(BaseModel):
-
-    id = fields.IntField(pk=True)
-
-    keyword = fields.CharField(max_length=100)
-
-    answer = fields.TextField()
-
-    category = fields.CharField(max_length=50)
-
-    is_active = fields.IntField(default=1)
-
-
-
-    class Meta:
-
-        table = "knowledge_base"

@@ -205,27 +205,103 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 INSERT IGNORE INTO role_permissions (role_id, permission_code) 
 SELECT 3, code FROM permissions;
 
--- 18. 敏感词库
+-- 18. 策略分类中枢表 (实现词库与话术的归类管理)
+CREATE TABLE IF NOT EXISTS policy_categories (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    type ENUM('SENSITIVE', 'KNOWLEDGE') NOT NULL, -- 区分词库分类或话术分类
+    description VARCHAR(200),
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE INDEX idx_name_type (name, type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 19. 风险敏感词库
 CREATE TABLE IF NOT EXISTS sensitive_words (
     id INT PRIMARY KEY AUTO_INCREMENT,
     word VARCHAR(100) UNIQUE NOT NULL,
-    category VARCHAR(50),
+    category_id INT NOT NULL, -- 强制关联分类 ID
     risk_level INT DEFAULT 5,
     is_active TINYINT DEFAULT 1,
     is_deleted TINYINT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES policy_categories(id)
 ) ENGINE=InnoDB;
 
--- 19. 智能带教知识库
+-- 20. 智能带教知识库
 CREATE TABLE IF NOT EXISTS knowledge_base (
     id INT PRIMARY KEY AUTO_INCREMENT,
     keyword VARCHAR(100) NOT NULL,
     answer TEXT NOT NULL,
-    category VARCHAR(50),
+    category_id INT NOT NULL, -- 强制关联分类 ID
     is_active TINYINT DEFAULT 1,
     is_deleted TINYINT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES policy_categories(id)
 ) ENGINE=InnoDB;
+
+-- ==========================================
+-- 初始权限与菜单同步 (rbac-integration-guard)
+-- ==========================================
+INSERT IGNORE INTO permissions (code, name, module) VALUES 
+('admin:policy:category', '策略分类管理', 'AI 决策中心');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (3, 'admin:policy:category');
+
+INSERT IGNORE INTO menu_config (name, path, icon_name, min_role_id) VALUES 
+('分类中枢', '/categories', 'Layers', 3);
+
+-- ==========================================
+-- 战术系统全量分页测试数据集 (V4.0 - 实体分类版)
+-- ==========================================
+
+-- 1. 注入 20+ 策略分类
+INSERT IGNORE INTO policy_categories (id, name, type, description) VALUES 
+(1, '财务风险', 'SENSITIVE', '涉及转账、私单等金钱交易拦截'),
+(2, '服务态度', 'SENSITIVE', '不耐烦、辱骂等负面情绪识别'),
+(3, '合规话术', 'KNOWLEDGE', '标准礼仪与法律免责声明'),
+(4, '业务话术', 'KNOWLEDGE', '商品参数、物流时效标准回复'),
+(5, '政治敏感', 'SENSITIVE', '违禁词库'), (6, '竞争对手', 'SENSITIVE', '友商平台信息过滤'),
+(7, '个人隐私', 'SENSITIVE', '身份证、手机号收集拦截'), (8, '引导好评', 'SENSITIVE', '不正当得利诱导'),
+(9, '售后流程', 'KNOWLEDGE', '退换货政策指导'), (10, '紧急公关', 'KNOWLEDGE', '危机处理话术'),
+(11, '金融欺诈', 'SENSITIVE', '疑似骗术词库'), (12, '劳动纪律', 'SENSITIVE', '坐席消极应接判定'),
+(13, '促销活动', 'KNOWLEDGE', '大促期间统一口径'), (14, '产品缺陷', 'KNOWLEDGE', '质量问题解释指引'),
+(15, '物流查询', 'KNOWLEDGE', '顺丰/中通链路查询回复'), (16, '会员权益', 'KNOWLEDGE', '积分/等级计算规则'),
+(17, '引流风险', 'SENSITIVE', '站外平台引流识别'), (18, '暴力倾向', 'SENSITIVE', '极端言论监控'),
+(19, '定制需求', 'KNOWLEDGE', '非标订单确认话术'), (20, '常见QA', 'KNOWLEDGE', '高频问题秒回矩阵'),
+(21, '数据安全', 'SENSITIVE', '防止公司内部资料外泄');
+
+-- 2. 注入 20+ 敏感词记录 (关联 category_id)
+INSERT IGNORE INTO sensitive_words (word, category_id, risk_level) VALUES 
+('加个微信', 1, 9), ('私下转账', 1, 10), ('淘宝店铺', 17, 8), ('你个笨蛋', 2, 9), 
+('没看说明', 2, 6), ('身份证号', 7, 10), ('打折力度', 1, 5), ('竞争对手', 6, 7),
+('返现两元', 8, 8), ('你是猪吗', 2, 10), ('银行账号', 1, 10), ('公司内部', 21, 9),
+('滚开', 2, 10), ('个人号', 17, 7), ('财务报表', 21, 9), ('优惠卷', 1, 4),
+('恶意中伤', 2, 8), ('不建议买', 12, 7), ('明天发货', 4, 3), ('退款申请', 9, 2),
+('举报你', 2, 8);
+
+-- 3. 注入 20+ 知识库记录 (关联 category_id)
+INSERT IGNORE INTO knowledge_base (keyword, answer, category_id) VALUES 
+('发货', '标准回复：我们会在 48 小时内为您优先发出。', 4),
+('正品', '标准回复：本店所有商品均由品牌官方授权，支持专柜验货。', 3),
+('退货', '标准回复：在不影响二次销售的情况下，支持 7 天无理由退换。', 9),
+('尺寸', '标准回复：详情页内有详细的规格表，建议您参考对比。', 4),
+('顺丰', '标准回复：默认顺丰包邮，为您提供极速物流体验。', 15),
+('颜色', '标准回复：图片为实物拍摄，受显示器影响可能存在轻微色差。', 4),
+('价格', '标准回复：我们的价格已是全网最优，且包含全套售后保障。', 13),
+('积分', '标准回复：每消费 1 元可获得 1 积分，可在会员中心兑换。', 16),
+('安装', '标准回复：该商品提供免费上门安装服务，请联系客服预约。', 4),
+('缺货', '标准回复：该规格目前处于预售状态，预计 5 天后补货。', 4),
+('开发票', '标准回复：请在确认收货后，在订单详情页申请电子发票。', 3),
+('投诉', '标准回复：很抱歉给您带来不便，我们的主管将立即为您回访。', 10),
+('优惠', '标准回复：关注店铺可领取 5 元无门槛红包。', 13),
+('材质', '标准回复：采用 100% 纯棉面料，触感柔软细腻。', 4),
+('洗涤', '标准回复：建议冷水手洗，避免阳光暴晒以防褪色。', 4),
+('批发', '标准回复：大宗采购请联系大客户专员 400-XXX-XXXX。', 19),
+('对比', '标准回复：我们的产品具备核心专利，性能优于市面同类产品。', 10),
+('物流慢', '标准回复：受天气影响物流稍有延迟，我们已为您催促网点。', 15),
+('改地址', '标准回复：只要包裹尚未发出，我们可以为您免费修改地址。', 4),
+('赠品', '标准回复：现在下单前 100 名用户可获赠精美战术挂件一个。', 13);
 
 -- ==========================================
 -- 初始数据填充
