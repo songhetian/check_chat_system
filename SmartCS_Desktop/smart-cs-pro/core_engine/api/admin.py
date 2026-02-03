@@ -1,34 +1,8 @@
 from fastapi import APIRouter, Query, Request
 from core.models import User, Department, ViolationRecord, Role, Permission, RolePermission
-
-@router.get("/permissions")
-async def get_permissions():
-    """获取全量系统权限定义"""
-    perms = await Permission.filter(is_deleted=0).values("id", "code", "name", "module")
-    return {"status": "ok", "data": perms}
-
-@router.get("/role/permissions")
-async def get_role_permissions(role_id: int):
-    """获取指定角色的权限代码列表"""
-    perms = await RolePermission.filter(role_id=role_id).values_list("permission_code", flat=True)
-    return {"status": "ok", "data": list(perms)}
-
-@router.post("/role/permissions")
-async def update_role_permissions(data: dict):
-    """全量覆盖更新角色权限"""
-    role_id, perms = data.get("role_id"), data.get("permissions", [])
-    
-    async with in_transaction() as conn:
-        # 先清除
-        await RolePermission.filter(role_id=role_id).delete(using_db=conn)
-        # 再批量插入
-        objs = [RolePermission(role_id=role_id, permission_code=p) for p in perms]
-        await RolePermission.bulk_create(objs, using_db=conn)
-        
-    return {"status": "ok"}
-
 from tortoise.expressions import Q
 from tortoise.functions import Count
+from tortoise.transactions import in_transaction
 import os, json
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
@@ -93,6 +67,7 @@ async def get_agents(request: Request, page: int = 1, size: int = 50, search: st
     offset = (page - 1) * size
     online_usernames = await redis.smembers("online_agents_set") if redis else []
 
+    # 核心：必须显式关联 Role 模型
     query = User.filter(is_deleted=0).select_related("department", "role")
     if search: query = query.filter(Q(username__icontains=search) | Q(real_name__icontains=search))
     if dept != "ALL": query = query.filter(department__name=dept)
@@ -101,6 +76,7 @@ async def get_agents(request: Request, page: int = 1, size: int = 50, search: st
     elif status == "OFFLINE": query = query.exclude(username__in=online_usernames)
 
     total = await query.count()
+    # 提取字段中必须包含 role 关联字段
     agents_data = await query.order_by("tactical_score").limit(size).offset(offset).annotate(
         manage_count=Count("managed_departments")
     ).values(
@@ -130,23 +106,19 @@ async def get_roles():
 
 @router.get("/permissions")
 async def get_permissions():
-    """获取全量系统权限定义"""
     perms = await Permission.filter(is_deleted=0).values("id", "code", "name", "module")
     return {"status": "ok", "data": perms}
 
 @router.get("/role/permissions")
 async def get_role_permissions(role_id: int):
-    """获取指定角色的权限代码列表"""
     perms = await RolePermission.filter(role_id=role_id).values_list("permission_code", flat=True)
     return {"status": "ok", "data": list(perms)}
 
 @router.post("/role/permissions")
 async def update_role_permissions(data: dict, request: Request):
-    """全量覆盖更新角色权限，并广播通知"""
     role_id, new_perms = data.get("role_id"), data.get("permissions", [])
     redis = request.app.state.redis
     
-    # 1. 获取旧权限集进行比对
     old_perms = await RolePermission.filter(role_id=role_id).values_list("permission_code", flat=True)
     added = set(new_perms) - set(old_perms)
     removed = set(old_perms) - set(new_perms)
@@ -157,21 +129,19 @@ async def update_role_permissions(data: dict, request: Request):
             objs = [RolePermission(role_id=role_id, permission_code=p) for p in new_perms]
             await RolePermission.bulk_create(objs, using_db=conn)
     
-    # 2. 广播权限变更信号
     if redis and (added or removed):
         role = await Role.get_or_none(id=role_id)
         role_code = role.code if role else "UNKNOWN"
-        
         all_perms_map = {p['code']: p['name'] for p in await Permission.all().values("code", "name")}
         
         msg_parts = []
-        if added: msg_parts.append(f"新增功能：{', '.join([all_perms_map.get(p, p) for p in added])}")
-        if removed: msg_parts.append(f"移除功能：{', '.join([all_perms_map.get(p, p) for p in removed])}")
+        if added: msg_parts.append(f"新增：{', '.join([all_perms_map.get(p, p) for p in added])}")
+        if removed: msg_parts.append(f"移除：{', '.join([all_perms_map.get(p, p) for p in removed])}")
         
         payload = {
             "type": "PERMISSION_CHANGED",
             "target_role": role_code,
-            "title": "系统权责变更提醒",
+            "title": "系统权责变更",
             "message": "您的权责矩阵已重校",
             "details": " | ".join(msg_parts)
         }

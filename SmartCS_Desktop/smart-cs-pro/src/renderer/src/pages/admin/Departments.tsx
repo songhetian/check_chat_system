@@ -171,7 +171,12 @@ export default function DepartmentsPage() {
             </TacticalTable>
           )}
         </div>
-        {total > 10 && <TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} />}
+        {/* 智能分页红线：仅在数据超过单页上限时展示，且确保在 Flex 布局底部固定 */}
+        {total > 10 && (
+          <div className="shrink-0 border-t border-slate-100 bg-white">
+            <TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} />
+          </div>
+        )}
       </div>
 
       {/* 新增/修改 模态框 */}

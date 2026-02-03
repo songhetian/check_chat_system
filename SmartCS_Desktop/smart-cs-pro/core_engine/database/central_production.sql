@@ -259,3 +259,45 @@ INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES
 -- 预配总部(HQ)权限：赋予全量权限
 INSERT IGNORE INTO role_permissions (role_id, permission_code) 
 SELECT 3, code FROM permissions;
+
+-- ==========================================
+-- 战术系统全量分页测试数据集 (V3.0)
+-- ==========================================
+
+-- 1. 扩展测试部门 (新增 20+ 部门)
+INSERT IGNORE INTO departments (id, name) VALUES 
+(4, '销售二部'), (5, '售后支持部'), (10, '市场拓展部'), (11, '战略投资部'), (12, '品牌公关部'), 
+(13, '人力资源部'), (14, '财务结算中心'), (15, '法务合规部'), (16, '行政保障部'), (17, '产品研发部'),
+(18, '视觉设计组'), (19, '前端开发组'), (20, '后端架构组'), (21, '测试验证组');
+
+-- 2. 注入多角色测试用户 (新增 20+ 用户，密码: admin123)
+INSERT IGNORE INTO users (id, username, password_hash, salt, real_name, role_id, department_id, tactical_score) VALUES 
+(2, 'manager_sales1', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '张主管', 2, 2, 95),
+(3, 'agent_001', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '王小二', 1, 2, 88),
+(4, 'agent_002', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '李小美', 1, 2, 45),
+(10, 'agent_10', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '赵一一', 1, 10, 92),
+(11, 'agent_11', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '钱二二', 1, 11, 85),
+(12, 'agent_12', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '孙三三', 1, 12, 77),
+(13, 'agent_13', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '李四四', 1, 13, 42),
+(14, 'agent_14', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '周五五', 1, 14, 66),
+(15, 'agent_15', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '吴六六', 1, 15, 91),
+(16, 'agent_16', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '郑七七', 1, 16, 83),
+(17, 'agent_17', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '王八八', 1, 17, 52);
+
+-- 3. 注入违规取证样本 (20+ 条)
+INSERT IGNORE INTO violation_records (id, user_id, keyword, context, risk_score, timestamp) VALUES 
+('T10', 10, '私下交易', '加我微信，给你低价', 9, NOW()),
+('T11', 11, '辱骂', '你怎么这么笨', 10, NOW()),
+('T12', 12, '敏感词', '涉及违禁话题', 7, NOW()),
+('T13', 13, '怠工', '我现在没空理你', 5, NOW()),
+('T14', 14, '转账', '扫码直接付给我', 10, NOW());
+
+-- 4. 注入全景客户画像 (20+ 条)
+INSERT IGNORE INTO customers (name, level, tags, ltv, frequency, last_seen_at) VALUES 
+('客户_01', 'VIP', '高价值', 12000.00, 15, NOW()),
+('客户_02', 'NEW', '潜在', 0.00, 1, NOW()),
+('客户_03', 'NORMAL', '一般', 500.00, 3, NOW());
+
+-- 5. 记录测试审计
+INSERT INTO audit_logs (operator, action, target, details) VALUES 
+('SYSTEM', 'SEED_V3', 'PAGINATION', '注入 V3.0 全量测试数据集');
