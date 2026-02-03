@@ -3,34 +3,24 @@ from contextlib import asynccontextmanager
 from logging.handlers import RotatingFileHandler
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import uvicorn, threading, httpx, numpy as np, aiomysql, redis.asyncio as redis
+from tortoise.contrib.fastapi import register_tortoise
+from tortoise.expressions import Q
+import uvicorn, threading, httpx, numpy as np, redis.asyncio as redis
 from PIL import ImageGrab
 from dotenv import load_dotenv
+
+# 引入 ORM 模型
+from models import User, Department, Notification, Customer, ViolationRecord
 
 # --- 1. 环境初始化 ---
 load_dotenv()
 logger = logging.getLogger("SmartCS")
 logger.setLevel(logging.INFO)
 
-# --- 2. 核心连接池 ---
-db_pool = None
 redis_client = None
 
-async def init_services():
-    global db_pool, redis_client
-    try:
-        db_pool = await aiomysql.create_pool(
-            host=os.getenv("DB_HOST", "127.0.0.1"),
-            port=int(os.getenv("DB_PORT", 3306)),
-            user=os.getenv("DB_USER", "root"),
-            password=os.getenv("DB_PASSWORD", "123456"),
-            db=os.getenv("DB_NAME", "smart_cs"),
-            autocommit=True
-        )
-        logger.info("✅ MySQL 联通")
-    except Exception as e: logger.error(f"❌ MySQL 失败: {e}")
-
+async def init_redis():
+    global redis_client
     try:
         redis_client = redis.Redis(
             host=os.getenv("REDIS_HOST", "127.0.0.1"),
@@ -40,146 +30,120 @@ async def init_services():
         logger.info("✅ Redis 联通")
     except Exception as e: logger.error(f"❌ Redis 失败: {e}")
 
-# --- 3. 业务逻辑 (脱敏消息函数) ---
-async def create_notification(title, content, msg_type="INFO"):
-    msg_id = secrets.token_hex(8)
-    if db_pool:
-        async with db_pool.acquire() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute("INSERT INTO notifications (id, title, content, type) VALUES (%s, %s, %s, %s)", (msg_id, title, content, msg_type))
-    if redis_client:
-        await redis_client.publish("notif_channel", json.dumps({"id": msg_id, "title": title}))
-    return msg_id
-
-# --- 4. FastAPI 路由与软删除逻辑 ---
+# --- 2. FastAPI 应用配置 ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_services()
+    await init_redis()
     yield
-    if db_pool: db_pool.close(); await db_pool.wait_closed()
     if redis_client: await redis_client.close()
 
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-@app.get("/api/health")
-async def health(): return {"status": "ok", "db": db_pool is not None, "redis": redis_client is not None}
+# 注册 Tortoise ORM (自动管理连接池)
+register_tortoise(
+    app,
+    db_url=f"mysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}",
+    modules={"models": ["models"]},
+    generate_schemas=False,
+    add_exception_handlers=True,
+)
 
-# 1. 部门 API (软删除过滤)
+@app.get("/api/health")
+async def health(): return {"status": "ok", "redis": redis_client is not None}
+
+# 1. 部门 API (ORM 优化)
 @app.get("/api/admin/departments")
 async def get_departments():
-    if not db_pool: return {"status": "error", "message": "脱机"}
-    async with db_pool.acquire() as conn:
-        async with conn.cursor(aiomysql.DictCursor) as cur:
-            await cur.execute("SELECT id, name FROM departments WHERE is_deleted = 0")
-            return {"status": "ok", "data": await cur.fetchall()}
+    data = await Department.filter(is_deleted=0).values("id", "name")
+    return {"status": "ok", "data": data}
 
-# 2. 坐席矩阵 API (全维度筛选 + 软删除过滤)
+# 2. 坐席管理 API (ORM 关联查询 + 效率优化)
 @app.get("/api/admin/agents")
 async def get_agents(page: int = 1, size: int = 10, search: str = "", dept: str = "ALL", status: str = "ALL", risk_level: str = "ALL"):
-    if not db_pool: return {"status": "error", "message": "核心链路脱机"}
     offset = (page - 1) * size
+    
+    # 获取在线列表
     online_keys = await redis_client.keys("online_agent:*") if redis_client else []
     online_usernames = [k.split(":")[1] for k in online_keys]
 
-    async with db_pool.acquire() as conn:
-        async with conn.cursor(aiomysql.DictCursor) as cur:
-            where = "WHERE u.is_deleted = 0"
-            params = []
-            if search:
-                where += " AND (u.username LIKE %s OR u.real_name LIKE %s)"
-                params.extend([f"%{search}%", f"%{search}%"])
-            if dept != "ALL":
-                where += " AND d.name = %s"
-                params.append(dept)
-            if risk_level == "SERIOUS": 
-                where += " AND EXISTS (SELECT 1 FROM violation_records vr WHERE vr.user_id = u.id AND vr.risk_score >= 9 AND vr.is_deleted = 0)"
-            elif risk_level == "MEDIUM": 
-                where += " AND EXISTS (SELECT 1 FROM violation_records vr WHERE vr.user_id = u.id AND vr.risk_score BETWEEN 5 AND 8 AND vr.is_deleted = 0)"
-            elif risk_level == "LOW": 
-                where += " AND EXISTS (SELECT 1 FROM violation_records vr WHERE vr.user_id = u.id AND vr.risk_score < 5 AND vr.is_deleted = 0)"
+    # 构建基础查询 (优化：使用 select_related 一次性 JOIN 部门表)
+    query = User.filter(is_deleted=0).select_related("department")
+    
+    if search:
+        query = query.filter(Q(username__icontains=search) | Q(real_name__icontains=search))
+    if dept != "ALL":
+        query = query.filter(department__name=dept)
+    
+    # 在线过滤
+    if status == "ONLINE":
+        query = query.filter(username__in=online_usernames)
+    elif status == "OFFLINE":
+        query = query.exclude(username__in=online_usernames)
 
-            if status == "ONLINE":
-                if not online_usernames: where += " AND 1=0"
-                else:
-                    where += f" AND u.username IN ({','.join(['%s']*len(online_usernames))})"
-                    params.extend(online_usernames)
-            elif status == "OFFLINE":
-                if online_usernames:
-                    where += f" AND u.username NOT IN ({','.join(['%s']*len(online_usernames))})"
-                    params.extend(online_usernames)
+    # 风险等级过滤 (ORM 表达优化)
+    if risk_level == "SERIOUS": query = query.filter(violations__risk_score__gte=9).distinct()
+    elif risk_level == "MEDIUM": query = query.filter(violations__risk_score__range=(5, 8)).distinct()
+    elif risk_level == "LOW": query = query.filter(violations__risk_score__lt=5).distinct()
 
-            sql = f"""
-                SELECT u.*, d.name as dept_name, 
-                (SELECT keyword FROM violation_records WHERE user_id = u.id AND is_deleted = 0 ORDER BY timestamp DESC LIMIT 1) as last_violation_type,
-                (SELECT risk_score FROM violation_records WHERE user_id = u.id AND is_deleted = 0 ORDER BY timestamp DESC LIMIT 1) as last_risk_score
-                FROM users u 
-                LEFT JOIN departments d ON u.department_id = d.id 
-                {where} LIMIT %s OFFSET %s
-            """
-            params.extend([size, offset])
-            await cur.execute(sql, params)
-            agents = await cur.fetchall()
-            await cur.execute(f"SELECT COUNT(*) as total FROM users u LEFT JOIN departments d ON u.department_id = d.id {where}", params[:-2] if params else [])
-            total_data = await cur.fetchone()
-            for a in agents:
-                a['is_online'] = a['username'] in online_usernames
-                if 'ltv' in a and a['ltv']: a['ltv'] = float(a['ltv'])
-            return {"status": "ok", "data": agents, "total": total_data['total']}
+    total = await query.count()
+    agents_data = await query.limit(size).offset(offset).all()
+    
+    # 转换为前端格式 (优化：使用 Pydantic 之前先手动映射，减少内存拷贝)
+    result = []
+    for a in agents_data:
+        # 获取最新一条违规 (ORM 优化)
+        last_v = await ViolationRecord.filter(user=a, is_deleted=0).order_by("-timestamp").first()
+        result.append({
+            "username": a.username,
+            "real_name": a.real_name,
+            "role": a.role,
+            "dept_name": a.department.name if a.department else "未归类",
+            "is_online": a.username in online_usernames,
+            "tactical_score": a.tactical_score,
+            "last_violation_type": last_v.keyword if last_v else None,
+            "last_risk_score": last_v.risk_score if last_v else 0
+        })
+    
+    return {"status": "ok", "data": result, "total": total}
 
-# 3. 客户画像 API (软删除过滤)
+# 3. 客户画像 API
 @app.get("/api/admin/customers")
 async def get_customers(page: int = 1, size: int = 10, search: str = ""):
-    if not db_pool: return {"status": "error", "message": "数据中枢脱机"}
-    offset = (page - 1) * size
-    async with db_pool.acquire() as conn:
-        async with conn.cursor(aiomysql.DictCursor) as cur:
-            where = "WHERE is_deleted = 0"
-            params = [size, offset]
-            if search:
-                where += " AND (name LIKE %s OR tags LIKE %s)"
-                params = [f"%{search}%", f"%{search}%", size, offset]
-            await cur.execute(f"SELECT * FROM customers {where} ORDER BY last_seen_at DESC LIMIT %s OFFSET %s", params)
-            data = await cur.fetchall()
-            for d in data:
-                if 'ltv' in d and d['ltv']: d['ltv'] = float(d['ltv'])
-            await cur.execute(f"SELECT COUNT(*) as total FROM customers {where}", params[:-2] if search else [])
-            total = await cur.fetchone()
-            return {"status": "ok", "data": data, "total": total['total']}
+    query = Customer.filter(is_deleted=0)
+    if search:
+        query = query.filter(Q(name__icontains=search) | Q(tags__icontains=search))
+    
+    total = await query.count()
+    data = await query.order_by("-last_seen_at").limit(size).offset(offset).values()
+    return {"status": "ok", "data": data, "total": total}
 
-# 4. 通知中心 API (软删除过滤)
-@app.get("/api/admin/notifications")
-async def get_notifications(page: int = 1, size: int = 10):
-    if not db_pool: return {"status": "error", "message": "神经链路脱机"}
-    async with db_pool.acquire() as conn:
-        async with conn.cursor(aiomysql.DictCursor) as cur:
-            await cur.execute("SELECT * FROM notifications WHERE is_deleted = 0 ORDER BY created_at DESC LIMIT %s OFFSET %s", (size, (page-1)*size))
-            data = await cur.fetchall()
-            await cur.execute("SELECT COUNT(*) as total FROM notifications WHERE is_deleted = 0")
-            total = await cur.fetchone()
-            return {"status": "ok", "data": data, "total": total['total']}
-
-@app.post("/api/admin/notifications/read")
-async def mark_read(data: dict):
-    msg_id = data.get("id")
-    async with db_pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            if msg_id == "ALL": await cur.execute("UPDATE notifications SET is_read = 1 WHERE is_deleted = 0")
-            else: await cur.execute("UPDATE notifications SET is_read = 1 WHERE id = %s", (msg_id,))
-            return {"status": "ok"}
-
+# 4. 认证逻辑 (ORM 版)
 @app.post("/api/auth/login")
 async def login(data: dict):
     u, p = data.get("username"), data.get("password")
-    if not db_pool: return {"status": "error", "message": "脱机"}
-    async with db_pool.acquire() as conn:
-        async with conn.cursor(aiomysql.DictCursor) as cur:
-            await cur.execute("SELECT * FROM users WHERE username = %s AND is_deleted = 0", (u,))
-            user = await cur.fetchone()
-            if u == "admin" and p == "admin123":
-                await create_notification("系统接入", f"指挥官 {u} 已上线")
-                return {"status": "ok", "data": {"user": {"username":u, "real_name":user['real_name'], "role":user['role'], "department": "指挥部"}}, "token": "tk_admin"}
-            return {"status": "error", "message": "凭据失效"}
+    user = await User.get_or_none(username=u, is_deleted=0).select_related("department")
+    if user and u == "admin" and p == "admin123":
+        return {
+            "status": "ok", 
+            "data": {
+                "user": {
+                    "username": u, 
+                    "real_name": user.real_name, 
+                    "role": user.role, 
+                    "department": user.department.name if user.department else "指挥部"
+                }, 
+                "token": "tk_" + secrets.token_hex(8)
+            }
+        }
+    return {"status": "error", "message": "身份特征认证失败"}
+
+# --- 通信 ---
+active_conns = []
+async def broadcast_event(data):
+    for c in active_conns:
+        try: await c.send_text(json.dumps(data))
+        except: pass
 
 @app.websocket("/ws/risk")
 async def websocket_endpoint(websocket: WebSocket, username: str = "guest"):
