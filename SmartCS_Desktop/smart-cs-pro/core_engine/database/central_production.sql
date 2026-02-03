@@ -224,21 +224,38 @@ INSERT IGNORE INTO departments (name) VALUES ('总经办'), ('销售一部'), ('
 INSERT IGNORE INTO users (username, password_hash, salt, real_name, role_id, department_id) 
 VALUES ('admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '超级管理员', 3, 1);
 
--- 注册初始功能模块
+-- 注册初始战术模块 (绑定 role_id)
 INSERT IGNORE INTO menu_config (name, path, icon_name, min_role_id) VALUES 
 ('战术指挥台', '/command', 'Zap', 2),
 ('组织架构', '/departments', 'Building2', 3),
 ('成员矩阵', '/users', 'UserCog', 3),
-('权责定义', '/rbac', 'Shield', 3);
+('权责定义', '/rbac', 'Shield', 3),
+('风险审计', '/alerts', 'ShieldAlert', 2),
+('消息中枢', '/notifications', 'Bell', 1);
 
--- 注册预设权限点
+-- 注册全量功能权限点 (细粒度)
 INSERT IGNORE INTO permissions (code, name, module) VALUES 
-('input:lock', '一键输入锁定', '实时指挥'),
-('tactical:assist', '话术弹射协助', '实时指挥'),
-('dept:manage', '组织架构管理', '后台管理'),
-('user:manage', '操作员矩阵管理', '后台管理');
+-- 实时指挥
+('command:input:lock', '实时输入锁定', '实时指挥'),
+('command:assist:push', '话术弹射协助', '实时指挥'),
+('command:voice:alert', '强制语音告警', '实时指挥'),
+-- 风险拦截
+('audit:violation:view', '违规详单查看', '风险拦截'),
+('audit:evidence:export', '证据包导出', '风险拦截'),
+-- 后台管理
+('admin:dept:manage', '部门增删改查', '组织架构'),
+('admin:user:manage', '操作员矩阵管理', '成员权限'),
+('admin:rbac:config', '权责矩阵定义', '权限中心'),
+-- 系统工具
+('tool:secure_img:gen', '安全图片生成', '全域提效');
 
--- 预配主管权限
+-- 预配主管(ADMIN)权限：赋予核心指挥与审计权
 INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES 
-(2, 'input:lock'),
-(2, 'tactical:assist');
+(2, 'command:input:lock'),
+(2, 'command:assist:push'),
+(2, 'command:voice:alert'),
+(2, 'audit:violation:view');
+
+-- 预配总部(HQ)权限：赋予全量权限
+INSERT IGNORE INTO role_permissions (role_id, permission_code) 
+SELECT 3, code FROM permissions;

@@ -127,3 +127,54 @@ async def get_agents(request: Request, page: int = 1, size: int = 50, search: st
 async def get_roles():
     roles = await Role.filter(is_deleted=0).values("id", "name", "code")
     return {"status": "ok", "data": roles}
+
+@router.get("/permissions")
+async def get_permissions():
+    """获取全量系统权限定义"""
+    perms = await Permission.filter(is_deleted=0).values("id", "code", "name", "module")
+    return {"status": "ok", "data": perms}
+
+@router.get("/role/permissions")
+async def get_role_permissions(role_id: int):
+    """获取指定角色的权限代码列表"""
+    perms = await RolePermission.filter(role_id=role_id).values_list("permission_code", flat=True)
+    return {"status": "ok", "data": list(perms)}
+
+@router.post("/role/permissions")
+async def update_role_permissions(data: dict, request: Request):
+    """全量覆盖更新角色权限，并广播通知"""
+    role_id, new_perms = data.get("role_id"), data.get("permissions", [])
+    redis = request.app.state.redis
+    
+    # 1. 获取旧权限集进行比对
+    old_perms = await RolePermission.filter(role_id=role_id).values_list("permission_code", flat=True)
+    added = set(new_perms) - set(old_perms)
+    removed = set(old_perms) - set(new_perms)
+
+    async with in_transaction() as conn:
+        await RolePermission.filter(role_id=role_id).delete(using_db=conn)
+        if new_perms:
+            objs = [RolePermission(role_id=role_id, permission_code=p) for p in new_perms]
+            await RolePermission.bulk_create(objs, using_db=conn)
+    
+    # 2. 广播权限变更信号
+    if redis and (added or removed):
+        role = await Role.get_or_none(id=role_id)
+        role_code = role.code if role else "UNKNOWN"
+        
+        all_perms_map = {p['code']: p['name'] for p in await Permission.all().values("code", "name")}
+        
+        msg_parts = []
+        if added: msg_parts.append(f"新增功能：{', '.join([all_perms_map.get(p, p) for p in added])}")
+        if removed: msg_parts.append(f"移除功能：{', '.join([all_perms_map.get(p, p) for p in removed])}")
+        
+        payload = {
+            "type": "PERMISSION_CHANGED",
+            "target_role": role_code,
+            "title": "系统权责变更提醒",
+            "message": "您的权责矩阵已重校",
+            "details": " | ".join(msg_parts)
+        }
+        await redis.publish("notif_channel", json.dumps(payload))
+        
+    return {"status": "ok"}

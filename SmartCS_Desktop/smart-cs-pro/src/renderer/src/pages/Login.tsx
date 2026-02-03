@@ -110,6 +110,7 @@ export default function Login() {
           username: user.username, 
           real_name: user.real_name, 
           role: user.role, 
+          role_code: user.role_code, // 新增：持久化角色代码用于 RBAC 联动
           department: user.department,
           rank: user.rank,
           score: user.score

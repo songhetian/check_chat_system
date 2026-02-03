@@ -231,6 +231,15 @@ const AgentView = () => {
     window.addEventListener('trigger-suggestion', onSuggestion); window.addEventListener('trigger-fireworks', onFireworks)
     window.addEventListener('trigger-sop', onSop); window.addEventListener('trigger-customer', onCustomer)
     window.addEventListener('trigger-toast', onToast)
+    window.addEventListener('trigger-permission-toast', (e: any) => {
+      setToast({
+        title: e.detail.title,
+        message: e.detail.message,
+        details: e.detail.details,
+        type: 'info',
+        duration: 10000 // 权限变更显示久一点
+      })
+    })
     window.addEventListener('trigger-violation-alert', (e: any) => {
       setToast({
         title: '战术拦截：高危预警',
@@ -271,6 +280,9 @@ const AgentView = () => {
               <div className="flex flex-col pr-4 border-r border-white/10">
                 <span className="text-[10px] font-black uppercase tracking-widest opacity-50">{toast.title}</span>
                 <span className="text-sm font-bold leading-tight">{toast.message}</span>
+                {toast.details && (
+                  <p className="text-[9px] text-white/60 mt-1 font-medium italic">{toast.details}</p>
+                )}
               </div>
               {toast.action && (
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase italic whitespace-nowrap text-white/80 group-hover:text-white">

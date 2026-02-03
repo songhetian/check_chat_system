@@ -77,6 +77,13 @@ export const useRiskSocket = () => {
           window.dispatchEvent(new CustomEvent('trigger-milestone', { detail: data }))
         }
 
+        if (data.type === 'PERMISSION_CHANGED') {
+          const currentUser = useAuthStore.getState().user;
+          if (data.target_role === currentUser?.role_code) {
+            window.dispatchEvent(new CustomEvent('trigger-permission-toast', { detail: data }))
+          }
+        }
+
         if (data.type === 'REWARD_NOTIFY') {
           window.dispatchEvent(new CustomEvent('trigger-reward', { detail: data }))
         }

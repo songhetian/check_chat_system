@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware'
 interface User {
   username: string
   role: 'AGENT' | 'ADMIN' | 'HQ'
+  role_code: string
   real_name: string
   department: string
   rank?: string
