@@ -81,7 +81,7 @@ async def health(): return {"status": "ok", "db": db_pool is not None, "redis": 
 # 1. 坐席管理 API
 @app.get("/api/admin/agents")
 async def get_agents(page: int = 1, size: int = 10, search: str = "", dept: str = "ALL"):
-    if not db_pool: return {"status": "error", "message": "DB Offline"}
+    if not db_pool: return {"status": "error", "message": "核心链路脱机"}
     offset = (page - 1) * size
     async with db_pool.acquire() as conn:
         async with conn.cursor(aiomysql.DictCursor) as cur:
@@ -105,7 +105,7 @@ async def get_agents(page: int = 1, size: int = 10, search: str = "", dept: str 
 # 2. 客户画像 API (真正从 MySQL 获取)
 @app.get("/api/admin/customers")
 async def get_customers(page: int = 1, size: int = 10, search: str = ""):
-    if not db_pool: return {"status": "error", "message": "DB Offline"}
+    if not db_pool: return {"status": "error", "message": "数据中枢脱机"}
     offset = (page - 1) * size
     async with db_pool.acquire() as conn:
         async with conn.cursor(aiomysql.DictCursor) as cur:
@@ -124,7 +124,7 @@ async def get_customers(page: int = 1, size: int = 10, search: str = ""):
 @app.post("/api/auth/login")
 async def login(data: dict):
     u, p = data.get("username"), data.get("password")
-    if not db_pool: return {"status": "error", "message": "中枢脱机"}
+    if not db_pool: return {"status": "error", "message": "神经链路脱机"}
     async with db_pool.acquire() as conn:
         async with conn.cursor(aiomysql.DictCursor) as cur:
             await cur.execute("SELECT * FROM users WHERE username = %s", (u,))

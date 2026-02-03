@@ -50,7 +50,7 @@ export default function CustomersPage() {
           <h2 className="text-3xl font-black tracking-tight uppercase italic text-tactical-glow">
             全视角客户画像 <span className="text-cyan-500">360°</span>
           </h2>
-          <p className="text-slate-500 text-sm mt-1 font-medium">基于 MySQL 中央库的实时行为分析面板</p>
+          <p className="text-slate-500 text-sm mt-1 font-medium">基于加密中枢数据流的实时行为分析面板</p>
         </div>
         <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black transition-all shadow-xl active:scale-95 hover:bg-slate-800">
           <Download size={16} /> 导出全量战术报告
@@ -149,7 +149,7 @@ export default function CustomersPage() {
         {!loading && customers.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-4">
             <UserCircle2 size={64} strokeWidth={1} />
-            <p className="font-black text-lg uppercase tracking-widest">MySQL 中未发现画像记录</p>
+            <p className="font-black text-lg uppercase tracking-widest">中枢未发现匹配的操作员记录</p>
           </div>
         )}
       </div>

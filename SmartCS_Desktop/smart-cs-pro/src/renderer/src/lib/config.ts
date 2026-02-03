@@ -30,7 +30,7 @@ export const initDynamicConfig = async () => {
         
         CONFIG.API_BASE = centralUrl;
         CONFIG.WS_BASE = centralUrl.replace('/api', '/ws').replace('http', 'ws');
-        console.log(`🌐 [动态配置] 指挥中心已锁定 (全小写强制): ${CONFIG.API_BASE}`);
+        console.log(`🌐 [战术同步] 神经链路已锁定`);
       }
 
       // 同步品牌自定义信息

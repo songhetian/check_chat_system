@@ -33,56 +33,48 @@ export default function Login() {
     // 登录页不需要置顶
     window.electron.ipcRenderer.send('set-always-on-top', false)
 
-    // 链路预检 (使用主进程桥接)
-    const checkLink = async () => {
-      const baseUrl = CONFIG.API_BASE.toLowerCase();
-      const target = `${baseUrl}/health`;
-      
-      try {
-        console.log(`📡 正在通过战术桥接探测链路: ${target}`);
-        const res = await window.api.callApi({ url: target });
-        
-        if (res.status === 200) {
-          console.log('✅ 指挥链路状态: 正常');
-        } else {
-          throw new Error(res.error || `HTTP ${res.status}`);
-        }
-      } catch (err: any) {
-        console.error('❌ [链路诊断] 桥接探测失败:', err);
-        setError(`无法连接中枢: 指挥链路阻塞 (TARGET: ${baseUrl.toUpperCase()})`);
-        speak('警告，物理链路脱机。');
-      }
-    };
-    checkLink();
-  }, [])
-
-    const handleLogin = async (e: React.FormEvent) => {
-      e.preventDefault()
-      if (isLoading) return
-      setError('')
-      setIsLoading(true)
-  
-      try {
-        // 登录前先物理注销，确保状态干净
-        useAuthStore.getState().logout();
-  
-        // 1. 通过战术桥接发起认证请求 (绕过所有 CORS)
-        const res = await window.api.callApi({
-          url: `${CONFIG.API_BASE}/auth/login`,
-          method: 'POST',
-          data: {
-            username: formData.username,
-            password: formData.password
+        // 链路预检 (使用主进程桥接)
+        const checkLink = async () => {
+          const baseUrl = CONFIG.API_BASE.toLowerCase();
+          const target = `${baseUrl}/health`;
+          
+          try {
+            await window.api.callApi({ url: target });
+            console.log('✅ [链路诊断] 神经握手成功');
+          } catch (err: any) {
+            setError(`链路初始化失败：加密中枢无法响应，请联系系统管理员`);
+            speak('警告，物理链路脱机。');
           }
-        });
-  
-        if (res.status !== 200 || res.data.status !== 'ok') {
-          setError(res.data?.message || res.error || '认证链路被拦截');
-          speak('身份核验未通过。');
-          setIsLoading(false)
-          return
-        }
-  
+        };
+        checkLink();
+      }, [])
+    
+      const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (isLoading) return
+        setError('')
+        setIsLoading(true)
+    
+        try {
+          // 登录前先物理注销，确保状态干净
+          useAuthStore.getState().logout();
+    
+          // 1. 通过战术桥接发起认证请求
+          const res = await window.api.callApi({
+            url: `${CONFIG.API_BASE}/auth/login`,
+            method: 'POST',
+            data: {
+              username: formData.username,
+              password: formData.password
+            }
+          });
+    
+          if (res.status !== 200 || res.data.status !== 'ok') {
+            setError(res.data?.message || '身份特征校验未通过，请重新输入');
+            speak('身份核验未通过。');
+            setIsLoading(false)
+            return
+          }  
         const { user, token } = res.data.data
   
         // 2. 启动仪式感序列
