@@ -13,11 +13,19 @@ import {
   Minus,
   X,
   Info,
-  Activity
+  CheckCheck
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
 import { CONFIG } from '../lib/config'
+
+interface Notification {
+  id: string
+  title: string
+  content: string
+  time: string
+  is_read: boolean
+}
 
 const menu = [
   { path: '/', icon: LayoutDashboard, label: '指挥中心概览' },
@@ -32,19 +40,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, logout } = useAuthStore()
   const location = useLocation()
   const clickAudio = useRef<HTMLAudioElement | null>(null)
+  const notifRef = useRef<HTMLDivElement | null>(null)
+  
   const [showNotif, setShowNotif] = useState(false)
+  const [notifications, setNotifications] = useState<Notification[]>([
+    { id: '1', title: '中枢链路已建立', content: '系统已成功同步 MySQL 指令枢纽。', time: '刚刚', is_read: false },
+    { id: '2', title: 'AI 引擎就绪', content: 'Ollama (qwen2:1.5b) 神经链路连接正常。', time: '5分钟前', is_read: false }
+  ])
+
+  const unreadCount = notifications.filter(n => !n.is_read).length
+
+  // 点击外部自动关闭消息面板
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotif(false)
+      }
+    }
+    if (showNotif) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showNotif])
 
   const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
   const handleClose = () => window.electron.ipcRenderer.send('close-window')
 
-  useEffect(() => {
-    window.electron.ipcRenderer.send('resize-window', { width: 1280, height: 850, center: true })
-    window.electron.ipcRenderer.send('set-always-on-top', false)
-  }, [])
-
   const handleLogout = () => {
     logout()
     window.location.hash = '/login'
+  }
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
+  }
+
+  const markAsRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
   }
 
   const playClick = () => {
@@ -117,7 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           
           <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-            <div className="relative">
+            <div className="relative" ref={notifRef}>
               <button 
                 onClick={() => setShowNotif(!showNotif)}
                 className={cn(
@@ -126,7 +158,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 )}
               >
                 <Bell size={20} />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[8px] text-white flex items-center justify-center font-black">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
 
               <AnimatePresence>
@@ -138,22 +174,46 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     className="absolute right-0 mt-4 w-80 bg-white border border-slate-200 shadow-2xl rounded-3xl overflow-hidden z-[500]"
                   >
                     <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                       <span className="text-xs font-black text-slate-900 uppercase">战术通知</span>
-                       <span className="text-[10px] text-cyan-600 font-bold">全部已读</span>
+                       <span className="text-xs font-black text-slate-900 uppercase">战术通知中心</span>
+                       <button 
+                        onClick={markAllAsRead}
+                        className="text-[10px] text-cyan-600 font-bold hover:underline"
+                       >
+                         全部标记已读
+                       </button>
                     </div>
-                    <div className="p-2 max-h-96 overflow-y-auto">
-                       <div className="p-4 hover:bg-slate-50 rounded-2xl transition-all border border-transparent hover:border-slate-100 cursor-pointer group">
-                          <div className="flex items-start gap-3">
-                             <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 shrink-0">
-                                <Info size={14} />
-                             </div>
-                             <div>
-                                <p className="text-xs font-bold text-slate-900 mb-1">中枢链路已建立</p>
-                                <p className="text-[10px] text-slate-500 leading-relaxed">系统已通过安全网关成功同步 MySQL 指令枢纽。</p>
-                                <p className="text-[8px] text-slate-400 mt-2">刚刚</p>
-                             </div>
-                          </div>
-                       </div>
+                    <div className="p-2 max-h-96 overflow-y-auto custom-scrollbar">
+                       {notifications.map(n => (
+                         <div 
+                          key={n.id} 
+                          onClick={() => markAsRead(n.id)}
+                          className={cn(
+                            "p-4 rounded-2xl transition-all border border-transparent cursor-pointer group mb-1",
+                            n.is_read ? "opacity-50 grayscale-[0.5]" : "hover:bg-cyan-50/50 hover:border-cyan-100"
+                          )}
+                         >
+                            <div className="flex items-start gap-3">
+                               <div className={cn(
+                                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                                n.is_read ? "bg-slate-100 text-slate-400" : "bg-cyan-100 text-cyan-600"
+                               )}>
+                                  {n.is_read ? <CheckCheck size={14} /> : <Info size={14} />}
+                               </div>
+                               <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold text-slate-900 mb-1">{n.title}</p>
+                                  <p className="text-[10px] text-slate-500 leading-relaxed truncate">{n.content}</p>
+                                  <p className="text-[8px] text-slate-400 mt-2">{n.time}</p>
+                               </div>
+                               {!n.is_read && <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-1" />}
+                            </div>
+                         </div>
+                       ))}
+                       {notifications.length === 0 && (
+                         <div className="py-10 text-center text-slate-300">
+                            <Bell size={24} className="mx-auto mb-2 opacity-20" />
+                            <p className="text-[10px] font-bold uppercase tracking-widest">暂无新通知</p>
+                         </div>
+                       )}
                     </div>
                   </motion.div>
                 )}
