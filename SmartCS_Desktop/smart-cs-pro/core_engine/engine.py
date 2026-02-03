@@ -22,6 +22,7 @@ from api.violation import router as violation_router
 from api.coach import router as coach_router
 from api.growth import router as growth_router
 from api.rbac import router as rbac_router
+from api.ai_config import router as ai_router
 
 # --- 1. 环境初始化 ---
 load_dotenv()
@@ -55,6 +56,7 @@ app.include_router(violation_router)
 app.include_router(coach_router)
 app.include_router(growth_router)
 app.include_router(rbac_router)
+app.include_router(ai_router)
 
 register_tortoise(
     app,

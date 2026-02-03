@@ -86,12 +86,61 @@ class Customer(BaseModel):
         table = "customers"
 
 class Notification(BaseModel):
+
     id = fields.CharField(max_length=50, pk=True)
+
     title = fields.CharField(max_length=255)
+
     content = fields.TextField()
+
     type = fields.CharField(max_length=50, default="INFO")
+
     is_read = fields.IntField(default=0)
+
     created_at = fields.DatetimeField(auto_now_add=True)
 
+
+
     class Meta:
+
         table = "notifications"
+
+
+
+class SensitiveWord(BaseModel):
+
+    id = fields.IntField(pk=True)
+
+    word = fields.CharField(max_length=100, unique=True)
+
+    category = fields.CharField(max_length=50)
+
+    risk_level = fields.IntField(default=5) # 1-10
+
+    is_active = fields.IntField(default=1)
+
+
+
+    class Meta:
+
+        table = "sensitive_words"
+
+
+
+class KnowledgeBase(BaseModel):
+
+    id = fields.IntField(pk=True)
+
+    keyword = fields.CharField(max_length=100)
+
+    answer = fields.TextField()
+
+    category = fields.CharField(max_length=50)
+
+    is_active = fields.IntField(default=1)
+
+
+
+    class Meta:
+
+        table = "knowledge_base"

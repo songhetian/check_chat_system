@@ -197,15 +197,35 @@ CREATE TABLE IF NOT EXISTS permissions (
     is_deleted TINYINT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 17. 角色权限关联表
-CREATE TABLE IF NOT EXISTS role_permissions (
+-- 注册 AI 决策中心权限
+INSERT IGNORE INTO permissions (code, name, module) VALUES 
+('admin:ai:policy', '全域 AI 策略配置', 'AI 决策中心');
+
+-- 注入总部(HQ)全量权限 (含 AI 策略)
+INSERT IGNORE INTO role_permissions (role_id, permission_code) 
+SELECT 3, code FROM permissions;
+
+-- 18. 敏感词库
+CREATE TABLE IF NOT EXISTS sensitive_words (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    role_id INT NOT NULL, -- 关联角色 ID
-    permission_code VARCHAR(50) NOT NULL,
-    FOREIGN KEY (permission_code) REFERENCES permissions(code),
-    FOREIGN KEY (role_id) REFERENCES roles(id),
-    UNIQUE INDEX idx_role_perm (role_id, permission_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    word VARCHAR(100) UNIQUE NOT NULL,
+    category VARCHAR(50),
+    risk_level INT DEFAULT 5,
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 19. 智能带教知识库
+CREATE TABLE IF NOT EXISTS knowledge_base (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    keyword VARCHAR(100) NOT NULL,
+    answer TEXT NOT NULL,
+    category VARCHAR(50),
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
 
 -- ==========================================
 -- 初始数据填充
