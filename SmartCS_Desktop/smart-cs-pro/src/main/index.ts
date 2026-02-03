@@ -65,10 +65,10 @@ function createWindow(): void {
     }
   })
 
-  // 核心：创建独立、透明、置顶的战术岛窗口
+  // 核心：创建标准窗口 (初始默认为登录页尺寸)
   const mainWindow = new BrowserWindow({
-    width: 260,
-    height: 52,
+    width: 1000,
+    height: 800,
     show: false,
     frame: false,
     transparent: true,
