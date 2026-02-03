@@ -66,7 +66,7 @@ export default function CustomersPage() {
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && fetchCustomers()}
             placeholder="搜索客户姓名、标签或特征码..." 
-            className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-cyan-500/20 transition-all font-medium" 
+            className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm text-slate-900 focus:ring-2 focus:ring-cyan-500/20 transition-all font-medium" 
           />
         </div>
         <button 

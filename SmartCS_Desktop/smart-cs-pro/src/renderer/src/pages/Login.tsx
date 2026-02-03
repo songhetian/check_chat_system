@@ -177,24 +177,23 @@ export default function Login() {
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-1">
             <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><User size={10}/> 操作员账号</label>
-            <input
-              value={formData.username}
-              onChange={(e) => setFormData({...formData, username: e.target.value})}
-              placeholder="请输入账号"
-              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-700"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><Lock size={10}/> 访问密钥</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              placeholder="请输入密码"
-              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-700 font-mono tracking-widest"
-            />
-          </div>
+                        <input 
+                          value={formData.username}
+                          onChange={(e) => setFormData({...formData, username: e.target.value})}
+                          placeholder="请输入账号" 
+                          className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-500" 
+                        />
+                      </div>
+            
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-cyan-500 uppercase ml-2 flex items-center gap-1"><Lock size={10}/> 访问密钥</label>
+                        <input 
+                          type="password"
+                          value={formData.password}
+                          onChange={(e) => setFormData({...formData, password: e.target.value})}
+                          placeholder="请输入密码" 
+                          className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-white/10 transition-all outline-none placeholder:text-slate-500 font-mono tracking-widest" 
+                        />          </div>
 
           <button
             type="submit"

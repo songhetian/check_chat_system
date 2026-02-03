@@ -73,7 +73,7 @@ const AdminHome = () => {
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchAgents()}
               placeholder="搜索操作员姓名或编号..." 
-              className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm text-slate-900 focus:ring-2 focus:ring-cyan-500/20"
             />
           </div>
           <div className="flex items-center gap-2">
