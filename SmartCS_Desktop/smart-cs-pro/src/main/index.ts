@@ -96,6 +96,10 @@ function createWindow(): void {
     mainWindow.setAlwaysOnTop(flag, 'screen-saver') // 使用 screen-saver 等级确保在 Mac 上真正置顶
   })
 
+  ipcMain.on('set-fullscreen', (_, flag: boolean) => {
+    mainWindow.setFullScreen(flag)
+  })
+
   // 响应前端尺寸变化
   ipcMain.on('resize-window', (_, { width, height, center }) => {
     // 增加 macOS 阴影缓冲

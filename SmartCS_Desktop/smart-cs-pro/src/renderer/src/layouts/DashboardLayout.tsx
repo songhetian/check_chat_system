@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, CheckCheck, MailOpen, AlertCircle
+  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Maximize2, Minimize2
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
@@ -20,6 +20,7 @@ interface Notification {
 const menu = [
   { path: '/', icon: LayoutDashboard, label: '指挥中心概览' },
   { path: '/alerts', icon: ShieldAlert, label: '风险拦截审计' },
+  { path: '/notifications', icon: Bell, label: '通知消息中枢' }, // 补全入口
   { path: '/customers', icon: Contact2, label: '客户画像分析' },
   { path: '/products', icon: Package, label: '商品战术话术' },
   { path: '/tools', icon: Wrench, label: '全域提效工具' },
@@ -31,12 +32,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const location = useLocation()
   const navigate = useNavigate()
   const notifRef = useRef<HTMLDivElement | null>(null)
+  const bellRef = useRef<HTMLButtonElement | null>(null)
   
   const [showNotif, setShowNotif] = useState(false)
+  const [isFullScreen, setIsFullScreen] = useState(false)
   const [selectedMsg, setSelectedMsg] = useState<Notification | null>(null)
   const [notifications, setNotifications] = useState<Notification[]>([])
 
-  // 1. 实时拉取最近 5 条通知
   const fetchRecentNotifs = async () => {
     try {
       const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/notifications?size=5`, method: 'GET' })
@@ -48,9 +50,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 
-  const handleMarkAllRead = async () => {
-    await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/notifications/read`, method: 'POST', data: { id: 'ALL' } })
-    fetchRecentNotifs()
+  // 点击外部关闭消息面板 (优化后的逻辑)
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (showNotif && 
+          notifRef.current && !notifRef.current.contains(e.target as Node) &&
+          bellRef.current && !bellRef.current.contains(e.target as Node)) {
+        setShowNotif(false)
+      }
+    }
+    window.addEventListener('mousedown', handleClick)
+    return () => window.removeEventListener('mousedown', handleClick)
+  }, [showNotif])
+
+  const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
+  const handleClose = () => window.electron.ipcRenderer.send('close-window')
+  const toggleFullScreen = () => {
+    const next = !isFullScreen
+    setIsFullScreen(next)
+    // 假设主进程支持此通道，若不支持，后续补充
+    window.electron.ipcRenderer.send('set-fullscreen', next)
   }
 
   const handleItemClick = async (n: Notification) => {
@@ -61,25 +80,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }
 
-  // 点击外部关闭逻辑
-  useEffect(() => {
-    const clickOut = (e: MouseEvent) => { if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotif(false) }
-    if (showNotif) document.addEventListener('mousedown', clickOut)
-    return () => document.removeEventListener('mousedown', clickOut)
-  }, [showNotif])
-
-  const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
-  const handleClose = () => window.electron.ipcRenderer.send('close-window')
-
-  useEffect(() => {
-    window.electron.ipcRenderer.send('resize-window', { width: 1280, height: 850, center: true })
-    window.electron.ipcRenderer.send('set-always-on-top', false)
-  }, [])
-
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden select-none font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800 shrink-0">
+      <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800 shrink-0 relative z-20">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-10 px-2 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
             <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20 font-black text-white">
@@ -102,32 +105,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
+      <main className="flex-1 flex flex-col overflow-hidden relative z-10">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
-          <div className="flex items-center gap-4">
-             <div className="px-4 py-1.5 bg-slate-100 rounded-full text-[10px] font-black text-slate-500 uppercase">指挥中心控制台</div>
+          <div className="px-4 py-1.5 bg-slate-100 rounded-full text-[10px] font-black text-slate-500 uppercase">
+            指挥中心控制台
           </div>
           
           <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-            <div className="relative" ref={notifRef}>
-              <button onClick={() => setShowNotif(!showNotif)} className={cn("relative p-2 rounded-full transition-colors", showNotif ? "bg-cyan-50 text-cyan-600" : "text-slate-400 hover:bg-slate-100")}>
+            <div className="relative">
+              <button 
+                ref={bellRef}
+                onClick={() => setShowNotif(!showNotif)} 
+                className={cn("relative p-2 rounded-full transition-colors", showNotif ? "bg-cyan-50 text-cyan-600" : "text-slate-400 hover:bg-slate-100")}
+              >
                 <Bell size={20} />
                 {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[8px] text-white flex items-center justify-center font-black animate-bounce">{unreadCount}</span>}
               </button>
 
               <AnimatePresence>
                 {showNotif && (
-                  <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} className="absolute right-0 mt-4 w-80 bg-white border border-slate-200 shadow-2xl rounded-3xl overflow-hidden z-[500]">
+                  <motion.div ref={notifRef} initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} className="absolute right-0 mt-4 w-80 bg-white border border-slate-200 shadow-2xl rounded-3xl overflow-hidden z-[500]">
                     <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                       <span className="text-xs font-black text-slate-900">战术通知 (最近5条)</span>
-                       <button onClick={handleMarkAllRead} className="text-[10px] text-cyan-600 font-bold hover:underline">全标已读</button>
+                       <span className="text-xs font-black text-slate-900">最近战术通知</span>
+                       <Link to="/notifications" onClick={() => setShowNotif(false)} className="text-[10px] text-cyan-600 font-bold hover:underline">全部</Link>
                     </div>
-                    <div className="max-h-[400px] overflow-y-auto">
+                    <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                        {notifications.map(n => (
                          <div key={n.id} onClick={() => handleItemClick(n)} className={cn("p-4 border-b border-slate-50 cursor-pointer group transition-all", n.is_read === 1 ? "opacity-40" : "hover:bg-slate-50")}>
                             <div className="flex items-start gap-3">
-                               <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", n.type === 'ALERT' ? "bg-red-100 text-red-600" : "bg-cyan-100 text-cyan-600")}>
+                               <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", n.is_read === 1 ? "bg-slate-100" : "bg-cyan-100 text-cyan-600")}>
                                   {n.is_read === 1 ? <MailOpen size={14}/> : <Bell size={14}/>}
                                </div>
                                <div className="flex-1 min-w-0">
@@ -138,15 +144,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                          </div>
                        ))}
                     </div>
-                    <button onClick={() => { setShowNotif(false); navigate('/notifications') }} className="w-full p-4 text-[10px] font-black text-slate-400 hover:bg-slate-50 transition-all uppercase tracking-widest border-t">进入通知中枢查看全部</button>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
             <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
-              <button onClick={handleMinimize} className="text-slate-400 hover:text-slate-600 transition-colors"><Minus size={18} /></button>
-              <button onClick={handleClose} className="text-slate-400 hover:text-red-500 transition-colors"><X size={18} /></button>
+              <button onClick={toggleFullScreen} className="text-slate-400 hover:text-slate-600 transition-colors" title={isFullScreen ? "退出全屏" : "全屏"}>
+                {isFullScreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+              </button>
+              <button onClick={handleMinimize} className="text-slate-400 hover:text-slate-600 transition-colors" title="最小化"><Minus size={18} /></button>
+              <button onClick={handleClose} className="text-slate-400 hover:text-red-500 transition-colors" title="关闭"><X size={18} /></button>
             </div>
           </div>
         </header>
@@ -155,25 +163,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </section>
 
-        {/* 详情模态框 */}
+        {/* 详情弹窗 */}
         <AnimatePresence>
           {selectedMsg && (
             <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedMsg(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden relative z-10">
-                  <div className="p-8">
+                  <div className="p-8 text-slate-900">
                      <div className="flex justify-between items-start mb-6">
-                        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", selectedMsg.type === 'ALERT' ? "bg-red-100 text-red-600" : "bg-cyan-100 text-cyan-600")}>
-                           <Info size={24} />
-                        </div>
-                        <button onClick={() => setSelectedMsg(null)} className="p-2 hover:bg-slate-100 rounded-full transition-all"><X size={20}/></button>
+                        <div className="w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center"><Info size={24} /></div>
+                        <button onClick={() => setSelectedMsg(null)} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400"><X size={20}/></button>
                      </div>
-                     <h3 className="text-2xl font-black text-slate-900 mb-2">{selectedMsg.title}</h3>
-                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">同步时间: {new Date(selectedMsg.created_at).toLocaleString()}</p>
+                     <h3 className="text-2xl font-black mb-2">{selectedMsg.title}</h3>
+                     <p className="text-[10px] text-slate-400 font-bold uppercase mb-6">{new Date(selectedMsg.created_at).toLocaleString()}</p>
                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 min-h-[100px]">
-                        <p className="text-sm text-slate-600 leading-relaxed font-medium">{selectedMsg.content}</p>
+                        <p className="text-sm leading-relaxed font-medium">{selectedMsg.content}</p>
                      </div>
-                     <button onClick={() => setSelectedMsg(null)} className="w-full mt-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl">确认并关闭战术指令</button>
+                     <button onClick={() => setSelectedMsg(null)} className="w-full mt-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl">确认指令</button>
                   </div>
                </motion.div>
             </div>
