@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Shield, Cpu, Activity, Lock, User, Minus, X, AlertTriangle } from 'lucide-react'
+import { Shield, Cpu, Activity, Lock, User, Minus, X, AlertTriangle, Square, Copy as CopyIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
 import { CONFIG } from '../lib/config'
@@ -17,6 +17,13 @@ export default function Login() {
 
   const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
   const handleClose = () => window.electron.ipcRenderer.send('close-window')
+  const [isFullScreen, setIsFullScreen] = useState(false)
+
+  const toggleFullScreen = () => {
+    const next = !isFullScreen
+    setIsFullScreen(next)
+    window.electron.ipcRenderer.send('set-fullscreen', next)
+  }
 
   // 核心：中文机械语音合成函数
   const speak = (text: string) => {
@@ -139,6 +146,9 @@ export default function Login() {
          <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <button onClick={handleMinimize} className="text-slate-600 hover:text-white transition-colors" title="最小化">
                <Minus size={16} />
+            </button>
+            <button onClick={toggleFullScreen} className="text-slate-600 hover:text-white transition-colors" title={isFullScreen ? "向下还原" : "最大化"}>
+               {isFullScreen ? <CopyIcon size={13} className="rotate-180" /> : <Square size={13} />}
             </button>
             <button onClick={handleClose} className="text-slate-600 hover:text-red-500 transition-colors" title="关闭">
                <X size={16} />

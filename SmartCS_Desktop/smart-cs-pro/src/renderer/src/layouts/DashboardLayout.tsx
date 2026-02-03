@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Maximize2, Minimize2
+  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
@@ -20,7 +20,7 @@ interface Notification {
 const menu = [
   { path: '/', icon: LayoutDashboard, label: '指挥中心概览' },
   { path: '/alerts', icon: ShieldAlert, label: '风险拦截审计' },
-  { path: '/notifications', icon: Bell, label: '通知消息中枢' }, // 补全入口
+  { path: '/notifications', icon: Bell, label: '通知消息中枢' },
   { path: '/customers', icon: Contact2, label: '客户画像分析' },
   { path: '/products', icon: Package, label: '商品战术话术' },
   { path: '/tools', icon: Wrench, label: '全域提效工具' },
@@ -33,11 +33,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navigate = useNavigate()
   const notifRef = useRef<HTMLDivElement | null>(null)
   const bellRef = useRef<HTMLButtonElement | null>(null)
+  const clickAudio = useRef<HTMLAudioElement | null>(null)
   
   const [showNotif, setShowNotif] = useState(false)
   const [isFullScreen, setIsFullScreen] = useState(false)
   const [selectedMsg, setSelectedMsg] = useState<Notification | null>(null)
   const [notifications, setNotifications] = useState<Notification[]>([])
+
+  const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
+  const handleClose = () => window.electron.ipcRenderer.send('close-window')
+  const toggleFullScreen = () => {
+    const next = !isFullScreen
+    setIsFullScreen(next)
+    window.electron.ipcRenderer.send('set-fullscreen', next)
+  }
 
   const fetchRecentNotifs = async () => {
     try {
@@ -50,7 +59,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 
-  // 点击外部关闭消息面板 (优化后的逻辑)
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (showNotif && 
@@ -63,15 +71,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => window.removeEventListener('mousedown', handleClick)
   }, [showNotif])
 
-  const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
-  const handleClose = () => window.electron.ipcRenderer.send('close-window')
-  const toggleFullScreen = () => {
-    const next = !isFullScreen
-    setIsFullScreen(next)
-    // 假设主进程支持此通道，若不支持，后续补充
-    window.electron.ipcRenderer.send('set-fullscreen', next)
-  }
-
   const handleItemClick = async (n: Notification) => {
     setSelectedMsg(n)
     if (n.is_read === 0) {
@@ -80,12 +79,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }
 
+  const handleLogout = () => {
+    logout()
+    window.location.hash = '/login'
+  }
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden select-none font-sans">
+      <audio ref={clickAudio} src="https://assets.mixkit.co/active_storage/sfx/2568/2534-preview.mp3" preload="auto" />
+      
       <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800 shrink-0 relative z-20">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-10 px-2 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
-            <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20 font-black text-white">
+            <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20 font-black text-white text-xs">
               {CONFIG.BRANDING.logoText}
             </div>
             <span className="text-xl font-black text-white tracking-tighter italic uppercase">{CONFIG.BRANDING.name}</span>
@@ -98,8 +104,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ))}
           </nav>
         </div>
-        <div className="mt-auto p-6 border-t border-white/5">
-          <button onClick={() => { logout(); window.location.hash = '/login' }} className="flex items-center gap-3 px-4 py-2 w-full text-slate-500 hover:text-red-400 transition-colors text-xs font-bold">
+        <div className="mt-auto p-6 border-t border-white/5 space-y-4">
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] text-cyan-400 font-bold uppercase">{user?.username[0]}</div>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-white leading-none">{user?.real_name}</span>
+              <span className="text-[10px] text-slate-500 mt-1 uppercase tracking-tighter">{user?.role}</span>
+            </div>
+          </div>
+          <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-2 w-full text-slate-500 hover:text-red-400 transition-colors text-xs font-bold">
             <LogOut size={14} /> 退出战术链路
           </button>
         </div>
@@ -107,17 +120,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <main className="flex-1 flex flex-col overflow-hidden relative z-10">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
-          <div className="px-4 py-1.5 bg-slate-100 rounded-full text-[10px] font-black text-slate-500 uppercase">
-            指挥中心控制台
-          </div>
+          <div className="px-4 py-1.5 bg-slate-100 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest">指挥中心控制台</div>
           
           <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <div className="relative">
-              <button 
-                ref={bellRef}
-                onClick={() => setShowNotif(!showNotif)} 
-                className={cn("relative p-2 rounded-full transition-colors", showNotif ? "bg-cyan-50 text-cyan-600" : "text-slate-400 hover:bg-slate-100")}
-              >
+              <button ref={bellRef} onClick={() => setShowNotif(!showNotif)} className={cn("relative p-2 rounded-full transition-colors", showNotif ? "bg-cyan-50 text-cyan-600" : "text-slate-400 hover:bg-slate-100")}>
                 <Bell size={20} />
                 {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[8px] text-white flex items-center justify-center font-black animate-bounce">{unreadCount}</span>}
               </button>
@@ -150,10 +157,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
-              <button onClick={toggleFullScreen} className="text-slate-400 hover:text-slate-600 transition-colors" title={isFullScreen ? "退出全屏" : "全屏"}>
-                {isFullScreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-              </button>
               <button onClick={handleMinimize} className="text-slate-400 hover:text-slate-600 transition-colors" title="最小化"><Minus size={18} /></button>
+              <button onClick={toggleFullScreen} className="text-slate-400 hover:text-slate-600 transition-colors" title={isFullScreen ? "向下还原" : "最大化"}>
+                {isFullScreen ? <CopyIcon size={14} className="rotate-180" /> : <Square size={14} />}
+              </button>
               <button onClick={handleClose} className="text-slate-400 hover:text-red-500 transition-colors" title="关闭"><X size={18} /></button>
             </div>
           </div>
@@ -171,7 +178,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden relative z-10">
                   <div className="p-8 text-slate-900">
                      <div className="flex justify-between items-start mb-6">
-                        <div className="w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center"><Info size={24} /></div>
+                        <div className={cn("w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center")}>
+                           <Info size={24} />
+                        </div>
                         <button onClick={() => setSelectedMsg(null)} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400"><X size={20}/></button>
                      </div>
                      <h3 className="text-2xl font-black mb-2">{selectedMsg.title}</h3>
