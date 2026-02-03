@@ -10,6 +10,7 @@ import {
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { TacticalTable } from '../../components/ui/TacticalTable'
+import { TacticalSelect } from '../../components/ui/TacticalSelect'
 
 export default function GlobalPolicyPage() {
   const [activeTab, setActiveTab] = useState<'WORDS' | 'KNOWLEDGE'>('WORDS')
@@ -120,7 +121,6 @@ export default function GlobalPolicyPage() {
          </div>
       </div>
 
-      {/* 编辑模态框 */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="策略参数重校">
          <div className="space-y-8">
             {activeTab === 'WORDS' ? (
@@ -128,13 +128,27 @@ export default function GlobalPolicyPage() {
                 <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">敏感词内容</label><input value={editItem?.word} onChange={(e)=>setEditItem({...editItem, word: e.target.value})} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold shadow-inner border-none" /></div>
                 <div className="grid grid-cols-2 gap-6">
                   <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">风险权重 (1-10)</label><input type="number" value={editItem?.risk_level} onChange={(e)=>setEditItem({...editItem, risk_level: parseInt(e.target.value)})} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-black shadow-inner border-none" /></div>
-                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">业务分类</label><select value={editItem?.category_id} onChange={(e)=>setEditItem({...editItem, category_id: e.target.value})} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold shadow-inner border-none">{cats.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">业务分类</label>
+                    <TacticalSelect 
+                      options={cats} 
+                      value={editItem?.category_id} 
+                      onChange={(val) => setEditItem({...editItem, category_id: val})} 
+                      placeholder="指派策略分类" 
+                    />
+                  </div>
                 </div>
               </>
             ) : (
               <>
                 <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">触发关键词</label><input value={editItem?.keyword} onChange={(e)=>setEditItem({...editItem, keyword: e.target.value})} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold shadow-inner border-none" /></div>
-                <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">所属分类</label><select value={editItem?.category_id} onChange={(e)=>setEditItem({...editItem, category_id: e.target.value})} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold shadow-inner border-none">{cats.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+                <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">所属分类</label>
+                  <TacticalSelect 
+                    options={cats} 
+                    value={editItem?.category_id} 
+                    onChange={(val) => setEditItem({...editItem, category_id: val})} 
+                    placeholder="指派话术分类" 
+                  />
+                </div>
                 <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">纠偏话术内容</label><textarea value={editItem?.answer} onChange={(e)=>setEditItem({...editItem, answer: e.target.value})} rows={4} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-medium shadow-inner border-none resize-none leading-relaxed" /></div>
               </>
             )}
