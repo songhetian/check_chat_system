@@ -435,3 +435,719 @@ Traceback (most recent call last):
     raise error
 redis.exceptions.AuthenticationError: Authentication required.
 INFO:     connection closed
+INFO:     192.168.2.184:52182 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+    if redis_client: await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed
+INFO:     192.168.2.184:52184 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+    if redis_client: await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed
+INFO:     192.168.2.184:52283 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+    if redis_client: await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed
+INFO:     192.168.2.184:52287 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+    if redis_client: await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed
+INFO:     192.168.2.184:52303 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+    if redis_client: await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed
+INFO:     192.168.2.184:52305 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+    if redis_client: await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed
+INFO:     192.168.2.184:52314 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+    if redis_client: await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed
+INFO:     192.168.2.184:52316 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+    if redis_client: await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed
+INFO:     192.168.2.184:52551 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed
+INFO:     192.168.2.184:52553 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 364, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 141, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 138, in app
+    await func(session)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 438, in app
+    await dependant.call(**solved_result.values)
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 199, in websocket_endpoint
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 324, in connect_check_health
+    await self.on_connect_check_health(check_health=check_health)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 471, in on_connect_check_health
+    await self.read_response()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/asyncio/connection.py", line 607, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        disable_decoding=disable_decoding
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/redis/_parsers/resp2.py", line 102, in _read_response
+    raise error
+redis.exceptions.AuthenticationError: Authentication required.
+INFO:     connection closed

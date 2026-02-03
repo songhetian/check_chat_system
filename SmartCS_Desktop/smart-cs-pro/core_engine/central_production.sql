@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS departments (
     name VARCHAR(50) NOT NULL UNIQUE,
     parent_id INT DEFAULT 0,
     manager_name VARCHAR(50),
+    is_deleted TINYINT DEFAULT 0, -- 软删除标记
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -23,7 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('AGENT', 'ADMIN', 'HQ') DEFAULT 'AGENT',
     department_id INT,
     authorized_device_id VARCHAR(100),
-    status TINYINT DEFAULT 1,
+    status TINYINT DEFAULT 1, -- 账号冻结状态
+    is_deleted TINYINT DEFAULT 0, -- 软删除标记
     streak_days INT DEFAULT 0,
     handled_customers_count INT DEFAULT 0,
     ai_adoption_count INT DEFAULT 0,
@@ -43,7 +45,8 @@ CREATE TABLE IF NOT EXISTS rank_config (
     min_days INT DEFAULT 0,
     min_volume INT DEFAULT 0,
     min_ai_adoption INT DEFAULT 0,
-    icon_tag VARCHAR(20)
+    icon_tag VARCHAR(20),
+    is_deleted TINYINT DEFAULT 0
 ) ENGINE=InnoDB;
 
 -- 4. 智能带教知识库
@@ -52,7 +55,8 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
     keyword VARCHAR(100) NOT NULL,
     answer TEXT NOT NULL,
     category VARCHAR(50),
-    is_active TINYINT DEFAULT 1
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0
 ) ENGINE=InnoDB;
 
 -- 5. 硬件设备白名单
@@ -62,6 +66,7 @@ CREATE TABLE IF NOT EXISTS devices (
     user_id INT,
     status ENUM('PENDING', 'APPROVED', 'BLOCKED') DEFAULT 'PENDING',
     device_info TEXT,
+    is_deleted TINYINT DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
@@ -71,7 +76,8 @@ CREATE TABLE IF NOT EXISTS sensitive_words (
     word VARCHAR(100) UNIQUE NOT NULL,
     category VARCHAR(50),
     risk_level INT DEFAULT 5,
-    is_active TINYINT DEFAULT 1
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0
 ) ENGINE=InnoDB;
 
 -- 7. 违规取证记录
@@ -83,6 +89,7 @@ CREATE TABLE IF NOT EXISTS violation_records (
     risk_score INT,
     screenshot_url VARCHAR(255),
     video_path VARCHAR(255),
+    is_deleted TINYINT DEFAULT 0,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
@@ -94,6 +101,7 @@ CREATE TABLE IF NOT EXISTS customers (
     tags TEXT,
     ltv DECIMAL(12,2) DEFAULT 0.00,
     frequency INT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0,
     last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -104,6 +112,7 @@ CREATE TABLE IF NOT EXISTS broadcasts (
     content TEXT,
     sender_id INT,
     target_dept_id INT,
+    is_deleted TINYINT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (sender_id) REFERENCES users(id),
     FOREIGN KEY (target_dept_id) REFERENCES departments(id)
@@ -116,7 +125,8 @@ CREATE TABLE IF NOT EXISTS voice_protocols (
     max_level INT DEFAULT 10,
     protocol_name VARCHAR(50),
     voice_text TEXT,
-    is_active TINYINT DEFAULT 1
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0
 ) ENGINE=InnoDB;
 
 -- 11. 全局合规审计日志
@@ -126,6 +136,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     action VARCHAR(50) NOT NULL,
     target VARCHAR(100),
     details TEXT,
+    is_deleted TINYINT DEFAULT 0,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -136,17 +147,19 @@ CREATE TABLE IF NOT EXISTS ai_usage_stats (
     action_type ENUM('OPTIMIZE', 'SUMMARIZE'),
     chars_processed INT,
     estimated_time_saved INT,
+    is_deleted TINYINT DEFAULT 0,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
--- 13. 系统通知中心表 (新增)
+-- 13. 系统通知中心表
 CREATE TABLE IF NOT EXISTS notifications (
     id VARCHAR(50) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     content TEXT,
     type VARCHAR(50) DEFAULT 'INFO',
     is_read TINYINT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
