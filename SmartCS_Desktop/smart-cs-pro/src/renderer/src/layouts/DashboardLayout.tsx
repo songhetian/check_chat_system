@@ -1,19 +1,19 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard,
   ShieldAlert,
-  Users,
   Settings,
   Package,
-  BarChart3,
   LogOut,
   Bell,
-  Search,
   Wrench,
-  Contact2, // 引入画像图标
+  Contact2,
   Minus,
-  X
+  X,
+  Info,
+  Activity
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
@@ -32,20 +32,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, logout } = useAuthStore()
   const location = useLocation()
   const clickAudio = useRef<HTMLAudioElement | null>(null)
+  const [showNotif, setShowNotif] = useState(false)
 
   const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
   const handleClose = () => window.electron.ipcRenderer.send('close-window')
 
   useEffect(() => {
-    // 确保进入仪表盘时窗口足够大并居中
     window.electron.ipcRenderer.send('resize-window', { width: 1280, height: 850, center: true })
-    // 管理模式不需要置顶
     window.electron.ipcRenderer.send('set-always-on-top', false)
   }, [])
 
   const handleLogout = () => {
-    logout();
-    window.location.hash = '/login';
+    logout()
+    window.location.hash = '/login'
   }
 
   const playClick = () => {
@@ -56,11 +55,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }
 
-  // ... (menu 定义保持不变)
-
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden select-none">
+    <div className="flex h-screen bg-slate-50 overflow-hidden select-none font-sans">
       <audio ref={clickAudio} src="https://assets.mixkit.co/active_storage/sfx/2568/2534-preview.mp3" preload="auto" />
+      
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800 shrink-0">
         <div className="p-6">
@@ -110,22 +108,58 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
+      <main className="flex-1 flex flex-col overflow-hidden relative">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
-          <div className="relative w-96" style={{ WebkitAppRegion: 'no-drag' } as any}>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <input 
-              placeholder="搜索坐席、违规词或商品战术..." 
-              className="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-cyan-500/20 transition-all"
-            />
+          <div className="flex items-center gap-4">
+             <div className="px-4 py-1.5 bg-slate-100 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest">
+               指挥中心控制台
+             </div>
           </div>
           
           <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-            <button className="relative p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotif(!showNotif)}
+                className={cn(
+                  "relative p-2 rounded-full transition-colors",
+                  showNotif ? "bg-cyan-50 text-cyan-600" : "text-slate-400 hover:bg-slate-100"
+                )}
+              >
+                <Bell size={20} />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+              </button>
+
+              <AnimatePresence>
+                {showNotif && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-4 w-80 bg-white border border-slate-200 shadow-2xl rounded-3xl overflow-hidden z-[500]"
+                  >
+                    <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                       <span className="text-xs font-black text-slate-900 uppercase">战术通知</span>
+                       <span className="text-[10px] text-cyan-600 font-bold">全部已读</span>
+                    </div>
+                    <div className="p-2 max-h-96 overflow-y-auto">
+                       <div className="p-4 hover:bg-slate-50 rounded-2xl transition-all border border-transparent hover:border-slate-100 cursor-pointer group">
+                          <div className="flex items-start gap-3">
+                             <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 shrink-0">
+                                <Info size={14} />
+                             </div>
+                             <div>
+                                <p className="text-xs font-bold text-slate-900 mb-1">中枢链路已建立</p>
+                                <p className="text-[10px] text-slate-500 leading-relaxed">系统已通过安全网关成功同步 MySQL 指令枢纽。</p>
+                                <p className="text-[8px] text-slate-400 mt-2">刚刚</p>
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <div className="h-8 w-[1px] bg-slate-200 mx-2" />
             
             <div className="flex items-center gap-6">
@@ -137,7 +171,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
               </div>
 
-              {/* 窗口控制按钮 */}
               <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
                 <button onClick={handleMinimize} className="text-slate-400 hover:text-slate-600 transition-colors" title="最小化">
                   <Minus size={18} />
@@ -150,8 +183,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        {/* Dynamic Viewport */}
-        <section className="flex-1 overflow-y-auto p-8">
+        <section className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50/50">
           {children}
         </section>
       </main>
