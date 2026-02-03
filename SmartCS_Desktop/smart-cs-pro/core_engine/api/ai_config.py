@@ -42,29 +42,57 @@ async def get_knowledge_base(current_user: dict = Depends(get_current_user)):
     items = await KnowledgeBase.filter(is_deleted=0).all().values()
     return {"status": "ok", "data": items}
 
-@router.post("/knowledge-base")
-async def save_knowledge_item(data: dict, request: Request, current_user: dict = Depends(get_current_user)):
+@router.post("/sensitive-words/import")
+async def import_sensitive_words(data: dict, request: Request, current_user: dict = Depends(get_current_user)):
     if current_user["role_code"] != "HQ":
-        return {"status": "error", "message": "权限不足：仅限总部管理员配置"}
+        return {"status": "error", "message": "权限不足"}
     
-    item_id = data.get("id")
-    payload = {
-        "keyword": data.get("keyword"),
-        "answer": data.get("answer"),
-        "category": data.get("category"),
-        "is_active": data.get("is_active", 1)
-    }
+    items = data.get("items", [])
+    if not items: return {"status": "error", "message": "导入清单为空"}
 
-    if item_id:
-        await KnowledgeBase.filter(id=item_id).update(**payload)
-    else:
-        await KnowledgeBase.create(**payload)
+    for item in items:
+        await SensitiveWord.get_or_create(
+            word=item.get("word"),
+            defaults={
+                "category": item.get("category", "未分类"),
+                "risk_level": item.get("risk_level", 5),
+                "is_active": 1
+            }
+        )
+    
+    # 同步 Redis 缓存
+    redis = request.app.state.redis
+    if redis:
+        all_words = await SensitiveWord.filter(is_active=1, is_deleted=0).values("word", "risk_level")
+        await redis.set("cache:sensitive_words", json.dumps(all_words))
+        await redis.publish("notif_channel", json.dumps({"type": "AI_POLICY_UPDATED", "module": "SENSITIVE_WORDS"}))
 
-    # 同步至 Redis
+    return {"status": "ok", "count": len(items)}
+
+@router.post("/knowledge-base/import")
+async def import_knowledge_base(data: dict, request: Request, current_user: dict = Depends(get_current_user)):
+    if current_user["role_code"] != "HQ":
+        return {"status": "error", "message": "权限不足"}
+    
+    items = data.get("items", [])
+    if not items: return {"status": "error", "message": "导入清单为空"}
+
+    for item in items:
+        await KnowledgeBase.get_or_create(
+            keyword=item.get("keyword"),
+            defaults={
+                "answer": item.get("answer"),
+                "category": item.get("category", "标准话术"),
+                "is_active": 1
+            }
+        )
+    
+    # 同步 Redis
     redis = request.app.state.redis
     if redis:
         kb_data = await KnowledgeBase.filter(is_active=1, is_deleted=0).values("keyword", "answer")
         await redis.set("cache:knowledge_base", json.dumps(kb_data))
         await redis.publish("notif_channel", json.dumps({"type": "AI_POLICY_UPDATED", "module": "KNOWLEDGE_BASE"}))
 
-    return {"status": "ok"}
+    return {"status": "ok", "count": len(items)}
+
