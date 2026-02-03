@@ -19,7 +19,6 @@ redis_client = None
 
 async def init_services():
     global db_pool, redis_client
-    # MySQL 初始化
     try:
         db_pool = await aiomysql.create_pool(
             host=os.getenv("DB_HOST", "127.0.0.1"),
@@ -32,7 +31,6 @@ async def init_services():
         logger.info("✅ MySQL 联通")
     except Exception as e: logger.error(f"❌ MySQL 失败: {e}")
 
-    # Redis 初始化
     try:
         redis_client = redis.Redis(
             host=os.getenv("REDIS_HOST", "127.0.0.1"),
@@ -42,7 +40,7 @@ async def init_services():
         logger.info("✅ Redis 联通")
     except Exception as e: logger.error(f"❌ Redis 失败: {e}")
 
-# --- 3. 业务逻辑组件 (AI & Scanner) ---
+# --- 3. 业务逻辑组件 ---
 class AIAnalyzer:
     def __init__(self):
         self.api_url = os.getenv("AI_URL", "http://127.0.0.1:11434/api/chat")
@@ -80,50 +78,48 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 @app.get("/api/health")
 async def health(): return {"status": "ok", "db": db_pool is not None, "redis": redis_client is not None}
 
-# 坐席列表 API (带搜索、筛选、分页)
+# 1. 坐席管理 API
 @app.get("/api/admin/agents")
-async def get_agents(
-    page: int = 1, 
-    size: int = 10, 
-    search: str = "", 
-    dept: str = "ALL", 
-    status: str = "ALL"
-):
+async def get_agents(page: int = 1, size: int = 10, search: str = "", dept: str = "ALL"):
     if not db_pool: return {"status": "error", "message": "DB Offline"}
     offset = (page - 1) * size
-    
     async with db_pool.acquire() as conn:
         async with conn.cursor(aiomysql.DictCursor) as cur:
-            # 构建 SQL
-            where_clauses = ["1=1"]
+            where = "WHERE 1=1"
             params = []
             if search:
-                where_clauses.append("(u.username LIKE %s OR u.real_name LIKE %s)")
+                where += " AND (u.username LIKE %s OR u.real_name LIKE %s)"
                 params.extend([f"%{search}%", f"%{search}%"])
             if dept != "ALL":
-                where_clauses.append("d.name = %s")
+                where += " AND d.name = %s"
                 params.append(dept)
             
-            sql = f"""
-                SELECT u.username, u.real_name, u.role, u.status as db_status, 
-                       u.tactical_score, d.name as dept_name
-                FROM users u
-                LEFT JOIN departments d ON u.department_id = d.id
-                WHERE {" AND ".join(where_clauses)}
-                LIMIT %s OFFSET %s
-            """
+            sql = f"SELECT u.*, d.name as dept_name FROM users u LEFT JOIN departments d ON u.department_id = d.id {where} LIMIT %s OFFSET %s"
             params.extend([size, offset])
             await cur.execute(sql, params)
             agents = await cur.fetchall()
-            
-            # 实时合并 Redis 中的在线状态
             for a in agents:
-                is_online = await redis_client.exists(f"online_agent:{a['username']}")
-                a['is_online'] = bool(is_online)
-                # 模拟违规标记
-                a['has_violation'] = await redis_client.exists(f"violation_alert:{a['username']}")
+                a['is_online'] = bool(await redis_client.exists(f"online_agent:{a['username']}"))
+            return {"status": "ok", "data": agents}
 
-            return {"status": "ok", "data": agents, "total": 100} # 简化 total
+# 2. 客户画像 API (真正从 MySQL 获取)
+@app.get("/api/admin/customers")
+async def get_customers(page: int = 1, size: int = 10, search: str = ""):
+    if not db_pool: return {"status": "error", "message": "DB Offline"}
+    offset = (page - 1) * size
+    async with db_pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            where = ""
+            params = [size, offset]
+            if search:
+                where = "WHERE name LIKE %s OR tags LIKE %s"
+                params = [f"%{search}%", f"%{search}%", size, offset]
+            
+            await cur.execute(f"SELECT * FROM customers {where} ORDER BY last_seen_at DESC LIMIT %s OFFSET %s", params)
+            data = await cur.fetchall()
+            await cur.execute(f"SELECT COUNT(*) as total FROM customers {where}", params[:-2] if search else [])
+            total = await cur.fetchone()
+            return {"status": "ok", "data": data, "total": total['total']}
 
 @app.post("/api/auth/login")
 async def login(data: dict):
@@ -134,37 +130,31 @@ async def login(data: dict):
             await cur.execute("SELECT * FROM users WHERE username = %s", (u,))
             user = await cur.fetchone()
             if u == "admin" and p == "admin123":
-                # 记录管理员上线
                 await redis_client.setex(f"online_agent:{u}", 3600, "ADMIN")
                 return {"status": "ok", "data": {"user": {"username":u, "real_name":user['real_name'], "role":user['role'], "department": "总经办"}, "token": "tk_admin"}}
             return {"status": "error", "message": "凭据失效"}
 
-# --- 5. 通信与订阅 ---
+# --- 5. 通信中枢 ---
 active_conns = []
+async def broadcast_event(data):
+    for c in active_conns:
+        try: await c.send_text(json.dumps(data))
+        except: pass
 
 @app.websocket("/ws/risk")
 async def websocket_endpoint(websocket: WebSocket, username: str = "guest"):
-    await websocket.accept()
-    active_conns.append(websocket)
-    
-    # 坐席上线，写入 Redis
+    await websocket.accept(); active_conns.append(websocket)
     if redis_client:
         await redis_client.setex(f"online_agent:{username}", 60, "ACTIVE")
-        await redis_client.publish("agent_status", json.dumps({"username": username, "status": "ONLINE"}))
-    
     try:
         while True:
-            # 维持连接并更新心跳
             await websocket.receive_text()
             await redis_client.expire(f"online_agent:{username}", 60)
     except:
         active_conns.remove(websocket)
-        if redis_client:
-            await redis_client.delete(f"online_agent:{username}")
-            await redis_client.publish("agent_status", json.dumps({"username": username, "status": "OFFLINE"}))
+        if redis_client: await redis_client.delete(f"online_agent:{username}")
 
 if __name__ == "__main__":
-    host = os.getenv("SERVER_HOST", "0.0.0.0")
-    port = int(os.getenv("SERVER_PORT", 8000))
-    print(f"🚀 [数智核心] 引擎已拉起: {host}:{port}")
+    host, port = os.getenv("SERVER_HOST", "0.0.0.0"), int(os.getenv("SERVER_PORT", 8000))
+    print(f"🚀 [核心引擎] 已拉起: {host}:{port}")
     uvicorn.run(app, host=host, port=port)
