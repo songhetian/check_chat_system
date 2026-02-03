@@ -1,11 +1,10 @@
-// 核心：动态战术配置中心 (全小写强制规范化版)
-// 能够根据当前环境自动切换指挥中心地址 (LAN Support)
-
-const defaultIp = '127.0.0.1'; 
+// 核心：动态战术配置中心 (局域网专用版)
+// 严禁硬编码 127.0.0.1，所有地址均从主进程环境注入
 
 export const CONFIG = {
-  API_BASE: `http://${defaultIp}:8000/api`,
-  WS_BASE: `ws://${defaultIp}:8000/ws`,
+  // 初始值设为占位符，渲染前必须被 initDynamicConfig 覆盖
+  API_BASE: '',
+  WS_BASE: '',
   APP_VERSION: '1.2.5-Stable',
   SYNC_INTERVAL: 5000,
   BRANDING: {
@@ -24,13 +23,15 @@ export const initDynamicConfig = async () => {
       let centralUrl = serverConfig?.network?.central_server_url;
       
       if (centralUrl) {
-        // 关键修复：强制全小写并规范化，防止出现 /API 导致的 404
+        // 关键修复：强制全小写规范化
         centralUrl = centralUrl.trim().toLowerCase();
         if (centralUrl.endsWith('/')) centralUrl = centralUrl.slice(0, -1);
         
         CONFIG.API_BASE = centralUrl;
+        // 自动转换协议：http -> ws
         CONFIG.WS_BASE = centralUrl.replace('/api', '/ws').replace('http', 'ws');
-        console.log(`🌐 [战术同步] 神经链路已锁定`);
+        
+        console.log(`🌐 [战术同步] 链路已锁定指挥中心: ${CONFIG.API_BASE}`);
       }
 
       // 同步品牌自定义信息
@@ -42,6 +43,6 @@ export const initDynamicConfig = async () => {
       }
     }
   } catch (e) {
-    console.error('❌ [动态配置] 获取失败，请检查配置文件');
+    console.error('❌ [战术同步] 配置文件加载失败，请检查 .env');
   }
 };
