@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, Search, Filter, MailOpen, Trash2, ChevronLeft, ChevronRight, CheckCheck, Loader2 } from 'lucide-react'
-import { Card } from '../../components/ui/card'
+import { Bell, MailOpen, CheckCheck, Loader2 } from 'lucide-react'
+import { TacticalPagination } from '../../components/ui/TacticalTable'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 
@@ -47,8 +47,8 @@ export default function NotificationsPage() {
     <div className="space-y-6 h-full flex flex-col font-sans">
       <div className="flex justify-between items-end text-slate-900 bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
         <div>
-          <h2 className="text-3xl font-black tracking-tight uppercase italic">
-            通知中枢 <span className="text-cyan-500">MESSAGES</span>
+          <h2 className="text-3xl font-black tracking-tight uppercase italic text-tactical-glow">
+            通知消息中枢 <span className="text-cyan-500">MESSAGES</span>
           </h2>
           <p className="text-slate-500 text-sm mt-1 font-medium">全域战术指令与系统广播存档</p>
         </div>
@@ -93,14 +93,13 @@ export default function NotificationsPage() {
           )}
         </div>
 
-        {/* Pagination */}
-        <div className="p-6 bg-slate-50/50 border-t flex justify-between items-center shrink-0">
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">显示第 {notifs.length} 条，共 {total} 条战术存档</span>
-          <div className="flex gap-2">
-            <button onClick={() => setPage(p => Math.max(1, p-1))} className="p-2 bg-white border rounded-xl hover:bg-slate-50 disabled:opacity-30" disabled={page === 1}><ChevronLeft size={16} /></button>
-            <button onClick={() => setPage(p => p + 1)} className="p-2 bg-white border rounded-xl hover:bg-slate-50 shadow-sm" disabled={notifs.length < 15}><ChevronRight size={16} /></button>
-          </div>
-        </div>
+        {/* 全局一致性分页器 */}
+        <TacticalPagination 
+          total={total} 
+          pageSize={15} 
+          currentPage={page} 
+          onPageChange={setPage} 
+        />
       </div>
     </div>
   )

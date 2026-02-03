@@ -38,6 +38,7 @@ import {
 import { cn } from './lib/utils'
 import { CONFIG } from './lib/config'
 import { TacticalSearch } from './components/ui/TacticalSearch'
+import { TacticalPagination } from './components/ui/TacticalTable'
 
 // 1. 工业级管理后台首页
 const AdminHome = () => {
@@ -165,14 +166,13 @@ const AdminHome = () => {
           )}
         </div>
 
-        {/* 分页控制器 */}
-        <div className="p-6 bg-slate-50/50 border-t flex justify-between items-center shrink-0">
-          <span className="text-xs font-bold text-slate-400">显示第 1-10 条，共 100 条记录</span>
-          <div className="flex gap-2">
-            <button className="p-2 bg-white border rounded-xl hover:bg-slate-50 disabled:opacity-30" disabled><ChevronLeft size={16} /></button>
-            <button className="p-2 bg-white border rounded-xl hover:bg-slate-50 shadow-sm"><ChevronRight size={16} /></button>
-          </div>
-        </div>
+        {/* 规范化分页器 */}
+        <TacticalPagination 
+          total={100} 
+          pageSize={10} 
+          currentPage={page} 
+          onPageChange={setPage} 
+        />
       </div>
     </div>
   )
