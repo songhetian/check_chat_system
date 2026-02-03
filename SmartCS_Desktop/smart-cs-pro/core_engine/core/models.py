@@ -9,6 +9,8 @@ class BaseModel(models.Model):
 class Department(BaseModel):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=50, unique=True)
+    # 部门主管关联 (自引用或关联 User)
+    manager = fields.ForeignKeyField('models.User', related_name='managed_departments', null=True)
     
     class Meta:
         table = "departments"
@@ -47,11 +49,11 @@ class KnowledgeBase(BaseModel):
 
 class ViolationRecord(BaseModel):
     id = fields.CharField(max_length=50, pk=True)
-    user = fields.ForeignKeyField('models.User', related_name='violations')
-    keyword = fields.CharField(max_length=100)
+    user = fields.ForeignKeyField('models.User', related_name='violations', index=True)
+    keyword = fields.CharField(max_length=100, index=True)
     context = fields.TextField()
-    risk_score = fields.IntField()
-    timestamp = fields.DatetimeField(auto_now_add=True)
+    risk_score = fields.IntField(index=True)
+    timestamp = fields.DatetimeField(auto_now_add=True, index=True)
 
     class Meta:
         table = "violation_records"

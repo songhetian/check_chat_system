@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon
+  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
@@ -19,8 +19,11 @@ interface Notification {
 
 const menu = [
   { path: '/', icon: LayoutDashboard, label: '指挥中心概览' },
+  { path: '/command', icon: Zap, label: '实时战术指挥' },
   { path: '/alerts', icon: ShieldAlert, label: '风险拦截审计' },
   { path: '/notifications', icon: Bell, label: '通知消息中枢' },
+  { path: '/departments', icon: Building2, label: '部门架构管理' },
+  { path: '/users', icon: UserCog, label: '员工权限矩阵' },
   { path: '/customers', icon: Contact2, label: '客户画像分析' },
   { path: '/products', icon: Package, label: '商品战术话术' },
   { path: '/tools', icon: Wrench, label: '全域提效工具' },
@@ -55,7 +58,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     } catch (e) { console.error(e) }
   }
 
-  useEffect(() => { fetchRecentNotifs() }, [showNotif])
+  useEffect(() => { 
+    fetchRecentNotifs() 
+    // 每 30 秒自动同步一次未读消息，实现无感更新
+    const timer = setInterval(fetchRecentNotifs, 30000)
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    // 当弹窗打开时也立即刷新一次，确保看到的是最新的
+    if (showNotif) fetchRecentNotifs()
+  }, [showNotif])
 
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 

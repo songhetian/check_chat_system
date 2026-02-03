@@ -39,6 +39,14 @@ export const useRiskSocket = () => {
         if (data.type === 'VIOLATION') {
           addViolation(data)
           setAlerting(true)
+          // 触发主管级实时拦截提示
+          window.dispatchEvent(new CustomEvent('trigger-violation-alert', { 
+            detail: { 
+              id: data.id, 
+              agent: data.agent || data.real_name, 
+              keyword: data.keyword 
+            } 
+          }))
           setTimeout(() => setAlerting(false), 5000)
         }
 

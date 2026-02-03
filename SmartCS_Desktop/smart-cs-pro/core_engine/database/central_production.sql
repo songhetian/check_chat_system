@@ -4,12 +4,12 @@
 CREATE DATABASE IF NOT EXISTS smart_cs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE smart_cs;
 
--- 1. 部门表
+-- 1. 部门表 (前置定义，manager_id 将在 users 表之后通过 ALTER 添加，或者使用延迟约束)
 CREATE TABLE IF NOT EXISTS departments (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL UNIQUE,
     parent_id INT DEFAULT 0,
-    manager_name VARCHAR(50),
+    manager_id INT, -- 新增：部门主管 ID
     is_deleted TINYINT DEFAULT 0, -- 软删除标记
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -36,6 +36,10 @@ CREATE TABLE IF NOT EXISTS users (
     FOREIGN KEY (department_id) REFERENCES departments(id),
     INDEX idx_user (username)
 ) ENGINE=InnoDB;
+
+-- 为部门表添加主管外键
+ALTER TABLE departments ADD CONSTRAINT fk_dept_manager FOREIGN KEY (manager_id) REFERENCES users(id);
+
 
 -- 3. 战术等级进阶配置表
 CREATE TABLE IF NOT EXISTS rank_config (
@@ -191,3 +195,21 @@ VALUES (5, 7, '橙色中级提醒', '提醒，当前对话存在合规风险，�
 -- 默认账号: admin / admin
 INSERT IGNORE INTO users (username, password_hash, salt, real_name, role, department_id) 
 VALUES ('admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'salt123', '超级管理员', 'HQ', 1);
+
+-- 14. 菜单配置表 (RBAC 核心)
+CREATE TABLE IF NOT EXISTS menu_config (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    path VARCHAR(100) NOT NULL,
+    icon_name VARCHAR(50),
+    min_role VARCHAR(20) DEFAULT 'ADMIN',
+    is_deleted TINYINT DEFAULT 0,
+    UNIQUE INDEX idx_path (path)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 注册初始战术模块
+INSERT IGNORE INTO menu_config (name, path, icon_name, min_role) VALUES 
+('战术指挥台', '/command', 'Zap', 'ADMIN'),
+('部门架构', '/departments', 'Building2', 'HQ'),
+('成员矩阵', '/users', 'UserCog', 'HQ');
+

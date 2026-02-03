@@ -21,7 +21,7 @@ async def get_coach_advice(request: Request, customer_msg: str):
 
     # 2. 缓存未命中则查库
     if kb_items is None:
-        kb_items_obj = await KnowledgeBase.filter(is_active=1).all().values("keyword", "answer", "category")
+        kb_items_obj = await KnowledgeBase.filter(is_active=1, is_deleted=0).all().values("keyword", "answer", "category")
         kb_items = kb_items_obj
         if redis:
             await redis.setex("cache:knowledge_base", 600, json.dumps(kb_items))

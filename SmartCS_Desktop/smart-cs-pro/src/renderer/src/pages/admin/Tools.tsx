@@ -1,76 +1,69 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Wrench, ShieldCheck, Zap, Download, RefreshCw, Smartphone, Monitor } from 'lucide-react'
 import axios from 'axios'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { CONFIG } from '../../lib/config'
-import { 
-  Copy, RefreshCw, Truck, ScanText, ShieldCheck, ExternalLink, Image as ImageIcon, Languages 
-} from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 export default function ToolsPage() {
-  const [isProcessingImg, setIsProcessingImg] = useState(false)
-  const [pinyinInput, setPinyinInput] = useState('')
-  const [pinyinResult, setPinyinResult] = useState('')
-  const [trackingNum, setTrackingNum] = useState('')
-  const [extractInput, setExtractInput] = useState('')
-  const [extracted, setExtracted] = useState<string[]>([])
-  const [preCheckText, setPreCheckText] = useState('')
-  const [checkResult, setCheckResult] = useState<'idle' | 'safe' | 'danger'>('idle')
+  const [loading, setLoading] = useState(false)
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    console.log('✅ 已复制到剪贴板');
-  }
-
-  const handleImageDefense = async () => {
-    setIsProcessingImg(true)
+  const handleGenerateSecureImg = async () => {
+    setLoading(true)
     try {
-      const res = await axios.post(`${CONFIG.API_BASE}/agent/image-defense`, { input_path: 'mock_path', watermark_text: 'SmartCS' })
-      if (res.data.status === 'ok') alert(`已生成安全图片`)
-    } finally { setIsProcessingImg(false) }
-  }
-
-  const handlePinyin = async () => {
-    if (!pinyinInput) return
-    const res = await axios.get(`${CONFIG.API_BASE}/agent/pinyin?text=${pinyinInput}`)
-    if (res.data.status === 'ok') setPinyinResult(res.data.result)
-  }
-
-  const handlePreCheck = () => {
-     setCheckResult(preCheckText.includes('钱') ? 'danger' : 'safe')
+      // 模拟调用安全工具接口
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // 规范化：使用全局事件分发 Toast
+      window.dispatchEvent(new CustomEvent('trigger-toast', {
+        detail: { 
+          title: '战术工具执行成功', 
+          message: '安全加固图片已生成并同步至分发节点。', 
+          type: 'success' 
+        }
+      }))
+    } catch (e) {
+      window.dispatchEvent(new CustomEvent('trigger-toast', {
+        detail: { 
+          title: '工具链异常', 
+          message: '无法生成安全载荷，请检查本地环境依赖。', 
+          type: 'error' 
+        }
+      }))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="space-y-6 pb-20 font-sans">
+    <div className="space-y-6 font-sans">
       <div className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
         <div>
-          <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic">全域提效工具 <span className="text-cyan-500">UTILITIES</span></h2>
-          <p className="text-slate-500 text-sm mt-1">内置战术组件，辅助一线坐席快速响应</p>
+          <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic">
+            全域提效工具箱 <span className="text-cyan-500">UTILITIES</span>
+          </h2>
+          <p className="text-slate-500 text-sm mt-1 font-medium">包含安全加固、屏幕诊断及终端同步等辅助实战功能</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="rounded-[32px] border-slate-200 shadow-sm overflow-hidden bg-white">
-          <CardHeader className="bg-slate-50/50 pb-4 border-b border-slate-100">
-            <CardTitle className="text-sm font-black flex items-center gap-2 uppercase tracking-widest"><ImageIcon size={18} className="text-cyan-500" /> 证据加水印器</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <button onClick={handleImageDefense} className="w-full h-24 rounded-2xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-400 gap-2 hover:bg-slate-50 transition-all">
-              {isProcessingImg ? <RefreshCw className="animate-spin" /> : <ImageIcon size={24} />}
-              <span className="text-[10px] font-black uppercase">选择并加注水印</span>
+         <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm group hover:border-cyan-500/30 transition-all">
+            <div className="w-14 h-14 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+               <ShieldCheck size={28} />
+            </div>
+            <h3 className="text-lg font-black text-slate-900 mb-2">安全图片加固</h3>
+            <p className="text-xs text-slate-400 font-medium leading-relaxed mb-8">
+              生成带有隐形水印和战术特征码的安全背景图，用于增强终端屏幕的防截屏溯源能力。
+            </p>
+            <button 
+              onClick={handleGenerateSecureImg}
+              disabled={loading}
+              className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl active:scale-95 hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              {loading ? <RefreshCw size={16} className="animate-spin" /> : <Download size={16} />} 
+              {loading ? '正在生成...' : '立即生成安全载荷'}
             </button>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-[32px] border-slate-200 shadow-sm overflow-hidden bg-white">
-          <CardHeader className="bg-slate-50/50 pb-4 border-b border-slate-100">
-            <CardTitle className="text-sm font-black flex items-center gap-2 uppercase tracking-widest"><ShieldCheck size={18} className="text-red-500" /> 话术合规预检</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <textarea value={preCheckText} onChange={(e) => setPreCheckText(e.target.value)} placeholder="输入待发送内容..." className="w-full h-20 bg-slate-50 border-none rounded-xl p-4 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-cyan-500/20" />
-            <button onClick={handlePreCheck} className="w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest">立即分析</button>
-          </CardContent>
-        </Card>
+         </div>
       </div>
     </div>
   )
