@@ -6,10 +6,18 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
+class Role(BaseModel):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=50, unique=True)
+    code = fields.CharField(max_length=20, unique=True)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "roles"
+
 class Department(BaseModel):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=50, unique=True)
-    # 部门主管关联 (自引用或关联 User)
     manager = fields.ForeignKeyField('models.User', related_name='managed_departments', null=True)
     
     class Meta:
@@ -21,7 +29,8 @@ class User(BaseModel):
     password_hash = fields.CharField(max_length=128)
     salt = fields.CharField(max_length=32)
     real_name = fields.CharField(max_length=50)
-    role = fields.CharField(max_length=20, default="AGENT")
+    # 外键关联 Role
+    role = fields.ForeignKeyField('models.Role', related_name='users')
     tactical_score = fields.IntField(default=0)
     status = fields.IntField(default=1)
     
@@ -31,21 +40,28 @@ class User(BaseModel):
     rank_level = fields.CharField(max_length=20, default="NOVICE")
     graduated_at = fields.DatetimeField(null=True)
     
-    # 外键关联
+    # 外键关联 Department
     department = fields.ForeignKeyField('models.Department', related_name='users', null=True)
 
     class Meta:
         table = "users"
 
-class KnowledgeBase(BaseModel):
+class Permission(BaseModel):
     id = fields.IntField(pk=True)
-    keyword = fields.CharField(max_length=100)
-    answer = fields.TextField()
-    category = fields.CharField(max_length=50)
-    is_active = fields.IntField(default=1)
+    code = fields.CharField(max_length=50, unique=True)
+    name = fields.CharField(max_length=100)
+    module = fields.CharField(max_length=50)
 
     class Meta:
-        table = "knowledge_base"
+        table = "permissions"
+
+class RolePermission(BaseModel):
+    id = fields.IntField(pk=True)
+    role = fields.ForeignKeyField('models.Role', related_name='permissions')
+    permission_code = fields.CharField(max_length=50)
+
+    class Meta:
+        table = "role_permissions"
 
 class ViolationRecord(BaseModel):
     id = fields.CharField(max_length=50, pk=True)
@@ -79,20 +95,3 @@ class Notification(BaseModel):
 
     class Meta:
         table = "notifications"
-
-class Permission(BaseModel):
-    id = fields.IntField(pk=True)
-    code = fields.CharField(max_length=50, unique=True)
-    name = fields.CharField(max_length=100)
-    module = fields.CharField(max_length=50)
-
-    class Meta:
-        table = "permissions"
-
-class RolePermission(BaseModel):
-    id = fields.IntField(pk=True)
-    role = fields.CharField(max_length=20)
-    permission_code = fields.CharField(max_length=50)
-
-    class Meta:
-        table = "role_permissions"
