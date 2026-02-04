@@ -85,8 +85,9 @@ export default function DepartmentsPage() {
   const handleSave = async () => {
     if (!inputName.trim() || !token) return
     const isEdit = modalType === 'EDIT'
+    const endpoint = isEdit ? '/departments/update' : '/departments'
     const res = await window.api.callApi({
-      url: `${CONFIG.API_BASE}/admin/departments${isEdit ? '/update' : ''}`,
+      url: `${CONFIG.API_BASE}/admin${endpoint}`,
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       data: isEdit ? { id: targetItem.id, name: inputName, manager_id: managerId || null } : { name: inputName }
@@ -105,40 +106,42 @@ export default function DepartmentsPage() {
     if (res.data.status === 'ok') { 
       setModalType('NONE'); 
       fetchDepts(); 
-      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '组织架构已调整', message: '目标战术单元已注销', type: 'success' } }))
+      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '指令执行成功', message: '目标战术单元已物理注销', type: 'success' } }))
     }
   }
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
       <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
-        <div><h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">组织架构中枢</h2><p className="text-slate-500 text-sm mt-1 font-medium">配置业务战术单元，实现全域数据隔离与权限管控</p></div>
-        {/* 1. 原子级按钮熔断：新增操作 */}
-        {hasPermission('admin:dept:manage') && (<button onClick={() => { setInputName(''); setManagerId(''); setModalType('ADD') }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 录入新部门</button>)}
+        <div><h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">组织架构中枢</h2><p className="text-slate-500 text-sm mt-1 font-medium">精确定义业务战术单元，实现全域数据隔离与动作权限管控</p></div>
+        {/* 增：admin:dept:create */}
+        {hasPermission('admin:dept:create') && (
+          <button onClick={() => { setInputName(''); setManagerId(''); setModalType('ADD') }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800"><Plus size={16} /> 录入新部门</button>
+        )}
       </header>
 
       <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {loading ? <div className="h-64 flex items-center justify-center text-slate-400 gap-3 font-bold uppercase italic tracking-widest"><Loader2 className="animate-spin" /> 同步架构中...</div> : (
-            <TacticalTable headers={['部门名称', '部门人数', '部门主管', '状态', '战术操作']}>
+            <TacticalTable headers={['部门名称', '部门人数', '部门主管', '运行状态', '战术动作']}>
               {depts.map((d) => (
                 <tr key={d.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-8 py-5"><div className="flex items-center justify-center gap-3"><div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner", d.manager__real_name ? "bg-cyan-50 text-cyan-600 border-cyan-100" : "bg-slate-50 text-slate-400 border-slate-100")}><Building2 size={18} /></div><span className="text-sm font-black text-slate-900">{d.name}</span></div></td>
-                  <td className="px-6 py-5 text-center font-bold text-slate-600"><div className="flex items-center justify-center gap-2"><Users2 size={14} className="text-slate-300" /><span className="text-sm">{d.member_count} <span className="text-[10px] opacity-40">人</span></span></div></td>
-                  <td className="px-6 py-5 text-center">{d.manager__real_name ? <div className="flex items-center justify-center gap-2"><div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-[9px] font-black">{d.manager__real_name[0]}</div><span className="text-xs font-black text-slate-700">{d.manager__real_name}</span></div> : <span className="text-[10px] text-slate-300 font-bold italic">未指派主管</span>}</td>
-                  <td className="px-6 py-5 text-center font-black italic text-[10px] text-emerald-600 uppercase tracking-widest">正常运行</td>
+                  <td className="px-6 py-5 text-center font-bold text-slate-600"><div className="flex items-center justify-center gap-2"><Users2 size={14} className="text-slate-300" /><span className="text-sm">{d.member_count} <span className="text-[10px] opacity-40 italic">UNIT</span></span></div></td>
+                  <td className="px-6 py-5 text-center">{d.manager__real_name ? <div className="flex items-center justify-center gap-2"><div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-[9px] font-black shadow-sm">{d.manager__real_name[0]}</div><span className="text-xs font-black text-slate-700">{d.manager__real_name}</span></div> : <span className="text-[10px] text-slate-300 font-bold italic">未指派</span>}</td>
+                  <td className="px-6 py-5 text-center font-black italic text-[10px] text-emerald-600 uppercase tracking-widest">Active</td>
                   <td className="px-8 py-5 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      {/* 2. 原子级按钮熔断：修改操作 */}
-                      {hasPermission('admin:dept:manage') && (
+                      {/* 改：admin:dept:update */}
+                      {hasPermission('admin:dept:update') && (
                         <button onClick={() => { setTargetItem(d); setInputName(d.name); setManagerId(d.manager_id || ''); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>
                       )}
-                      {/* 3. 原子级按钮熔断：删除操作 */}
+                      {/* 删：admin:dept:delete */}
                       {hasPermission('admin:dept:delete') && (
                         <button onClick={() => { setTargetItem(d); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>
                       )}
-                      {!hasPermission('admin:dept:manage') && !hasPermission('admin:dept:delete') && (
-                        <span className="text-[9px] text-slate-300 font-black uppercase italic opacity-50">锁定</span>
+                      {!hasPermission('admin:dept:update') && !hasPermission('admin:dept:delete') && (
+                        <span className="text-[9px] text-slate-300 font-black uppercase italic opacity-50">只读</span>
                       )}
                     </div>
                   </td>
@@ -150,14 +153,13 @@ export default function DepartmentsPage() {
         {total > 10 && <div className="shrink-0 border-t border-slate-100 bg-white p-2"><TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} /></div>}
       </div>
 
-      <Modal isOpen={modalType === 'ADD' || modalType === 'EDIT'} onClose={() => setModalType('NONE')} title={modalType === 'ADD' ? '录入新战术部门' : '修改部门架构'}>
-        {/* ... 表单内容 */}
+      <Modal isOpen={modalType === 'ADD' || modalType === 'EDIT'} onClose={() => setModalType('NONE')} title={modalType === 'ADD' ? '录入新战术单元' : '调整组织架构'}>
         <div className="space-y-8">
-          <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">部门名称</label><input autoFocus value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="请输入部门名称" className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-black text-slate-900 shadow-inner" /></div>
+          <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">部门标识名称</label><input autoFocus value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="输入名称..." className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-black text-slate-900 shadow-inner" /></div>
           {modalType === 'EDIT' && (
             <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">指派部门主管</label>
-              <div className="relative group"><div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-cyan-500 transition-colors"><Search size={16} /></div><input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="搜索部门内员工姓名..." className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-900 shadow-inner" /></div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">指派实战主管</label>
+              <div className="relative group"><div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-cyan-500 transition-colors"><Search size={16} /></div><input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="检索姓名..." className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-900 shadow-inner" /></div>
               <div className="max-h-40 overflow-y-auto custom-scrollbar border border-slate-100 rounded-2xl p-2 bg-slate-50/30">
                  {deptUsers.map(u => (
                    <div key={u.id} onClick={() => setManagerId(u.id)} className={cn("p-3 rounded-xl cursor-pointer flex justify-between items-center transition-all", managerId == u.id ? "bg-cyan-500 text-white shadow-lg" : "hover:bg-white text-slate-600")}>
@@ -168,17 +170,17 @@ export default function DepartmentsPage() {
               </div>
             </div>
           )}
-          <button onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"><ShieldCheck size={18} /> 固化架构变更</button>
+          <button onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"><ShieldCheck size={18} /> 确认并固化架构</button>
         </div>
       </Modal>
 
-      <Modal isOpen={modalType === 'DELETE'} onClose={() => setModalType('NONE')} title="确认注销部门">
+      <Modal isOpen={modalType === 'DELETE'} onClose={() => setModalType('NONE')} title="物理注销确认">
         <div className="space-y-8 flex flex-col items-center text-center">
            <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
-           <div><h4 className="text-lg font-black text-slate-900 mb-2">确定要注销该部门吗？</h4><p className="text-sm text-slate-500 font-medium leading-relaxed px-4">您正在执行物理级权限注销。此操作将受到 <span className="text-red-600 font-black">[admin:dept:delete]</span> 动作级权限的严格监管。</p></div>
+           <div><h4 className="text-lg font-black text-slate-900 mb-2 italic">确认物理注销该部门？</h4><p className="text-sm text-slate-500 font-medium leading-relaxed px-4 text-center">注销 <span className="text-red-600 font-black">[{targetItem?.name}]</span> 将导致该单元关联的所有业务链条断裂。此操作受到动作级权限 <span className="text-slate-900 font-black">[admin:dept:delete]</span> 的严密监管。</p></div>
            <div className="grid grid-cols-2 gap-4 w-full">
-              <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all">取消</button>
-              <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-red-500/20 hover:bg-red-600 active:scale-95 transition-all">确认物理注销</button>
+              <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all">放弃动作</button>
+              <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all">确认注销</button>
            </div>
         </div>
       </Modal>

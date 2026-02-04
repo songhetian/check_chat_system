@@ -82,7 +82,7 @@ export default function UsersPage() {
     })
     if (res.data.status === 'ok') {
       fetchData()
-      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '权限同步成功', message: `节点权限已重校`, type: 'success' } }))
+      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '权限同步成功', message: `节点权限已实时重校`, type: 'success' } }))
     }
   }
 
@@ -91,9 +91,14 @@ export default function UsersPage() {
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0 gap-6">
         <div><h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">成员权责矩阵</h2><p className="text-slate-500 text-sm mt-1 font-medium">配置操作员身份、战术奖惩记录及新兵培训实战进度</p></div>
         <div className="flex flex-wrap gap-3">
-           <button onClick={() => {}} className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-2xl text-[10px] font-black shadow-lg active:scale-95 transition-all hover:bg-emerald-700"><Download size={14} /> 下载模板</button>
-           <button onClick={() => setShowImport(true)} className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black shadow-xl active:scale-95 hover:bg-slate-800 transition-all"><Upload size={14} /> 批量导入</button>
-           <button className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black shadow-xl active:scale-95 transition-all"><Plus size={14} /> 录入成员</button>
+           <button className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-2xl text-[10px] font-black shadow-lg"><Download size={14} /> 模板</button>
+           {/* 增：admin:user:create */}
+           {hasPermission('admin:user:create') && (
+             <button onClick={() => setShowImport(true)} className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800"><Upload size={14} /> 批量导入</button>
+           )}
+           {hasPermission('admin:user:create') && (
+             <button className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black shadow-xl active:scale-95 transition-all"><Plus size={14} /> 录入成员</button>
+           )}
         </div>
       </header>
 
@@ -119,9 +124,26 @@ export default function UsersPage() {
                   <td className="px-6 py-5 text-center">{u.is_manager ? <div className="px-3 py-1 bg-cyan-50 text-cyan-600 text-[10px] font-black rounded-full border border-cyan-100 inline-flex items-center gap-1.5 shadow-sm"><ShieldCheck size={12} /> 部门主管</div> : <span className="text-[10px] text-slate-300 font-bold italic">普通成员</span>}</td>
                   <td className="px-6 py-5 text-center font-bold text-slate-500 uppercase text-[10px] italic">{u.dept_name || '未归类'}</td>
                   <td className="px-6 py-5 text-center"><span className={cn("px-3 py-1 rounded-full text-[9px] font-black uppercase border shadow-sm", u.role_code === 'HQ' ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-500 border-slate-200")}>{u.role_name}</span></td>
-                  <td className="px-6 py-5 text-center"><div className="flex items-center justify-center gap-2">{roles.map(r => (<button key={r.id} onClick={() => handleRoleChange(u.username, r.id)} disabled={u.role_id === r.id} className={cn("px-3 py-1.5 rounded-lg text-[10px] font-black transition-all active:scale-95 border shadow-sm", u.role_id === r.id ? "bg-cyan-500 border-cyan-400 text-slate-950" : "bg-white border-slate-100 text-slate-400 hover:bg-slate-50")}>{r.name}</button>))}</div></td>
+                  <td className="px-6 py-5 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                       {/* 改：admin:user:update */}
+                       {roles.map(r => (
+                         <button 
+                           key={r.id} 
+                           onClick={() => handleRoleChange(u.username, r.id)} 
+                           disabled={u.role_id === r.id || !hasPermission('admin:user:update')} 
+                           className={cn("px-3 py-1.5 rounded-lg text-[10px] font-black transition-all active:scale-95 border shadow-sm", u.role_id === r.id ? "bg-cyan-500 border-cyan-400 text-slate-950" : "bg-white border-slate-100 text-slate-400 hover:bg-slate-50 disabled:opacity-30")}
+                         >
+                           {r.name}
+                         </button>
+                       ))}
+                    </div>
+                  </td>
                   <td className="px-8 py-5 text-center">
-                    {hasPermission('admin:user:manage') ? <button onClick={() => openDeleteModal(u)} className="p-2.5 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button> : <span className="text-[10px] text-slate-300 italic font-black uppercase">锁定</span>}
+                    {/* 删：admin:user:delete */}
+                    {hasPermission('admin:user:delete') ? (
+                      <button onClick={() => openDeleteModal(u)} className="p-2.5 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>
+                    ) : <span className="text-[10px] text-slate-300 italic font-black uppercase tracking-widest">Locked</span>}
                   </td>
                 </tr>
               ))}
@@ -134,14 +156,14 @@ export default function UsersPage() {
       <AnimatePresence>
         {modalType === 'DELETE' && (
           <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="bg-white w-full max-w-md rounded-[40px] shadow-2xl relative z-10 p-10 text-center">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="bg-white w-full max-w-md rounded-[40px] shadow-2xl relative z-10 p-10 text-center text-slate-900">
                <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-6 border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
-               <h3 className="text-xl font-black text-slate-900 mb-2 italic">确认注销该操作员节点？</h3>
-               <p className="text-xs text-slate-400 font-medium mb-8 leading-relaxed">注销 <span className="text-red-600 font-black">[@{targetUser?.username}]</span> 将导致其物理身份在矩阵中彻底消失，且不可恢复。</p>
+               <h3 className="text-xl font-black mb-2 italic">确认注销该操作员节点？</h3>
+               <p className="text-xs text-slate-400 font-medium mb-8 leading-relaxed">注销 <span className="text-red-600 font-black">[@{targetUser?.username}]</span> 将导致其物理身份在矩阵中彻底消失。</p>
                <div className="grid grid-cols-2 gap-4">
-                  <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">取消</button>
-                  <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-red-500/20 hover:bg-red-600 active:scale-95 transition-all">确认注销</button>
+                  <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all">放弃动作</button>
+                  <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all">确认注销</button>
                </div>
             </motion.div>
           </div>

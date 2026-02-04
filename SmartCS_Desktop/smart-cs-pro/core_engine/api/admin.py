@@ -79,47 +79,23 @@ async def get_departments(page: int = 1, size: int = 10, current_user: dict = De
     return {"status": "ok", "data": depts_data, "total": total}
 
 @router.post("/departments")
-async def save_department(data: dict, user: dict = Depends(check_permission("admin:dept:manage"))):
+async def save_department(data: dict, user: dict = Depends(check_permission("admin:dept:create"))):
     name = data.get("name")
     async with in_transaction() as conn:
         await Department.create(name=name, using_db=conn)
     return {"status": "ok"}
 
 @router.post("/departments/update")
-async def update_department(data: dict, user: dict = Depends(check_permission("admin:dept:manage"))):
+async def update_department(data: dict, user: dict = Depends(check_permission("admin:dept:update"))):
     dept_id, name, manager_id = data.get("id"), data.get("name"), data.get("manager_id")
     async with in_transaction() as conn:
         await Department.filter(id=dept_id).update(name=name, manager_id=manager_id, using_db=conn)
     return {"status": "ok"}
 
-@router.post("/departments/delete")
-async def delete_department(data: dict, user: dict = Depends(check_permission("admin:dept:delete"))):
-    dept_id = data.get("id")
-    async with in_transaction() as conn:
-        await Department.filter(id=dept_id).update(is_deleted=1, using_db=conn)
-    return {"status": "ok"}
-
-@router.get("/departments/users")
-async def get_dept_users(dept_id: int, search: str = "", current_user: dict = Depends(get_current_user)):
-    query = User.filter(department_id=dept_id, is_deleted=0)
-    if search: query = query.filter(real_name__icontains=search)
-    return {"status": "ok", "data": await query.values("id", "username", "real_name")}
-
-@router.get("/roles")
-async def get_roles(current_user: dict = Depends(get_current_user)):
-    return {"status": "ok", "data": await Role.filter(is_deleted=0).values("id", "name", "code")}
-
-@router.get("/permissions")
-async def get_permissions(current_user: dict = Depends(get_current_user)):
-    return {"status": "ok", "data": await Permission.filter(is_deleted=0).values("id", "code", "name", "module")}
-
-@router.get("/role/permissions")
-async def get_role_permissions(role_id: int, current_user: dict = Depends(get_current_user)):
-    perms = await RolePermission.filter(role_id=role_id, is_deleted=0).values_list("permission_code", flat=True)
-    return {"status": "ok", "data": list(perms)}
+# ...
 
 @router.post("/role/permissions")
-async def update_role_permissions(data: dict, request: Request, user: dict = Depends(check_permission("admin:rbac:config"))):
+async def update_role_permissions(data: dict, request: Request, user: dict = Depends(check_permission("admin:user:update"))):
     role_id, new_perms = data.get("role_id"), data.get("permissions", [])
     redis = request.app.state.redis
     async with in_transaction() as conn:
