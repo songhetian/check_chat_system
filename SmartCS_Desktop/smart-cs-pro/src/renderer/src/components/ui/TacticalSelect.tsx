@@ -48,7 +48,7 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
       <div 
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-black flex items-center justify-between cursor-pointer transition-all shadow-sm group",
+          "w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-black flex items-center justify-between cursor-pointer transition-all shadow-sm group",
           isOpen ? "ring-4 ring-cyan-500/10 border-cyan-500 shadow-lg" : "hover:border-slate-300"
         )}
       >

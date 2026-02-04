@@ -19,7 +19,7 @@ function Modal({ isOpen, onClose, title, children }: any) {
       {isOpen && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
-          <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="relative w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden z-10 bg-white p-10">
+          <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="relative w-full max-w-lg rounded-[40px] shadow-2xl z-10 bg-white p-10">
              <div className="flex justify-between items-center mb-8">
                 <h3 className="text-2xl font-black uppercase italic">{title}</h3>
                 <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400"><X size={24}/></button>
