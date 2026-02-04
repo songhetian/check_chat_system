@@ -47,16 +47,24 @@ export default function TacticalCommand() {
     } catch (e) { console.error(e) }
   }
 
+  // 核心加固：强制刷新逻辑，注入时间戳
   const fetchData = async (silent = false) => {
     if (!token) return
     if (!silent) setLoading(true)
     try {
       const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/admin/agents?role_only=AGENT&search=${search}&dept_id=${deptId}`, 
+        url: `${CONFIG.API_BASE}/admin/agents?role_only=AGENT&search=${search}&dept_id=${deptId}&_t=${Date.now()}`, 
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      if (res.status === 200) setAgents(res.data.data)
+      if (res.status === 200) {
+        setAgents(res.data.data)
+        // 自动对齐当前选中的 Agent 数据
+        if (activeAgent) {
+          const updated = res.data.data.find((a: any) => a.username === activeAgent.username)
+          if (updated) setActiveAgent(updated)
+        }
+      }
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
   }
@@ -85,36 +93,40 @@ export default function TacticalCommand() {
     })
     if (res.data.status === 'ok') {
       if (type === 'LOCK') setIsInputLocked(!isInputLocked)
-      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '战术指令生效', message: `针对 ${activeAgent.real_name} 的 [${description}] 已物理下发`, type: 'success' } }))
+      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '指令生效', message: `针对 ${activeAgent.real_name} 的 [${description}] 已下发`, type: 'success' } }))
     }
   }
 
   return (
     <div className="flex flex-col h-full font-sans bg-slate-50/50 p-4 lg:p-6 gap-6 overflow-hidden select-none text-slate-900">
       <header className="flex justify-between items-center bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
-        <div className="flex items-center gap-6"><div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl"><Radar size={24} className="text-cyan-400 animate-pulse" /></div><div><h2 className="text-2xl font-black text-slate-900 italic tracking-tighter uppercase leading-none">战术监控指挥中枢</h2><div className="flex items-center gap-2 mt-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest"><span className="flex items-center gap-1 text-emerald-500"><Globe size={10}/> 实时链路已激活</span></div></div></div>
+        <div className="flex items-center gap-6">
+          <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl"><Radar size={24} className="text-cyan-400 animate-pulse" /></div>
+          <div><h2 className="text-2xl font-black text-slate-900 italic tracking-tighter uppercase leading-none">战术监控指挥中枢</h2><div className="flex items-center gap-2 mt-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest"><span className="flex items-center gap-1 text-emerald-500"><Globe size={10}/> 实时链路已激活</span></div></div>
+        </div>
         <div className="flex items-center gap-4">
            {isHQ && (
              <div className="w-56">
-               <TacticalSelect 
-                 options={depts}
-                 value={deptId}
-                 onChange={(val: string | number) => setDeptId(String(val))}
-                 placeholder="全域战术单元"
-               />
+               <TacticalSelect options={depts} value={deptId} onChange={(val: string | number) => setDeptId(String(val))} placeholder="全域战术单元" />
              </div>
            )}
            <StatBox label="监控节点" value={agents.length} color="text-cyan-500" />
            <StatBox label="在线坐席" value={agents.filter(a => a.is_online).length} color="text-emerald-500" />
-           <button onClick={() => fetchData()} className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 border border-slate-800 transition-all shadow-xl active:scale-95 group">
-              <RefreshCw size={20} className={cn(loading && "animate-spin", "group-hover:rotate-180 transition-transform duration-500")} />
-           </button>
         </div>
       </header>
 
       <main className="flex-1 flex gap-6 min-h-0">
         <div className="w-full lg:w-[380px] flex flex-col bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden shrink-0">
-           <div className="p-6 border-b border-slate-100 space-y-4"><h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2"><Radio size={14} className="text-cyan-500" /> 节点实时矩阵</h3><TacticalSearch value={search} onChange={setSearch} placeholder="检索操作员..." /></div>
+           <div className="p-6 border-b border-slate-100 space-y-4">
+              <div className="flex items-center justify-between">
+                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2"><Radio size={14} className="text-cyan-500" /> 节点实时矩阵</h3>
+                 {/* 优化：刷新按钮移至矩阵头部 */}
+                 <button onClick={() => fetchData()} className="p-2 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 hover:text-cyan-600 transition-all border border-slate-100 shadow-sm group">
+                    <RefreshCw size={16} className={cn(loading && "animate-spin", "group-active:rotate-180 transition-transform")} />
+                 </button>
+              </div>
+              <TacticalSearch value={search} onChange={setSearch} placeholder="检索操作员..." />
+           </div>
            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-3 bg-slate-50/30">
               {agents.map(a => {
                 const theme = getAgentStatusTheme(a.tactical_score, a.is_online);
@@ -137,7 +149,7 @@ export default function TacticalCommand() {
               {activeAgent ? (
                 <motion.div key={activeAgent.username} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col h-full">
                   <section className="p-8 border-b border-slate-100 bg-slate-50/30 shrink-0">
-                     <div className="flex items-center justify-between mb-6"><div className="flex items-center gap-3"><div className="w-1.5 h-4 bg-cyan-500 rounded-full" /><h5 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.4em]">指挥官干预指令矩阵</h5></div><div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm"><span className="text-[9px] font-black text-slate-400">正在指挥: {activeAgent.real_name}</span></div></div>
+                     <div className="flex items-center justify-between mb-6"><div className="flex items-center gap-3"><div className="w-1.5 h-4 bg-cyan-500 rounded-full" /><h5 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.4em]">指挥官干预矩阵</h5></div><div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm"><span className="text-[9px] font-black text-slate-400">目标: {activeAgent.real_name}</span></div></div>
                      <div className="grid grid-cols-4 gap-6">
                         <TacticalButton disabled={!activeAgent.is_online} active={isInputLocked} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定')} icon={isInputLocked ? Unlock : Lock} label={isInputLocked ? '解除锁定' : '强制锁定'} sub="PHYSICAL LOCK" color={isInputLocked ? 'bg-red-600' : 'bg-slate-900'} />
                         <TacticalButton onClick={() => executeIntervention('PUSH', '话术弹射', { text: '非常抱歉...' })} icon={Send} label="话术弹射" sub="AUTO PUSH" color="bg-cyan-500" textColor="text-slate-950" />
@@ -154,11 +166,11 @@ export default function TacticalCommand() {
                               {liveChat.length === 0 ? (<div className="h-40 flex items-center justify-center text-slate-700 italic text-sm">等待坐席物理数据载荷上传...</div>) : liveChat.map((chat, idx) => (
                                 <div key={idx} className="flex gap-4 text-xs"><span className="text-slate-500 font-bold shrink-0 mt-2 uppercase">RAW:</span><span className="text-white/90 bg-white/5 px-4 py-3 rounded-3xl rounded-tl-none border border-white/5 backdrop-blur-md italic">"{chat.text}"</span></div>
                               ))}
-                              {activeAgent.is_online && <div className="flex items-center gap-2 text-[10px] text-slate-500 italic"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" /> 物理连接已握手</div>}
+                              {activeAgent.is_online && <div className="flex items-center gap-2 text-[10px] text-slate-500 italic"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" /> 链路已握手</div>}
                            </div>
                         </div>
                      </section>
-                     <section className="p-10 bg-slate-900 text-white rounded-[48px] relative overflow-hidden shadow-2xl"><div className="absolute top-0 right-0 p-8 opacity-10"><BrainCircuit size={100} /></div><h5 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-2"><BrainCircuit size={16} /> 智脑实时研判</h5><p className="text-base font-medium text-slate-300 leading-relaxed italic relative z-10">"检测到该操作员处于诱导高发区。建议指挥官立即执行<span className="text-cyan-400 font-black underline underline-offset-4 mx-1">‘强制锁定’</span>以阻断违规闭环。"</p></section>
+                     <section className="p-10 bg-slate-900 text-white rounded-[48px] relative overflow-hidden shadow-2xl"><div className="absolute top-0 right-0 p-8 opacity-10"><BrainCircuit size={100} /></div><h5 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-2"><BrainCircuit size={16} /> 智脑实时研判</h5><p className="text-base font-medium text-slate-300 leading-relaxed italic relative z-10">"检测到该操作员处于诱导高发区。建议立即执行<span className="text-cyan-400 font-black underline underline-offset-4 mx-1">‘强制锁定’</span>以阻断违规闭环。"</p></section>
                   </div>
                 </motion.div>
               ) : (
