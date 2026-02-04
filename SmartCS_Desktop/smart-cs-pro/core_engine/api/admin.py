@@ -78,6 +78,27 @@ async def get_departments(page: int = 1, size: int = 10, current_user: dict = De
     )
     return {"status": "ok", "data": depts_data, "total": total}
 
+@router.post("/departments")
+async def save_department(data: dict, user: dict = Depends(check_permission("admin:dept:manage"))):
+    name = data.get("name")
+    async with in_transaction() as conn:
+        await Department.create(name=name, using_db=conn)
+    return {"status": "ok"}
+
+@router.post("/departments/update")
+async def update_department(data: dict, user: dict = Depends(check_permission("admin:dept:manage"))):
+    dept_id, name, manager_id = data.get("id"), data.get("name"), data.get("manager_id")
+    async with in_transaction() as conn:
+        await Department.filter(id=dept_id).update(name=name, manager_id=manager_id, using_db=conn)
+    return {"status": "ok"}
+
+@router.post("/departments/delete")
+async def delete_department(data: dict, user: dict = Depends(check_permission("admin:dept:delete"))):
+    dept_id = data.get("id")
+    async with in_transaction() as conn:
+        await Department.filter(id=dept_id).update(is_deleted=1, using_db=conn)
+    return {"status": "ok"}
+
 @router.get("/departments/users")
 async def get_dept_users(dept_id: int, search: str = "", current_user: dict = Depends(get_current_user)):
     query = User.filter(department_id=dept_id, is_deleted=0)

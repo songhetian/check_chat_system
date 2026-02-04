@@ -120,3 +120,25 @@ INFO:     192.168.2.184:58396 - "GET /api/admin/notifications?size=5 HTTP/1.1" 4
 INFO:     192.168.2.184:58403 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
 INFO:     192.168.2.184:58654 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
 INFO:     192.168.2.184:58672 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58710 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58726 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58736 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58741 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58754 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58760 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58880 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58947 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59219 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59255 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59258 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59253 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59254 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59256 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59257 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59260 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:59253 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59261 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open

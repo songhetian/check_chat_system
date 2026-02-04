@@ -113,6 +113,7 @@ export default function DepartmentsPage() {
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
       <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
         <div><h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">组织架构中枢</h2><p className="text-slate-500 text-sm mt-1 font-medium">配置业务战术单元，实现全域数据隔离与权限管控</p></div>
+        {/* 1. 原子级按钮熔断：新增操作 */}
         {hasPermission('admin:dept:manage') && (<button onClick={() => { setInputName(''); setManagerId(''); setModalType('ADD') }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 录入新部门</button>)}
       </header>
 
@@ -128,9 +129,17 @@ export default function DepartmentsPage() {
                   <td className="px-6 py-5 text-center font-black italic text-[10px] text-emerald-600 uppercase tracking-widest">正常运行</td>
                   <td className="px-8 py-5 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      {hasPermission('admin:dept:manage') ? (
-                        <><button onClick={() => { setTargetItem(d); setInputName(d.name); setManagerId(d.manager_id || ''); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button><button onClick={() => { setTargetItem(d); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button></>
-                      ) : <span className="text-[9px] text-slate-300 font-black uppercase italic opacity-50">只读</span>}
+                      {/* 2. 原子级按钮熔断：修改操作 */}
+                      {hasPermission('admin:dept:manage') && (
+                        <button onClick={() => { setTargetItem(d); setInputName(d.name); setManagerId(d.manager_id || ''); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>
+                      )}
+                      {/* 3. 原子级按钮熔断：删除操作 */}
+                      {hasPermission('admin:dept:delete') && (
+                        <button onClick={() => { setTargetItem(d); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>
+                      )}
+                      {!hasPermission('admin:dept:manage') && !hasPermission('admin:dept:delete') && (
+                        <span className="text-[9px] text-slate-300 font-black uppercase italic opacity-50">锁定</span>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -142,6 +151,7 @@ export default function DepartmentsPage() {
       </div>
 
       <Modal isOpen={modalType === 'ADD' || modalType === 'EDIT'} onClose={() => setModalType('NONE')} title={modalType === 'ADD' ? '录入新战术部门' : '修改部门架构'}>
+        {/* ... 表单内容 */}
         <div className="space-y-8">
           <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">部门名称</label><input autoFocus value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="请输入部门名称" className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-black text-slate-900 shadow-inner" /></div>
           {modalType === 'EDIT' && (
@@ -165,10 +175,10 @@ export default function DepartmentsPage() {
       <Modal isOpen={modalType === 'DELETE'} onClose={() => setModalType('NONE')} title="确认注销部门">
         <div className="space-y-8 flex flex-col items-center text-center">
            <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
-           <div><h4 className="text-lg font-black text-slate-900 mb-2">确定要注销该部门吗？</h4><p className="text-sm text-slate-500 font-medium leading-relaxed px-4">注销 <span className="text-red-600 font-black">[{targetItem?.name}]</span> 将导致该部门下的员工失去组织归属。</p></div>
+           <div><h4 className="text-lg font-black text-slate-900 mb-2">确定要注销该部门吗？</h4><p className="text-sm text-slate-500 font-medium leading-relaxed px-4">您正在执行物理级权限注销。此操作将受到 <span className="text-red-600 font-black">[admin:dept:delete]</span> 动作级权限的严格监管。</p></div>
            <div className="grid grid-cols-2 gap-4 w-full">
               <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all">取消</button>
-              <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-red-500/20 hover:bg-red-600 active:scale-95 transition-all">确认注销</button>
+              <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-red-500/20 hover:bg-red-600 active:scale-95 transition-all">确认物理注销</button>
            </div>
         </div>
       </Modal>
