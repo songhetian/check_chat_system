@@ -33,3 +33,5 @@ Thumbs.db
 
 # Database local files
 *.sqlite
+
+*.log

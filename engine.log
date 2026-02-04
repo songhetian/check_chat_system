@@ -100,3 +100,7 @@ INFO:     192.168.2.184:52398 - "GET /api/admin/notifications?size=5 HTTP/1.1" 4
 INFO:     192.168.2.184:52548 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
 INFO:     192.168.2.184:52558 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
 INFO:     192.168.2.184:52592 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:52666 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:52754 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:52883 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:53048 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
