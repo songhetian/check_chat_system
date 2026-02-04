@@ -5,26 +5,32 @@ ROOT_DIR=$(cd "$(dirname "$0")"; pwd)
 echo "🚀 [Smart-CS Pro] 正在初始化战术指挥链路..."
 echo "📍 根目录: $ROOT_DIR"
 
-# 1. 检查并激活虚拟环境
+# 1. 战术环境判定
+PYTHON_EXEC="python3"
 if [ -d "$ROOT_DIR/venv" ]; then
-    source "$ROOT_DIR/venv/bin/activate"
-    echo "  ✅ 虚拟环境已激活"
+    PYTHON_EXEC="$ROOT_DIR/venv/bin/python"
+    echo "  ✅ 锁定战术虚拟环境 (venv)"
 else
-    echo "  ❌ 错误: 未在根目录找到 venv 环境，请先创建虚拟环境。"
-    exit 1
+    if command -v python3 >/dev/null 2>&1; then
+        PYTHON_EXEC="python3"
+        echo "  ⚠️  未发现 venv，回退至系统 python3"
+    else
+        PYTHON_EXEC="python"
+        echo "  ⚠️  未发现 venv，回退至系统 python"
+    fi
 fi
 
 # 2. 进入核心目录执行初始化
 cd "$ROOT_DIR/SmartCS_Desktop/smart-cs-pro"
-python core_engine/init_system.py
+$PYTHON_EXEC core_engine/init_system.py
 
 # 3. 启动进程守卫 (后台静默运行)
-echo "🛡️  正在启动 macOS 兼容版进程守卫..."
+echo "🛡️  正在启动进程守卫..."
 cd core_engine
 # 杀死可能残余的旧进程
 pkill -f "python engine.py" > /dev/null 2>&1
-# 关键修复：显式指定 venv 中的 python 路径
-"$ROOT_DIR/venv/bin/python" utils/guardian.py > "$ROOT_DIR/engine.log" 2>&1 &
+# 使用动态判定的解释器
+$PYTHON_EXEC utils/guardian.py > "$ROOT_DIR/engine.log" 2>&1 &
 ENGINE_PID=$!
 cd ..
 
