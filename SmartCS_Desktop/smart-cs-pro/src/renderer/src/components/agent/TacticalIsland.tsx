@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Shield, BrainCircuit, Activity, Radar as RadarIcon, Trophy, BarChart, 
   ChevronRight, AlertCircle, Zap, Terminal, Target, LogOut, Cpu, LayoutGrid, Settings, MessageSquareOff,
-  Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor
+  Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor,
+  Ghost, Square
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -13,16 +14,17 @@ import { CONFIG } from '../../lib/config'
 export const TacticalIsland = () => {
   const { 
     isAlerting, lastAiAnalysis, isOnline, violations, isMuted, setMuted,
-    isOnboardingMode, setOnboardingMode, isAiOptimizeEnabled, setAiOptimize
+    isOnboardingMode, setOnboardingMode, isAiOptimizeEnabled, setAiOptimize,
+    isGlassMode, setGlassMode
   } = useRiskStore()
   const { user, logout } = useAuthStore()
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'AI' | 'RADAR' | 'TOOLS'>('AI')
 
-  // 灵动岛尺寸动态适配：大幅增加高度以确保显示效果
+  // 灵动岛尺寸动态适配
   useEffect(() => {
-    const width = 620 // 宽度增加，提供更稳重的视觉感
-    const height = isExpanded ? 760 : 110 // 增加窗口物理高度缓冲区 (110 > 96)
+    const width = 620
+    const height = isExpanded ? 760 : 110
     window.electron.ipcRenderer.send('resize-window', { width, height })
     window.electron.ipcRenderer.send('set-always-on-top', true)
   }, [isExpanded])
@@ -32,16 +34,17 @@ export const TacticalIsland = () => {
       <motion.div 
         layout
         className={cn(
-          "pointer-events-auto bg-slate-950/98 border border-white/10 backdrop-blur-3xl shadow-[0_20px_60px_rgba(0,0,0,1)] flex flex-col overflow-hidden transition-all duration-500 rounded-[40px]",
+          "pointer-events-auto border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,1)] flex flex-col overflow-hidden transition-all duration-500 rounded-[40px]",
+          isGlassMode ? "bg-slate-950/98 backdrop-blur-3xl" : "bg-slate-950",
           isAlerting && "border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.6)] ring-2 ring-red-500/20"
         )}
       >
-        {/* 1. 战术中枢条 (Main Bar - 强化高度) */}
+        {/* 1. 战术中枢条 (Main Bar) */}
         <div 
           className="flex items-center justify-between px-7 h-[96px] shrink-0 cursor-move" 
           style={{ WebkitAppRegion: 'drag' } as any}
         >
-          {/* 左侧：用户信息 & 状态 (更显眼的头像) */}
+          {/* 左侧：用户信息 & 状态 */}
           <div className="flex items-center gap-5 min-w-[200px]">
             <div className="relative">
               <div className={cn(
@@ -71,8 +74,16 @@ export const TacticalIsland = () => {
             </div>
           </div>
 
-          {/* 中间：核心控制组 (更大、更易点击的按钮) */}
+          {/* 中间：核心控制组 */}
           <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            <HubBtn 
+              icon={isGlassMode ? <Ghost size={22} /> : <Square size={22} />} 
+              active={!isGlassMode} 
+              onClick={() => setGlassMode(!isGlassMode)}
+              title={isGlassMode ? "切换至实色背景" : "切换至磨砂玻璃"}
+              color="white"
+            />
+            <div className="w-px h-10 bg-white/10 mx-1" />
             <HubBtn 
               icon={<GraduationCap size={22} />} 
               active={isOnboardingMode} 
@@ -87,7 +98,6 @@ export const TacticalIsland = () => {
               title="智能输入优化"
               color="cyan"
             />
-            <div className="w-px h-10 bg-white/10 mx-1" />
             <HubBtn 
               icon={isMuted ? <VolumeX size={22} /> : <Volume2 size={22} />} 
               active={isMuted} 
@@ -103,7 +113,7 @@ export const TacticalIsland = () => {
             />
           </div>
 
-          {/* 右侧：风险动态 & 退出 (高对比度显示) */}
+          {/* 右侧：风险动态 & 退出 */}
           <div className="flex items-center gap-5 min-w-[150px] justify-end" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <div className="flex flex-col items-end mr-1">
                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Risk Index</span>
@@ -123,7 +133,7 @@ export const TacticalIsland = () => {
           </div>
         </div>
 
-        {/* 2. 展开看板 (Dashboard - 高级磨砂感) */}
+        {/* 2. 展开看板 (Dashboard) */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div 
@@ -220,7 +230,7 @@ export const TacticalIsland = () => {
                  )}
               </div>
               
-              {/* 底部页脚 (强化信息感) */}
+              {/* 底部页脚 */}
               <div className="p-6 bg-black/60 border-t border-white/10 flex justify-between items-center px-10">
                  <div className="flex items-center gap-4">
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_#10b981]" />

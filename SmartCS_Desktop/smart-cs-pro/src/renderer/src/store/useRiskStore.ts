@@ -26,6 +26,7 @@ interface RiskState {
   isAlerting: boolean
   isRedAlert: boolean
   isMuted: boolean
+  isGlassMode: boolean
   isOnboardingMode: boolean
   isAiOptimizeEnabled: boolean
   violations: Violation[]
@@ -36,6 +37,7 @@ interface RiskState {
   setAlerting: (isAlerting: boolean) => void
   setRedAlert: (isRedAlert: boolean) => void
   setMuted: (isMuted: boolean) => void
+  setGlassMode: (enabled: boolean) => void
   setOnboardingMode: (enabled: boolean) => void
   setAiOptimize: (enabled: boolean) => void
   setAiAnalysis: (analysis: AiUltraAnalysis) => void
@@ -48,6 +50,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   isAlerting: false,
   isRedAlert: false,
   isMuted: false,
+  isGlassMode: true,
   isOnboardingMode: true,
   isAiOptimizeEnabled: false,
   violations: [],
@@ -58,6 +61,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   setAlerting: (isAlerting) => set({ isAlerting }),
   setRedAlert: (isRedAlert) => set({ isRedAlert }),
   setMuted: (isMuted) => set({ isMuted }),
+  setGlassMode: (isGlassMode) => set({ isGlassMode }),
   setOnboardingMode: (isOnboardingMode) => set({ isOnboardingMode }),
   setAiOptimize: (isAiOptimizeEnabled) => set({ isAiOptimizeEnabled }),
   setAiAnalysis: (lastAiAnalysis) => set({ lastAiAnalysis }),
