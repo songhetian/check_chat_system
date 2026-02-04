@@ -20,7 +20,7 @@ async def get_categories(page: int = 1, size: int = 10, type: str = None, curren
 @router.post("/categories")
 async def save_category(data: dict, user: dict = Depends(check_permission("admin:cat:create"))):
     cat_id = data.get("id")
-    is_edit = !!cat_id
+    is_edit = bool(cat_id)
     # 逻辑熔断：编辑需校验 update 权限
     if is_edit and "admin:cat:update" not in user.get("permissions", []):
         from fastapi import HTTPException

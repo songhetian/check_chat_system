@@ -1,7 +1,15 @@
-Traceback (most recent call last):
-  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/engine.py", line 16, in <module>
-    from api.ai_config import router as ai_router
-  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/ai_config.py", line 23
-    is_edit = !!cat_id
-              ^
-SyntaxError: invalid syntax
+INFO:     Started server process [86904]
+INFO:     Waiting for application startup.
+INFO:tortoise:Tortoise-ORM started, {'default': <tortoise.backends.mysql.client.MySQLClient object at 0x105b1f8c0>}, {'models': {'AuditLog': <class 'core.models.AuditLog'>, 'Customer': <class 'core.models.Customer'>, 'Department': <class 'core.models.Department'>, 'KnowledgeBase': <class 'core.models.KnowledgeBase'>, 'Notification': <class 'core.models.Notification'>, 'Permission': <class 'core.models.Permission'>, 'Platform': <class 'core.models.Platform'>, 'PolicyCategory': <class 'core.models.PolicyCategory'>, 'Product': <class 'core.models.Product'>, 'Role': <class 'core.models.Role'>, 'RolePermission': <class 'core.models.RolePermission'>, 'SensitiveWord': <class 'core.models.SensitiveWord'>, 'TrainingSession': <class 'core.models.TrainingSession'>, 'User': <class 'core.models.User'>, 'UserReward': <class 'core.models.UserReward'>, 'ViolationRecord': <class 'core.models.ViolationRecord'>}}
+INFO:SmartCS:🚀 Redis Connection Pool Initialized
+INFO:SmartCS:✅ Redis 战术缓存已激活
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+🚀 [战术核心] 架构标准化重塑完成: 0.0.0.0:8000
+INFO:     192.168.2.184:61468 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:61471 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:61472 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
