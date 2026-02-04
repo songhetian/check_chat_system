@@ -39,6 +39,8 @@ async def login(data: dict, request: Request):
                 "username": user.username, 
                 "real_name": user.real_name, 
                 "role_code": user.role.code,
+                "dept_name": user.department.name if user.department else "独立战术单元",
+                "tactical_score": user.tactical_score,
                 "permissions": list(perms)
             }, 
             "token": token

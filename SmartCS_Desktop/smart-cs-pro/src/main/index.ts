@@ -145,9 +145,9 @@ function createWindow(): void {
 
   // 响应前端尺寸变化
   ipcMain.on('resize-window', (_, { width, height, center }) => {
-    // 仅在 macOS 下增加阴影缓冲，Windows 下保持精确尺寸
-    const adjustedWidth = process.platform === 'darwin' ? width + 20 : width
-    const adjustedHeight = process.platform === 'darwin' ? height + 20 : height
+    // 回归 1:1 紧凑尺寸，移除阴影余量
+    const adjustedWidth = (process.platform === 'darwin' ? width + 20 : width)
+    const adjustedHeight = (process.platform === 'darwin' ? height + 20 : height)
     
     mainWindow.setSize(Math.round(adjustedWidth), Math.round(adjustedHeight), true)
     if (center) mainWindow.center()

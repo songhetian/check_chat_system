@@ -4,7 +4,7 @@ import {
   ShieldAlert, Activity, Trophy, Users, Radio, 
   Cpu, ArrowRight, X, AlertCircle, Database, Zap,
   Search, ShieldCheck, UserCircle2, BarChart3,
-  HeartPulse, Shield, Smartphone, Globe
+  HeartPulse, Shield, Smartphone, Globe, Hand, CheckCircle2
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
@@ -60,8 +60,9 @@ function StatusIndicator({ score }: { score: number }) {
 export default function BigScreen() {
   const [agents, setAgents] = useState<any[]>([])
   const [violations, setViolations] = useState<any[]>([])
+  const [resolved, setResolved] = useState<any[]>([])
+  const [emergencies, setEmergencies] = useState<any[]>([])
   const [time, setTime] = useState(new Date())
-  const [activeModal, setActiveModal] = useState<string | null>(null)
   const [isSystemSafe, setIsSystemSafe] = useState(true)
 
   const fetchData = async () => {
@@ -76,11 +77,20 @@ export default function BigScreen() {
         setIsSystemSafe(!hasHighRisk)
       }
 
+      // 获取未解决违规 (待处理)
       const resViolations = await window.api.callApi({
-        url: `${CONFIG.API_BASE}/admin/violations?token=CORE_LINK`,
+        url: `${CONFIG.API_BASE}/admin/violations?status=PENDING&size=15`,
         method: 'GET'
       })
       if (resViolations.status === 200) setViolations(resViolations.data.data)
+
+      // 获取已解决库
+      const resResolved = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/violations?status=RESOLVED&size=10`,
+        method: 'GET'
+      })
+      if (resResolved.status === 200) setResolved(resResolved.data.data)
+
     } catch (e) { console.error('Link Sync Error', e) }
   }
 
@@ -88,7 +98,18 @@ export default function BigScreen() {
     fetchData()
     const t1 = setInterval(fetchData, 5000)
     const t2 = setInterval(() => setTime(new Date()), 1000)
-    return () => { clearInterval(t1); clearInterval(t2); }
+    
+    // 监听实时求助信号
+    const onEmergency = (e: any) => {
+      setEmergencies(prev => [e.detail, ...prev].slice(0, 5))
+    }
+    window.addEventListener('ws-emergency-help', onEmergency)
+
+    return () => { 
+      clearInterval(t1); 
+      clearInterval(t2); 
+      window.removeEventListener('ws-emergency-help', onEmergency)
+    }
   }, [])
 
   return (
@@ -103,27 +124,6 @@ export default function BigScreen() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/5 blur-[120px] rounded-full" />
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
       </div>
-
-      {/* 弹窗库 */}
-      <TacticalModal isOpen={activeModal === 'VIOLATION'} onClose={() => setActiveModal(null)} title="全域拦截实时清单">
-        <div className="grid grid-cols-1 gap-4">
-          {violations.map((v) => (
-            <div key={v.id} className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl flex justify-between items-center group hover:bg-white/[0.05] transition-all">
-              <div className="flex gap-6 items-center">
-                <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center border border-red-500/20"><ShieldAlert size={20}/></div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-black text-white">{v.real_name} <span className="text-slate-500 font-mono text-xs">@{v.username}</span></span>
-                  <p className="text-xs text-slate-400 font-medium italic">命中关键词 [{v.keyword}]: "{v.context}"</p>
-                </div>
-              </div>
-              <div className="text-right flex flex-col items-end gap-1">
-                <span className="text-[10px] font-bold text-slate-500 font-mono">{new Date(v.timestamp).toLocaleString()}</span>
-                <span className="px-2 py-0.5 bg-red-500 text-white text-[8px] font-black rounded uppercase italic tracking-tighter">Immediate Action Required</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </TacticalModal>
 
       <div className="relative z-10 max-w-[1800px] mx-auto p-6 lg:p-10 flex flex-col gap-10">
         
@@ -171,7 +171,7 @@ export default function BigScreen() {
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-10">
             {/* KPI 行 */}
             <div className="grid grid-cols-2 gap-6">
-              <div onClick={() => setActiveModal('VIOLATION')} className="bg-slate-900/40 border border-white/5 p-8 rounded-[40px] backdrop-blur-xl group cursor-pointer hover:border-red-500/30 transition-all">
+              <div className="bg-slate-900/40 border border-white/5 p-8 rounded-[40px] backdrop-blur-xl group hover:border-red-500/30 transition-all">
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-4">今日风险事件</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-6xl font-black italic tracking-tighter text-red-500 text-tactical-glow">{violations.length}</span>
@@ -217,81 +217,59 @@ export default function BigScreen() {
             </div>
           </div>
 
-          {/* 右侧：拦截日志与战术动作 */}
-          <div className="col-span-12 lg:col-span-8 flex flex-col gap-10">
+          {/* 右侧：解决库与战术动作 */}
+          <div className="col-span-12 lg:col-span-8 grid grid-cols-2 gap-10">
             
-            {/* 实时日志：横向扩展，增强直观性 */}
-            <div className="bg-slate-900/40 border border-white/5 rounded-[48px] p-10 backdrop-blur-xl h-[500px] flex flex-col">
-              <div className="flex justify-between items-center mb-8 shrink-0">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-3">
-                  <Radio size={16} className="text-red-500 animate-pulse" /> 拦截取证加密链路
+            {/* 1. 实时求助响应流 */}
+            <div className="bg-slate-900/40 border border-white/5 rounded-[48px] p-8 backdrop-blur-xl h-[650px] flex flex-col">
+              <div className="flex justify-between items-center mb-6 shrink-0">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-red-400 flex items-center gap-3">
+                  <Hand size={16} className="animate-bounce" /> 紧急战术求援流
                 </h3>
-                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest italic">Encrypted Stream Layer-7</span>
               </div>
               <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar-dark space-y-4">
-                {violations.slice(0, 15).map((v) => (
-                  <motion.div
-                    key={v.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                    className="p-6 rounded-[32px] bg-slate-950/50 border border-white/5 flex items-center gap-8 hover:border-cyan-500/20 transition-all group"
-                  >
-                    <div className="flex flex-col items-center gap-1 shrink-0 min-w-[80px]">
-                      <span className="text-xs font-black text-slate-300 font-mono italic">{v.timestamp.split('T')[1].split('.')[0]}</span>
-                      <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">{v.timestamp.split('T')[0]}</span>
-                    </div>
-                    <div className="w-[1px] h-10 bg-white/5" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className="text-sm font-black text-white group-hover:text-cyan-400 transition-colors">{v.real_name}</span>
-                        <span className="px-2 py-0.5 bg-red-500/10 text-red-500 text-[8px] font-black rounded-full border border-red-500/20 uppercase italic">Intercepted</span>
-                      </div>
-                      <p className="text-xs text-slate-400 font-medium leading-relaxed italic line-clamp-1 group-hover:text-slate-200 transition-colors">
-                        "{v.context}"
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-[10px] font-black text-red-400 uppercase tracking-widest bg-red-500/5 px-3 py-1 rounded-full border border-red-500/10">{v.keyword}</span>
-                    </div>
-                  </motion.div>
+                {emergencies.map((e, idx) => (
+                  <div key={idx} className="p-5 rounded-[28px] bg-red-500/10 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                     <div className="flex justify-between items-center mb-3">
+                        <span className="text-xs font-black text-white">{e.username}</span>
+                        <span className="text-[8px] font-black bg-red-500 text-white px-2 py-0.5 rounded">SOS ACTIVE</span>
+                     </div>
+                     <p className="text-xs text-slate-200 italic mb-4 leading-relaxed font-medium">"{e.content || '请求画面协助...'}"</p>
+                     {e.image && <img src={e.image} className="w-full rounded-2xl border border-white/10" />}
+                  </div>
                 ))}
+                {emergencies.length === 0 && (
+                   <div className="h-full flex flex-col items-center justify-center opacity-20 italic text-slate-500">
+                      <Hand size={48} className="mb-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">无待处理求援信号</span>
+                   </div>
+                )}
               </div>
             </div>
 
-            {/* 底部功能区 */}
-            <div className="grid grid-cols-3 gap-10">
-              <div className="col-span-2 bg-slate-900/40 border border-white/5 rounded-[48px] p-10 backdrop-blur-xl flex flex-col justify-between group">
-                <div>
-                  <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-2">全域系统自检</h3>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-8 italic">Diagnostic System Health-Check 100%</p>
-                </div>
-                <div className="flex gap-10">
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[9px] font-black text-slate-600 uppercase">AI Processor</span>
-                    <span className="text-xl font-black text-emerald-500 italic">98.2% <span className="text-[10px] opacity-50">EFF</span></span>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[9px] font-black text-slate-600 uppercase">DB Latency</span>
-                    <span className="text-xl font-black text-cyan-400 italic">14ms <span className="text-[10px] opacity-50">STABLE</span></span>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[9px] font-black text-slate-600 uppercase">System Rank</span>
-                    <span className="text-xl font-black text-amber-400 italic">ALPHA <span className="text-[10px] opacity-50">READY</span></span>
-                  </div>
-                </div>
+            {/* 2. 战术解决库归档 */}
+            <div className="bg-slate-900/40 border border-white/5 rounded-[48px] p-8 backdrop-blur-xl h-[650px] flex flex-col">
+              <div className="flex justify-between items-center mb-6 shrink-0">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400 flex items-center gap-3">
+                  <CheckCircle2 size={16} /> 战术解决库归档
+                </h3>
               </div>
-
-              <div className="bg-slate-900/40 border border-white/5 rounded-[48px] p-10 backdrop-blur-xl flex flex-col gap-4">
-                <button 
-                  onClick={() => window.location.hash = '/alerts'}
-                  className="flex-1 flex justify-between items-center px-6 bg-cyan-500 text-slate-950 rounded-[24px] font-black text-xs hover:bg-cyan-400 transition-all active:scale-95 shadow-xl shadow-cyan-500/20"
-                >
-                  取证管理 <ArrowRight size={16} />
-                </button>
-                <button 
-                  onClick={() => window.location.hash = '/'}
-                  className="flex-1 flex justify-between items-center px-6 bg-white/5 border border-white/10 text-white rounded-[24px] font-black text-xs hover:bg-white/10 transition-all active:scale-95"
-                >
-                  返回主阵 <ArrowRight size={16} />
-                </button>
+              <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar-dark space-y-4">
+                {resolved.map((r) => (
+                  <div key={r.id} className="p-6 rounded-[32px] bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 transition-all group">
+                     <div className="flex justify-between items-center mb-2">
+                        <span className="text-[10px] font-black text-emerald-500 uppercase">Resolved CASE</span>
+                        <span className="text-[9px] font-mono text-slate-500 italic">{new Date(r.timestamp).toLocaleDateString()}</span>
+                     </div>
+                     <div className="text-sm font-black text-white mb-2 group-hover:text-emerald-400 transition-colors">{r.keyword}</div>
+                     <div className="p-3 bg-black/40 rounded-xl border border-white/5 text-[10px] text-slate-400 italic mb-2">
+                        触发场景: "{r.context}"
+                     </div>
+                     <div className="text-[11px] font-bold text-emerald-400/80 leading-relaxed">
+                        对策: {r.solution}
+                     </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

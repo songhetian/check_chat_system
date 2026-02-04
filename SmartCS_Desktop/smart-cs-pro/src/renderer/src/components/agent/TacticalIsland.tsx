@@ -4,7 +4,7 @@ import {
   Shield, BrainCircuit, Activity, Radar as RadarIcon, Trophy, BarChart, 
   ChevronRight, AlertCircle, Zap, Terminal, Target, LogOut, Cpu, LayoutGrid, Settings, MessageSquareOff,
   Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor,
-  Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2
+  Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -45,103 +45,117 @@ export const TacticalIsland = () => {
 
   // 灵动岛尺寸动态适配
   useEffect(() => {
-    const width = 680
-    const height = showHelpModal ? 400 : (isExpanded ? 800 : 100)
-    window.electron.ipcRenderer.send('resize-window', { width, height })
+    const width = 640
+    const height = showHelpModal ? 400 : (isExpanded ? 800 : 80)
+    window.electron.ipcRenderer.send('resize-window', { width, height, center: !isExpanded && !showHelpModal })
     window.electron.ipcRenderer.send('set-always-on-top', true)
   }, [isExpanded, showHelpModal])
 
   return (
-    <div className="h-screen w-screen flex items-start justify-center pt-1 overflow-hidden pointer-events-none select-none bg-transparent">
+    <div className="h-screen w-screen flex items-start justify-center overflow-hidden pointer-events-none select-none bg-transparent">
       <motion.div 
         layout
         initial={false}
+        animate={{ borderRadius: '38px' }}
         className={cn(
-          "pointer-events-auto border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden rounded-[38px]",
+          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden rounded-[38px]",
           isGlassMode ? "bg-slate-950/30 backdrop-blur-3xl" : "bg-slate-950",
-          isAlerting && "border-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] ring-1 ring-red-500/20"
+          isAlerting && "border-red-500 ring-1 ring-red-500/20"
         )}
         style={{ borderRadius: '38px' }}
       >
         {/* 1. 战术中枢条 (Main Bar) */}
         <div 
-          className="flex items-center justify-between px-6 h-[80px] shrink-0 cursor-move" 
+          className="flex items-center justify-between px-5 h-[64px] shrink-0 cursor-move" 
           style={{ WebkitAppRegion: 'drag' } as any}
         >
           {/* 左侧：用户信息 & 状态 */}
-          <div className="flex items-center gap-3.5 min-w-[180px]">
+          <div className="flex items-center gap-3 min-w-[150px]">
             <div className="relative">
               <div className={cn(
-                "w-11 h-11 rounded-[16px] flex items-center justify-center font-black text-lg transition-all duration-500",
+                "w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm transition-all duration-500",
                 isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]" : "bg-slate-900 text-slate-600 border border-white/5"
               )}>
-                {user?.real_name ? user.real_name[0] : <UserIcon size={22} />}
+                {user?.real_name ? user.real_name[0] : <UserIcon size={18} />}
               </div>
               <div className={cn(
-                "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-[2.5px] border-slate-950 transition-all duration-500",
+                "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[2px] border-slate-950 transition-all duration-500",
                 isOnline ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : "bg-red-500 animate-pulse"
               )} />
             </div>
             <div className="flex flex-col">
-              <span className="text-[13px] font-black text-white tracking-widest uppercase flex items-center gap-1.5">
+              <span className="text-[12px] font-black text-white tracking-tight flex items-center gap-1.5 leading-none mb-1">
                 {user?.real_name || 'Node'}
-                {isOnboardingMode && <GraduationCap size={14} className="text-amber-400 animate-bounce" />}
+                {isOnboardingMode && <GraduationCap size={12} className="text-amber-400 animate-bounce" />}
               </span>
-              <span className={cn(
-                "text-[9px] font-bold uppercase tracking-widest opacity-60",
-                isOnline ? "text-emerald-500" : "text-red-500"
-              )}>
-                {isOnline ? '在线' : '脱机'}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <div className={cn("w-1 h-1 rounded-full", isOnline ? "bg-emerald-500" : "bg-red-500")} />
+                <span className={cn(
+                  "text-[8px] font-bold uppercase tracking-widest opacity-60",
+                  isOnline ? "text-emerald-500" : "text-red-500"
+                )}>
+                  {isOnline ? 'Online' : 'Offline'}
+                </span>
+              </div>
             </div>
           </div>
 
           {/* 中间：核心控制组 */}
-          <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <div className="flex items-center gap-1.5" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <HubBtn 
-              icon={isGlassMode ? <Ghost size={18} /> : <Square size={18} />} 
+              icon={isGlassMode ? <Ghost size={16} /> : <Square size={16} />} 
               active={!isGlassMode} 
               onClick={() => setGlassMode(!isGlassMode)}
               title={isGlassMode ? "切换实色背景" : "切换高透明磨砂"}
               color="muted"
             />
-            <div className="w-px h-6 bg-white/5 mx-0.5" />
             <HubBtn 
-              icon={<GraduationCap size={18} />} 
+              icon={<GraduationCap size={16} />} 
               active={isOnboardingMode} 
               onClick={() => setOnboardingMode(!isOnboardingMode)}
               title="培训模式"
               color="emerald"
             />
             <HubBtn 
-              icon={<Sparkles size={18} />} 
-              active={isAiOptimizeEnabled} 
-              onClick={() => setAiOptimize(!isAiOptimizeEnabled)}
-              title="AI 优化"
-              color="emerald"
-            />
-            <HubBtn 
-              icon={isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />} 
+              icon={isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />} 
               active={isMuted} 
               onClick={() => setMuted(!isMuted)}
               title="静音控制"
               color="red"
             />
+            <div className="w-px h-5 bg-white/5 mx-0.5" />
             <HubBtn 
-              icon={<Hand size={18} />} 
+              icon={<Globe size={16} />} 
+              active={false} 
+              onClick={() => window.open('#/big-screen', '_blank')}
+              title="全景战术投影"
+              color="white"
+            />
+            <HubBtn 
+              icon={<Hand size={16} />} 
               active={showHelpModal} 
               onClick={() => setShowHelpModal(!showHelpModal)}
               title="战术求助"
               color="red"
             />
-            <div className="w-px h-6 bg-white/5 mx-0.5" />
             <HubBtn 
-              icon={<LayoutGrid size={18} />} 
+              icon={<LayoutGrid size={16} />} 
               active={isExpanded} 
               onClick={() => setIsExpanded(!isExpanded)} 
               title="看板"
               color="emerald"
             />
+          </div>
+
+          {/* 右侧：退出 */}
+          <div className="flex items-center justify-end min-w-[40px]" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            <button 
+              onClick={() => { logout(); window.location.hash = '/login'; }}
+              className="w-8 h-8 rounded-lg bg-white/5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center transition-all group border border-white/5"
+              title="退出登录"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
 
           {/* 右侧：退出 */}
@@ -163,7 +177,7 @@ export const TacticalIsland = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="p-8 border-t border-white/10 bg-slate-900 flex flex-col gap-6"
+              className="p-8 border-t border-white/10 bg-slate-900 flex flex-col gap-6 rounded-b-[38px]"
             >
               <div className="flex items-center gap-3 mb-2">
                  <div className="w-1.5 h-4 bg-red-500 rounded-full" />
@@ -219,7 +233,7 @@ export const TacticalIsland = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="flex-1 flex flex-col overflow-hidden border-t border-white/5 bg-gradient-to-b from-black/20 via-slate-900/40 to-black/60"
+              className="flex-1 flex flex-col overflow-hidden border-t border-white/5 bg-gradient-to-b from-black/20 via-slate-900/40 to-black/60 rounded-b-[38px]"
             >
               <div className="flex p-2.5 bg-black/40 gap-2.5 shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
                  <TabBtn id="AI" active={activeTab} set={setActiveTab} icon={<Target size={17}/>} label="智脑核对" />
@@ -369,7 +383,7 @@ function HubBtn({ icon, active, onClick, title, color }: any) {
       onClick={onClick}
       title={title}
       className={cn(
-        "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 active:scale-90 border border-transparent",
+        "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 active:scale-90 border border-transparent",
         active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white"
       )}
     >
