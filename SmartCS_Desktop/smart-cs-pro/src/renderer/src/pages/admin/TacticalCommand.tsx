@@ -14,6 +14,7 @@ import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalSearch } from '../../components/ui/TacticalSearch'
 import { TacticalSelect } from '../../components/ui/TacticalSelect'
+import { toast } from 'sonner'
 
 const getAgentStatusTheme = (score: number, isOnline: boolean) => {
   if (!isOnline) return { border: 'border-slate-200', bg: 'bg-white', text: 'text-slate-400', label: '脱机', dot: 'bg-slate-300' }
@@ -93,7 +94,7 @@ export default function TacticalCommand() {
     })
     if (res.data.status === 'ok') {
       if (type === 'LOCK') setIsInputLocked(!isInputLocked)
-      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '指令生效', message: `针对 ${activeAgent.real_name} 的 [${description}] 已下发`, type: 'success' } }))
+      toast.success('指令生效', { description: `针对 ${activeAgent.real_name} 的 [${description}] 已下发` })
     }
   }
 
@@ -121,8 +122,8 @@ export default function TacticalCommand() {
               <div className="flex items-center justify-between">
                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2"><Radio size={14} className="text-cyan-500" /> 节点实时矩阵</h3>
                  {/* 优化：刷新按钮移至矩阵头部 */}
-                 <button onClick={() => fetchData()} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 hover:text-cyan-600 transition-all border border-slate-100 shadow-sm group">
-                    <RefreshCw size={18} className={cn(loading && "animate-spin", "group-active:rotate-180 transition-transform")} />
+                 <button onClick={() => fetchData()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl hover:bg-slate-100 transition-all border border-slate-200 shadow-sm group">
+                    <RefreshCw size={18} className={cn(loading && "animate-spin")} />
                  </button>
               </div>
               <TacticalSearch value={search} onChange={setSearch} placeholder="检索操作员..." />

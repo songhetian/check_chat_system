@@ -12,6 +12,7 @@ import { CONFIG } from '../../lib/config'
 import { TacticalTable, TacticalPagination } from '../../components/ui/TacticalTable'
 import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { useAuthStore } from '../../store/useAuthStore'
+import { toast } from 'sonner'
 
 export default function GlobalPolicyPage() {
   const { token, hasPermission } = useAuthStore()
@@ -68,6 +69,7 @@ export default function GlobalPolicyPage() {
       if (res.data.status === 'ok') { 
         setModalType('NONE'); 
         fetchData(); 
+        toast.success(isEdit ? '策略已优化' : '新策略已就绪', { description: '战术规则矩阵已同步至全域' })
       }
     } finally {
       setProcessing(false)
@@ -88,7 +90,7 @@ export default function GlobalPolicyPage() {
       if (res.data.status === 'ok') {
         setModalType('NONE'); 
         fetchData();
-        window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '策略节点已清除', message: '战术规则已实时重载', type: 'success' } }))
+        toast.success('策略节点已清除', { description: '战术规则已实时重载' })
       }
     } finally {
       setProcessing(false)

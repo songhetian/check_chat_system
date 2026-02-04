@@ -54,8 +54,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const fetchRecentNotifs = async () => {
+    const token = useAuthStore.getState().token
+    if (!token) return
     try {
-      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/notifications?size=5`, method: 'GET' })
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/admin/notifications?size=5`, 
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
       if (res.status === 200) setNotifications(res.data.data)
     } catch (e) { console.error(e) }
   }
@@ -87,9 +93,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [showNotif])
 
   const handleItemClick = async (n: Notification) => {
+    const token = useAuthStore.getState().token
     setSelectedMsg(n)
-    if (n.is_read === 0) {
-      await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/notifications/read`, method: 'POST', data: { id: n.id } })
+    if (n.is_read === 0 && token) {
+      await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/admin/notifications/read`, 
+        method: 'POST', 
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: { id: n.id } 
+      })
       fetchRecentNotifs()
     }
   }

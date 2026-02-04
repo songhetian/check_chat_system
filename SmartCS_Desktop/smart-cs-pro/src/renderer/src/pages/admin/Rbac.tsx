@@ -8,6 +8,7 @@ import {
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { useAuthStore } from '../../store/useAuthStore'
+import { toast } from 'sonner'
 
 export default function RbacPage() {
   const { token } = useAuthStore()
@@ -77,7 +78,7 @@ export default function RbacPage() {
       data: { role_id: activeRoleId, permissions: rolePerms }
     })
     if (res.data.status === 'ok') {
-      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '矩阵已固化', message: '权责变更已实时同步至受影响节点', type: 'success' } }))
+      toast.success('矩阵已固化', { description: '权责变更已实时同步至受影响节点' })
     }
   }
 
@@ -85,7 +86,12 @@ export default function RbacPage() {
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6">
       <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
         <div><h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic">权责矩阵定义</h2><p className="text-slate-500 text-sm mt-1 font-medium">精确定义系统角色的实战权限范围与数据访问红线</p></div>
-        <button onClick={handleSave} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 hover:bg-slate-800 transition-all"><Save size={16} /> 保存配置</button>
+        <div className="flex gap-3">
+           <button onClick={() => initData()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+             <RefreshCw size={18} className={cn(loading && "animate-spin")} />
+           </button>
+           <button onClick={handleSave} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 hover:bg-slate-800 transition-all"><Save size={16} /> 保存配置</button>
+        </div>
       </header>
 
       <div className="grid grid-cols-12 gap-8 flex-1 overflow-hidden">

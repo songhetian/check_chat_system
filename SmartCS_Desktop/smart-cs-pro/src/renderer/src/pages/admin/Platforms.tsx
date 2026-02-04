@@ -12,6 +12,9 @@ export default function PlatformsPage() {
   const [platforms, setPlatforms] = useState<any[]>([])
   const [processingId, setProcessingId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  const [modalType, setModalType] = useState<'NONE' | 'DELETE'>('NONE')
+  const [targetItem, setTargetItem] = useState<any>(null)
+  const [processing, setProcessing] = useState(false)
 
   const fetchPlatforms = async (silent = false) => {
     if (!token) return
@@ -34,8 +37,8 @@ export default function PlatformsPage() {
   useEffect(() => { fetchPlatforms() }, [token])
 
   const handleToggle = async (p: any) => {
-    if (!hasPermission('admin:ai:update')) {
-      toast.error('权限不足', { description: '缺失 [admin:ai:update] 权限' })
+    if (!hasPermission('admin:platform:update')) {
+      toast.error('权限不足', { description: '缺失 [admin:platform:update] 权限' })
       return
     }
     if (processingId) return
@@ -56,26 +59,23 @@ export default function PlatformsPage() {
     }
   }
 
-  const handleDelete = async (p: any) => {
-    if (!hasPermission('admin:ai:delete')) {
-      toast.error('权限不足', { description: '缺失 [admin:ai:delete] 权限' })
-      return
-    }
-    if (processingId) return
-    setProcessingId(p.id)
+  const executeDelete = async () => {
+    if (!targetItem || !token || processing) return
+    setProcessing(true)
     try {
       const res = await window.api.callApi({
         url: `${CONFIG.API_BASE}/admin/platforms/delete`,
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
-        data: { id: p.id }
+        data: { id: targetItem.id }
       })
       if (res.data.status === 'ok') {
-        fetchPlatforms(true)
-        toast.success('监控节点已移除', { description: `平台 [${p.name}] 已从扫描队列中注销` })
+        setModalType('NONE')
+        fetchPlatforms(false)
+        toast.success('监控节点已移除', { description: `平台 [${targetItem.name}] 已从扫描队列中注销` })
       }
     } finally {
-      setProcessingId(null)
+      setProcessing(false)
     }
   }
 
@@ -90,7 +90,7 @@ export default function PlatformsPage() {
           <button onClick={() => fetchPlatforms(false)} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
             <RefreshCw size={18} className={cn(loading && "animate-spin")} />
           </button>
-          {hasPermission('admin:ai:create') && (
+          {hasPermission('admin:platform:create') && (
             <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800">
               <Plus size={16} /> 增加监控目标
             </button>
@@ -115,9 +115,9 @@ export default function PlatformsPage() {
                 <Monitor size={24} />
               </div>
               <div className="flex gap-2">
-                {hasPermission('admin:ai:delete') && (
+                {hasPermission('admin:platform:delete') && (
                   <button 
-                    onClick={() => handleDelete(p)} 
+                    onClick={(e) => { e.stopPropagation(); setTargetItem(p); setModalType('DELETE'); }} 
                     disabled={!!processingId}
                     className="p-2 text-slate-300 hover:text-red-500 transition-colors disabled:opacity-50"
                   >
@@ -138,7 +138,7 @@ export default function PlatformsPage() {
                   <div className={cn("w-2 h-2 rounded-full", p.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-300")} />
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">{p.is_active ? 'Active' : 'Paused'}</span>
                </div>
-               {hasPermission('admin:ai:update') && (
+               {hasPermission('admin:platform:update') && (
                  <button 
                    onClick={() => handleToggle(p)}
                    disabled={!!processingId}
@@ -155,6 +155,28 @@ export default function PlatformsPage() {
           </motion.div>
         ))}
       </div>
+
+      <AnimatePresence>
+        {modalType === 'DELETE' && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !processing && setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="bg-white w-full max-w-md rounded-[40px] shadow-2xl relative z-10 p-10 text-center">
+               <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-6 border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
+               <h3 className="text-xl font-black mb-2 italic">注销战术目标？</h3>
+               <p className="text-xs text-slate-400 font-medium mb-8 leading-relaxed px-4 text-center">您正在移除 <span className="text-red-600 font-black">[{targetItem?.name}]</span>。系统将不再对该软件执行实时 OCR 扫描。此行为受到原子级权限 <span className="text-slate-900 font-black">[admin:platform:delete]</span> 的监管。</p>
+               <div className="grid grid-cols-2 gap-4">
+                  <button disabled={processing} onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all disabled:opacity-50">放弃动作</button>
+                  <button disabled={processing} onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100">
+                    {processing && <Loader2 className="animate-spin" size={16} />} 确认物理移除
+                  </button>
+               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
     </div>
   )
 }
