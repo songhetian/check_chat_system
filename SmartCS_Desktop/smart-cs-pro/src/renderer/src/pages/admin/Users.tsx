@@ -10,8 +10,10 @@ import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { TacticalTable, TacticalPagination } from '../../components/ui/TacticalTable'
 import { TacticalSearch } from '../../components/ui/TacticalSearch'
+import { useAuthStore } from '../../store/useAuthStore'
 
 export default function UsersPage() {
+  const { hasPermission, token } = useAuthStore()
   const [users, setUsers] = useState<any[]>([])
   const [roles, setRoles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -24,13 +26,19 @@ export default function UsersPage() {
   const [uploadFile, setUploadFile] = useState<File | null>(null)
 
   const fetchData = async () => {
+    if (!token) return
     setLoading(true)
     try {
       const [resRoles, resUsers] = await Promise.all([
-        window.api.callApi({ url: `${CONFIG.API_BASE}/admin/roles`, method: 'GET' }),
+        window.api.callApi({
+          url: `${CONFIG.API_BASE}/admin/roles`, 
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
         window.api.callApi({
           url: `${CONFIG.API_BASE}/admin/agents?page=${page}&size=10&search=${search}`,
-          method: 'GET'
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
         })
       ])
       if (resRoles.status === 200) setRoles(resRoles.data.data)
@@ -38,22 +46,25 @@ export default function UsersPage() {
         setUsers(resUsers.data.data)
         setTotal(resUsers.data.total)
       }
-    } catch (e) { console.error(e) }
-    finally { setLoading(false) }
+    } catch (e) {
+      console.error('成员矩阵同步异常', e)
+    } finally { setLoading(false) }
   }
 
   useEffect(() => { fetchData() }, [page, search])
 
   const handleDownloadTemplate = () => {
-    const headers = "用户名,真实姓名,部门ID,角色ID(1:坐席/2:主管/3:总部)\n"
+    const headers = "用户名,真实姓名,部门ID,角色ID(1:坐席/2:主管/3:总部)"
     const blob = new Blob(["\ufeff" + headers], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", "SmartCS_成员导入模板.csv"); link.click()
   }
 
   const handleRoleChange = async (username: string, newRoleId: number) => {
+    if (!token) return
     const res = await window.api.callApi({
       url: `${CONFIG.API_BASE}/hq/user/update-role`,
       method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
       data: { username, new_role_id: newRoleId }
     })
     if (res.data.status === 'ok') {
@@ -71,7 +82,7 @@ export default function UsersPage() {
           <p className="text-slate-500 text-sm mt-1 font-medium">管理操作员身份、战术奖惩记录及新兵培训实战进度</p>
         </div>
         <div className="flex flex-wrap gap-3">
-           <button onClick={handleDownloadTemplate} className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-2xl text-[10px] font-black shadow-lg hover:bg-emerald-700 transition-all"><Download size={14} /> 下载模板</button>
+           <button onClick={handleDownloadTemplate} className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-2xl text-[10px] font-black shadow-lg hover:bg-emerald-700 active:scale-95 transition-all"><Download size={14} /> 下载模板</button>
            <button onClick={() => setShowImport(true)} className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black shadow-xl hover:bg-slate-800 transition-all"><Upload size={14} /> 批量导入</button>
            <button className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black shadow-xl active:scale-95 transition-all"><Plus size={14} /> 录入成员</button>
         </div>
@@ -97,8 +108,6 @@ export default function UsersPage() {
                     </div>
                   </td>
                   <td className="px-6 py-5 text-center">{u.is_manager ? <div className="px-3 py-1 bg-cyan-50 text-cyan-600 text-[10px] font-black rounded-full border border-cyan-100 inline-flex items-center gap-1.5 shadow-sm"><ShieldCheck size={12} /> 部门主管</div> : <span className="text-[10px] text-slate-300 font-bold italic">普通成员</span>}</td>
-                  
-                  {/* 补全：战术奖励展示 */} 
                   <td className="px-6 py-5 text-center">
                     <div className="flex justify-center gap-1">
                        {u.reward_count > 0 ? (
@@ -109,8 +118,6 @@ export default function UsersPage() {
                        ) : <span className="text-[9px] text-slate-200 italic font-black uppercase">无奖励记录</span>}
                     </div>
                   </td>
-
-                  {/* 补全：培训进度展示 */} 
                   <td className="px-6 py-5 text-center">
                     <div className="flex flex-col items-center gap-1.5">
                        <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -119,7 +126,6 @@ export default function UsersPage() {
                        <span className="text-[8px] font-black text-slate-400 uppercase">{u.training_progress === 100 ? '实战结业' : `进度 ${u.training_progress || 0}%`}</span>
                     </div>
                   </td>
-
                   <td className="px-6 py-5 text-center"><span className={cn("px-3 py-1 rounded-full text-[9px] font-black uppercase border shadow-sm", u.role_code === 'HQ' ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-500 border-slate-200")}>{u.role_name}</span></td>
                   <td className="px-6 py-5 text-center">
                     <div className="flex items-center justify-center gap-2">
@@ -137,7 +143,6 @@ export default function UsersPage() {
         {total > 10 && <div className="shrink-0 border-t border-slate-100 bg-white"><TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} /></div>}
       </div>
 
-      {/* 导入模态框 (保持逻辑对齐) */} 
       <AnimatePresence>
         {showImport && (
           <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">

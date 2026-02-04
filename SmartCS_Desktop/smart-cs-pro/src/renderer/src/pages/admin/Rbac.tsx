@@ -7,8 +7,10 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
+import { useAuthStore } from '../../store/useAuthStore'
 
 export default function RbacPage() {
+  const { token } = useAuthStore()
   const [roles, setRoles] = useState<any[]>([])
   const [permissions, setPermissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -16,23 +18,38 @@ export default function RbacPage() {
   const [rolePerms, setRolePerms] = useState<string[]>([])
 
   const initData = async () => {
+    if (!token) return
     setLoading(true)
     try {
       const [resRoles, resPerms] = await Promise.all([
-        window.api.callApi({ url: `${CONFIG.API_BASE}/admin/roles`, method: 'GET' }),
-        window.api.callApi({ url: `${CONFIG.API_BASE}/admin/permissions`, method: 'GET' })
+        window.api.callApi({ 
+          url: `${CONFIG.API_BASE}/admin/roles`, 
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        window.api.callApi({ 
+          url: `${CONFIG.API_BASE}/admin/permissions`, 
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
       ])
       if (resRoles.status === 200) {
         setRoles(resRoles.data.data)
         if (resRoles.data.data.length > 0) setActiveRoleId(resRoles.data.data[0].id)
       }
       if (resPerms.status === 200) setPermissions(resPerms.data.data)
+    } catch (e) {
+      console.error('RBAC初始化失败', e)
     } finally { setLoading(false) }
   }
 
   const fetchRolePerms = async () => {
-    if (!activeRoleId) return
-    const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/role/permissions?role_id=${activeRoleId}`, method: 'GET' })
+    if (!activeRoleId || !token) return
+    const res = await window.api.callApi({ 
+      url: `${CONFIG.API_BASE}/admin/role/permissions?role_id=${activeRoleId}`, 
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
     if (res.status === 200) setRolePerms(res.data.data)
   }
 
@@ -52,10 +69,11 @@ export default function RbacPage() {
   }
 
   const handleSave = async () => {
-    if (!activeRoleId) return
+    if (!activeRoleId || !token) return
     const res = await window.api.callApi({
       url: `${CONFIG.API_BASE}/admin/role/permissions`,
       method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
       data: { role_id: activeRoleId, permissions: rolePerms }
     })
     if (res.data.status === 'ok') {

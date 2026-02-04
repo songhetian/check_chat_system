@@ -11,8 +11,10 @@ import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { TacticalTable } from '../../components/ui/TacticalTable'
 import { TacticalSelect } from '../../components/ui/TacticalSelect'
+import { useAuthStore } from '../../store/useAuthStore'
 
 export default function GlobalPolicyPage() {
+  const { token } = useAuthStore()
   const [activeTab, setActiveTab] = useState<'WORDS' | 'KNOWLEDGE'>('WORDS')
   const [words, setWords] = useState<any[]>([])
   const [kb, setKb] = useState<any[]>([])
@@ -27,15 +29,26 @@ export default function GlobalPolicyPage() {
   const [uploadFile, setUploadFile] = useState<File | null>(null)
 
   const fetchData = async () => {
+    if (!token) return
     setLoading(true)
     try {
       const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
       const [resData, resCats] = await Promise.all([
-        window.api.callApi({ url: `${CONFIG.API_BASE}/${endpoint}`, method: 'GET' }),
-        window.api.callApi({ url: `${CONFIG.API_BASE}/ai/categories?type=${activeTab}`, method: 'GET' })
+        window.api.callApi({
+          url: `${CONFIG.API_BASE}/${endpoint}`,
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        window.api.callApi({
+          url: `${CONFIG.API_BASE}/ai/categories?type=${activeTab}`,
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
       ])
       if (resData.status === 200) activeTab === 'WORDS' ? setWords(resData.data.data) : setKb(resData.data.data)
       if (resCats.status === 200) setCats(resCats.data.data)
+    } catch (e) {
+      console.error('AI策略拉取失败', e)
     } finally { setLoading(false) }
   }
 
@@ -57,7 +70,7 @@ export default function GlobalPolicyPage() {
   }
 
   const handleStartImport = async () => {
-    if (!uploadFile) return
+    if (!uploadFile || !token) return
     alert(`正在同步战术数据包：${uploadFile.name}`)
     setUploadFile(null); setShowImport(false); fetchData()
   }
@@ -68,8 +81,14 @@ export default function GlobalPolicyPage() {
   }
 
   const handleSave = async () => {
+    if (!token) return
     const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
-    const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/${endpoint}`, method: 'POST', data: editItem })
+    const res = await window.api.callApi({
+      url: `${CONFIG.API_BASE}/${endpoint}`,
+      method: 'POST', 
+      headers: { 'Authorization': `Bearer ${token}` },
+      data: editItem 
+    })
     if (res.data.status === 'ok') { setModalOpen(false); fetchData(); }
   }
 
@@ -156,14 +175,14 @@ export default function GlobalPolicyPage() {
          </div>
       </Modal>
 
-      <AnimatePresence>{showImport && <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowImport(false)} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" /><motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl relative z-10 p-10 text-center"><div className="flex justify-between items-center mb-8"><h3 className="text-xl font-black text-slate-900 uppercase italic">导入战术数据</h3><button onClick={() => setShowImport(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><X size={20}/></button></div><div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} className={cn("w-full h-64 rounded-[32px] border-4 border-dashed transition-all flex flex-col items-center justify-center gap-4", isDragging ? "bg-cyan-50 border-cyan-500 scale-[1.02]" : "bg-slate-50 border-slate-200", uploadFile && "border-emerald-500 bg-emerald-50")}>{uploadFile ? <div className="flex flex-col items-center gap-3"><div className="w-16 h-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg"><FileSpreadsheet size={32} /></div><span className="text-sm font-black text-emerald-900">{uploadFile.name}</span></div> : <div className="flex flex-col items-center gap-3 opacity-40"><Upload size={48} /><span className="text-xs font-black">拖拽战术清单至此</span></div>}</div><button onClick={handleStartImport} disabled={!uploadFile} className="w-full mt-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-xl disabled:opacity-20 active:scale-95 transition-all">开始同步策略</button></motion.div></div>}</AnimatePresence>
+      <AnimatePresence>{showImport && <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowImport(false)} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" /><motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl relative z-10 p-10 text-center"><div className="flex justify-between items-center mb-8"><h3 className="text-xl font-black text-slate-900 uppercase italic">导入战术数据</h3><button onClick={() => setShowImport(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><X size={20}/></button></div><div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} className={cn("w-full h-64 rounded-[32px] border-4 border-dashed transition-all flex flex-col items-center justify-center gap-4", isDragging ? "bg-cyan-50 border-cyan-500 scale-[1.02]" : "bg-slate-50 border-slate-200", uploadFile && "border-emerald-500 bg-emerald-50")}>{uploadFile ? <div className="flex flex-col items-center gap-3"><div className="w-16 h-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg"><FileSpreadsheet size={32} /></div><span className="text-sm font-black text-emerald-900">{uploadFile.name}</span></div> : <div className="flex flex-col items-center gap-3 opacity-40"><Upload size={48} /><span className="text-xs font-black">拖拽战术清单至此</span></div>}</div><button onClick={handleStartImport} disabled={!uploadFile} className="w-full mt-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-xl disabled:opacity-20 active:scale-95 transition-all">开始同步策略</button></motion.div></div>}</AnimatePresence>
     </div>
   )
 }
 
 function Modal({ isOpen, onClose, title, children }: any) {
   return (
-    <AnimatePresence>{isOpen && <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" /><motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-xl rounded-[40px] shadow-2xl relative z-10 bg-white p-10"><div className="flex justify-between items-center mb-8"><h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">{title}</h3><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400"><X size={24}/></button></div>{children}</motion.div></div>}</AnimatePresence>
+    <AnimatePresence>{isOpen && <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" /><motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="relative w-full max-w-xl rounded-[40px] shadow-2xl relative z-10 bg-white p-10"><div className="flex justify-between items-center mb-8"><h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">{title}</h3><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400"><X size={24}/></button></div>{children}</motion.div></div>}</AnimatePresence>
   )
 }
 
