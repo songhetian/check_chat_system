@@ -783,3 +783,112 @@ INFO:     192.168.2.184:55922 - "GET /api/admin/agents?page=1&size=10&search=&de
 INFO:     192.168.2.184:55922 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=10 HTTP/1.1" 200 OK
 INFO:     192.168.2.184:55922 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=15 HTTP/1.1" 200 OK
 INFO:     192.168.2.184:55939 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55956 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56108 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=15 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56120 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56120 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56122 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56121 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56123 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56124 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56127 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56127 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56130 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56137 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:56139 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:56136 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56138 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:56138 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56137 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:56149 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56147 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection closed
+INFO:     192.168.2.184:56148 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     192.168.2.184:56136 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56139 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56150 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:56158 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:56136 - "GET /api/admin/violations?page=1&username=&dept_id=1&risk_level=ALL HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56136 - "GET /api/admin/violations?page=1&username=&dept_id=3&risk_level=ALL HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56185 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56187 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56186 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56188 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56185 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56187 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56188 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:56186 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:57022 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57025 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57020 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57034 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     192.168.2.184:57023 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     connection open
+INFO:     192.168.2.184:57021 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57024 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57037 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:57095 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57093 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57098 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57096 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57100 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:57097 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57094 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57101 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     192.168.2.184:57102 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:57121 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57124 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57119 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57122 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57126 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:57120 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57123 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57127 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:57151 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57154 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57149 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57152 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57156 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:57150 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57153 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57157 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open

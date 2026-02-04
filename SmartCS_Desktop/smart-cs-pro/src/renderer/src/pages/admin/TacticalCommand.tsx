@@ -13,6 +13,7 @@ import { CONFIG } from '../../lib/config'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalSearch } from '../../components/ui/TacticalSearch'
+import { TacticalSelect } from '../../components/ui/TacticalSelect'
 
 const getAgentStatusTheme = (score: number, isOnline: boolean) => {
   if (!isOnline) return { border: 'border-slate-200', bg: 'bg-white', text: 'text-slate-400', label: '脱机', dot: 'bg-slate-300' }
@@ -94,18 +95,20 @@ export default function TacticalCommand() {
         <div className="flex items-center gap-6"><div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl"><Radar size={24} className="text-cyan-400 animate-pulse" /></div><div><h2 className="text-2xl font-black text-slate-900 italic tracking-tighter uppercase leading-none">战术监控指挥中枢</h2><div className="flex items-center gap-2 mt-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest"><span className="flex items-center gap-1 text-emerald-500"><Globe size={10}/> 实时链路已激活</span></div></div></div>
         <div className="flex items-center gap-4">
            {isHQ && (
-             <select 
-               value={deptId} 
-               onChange={(e) => setDeptId(e.target.value)}
-               className="bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black px-4 py-2 outline-none focus:ring-2 focus:ring-cyan-500/20 shadow-inner"
-             >
-               <option value="">全域战术单元</option>
-               {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-             </select>
+             <div className="w-56">
+               <TacticalSelect 
+                 options={depts}
+                 value={deptId}
+                 onChange={(val: string | number) => setDeptId(String(val))}
+                 placeholder="全域战术单元"
+               />
+             </div>
            )}
            <StatBox label="监控节点" value={agents.length} color="text-cyan-500" />
            <StatBox label="在线坐席" value={agents.filter(a => a.is_online).length} color="text-emerald-500" />
-           <button onClick={() => fetchData()} className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 border border-slate-100 transition-all shadow-sm"><RefreshCw size={18} className={cn(loading && "animate-spin")} /></button>
+           <button onClick={() => fetchData()} className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 border border-slate-800 transition-all shadow-xl active:scale-95 group">
+              <RefreshCw size={20} className={cn(loading && "animate-spin", "group-hover:rotate-180 transition-transform duration-500")} />
+           </button>
         </div>
       </header>
 

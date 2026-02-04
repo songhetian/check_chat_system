@@ -34,6 +34,7 @@ import { cn } from './lib/utils'
 import { CONFIG } from './lib/config'
 import { TacticalSearch } from './components/ui/TacticalSearch'
 import { TacticalPagination } from './components/ui/TacticalTable'
+import { TacticalSelect } from './components/ui/TacticalSelect'
 
 // 1. 管理首页：集成链路异常感知 UI
 const AdminHome = () => {
@@ -98,21 +99,21 @@ const AdminHome = () => {
         </div>
         <div className="flex items-center gap-4">
            {isHQ && (
-             <select 
-               value={deptId} 
-               onChange={(e) => { setDeptId(e.target.value); setPage(1); }}
-               className="bg-slate-50 border border-slate-100 rounded-2xl text-xs font-black px-6 py-3 outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all"
-             >
-               <option value="">全域战术单元</option>
-               {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-             </select>
+             <div className="w-64">
+               <TacticalSelect 
+                 options={depts}
+                 value={deptId}
+                 onChange={(val: string | number) => { setDeptId(String(val)); setPage(1); }}
+                 placeholder="全域战术单元"
+               />
+             </div>
            )}
            <button 
-             onClick={fetchAgents} 
-             className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
-             title="实时同步态势"
+             onClick={() => fetchAgents()} 
+             className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 group"
+             title="物理同步态势"
            >
-             <RefreshCw size={20} className={cn(loading && "animate-spin")} />
+             <RefreshCw size={20} className={cn(loading && "animate-spin", "group-hover:rotate-180 transition-transform duration-500")} />
            </button>
            <button onClick={() => window.open('#/big-screen', '_blank')} className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-2xl active:scale-95 flex items-center gap-3 hover:bg-slate-800 transition-all uppercase tracking-widest"><Globe size={18} /> 激活态势投影</button>
         </div>
