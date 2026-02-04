@@ -24,9 +24,25 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [modalType, setModalType] = useState<'NONE' | 'DELETE'>('NONE')
+  const [targetItem, setTargetItem] = useState<any>(null)
 
-  const fetchProducts = async () => {
+  const executeDelete = async () => {
+    if (!targetItem || !token) return
+    const res = await window.api.callApi({
+      url: `${CONFIG.API_BASE}/admin/products/delete`,
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      data: { id: targetItem.id }
+    })
+    if (res.data.status === 'ok') {
+      setModalType('NONE'); fetchProducts()
+      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '资产已注销', message: '商品战术话术已从物理库移除', type: 'success' } }))
+    }
+  }
+
+  // ... (在渲染部分补全删除确认模态框)
+
     if (!token) return
     setLoading(true)
     try {

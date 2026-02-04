@@ -138,6 +138,24 @@ async def save_product(data: dict, user: dict = Depends(check_permission("admin:
         await record_audit(user["real_name"], "PROD_CREATE", p.name, "同步新商品资产")
     return {"status": "ok"}
 
+@router.post("/products/delete")
+async def delete_product(data: dict, user: dict = Depends(check_permission("admin:ai:delete"))):
+    p_id = data.get("id")
+    async with in_transaction() as conn:
+        p = await Product.get(id=p_id)
+        await Product.filter(id=p_id).update(is_deleted=1, using_db=conn)
+        await record_audit(user["real_name"], "PROD_DELETE", p.name, "物理注销商品资产")
+    return {"status": "ok"}
+
+@router.post("/platforms/delete")
+async def delete_platform(data: dict, user: dict = Depends(check_permission("admin:ai:delete"))):
+    p_id = data.get("id")
+    async with in_transaction() as conn:
+        p = await Platform.get(id=p_id)
+        await Platform.filter(id=p_id).update(is_deleted=1, using_db=conn)
+        await record_audit(user["real_name"], "PLATFORM_DELETE", p.name, "注销监控目标软件")
+    return {"status": "ok"}
+
 @router.get("/platforms")
 async def get_platforms(page: int = 1, size: int = 12, current_user: dict = Depends(get_current_user)):
     query = Platform.filter(is_deleted=0)

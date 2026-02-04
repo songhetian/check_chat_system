@@ -69,14 +69,37 @@ async def save_sensitive_word(data: dict, request: Request, user: dict = Depends
         await record_audit(user["real_name"], "WORD_SAVE", data.get("word"), "更新全域敏感词库")
     return {"status": "ok"}
 
+@router.post("/sensitive-words/delete")
+async def delete_sensitive_word(data: dict, request: Request, user: dict = Depends(check_permission("admin:ai:delete"))):
+    w_id = data.get("id")
+    async with in_transaction() as conn:
+        w = await SensitiveWord.get(id=w_id)
+        await SensitiveWord.filter(id=w_id).update(is_deleted=1, using_db=conn)
+        
+        redis = request.app.state.redis
+        if redis:
+            all_words = await SensitiveWord.filter(is_active=1, is_deleted=0).values("word", "risk_level")
+            await redis.set("cache:sensitive_words", json.dumps(all_words))
+        await record_audit(user["real_name"], "WORD_DELETE", w.word, "注销全域敏感词")
+    return {"status": "ok"}
+
 @router.get("/knowledge-base")
 async def get_knowledge_base(page: int = 1, size: int = 10, current_user: dict = Depends(get_current_user)):
-    query = KnowledgeBase.filter(is_deleted=0)
-    total = await query.count()
-    data = await query.select_related("category").offset((page - 1) * size).limit(size).order_by("-id").values(
-        "id", "keyword", "answer", "is_active", "category__name", "category_id"
-    )
-    return {"status": "ok", "data": data, "total": total}
+    # ... 原有逻辑保持
+
+@router.post("/knowledge-base/delete")
+async def delete_knowledge_item(data: dict, request: Request, user: dict = Depends(check_permission("admin:ai:delete"))):
+    item_id = data.get("id")
+    async with in_transaction() as conn:
+        k = await KnowledgeBase.get(id=item_id)
+        await KnowledgeBase.filter(id=item_id).update(is_deleted=1, using_db=conn)
+        
+        redis = request.app.state.redis
+        if redis:
+            kb_data = await KnowledgeBase.filter(is_active=1, is_deleted=0).values("keyword", "answer")
+            await redis.set("cache:knowledge_base", json.dumps(kb_data))
+        await record_audit(user["real_name"], "KB_DELETE", k.keyword, "注销智能话术节点")
+    return {"status": "ok"}
 
 @router.post("/knowledge-base")
 async def save_knowledge_item(data: dict, request: Request, user: dict = Depends(check_permission("admin:ai:create"))):

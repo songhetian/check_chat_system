@@ -62,19 +62,22 @@ const AdminHome = () => {
     } catch (e) { console.error(e) }
   }
 
-  const fetchAgents = async () => {
+  const fetchAgents = async (silent = false) => {
     if (!token) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     setErrorMsg(null)
     try {
       const res = await window.api.callApi({
-        url: `${CONFIG.API_BASE}/admin/agents?page=${page}&size=10&search=${search}&dept_id=${deptId}`,
+        url: `${CONFIG.API_BASE}/admin/agents?page=${page}&size=10&search=${search}&dept_id=${deptId}&_t=${Date.now()}`,
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
       if (res.status === 200) {
         setAgents(res.data.data)
         setTotal(res.data.total)
+        if (silent) {
+          window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '态势已对齐', message: '指挥中心数据已同步至最新物理刻度', type: 'success' } }))
+        }
       } else if (res.status === 401) {
         setErrorMsg("身份认证失效，请重新登录")
       } else {

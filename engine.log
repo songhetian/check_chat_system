@@ -355,3 +355,30 @@ INFO:     192.168.2.184:59301 - "GET /api/admin/agents?page=1&size=10&search=&de
 INFO:     192.168.2.184:59308 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
 INFO:SmartCS:📡 [WS] 节点已挂载: admin
 INFO:     connection open
+INFO:     192.168.2.184:59328 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59335 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59337 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59338 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59336 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59335 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59335 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59335 - "GET /api/admin/agents?page=1&size=10&search=&dept_id= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59335 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59335 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59339 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59339 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770187031989 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:59341 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770187031989 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:59335 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59340 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59335 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59339 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59340 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59341 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59335 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59344 - "GET /api/admin/role/permissions?role_id=2 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59354 - "GET /api/admin/role/permissions?role_id=3 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:59390 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59477 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
