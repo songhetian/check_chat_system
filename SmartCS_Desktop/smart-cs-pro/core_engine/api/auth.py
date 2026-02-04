@@ -48,8 +48,15 @@ async def login(data: dict, request: Request):
 async def get_current_user(request: Request, creds: HTTPAuthorizationCredentials = Depends(security)):
     token = creds.credentials
     redis = request.app.state.redis
-    cached = await redis.get(f"token:{token}") if redis else None
-    if not cached: raise HTTPException(status_code=401, detail="令牌失效")
+    if not redis:
+        print("🚨 [鉴权故障] Redis 连接未就绪")
+        raise HTTPException(status_code=500, detail="中枢缓存脱机")
+    
+    cached = await redis.get(f"token:{token}")
+    if not cached: 
+        print(f"🚨 [鉴权失效] 尝试匹配令牌: {token[:10]}... | 匹配结果: 未命中")
+        raise HTTPException(status_code=401, detail="令牌失效或已过期")
+    
     return json.loads(cached)
 
 def check_permission(required_perm: str):
