@@ -25,6 +25,7 @@ interface RiskState {
   isOnline: boolean
   isAlerting: boolean
   isRedAlert: boolean
+  isMuted: boolean
   isOnboardingMode: boolean
   isAiOptimizeEnabled: boolean
   violations: Violation[]
@@ -34,6 +35,7 @@ interface RiskState {
   setOnline: (isOnline: boolean) => void
   setAlerting: (isAlerting: boolean) => void
   setRedAlert: (isRedAlert: boolean) => void
+  setMuted: (isMuted: boolean) => void
   setOnboardingMode: (enabled: boolean) => void
   setAiOptimize: (enabled: boolean) => void
   setAiAnalysis: (analysis: AiUltraAnalysis) => void
@@ -45,6 +47,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   isOnline: true,
   isAlerting: false,
   isRedAlert: false,
+  isMuted: false,
   isOnboardingMode: true,
   isAiOptimizeEnabled: false,
   violations: [],
@@ -54,6 +57,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   setOnline: (isOnline) => set({ isOnline }),
   setAlerting: (isAlerting) => set({ isAlerting }),
   setRedAlert: (isRedAlert) => set({ isRedAlert }),
+  setMuted: (isMuted) => set({ isMuted }),
   setOnboardingMode: (isOnboardingMode) => set({ isOnboardingMode }),
   setAiOptimize: (isAiOptimizeEnabled) => set({ isAiOptimizeEnabled }),
   setAiAnalysis: (lastAiAnalysis) => set({ lastAiAnalysis }),

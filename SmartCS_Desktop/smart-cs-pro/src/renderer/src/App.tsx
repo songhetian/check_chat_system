@@ -180,11 +180,11 @@ const AdminHome = () => {
 // 2. 坐席视图容器
 const AgentView = () => {
   const isRedAlert = useRiskStore(s => s.isRedAlert)
+  const isMuted = useRiskStore(s => s.isMuted)
   const [activeSuggestion, setActiveSuggestion] = useState<any>(null)
   const [showFireworks, setShowFireworks] = useState(false)
   const [sopSteps, setSopSteps] = useState<string[] | null>(null)
   const [activeCustomer, setActiveCustomer] = useState<any>(null)
-  const [isMuted, setIsMuted] = useState(false)
 
   useEffect(() => {
     // 监听全局 Toast 事件 (兼容旧逻辑，转发给 sonner)
@@ -229,9 +229,6 @@ const AgentView = () => {
 
   return (
     <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600")}>
-      <button onClick={() => setIsMuted(!isMuted)} className="fixed top-24 right-10 z-[400] w-10 h-10 rounded-full bg-slate-900/80 backdrop-blur-md text-white flex items-center justify-center hover:scale-110 active:scale-90 transition-all border border-white/10 shadow-2xl">
-        {isMuted ? <VolumeX size={18} className="text-red-400" /> : <Volume2 size={18} className="text-cyan-400" />}
-      </button>
       <TacticalIsland />
     </div>
   )
