@@ -18,17 +18,24 @@ async def get_violations(
     size: int = 20
 ):
     """
-    [实战审计] 违规记录隔离：主管锁定部门，总部全域穿透
+    [实战审计] 违规记录隔离：主管锁定部门，总部全域穿透，坐席强制自看
     """
     query = ViolationRecord.filter(is_deleted=0).select_related("user", "user__department")
 
-    if current_user["role_code"] == "ADMIN":
+    # 核心：物理隔离逻辑
+    if current_user["role_code"] == "AGENT":
+        # 坐席身份：强制锁定本人 username，无视前端传参
+        query = query.filter(user__username=current_user["username"])
+    elif current_user["role_code"] == "ADMIN":
+        # 主管身份：锁定本部门
         query = query.filter(user__department_id=current_user["dept_id"])
+        if username: # 主管可在部门内搜人
+            query = query.filter(Q(user__username__icontains=username) | Q(user__real_name__icontains=username))
     elif current_user["role_code"] == "HQ" and dept_id:
+        # 总部身份：全域穿透
         query = query.filter(user__department_id=dept_id)
-
-    if username:
-        query = query.filter(Q(user__username__icontains=username) | Q(user__real_name__icontains=username))
+        if username:
+            query = query.filter(Q(user__username__icontains=username) | Q(user__real_name__icontains=username))
     if keyword:
         query = query.filter(keyword__icontains=keyword)
     
@@ -50,17 +57,22 @@ async def resolve_violation(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    [战术对齐] 标记违规已解决，并记录解决方案
+    [战术对齐] 标记违规已解决，并注入贡献奖励 (+2 PT)
     """
     v_id, solution = data.get("id"), data.get("solution")
-    v = await ViolationRecord.get_or_none(id=v_id)
+    v = await ViolationRecord.get_or_none(id=v_id).select_related("user")
+    
     if v:
-        # 由于 models.py 可能还没加字段，这里使用临时处理或确保 models 已对齐
-        # 工业级做法：通过原子更新或 Tortoise 对象更新
+        # 1. 持久化解决方案
         v.solution = solution
         v.status = "RESOLVED"
         await v.save()
-        return {"status": "ok", "message": "战术解决库已同步"}
+        
+        # 2. 注入贡献奖励：通过事务补回分数
+        from core.services import grant_user_reward
+        await grant_user_reward(v.user.id, 'SCORE', '解决库贡献奖', 2)
+        
+        return {"status": "ok", "message": "战术解决库已同步，奖励 2 PT 已发放"}
     return {"status": "error", "message": "未找到相关记录"}
 
 async def get_custom_audio(keyword: str):

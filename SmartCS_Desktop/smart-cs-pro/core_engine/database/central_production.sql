@@ -199,7 +199,9 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 ('agent:status:sync', '个人态势同步', '坐席实战'),
 ('agent:honor:view', '个人荣誉查看', '坐席实战'),
 ('agent:training:execute', '实战培训执行', '坐席实战'),
-('agent:command:receive', '战术指令接收', '坐席实战');
+('agent:command:receive', '战术指令接收', '坐席实战'),
+('agent:hud:view', '个人态势舱查看', '坐席实战'),
+('agent:hud:export', '个人战术报表导出', '坐席实战');
 
 -- 授权 HQ 全量权限
 INSERT IGNORE INTO role_permissions (role_id, permission_code) 
@@ -210,4 +212,5 @@ INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES
 (1, 'agent:status:sync'),
 (1, 'agent:honor:view'),
 (1, 'agent:training:execute'),
-(1, 'agent:command:receive');
+(1, 'agent:command:receive'),
+(1, 'agent:hud:view');

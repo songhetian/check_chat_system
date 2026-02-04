@@ -2,6 +2,7 @@ import json, time, asyncio, re, hashlib, secrets, os, logging, subprocess, shuti
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from tortoise.contrib.fastapi import register_tortoise
 import uvicorn, redis.asyncio as redis
 from dotenv import load_dotenv
@@ -83,6 +84,15 @@ app.include_router(growth_router)
 app.include_router(rbac_router)
 app.include_router(ai_router)
 
+# --- 物理资产托管：Web 态势舱支持 ---
+# 自动检测并托管前端静态资源
+dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist", "renderer")
+if os.path.exists(dist_path):
+    app.mount("/", StaticFiles(directory=dist_path, html=True), name="static")
+    logger.info(f"🌐 [Web链路] 已激活前端托管: {dist_path}")
+else:
+    logger.warning(f"⚠️ [Web链路] 未发现 dist 目录，请先执行 npm run build")
+
 # --- 4. WebSocket 战术链路 ---
 @app.websocket("/api/ws/risk")
 async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), username: str = Query(...)):
@@ -98,11 +108,28 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
             msg = json.loads(data)
             if msg.get("type") == "CHAT_TRANSMISSION":
                 # 战术加固：实时扫描内容敏感词
-                from core.services import SmartScanner
+                from core.services import SmartScanner, grant_user_reward
                 scanner = SmartScanner()
                 content = msg.get("content", "")
-                await scanner.process(content, username=username, redis_client=app.state.redis, ws_manager=manager)
                 
+                # 1. 执行扫描并检查是否命中
+                is_violated = await scanner.process(content, username=username, redis_client=app.state.redis, ws_manager=manager)
+                
+                # 2. 自愈机制：如果本次无违规，增加净空计数
+                if not is_violated and app.state.redis:
+                    counter_key = f"clean_msg_count:{username}"
+                    count = await app.state.redis.incr(counter_key)
+                    if count >= 50:
+                        # 达到阈值，触发自愈奖励 (+1 PT)
+                        u_obj = await User.get_or_none(username=username)
+                        if u_obj:
+                            await grant_user_reward(u_obj.id, 'SCORE', '净空自愈奖励', 1)
+                            await app.state.redis.set(counter_key, 0) # 重置计数
+                            logger.info(f"🌿 [自愈] 操作员 {username} 已完成 50 条净空对话，奖励 1 PT")
+                elif is_violated and app.state.redis:
+                    # 如果违规，重置净空计数
+                    await app.state.redis.set(f"clean_msg_count:{username}", 0)
+
                 await manager.broadcast({
                     "type": "LIVE_CHAT",
                     "username": username,

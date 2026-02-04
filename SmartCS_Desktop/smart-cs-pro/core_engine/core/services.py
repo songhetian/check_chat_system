@@ -77,7 +77,7 @@ class SmartScanner:
         self.last_hash = ""
 
     async def process(self, text, username="admin", redis_client=None, ws_manager=None):
-        if not text: return
+        if not text: return False
         
         # 1. 动态获取全量敏感词库
         from core.models import SensitiveWord
@@ -99,4 +99,5 @@ class SmartScanner:
                         "timestamp": time.time() * 1000,
                         "id": secrets.token_hex(12)
                     })
-                break # 命中一个就触发
+                return True # 命中
+        return False # 未命中
