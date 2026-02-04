@@ -101,7 +101,7 @@ const AdminHome = () => {
            {isHQ && (
              <div className="w-64">
                <TacticalSelect 
-                 options={depts}
+                 options={[{id: '', name: '全域战术单元'}, ...depts]}
                  value={deptId}
                  onChange={(val: string | number) => { setDeptId(String(val)); setPage(1); }}
                  placeholder="全域战术单元"

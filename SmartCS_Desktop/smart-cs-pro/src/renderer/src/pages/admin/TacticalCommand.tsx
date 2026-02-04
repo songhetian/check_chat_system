@@ -107,7 +107,7 @@ export default function TacticalCommand() {
         <div className="flex items-center gap-4">
            {isHQ && (
              <div className="w-56">
-               <TacticalSelect options={depts} value={deptId} onChange={(val: string | number) => setDeptId(String(val))} placeholder="全域战术单元" />
+               <TacticalSelect options={[{id: '', name: '全域战术单元'}, ...depts]} value={deptId} onChange={(val: string | number) => setDeptId(String(val))} placeholder="全域战术单元" />
              </div>
            )}
            <StatBox label="监控节点" value={agents.length} color="text-cyan-500" />
