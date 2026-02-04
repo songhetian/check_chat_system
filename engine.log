@@ -170,3 +170,34 @@ INFO:     192.168.2.184:58367 - "GET /api/admin/departments?size=100 HTTP/1.1" 2
 INFO:     192.168.2.184:58364 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186465624 HTTP/1.1" 200 OK
 INFO:     192.168.2.184:58365 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186465625 HTTP/1.1" 200 OK
 INFO:     192.168.2.184:58376 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58394 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58497 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58510 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58517 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186583826 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58517 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186584781 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58517 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186584964 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58517 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186585165 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58517 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186585364 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58517 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186585564 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58517 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186585765 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58518 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58694 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58703 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58724 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:58738 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58741 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58743 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:58736 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58739 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58740 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58737 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58736 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186708558 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58737 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770186708561 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:58745 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
