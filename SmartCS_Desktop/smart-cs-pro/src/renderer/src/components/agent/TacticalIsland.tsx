@@ -21,7 +21,7 @@ export const TacticalIsland = () => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'AI' | 'RADAR' | 'TOOLS'>('AI')
 
-  // 灵动岛尺寸动态适配：增加宽度，优化高度紧凑感
+  // 灵动岛尺寸动态适配
   useEffect(() => {
     const width = 680
     const height = isExpanded ? 780 : 100
@@ -34,8 +34,8 @@ export const TacticalIsland = () => {
       <motion.div 
         layout
         className={cn(
-          "pointer-events-auto border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden transition-all duration-500 rounded-[38px]",
-          isGlassMode ? "bg-slate-950/90 backdrop-blur-3xl" : "bg-slate-950",
+          "pointer-events-auto border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden transition-all duration-500 rounded-[38px]",
+          isGlassMode ? "bg-slate-950/85 backdrop-blur-3xl" : "bg-slate-950",
           isAlerting && "border-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] ring-1 ring-red-500/20"
         )}
       >
@@ -44,7 +44,7 @@ export const TacticalIsland = () => {
           className="flex items-center justify-between px-6 h-[80px] shrink-0 cursor-move" 
           style={{ WebkitAppRegion: 'drag' } as any}
         >
-          {/* 左侧：用户信息 & 状态 (更紧凑的布局) */}
+          {/* 左侧：用户信息 & 状态 */}
           <div className="flex items-center gap-3.5 min-w-[180px]">
             <div className="relative">
               <div className={cn(
@@ -72,14 +72,14 @@ export const TacticalIsland = () => {
             </div>
           </div>
 
-          {/* 中间：核心控制组 (紧凑按钮，动态配色) */}
+          {/* 中间：核心控制组 */}
           <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <HubBtn 
               icon={isGlassMode ? <Ghost size={18} /> : <Square size={18} />} 
               active={!isGlassMode} 
               onClick={() => setGlassMode(!isGlassMode)}
-              title={isGlassMode ? "切换实色" : "切换磨砂"}
-              color="emerald"
+              title={isGlassMode ? "切换实色背景" : "切换磨砂玻璃"}
+              color="white"
             />
             <div className="w-px h-6 bg-white/5 mx-0.5" />
             <HubBtn 
@@ -112,7 +112,7 @@ export const TacticalIsland = () => {
             />
           </div>
 
-          {/* 右侧：功能控制 & 退出 (移除风险值显示) */}
+          {/* 右侧：退出 */}
           <div className="flex items-center justify-end min-w-[60px]" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <button 
               onClick={() => { logout(); window.location.hash = '/login'; }}
@@ -211,9 +211,11 @@ export const TacticalIsland = () => {
 }
 
 function HubBtn({ icon, active, onClick, title, color }: any) {
-  const activeClass = color === 'red' 
-    ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)] border-red-400" 
-    : "bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.4)] border-emerald-400"
+  const activeClassMap: any = {
+    red: "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)] border-red-400",
+    emerald: "bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.4)] border-emerald-400",
+    white: "bg-white text-black shadow-lg"
+  }
 
   return (
     <button 
@@ -221,7 +223,7 @@ function HubBtn({ icon, active, onClick, title, color }: any) {
       title={title}
       className={cn(
         "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 active:scale-90 border border-transparent",
-        active ? activeClass : "text-slate-500 hover:bg-white/10 hover:text-white"
+        active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white"
       )}
     >
       {icon}
