@@ -127,5 +127,14 @@ register_tortoise(
 if __name__ == "__main__":
     host, port = os.getenv("SERVER_HOST", "0.0.0.0"), int(os.getenv("SERVER_PORT", 8000))
     print(f"🚀 [战术核心] 架构标准化重塑完成: {host}:{port}")
-    # 强制指定 websockets 驱动，移除可能导致启动失败的 uvloop 锁定
-    uvicorn.run(app, host=host, port=port, ws='websockets')
+    
+    # 智能驱动自适应：检测环境是否支持高性能 WebSocket
+    ws_driver = "auto"
+    try:
+        import websockets
+        ws_driver = "websockets"
+        print("  ✅ 已激活 websockets 高性能驱动")
+    except ImportError:
+        print("  ⚠️  未检测到 websockets 库，将使用 uvicorn 默认驱动")
+
+    uvicorn.run(app, host=host, port=port, ws=ws_driver)
