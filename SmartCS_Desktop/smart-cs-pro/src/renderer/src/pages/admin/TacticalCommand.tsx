@@ -37,7 +37,7 @@ export default function TacticalCommand() {
     if (!silent) setLoading(true)
     try {
       const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/admin/agents?role_only=AGENT&search=${search}`, 
+        url: `${CONFIG.API_BASE}/admin/agents?role_only=AGENT&page=1&size=100&search=${search}`, 
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })

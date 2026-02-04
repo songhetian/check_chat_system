@@ -48,7 +48,7 @@ async def get_agents(
     page: int = 1, 
     size: int = 50,
     search: str = "",
-    role_only: str = "AGENT" # 默认仅看坐席
+    role_only: str = Query(None) # 修改为从 Query 显式拉取，避免默认值冲突
 ):
     redis = request.app.state.redis
     offset = (page - 1) * size
@@ -57,6 +57,7 @@ async def get_agents(
     # 1. 基础过滤：必须未删除，且符合角色要求
     query = User.filter(is_deleted=0).select_related("role")
     
+    # 强制执行角色代码过滤
     if role_only:
         query = query.filter(role__code=role_only)
     
