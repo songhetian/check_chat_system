@@ -88,7 +88,9 @@ app.include_router(ai_router)
 async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), username: str = Query(...)):
     await manager.connect(username, websocket)
     redis_conn = app.state.redis
-    if redis_conn: await redis_conn.sadd("online_agents_set", username)
+    if redis_conn: 
+        await redis_conn.sadd("online_agents_set", username)
+        await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "ONLINE"})
     
     try:
         while True:
@@ -103,11 +105,15 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
                 })
     except WebSocketDisconnect:
         manager.disconnect(username)
-        if redis_conn: await redis_conn.srem("online_agents_set", username)
+        if redis_conn: 
+            await redis_conn.srem("online_agents_set", username)
+            await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
     except Exception as e:
         logger.error(f"⚠️ WS 链路异常: {e}")
         manager.disconnect(username)
-        if redis_conn: await redis_conn.srem("online_agents_set", username)
+        if redis_conn: 
+            await redis_conn.srem("online_agents_set", username)
+            await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
 
 # --- 5. 物理引擎挂载 ---
 register_tortoise(

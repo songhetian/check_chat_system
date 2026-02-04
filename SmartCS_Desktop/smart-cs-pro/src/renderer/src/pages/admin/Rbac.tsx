@@ -17,6 +17,7 @@ export default function RbacPage() {
   const [loading, setLoading] = useState(true)
   const [activeRoleId, setActiveRoleId] = useState<number | null>(null)
   const [rolePerms, setRolePerms] = useState<string[]>([])
+  const [processing, setProcessing] = useState(false)
 
   const initData = async () => {
     if (!token) return
@@ -36,7 +37,7 @@ export default function RbacPage() {
       ])
       if (resRoles.status === 200) {
         setRoles(resRoles.data.data)
-        if (resRoles.data.data.length > 0) setActiveRoleId(resRoles.data.data[0].id)
+        if (resRoles.data.data.length > 0 && !activeRoleId) setActiveRoleId(resRoles.data.data[0].id)
       }
       if (resPerms.status === 200) setPermissions(resPerms.data.data)
     } catch (e) {
@@ -70,15 +71,20 @@ export default function RbacPage() {
   }
 
   const handleSave = async () => {
-    if (!activeRoleId || !token) return
-    const res = await window.api.callApi({
-      url: `${CONFIG.API_BASE}/admin/role/permissions`,
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      data: { role_id: activeRoleId, permissions: rolePerms }
-    })
-    if (res.data.status === 'ok') {
-      toast.success('矩阵已固化', { description: '权责变更已实时同步至受影响节点' })
+    if (!activeRoleId || !token || processing) return
+    setProcessing(true)
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/role/permissions`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: { role_id: activeRoleId, permissions: rolePerms }
+      })
+      if (res.data.status === 'ok') {
+        toast.success('矩阵已固化', { description: '权责变更已实时同步至受影响节点' })
+      }
+    } finally {
+      setProcessing(false)
     }
   }
 
@@ -90,7 +96,9 @@ export default function RbacPage() {
            <button onClick={() => initData()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
              <RefreshCw size={18} className={cn(loading && "animate-spin")} />
            </button>
-           <button onClick={handleSave} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 hover:bg-slate-800 transition-all"><Save size={16} /> 保存配置</button>
+           <button disabled={processing} onClick={handleSave} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 hover:bg-slate-800 transition-all disabled:opacity-50">
+             {processing ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} 保存配置
+           </button>
         </div>
       </header>
 

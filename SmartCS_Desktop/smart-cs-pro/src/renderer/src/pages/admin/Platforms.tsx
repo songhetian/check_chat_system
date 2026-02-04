@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Monitor, Plus, Trash2, Power, PowerOff, ShieldCheck, Loader2, RefreshCw } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Monitor, Plus, Trash2, Power, PowerOff, ShieldCheck, Loader2, RefreshCw, ShieldAlert } from 'lucide-react'
 import axios from 'axios'
 import { toast } from 'sonner'
 import { cn } from '../../lib/utils'
@@ -174,9 +174,6 @@ export default function PlatformsPage() {
           </div>
         )}
       </AnimatePresence>
-    </div>
-  )
-}
     </div>
   )
 }

@@ -32,6 +32,7 @@ export default function TacticalCommand() {
   const [isInputLocked, setIsInputLocked] = useState(false)
   const [search, setSearch] = useState('')
   const [liveChat, setLiveChat] = useState<any[]>([])
+  const [processing, setProcessing] = useState<string | null>(null)
   
   const violations = useRiskStore(s => s.violations)
   const isHQ = user?.role_code === 'HQ'
@@ -80,21 +81,33 @@ export default function TacticalCommand() {
         setLiveChat(prev => [...prev.slice(-15), { sender: 'USR', text: msg.content, time: new Date().toLocaleTimeString() }])
       }
     }
+    const onNodeSync = () => {
+      fetchData(true) // 静默刷新坐席矩阵状态
+    }
     window.addEventListener('ws-live-chat', onLiveChat)
-    return () => window.removeEventListener('ws-live-chat', onLiveChat)
+    window.addEventListener('ws-tactical-node-sync', onNodeSync)
+    return () => {
+      window.removeEventListener('ws-live-chat', onLiveChat)
+      window.removeEventListener('ws-tactical-node-sync', onNodeSync)
+    }
   }, [activeAgent])
 
   const executeIntervention = async (type: string, description: string, payload: any = {}) => {
-    if (!activeAgent || !token) return
-    const res = await window.api.callApi({
-      url: `${CONFIG.API_BASE}/admin/command`,
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      data: { username: activeAgent.username, type, payload }
-    })
-    if (res.data.status === 'ok') {
-      if (type === 'LOCK') setIsInputLocked(!isInputLocked)
-      toast.success('指令生效', { description: `针对 ${activeAgent.real_name} 的 [${description}] 已下发` })
+    if (!activeAgent || !token || processing) return
+    setProcessing(type)
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/command`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: { username: activeAgent.username, type, payload }
+      })
+      if (res.data.status === 'ok') {
+        if (type === 'LOCK') setIsInputLocked(!isInputLocked)
+        toast.success('指令生效', { description: `针对 ${activeAgent.real_name} 的 [${description}] 已下发` })
+      }
+    } finally {
+      setProcessing(null)
     }
   }
 
@@ -152,10 +165,10 @@ export default function TacticalCommand() {
                   <section className="p-8 border-b border-slate-100 bg-slate-50/30 shrink-0">
                      <div className="flex items-center justify-between mb-6"><div className="flex items-center gap-3"><div className="w-1.5 h-4 bg-cyan-500 rounded-full" /><h5 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.4em]">指挥官干预矩阵</h5></div><div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm"><span className="text-[9px] font-black text-slate-400">目标: {activeAgent.real_name}</span></div></div>
                      <div className="grid grid-cols-4 gap-6">
-                        <TacticalButton disabled={!activeAgent.is_online} active={isInputLocked} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定')} icon={isInputLocked ? Unlock : Lock} label={isInputLocked ? '解除锁定' : '强制锁定'} sub="PHYSICAL LOCK" color={isInputLocked ? 'bg-red-600' : 'bg-slate-900'} />
-                        <TacticalButton onClick={() => executeIntervention('PUSH', '话术弹射', { text: '非常抱歉...' })} icon={Send} label="话术弹射" sub="AUTO PUSH" color="bg-cyan-500" textColor="text-slate-950" />
-                        <TacticalButton onClick={() => executeIntervention('VOICE', '语音警告')} icon={Mic} label="语音告警" sub="AUDIO WARN" color="bg-white" textColor="text-red-600" border="border-2 border-red-100" />
-                        <TacticalButton onClick={() => executeIntervention('SOP', '推送 SOP')} icon={FileText} label="推送 SOP" sub="TACTICAL SOP" color="bg-white" textColor="text-slate-900" border="border-2 border-slate-100" />
+                        <TacticalButton disabled={!activeAgent.is_online || (processing && processing !== 'LOCK')} active={isInputLocked} loading={processing === 'LOCK'} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定')} icon={isInputLocked ? Unlock : Lock} label={isInputLocked ? '解除锁定' : '强制锁定'} sub="PHYSICAL LOCK" color={isInputLocked ? 'bg-red-600' : 'bg-slate-900'} />
+                        <TacticalButton disabled={processing && processing !== 'PUSH'} loading={processing === 'PUSH'} onClick={() => executeIntervention('PUSH', '话术弹射', { text: '非常抱歉...' })} icon={Send} label="话术弹射" sub="AUTO PUSH" color="bg-cyan-500" textColor="text-slate-950" />
+                        <TacticalButton disabled={processing && processing !== 'VOICE'} loading={processing === 'VOICE'} onClick={() => executeIntervention('VOICE', '语音警告')} icon={Mic} label="语音告警" sub="AUDIO WARN" color="bg-white" textColor="text-red-600" border="border-2 border-red-100" />
+                        <TacticalButton disabled={processing && processing !== 'SOP'} loading={processing === 'SOP'} onClick={() => executeIntervention('SOP', '推送 SOP')} icon={FileText} label="推送 SOP" sub="TACTICAL SOP" color="bg-white" textColor="text-slate-900" border="border-2 border-slate-100" />
                      </div>
                   </section>
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
@@ -194,11 +207,18 @@ function StatBox({ label, value, color }: any) {
   )
 }
 
-function TacticalButton({ onClick, icon: Icon, label, sub, color, textColor = 'text-white', border, active, disabled }: any) {
+function TacticalButton({ onClick, icon: Icon, label, sub, color, textColor = 'text-white', border, active, disabled, loading }: any) {
+
   return (
-    <motion.button disabled={disabled} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onClick} className={cn("flex flex-col items-center justify-center gap-3 p-6 rounded-[32px] transition-all shadow-xl group disabled:opacity-20 relative overflow-hidden", color, border, textColor)}>
-       <Icon size={28} strokeWidth={2.5} className={cn("transition-transform group-hover:scale-110", active && "animate-bounce")} />
+
+    <motion.button disabled={disabled || loading} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onClick} className={cn("flex flex-col items-center justify-center gap-3 p-6 rounded-[32px] transition-all shadow-xl group disabled:opacity-20 relative overflow-hidden", color, border, textColor)}>
+
+       {loading ? <Loader2 size={28} className="animate-spin" /> : <Icon size={28} strokeWidth={2.5} className={cn("transition-transform group-hover:scale-110", active && "animate-bounce")} />}
+
        <div className="text-center"><p className="text-xs font-black uppercase tracking-tighter leading-none mb-1">{label}</p><p className="text-[8px] font-bold opacity-40 uppercase tracking-widest font-mono">{sub}</p></div>
+
     </motion.button>
+
   )
+
 }
