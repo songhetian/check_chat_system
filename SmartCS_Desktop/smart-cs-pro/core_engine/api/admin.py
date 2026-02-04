@@ -46,21 +46,21 @@ async def get_agents(
     request: Request, 
     current_user: dict = Depends(get_current_user),
     page: int = 1, 
-    size: int = 50, # 增加默认拉取量，确保首页显影
-    search: str = ""
+    size: int = 50,
+    search: str = "",
+    role_only: str = "AGENT" # 默认仅看坐席
 ):
-    """
-    [战术修复] 人员列表显影加固：
-    1. 移除可能导致 Join 过滤失败的 select_related(department)
-    2. 采用异步并发处理统计数据
-    """
     redis = request.app.state.redis
     offset = (page - 1) * size
     online_usernames = await redis.smembers("online_agents_set") if redis else []
 
-    # 核心：只关联必须的 Role，Department 改为按需取，防止 Inner Join 过滤掉没部门的人
+    # 1. 基础过滤：必须未删除，且符合角色要求
     query = User.filter(is_deleted=0).select_related("role")
     
+    if role_only:
+        query = query.filter(role__code=role_only)
+    
+    # 2. 物理数据隔离：主管只能看本部门
     if current_user["role_code"] == "ADMIN":
         query = query.filter(department_id=current_user["dept_id"])
     
@@ -68,8 +68,7 @@ async def get_agents(
         query = query.filter(Q(username__icontains=search) | Q(real_name__icontains=search))
 
     total = await query.count()
-    # 先拉取基础用户数据
-    agents_data = await query.order_by("tactical_score").limit(size).offset(offset).values(
+    agents_data = await query.order_by("-id").limit(size).offset(offset).values(
         "id", "username", "real_name", "role_id", "role__name", "role__code", "tactical_score", "department_id"
     )
     
@@ -127,6 +126,29 @@ async def get_notifications(page: int = 1, size: int = 10, current_user: dict = 
     total = await query.count()
     data = await query.order_by("-created_at").limit(size).offset(offset).values()
     return {"status": "ok", "data": data, "total": total}
+
+@router.post("/command")
+async def send_command(data: dict, request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    [实战闭环] 指挥官指令物理下发接口
+    """
+    target_username = data.get("username")
+    cmd_type = data.get("type") # LOCK, PUSH, VOICE, SOP
+    cmd_payload = data.get("payload", {})
+    
+    ws_manager = request.app.state.ws_manager
+    if not ws_manager:
+        return {"status": "error", "message": "指令中枢未挂载"}
+    
+    # 物理下发：通过 WebSocket 精准靶向坐席终端
+    await ws_manager.send_personal_message({
+        "type": f"TACTICAL_{cmd_type}",
+        "payload": cmd_payload,
+        "commander": current_user["real_name"]
+    }, target_username)
+    
+    # 同时写入审计流 (略，后续补全)
+    return {"status": "ok"}
 
 @router.get("/departments")
 async def get_departments(request: Request, current_user: dict = Depends(get_current_user), page: int = 1, size: int = 10):
