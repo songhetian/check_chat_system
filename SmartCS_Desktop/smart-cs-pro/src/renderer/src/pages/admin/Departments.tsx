@@ -16,7 +16,7 @@ function Modal({ isOpen, onClose, title, children }: any) {
       {isOpen && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden z-10 bg-white">
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="relative w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden z-10 bg-white">
              <div className="p-10">
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">{title}</h3>
@@ -32,7 +32,7 @@ function Modal({ isOpen, onClose, title, children }: any) {
 }
 
 export default function DepartmentsPage() {
-  const { hasPermission } = useAuthStore()
+  const { hasPermission, token } = useAuthStore()
   const [depts, setDepts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -49,7 +49,11 @@ export default function DepartmentsPage() {
   const fetchDepts = async () => {
     setLoading(true)
     try {
-      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments?page=${page}&size=10`, method: 'GET' })
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/admin/departments?page=${page}&size=10`, 
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
       if (res.status === 200) {
         setDepts(res.data.data)
         setTotal(res.data.total)
@@ -57,7 +61,24 @@ export default function DepartmentsPage() {
     } finally { setLoading(false) }
   }
 
+  const fetchDeptUsers = async (deptId: number) => {
+    try {
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/admin/departments/users?dept_id=${deptId}&search=${userSearch}`, 
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.status === 200) setDeptUsers(res.data.data)
+    } catch (e) { console.error(e) }
+  }
+
   useEffect(() => { fetchDepts() }, [page])
+  
+  useEffect(() => {
+    if (modalType === 'EDIT' && targetItem) {
+      fetchDeptUsers(targetItem.id)
+    }
+  }, [modalType, userSearch])
 
   const handleSave = async () => {
     if (!inputName.trim()) return
@@ -65,7 +86,19 @@ export default function DepartmentsPage() {
     const res = await window.api.callApi({
       url: `${CONFIG.API_BASE}/admin/departments${isEdit ? '/update' : ''}`,
       method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
       data: isEdit ? { id: targetItem.id, name: inputName, manager_id: managerId || null } : { name: inputName }
+    })
+    if (res.data.status === 'ok') { setModalType('NONE'); fetchDepts(); }
+  }
+
+  const executeDelete = async () => {
+    if (!targetItem) return
+    const res = await window.api.callApi({ 
+      url: `${CONFIG.API_BASE}/admin/departments/delete`, 
+      method: 'POST', 
+      headers: { 'Authorization': `Bearer ${token}` },
+      data: { id: targetItem.id } 
     })
     if (res.data.status === 'ok') { setModalType('NONE'); fetchDepts(); }
   }
@@ -82,7 +115,6 @@ export default function DepartmentsPage() {
         )}
       </header>
 
-      {/* 核心容器：必须使用 min-h-0 配合 flex-1 实现内部滚动 */}
       <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {loading ? (
@@ -108,7 +140,6 @@ export default function DepartmentsPage() {
           )}
         </div>
         
-        {/* 稳固的分页器布局 */}
         {total > 10 && (
           <div className="shrink-0 border-t border-slate-100 bg-white p-2">
             <TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} />
@@ -122,7 +153,7 @@ export default function DepartmentsPage() {
           {modalType === 'EDIT' && (
             <div className="space-y-4">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">指派部门主管</label>
-              <div className="relative"><div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300"><Search size={16} /></div><input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="搜索部门内员工姓名..." className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold shadow-inner" /></div>
+              <div className="relative group"><div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-cyan-500 transition-colors"><Search size={16} /></div><input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="搜索部门内员工姓名..." className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold shadow-inner" /></div>
               <div className="max-h-40 overflow-y-auto custom-scrollbar border border-slate-100 rounded-2xl p-2 bg-slate-50/30">
                  {deptUsers.map(u => (
                    <div key={u.id} onClick={() => setManagerId(u.id)} className={cn("p-3 rounded-xl cursor-pointer flex justify-between items-center transition-all", managerId == u.id ? "bg-cyan-500 text-white shadow-lg" : "hover:bg-white text-slate-600")}>
@@ -134,6 +165,17 @@ export default function DepartmentsPage() {
             </div>
           )}
           <button onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"><ShieldCheck size={18} /> 固化架构变更</button>
+        </div>
+      </Modal>
+
+      <Modal isOpen={modalType === 'DELETE'} onClose={() => setModalType('NONE')} title="确认注销操作">
+        <div className="space-y-8 flex flex-col items-center text-center">
+           <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
+           <div><h4 className="text-lg font-black text-slate-900 mb-2">确定要注销该部门吗？</h4><p className="text-sm text-slate-500 font-medium leading-relaxed px-4">您正在执行高危战术操作。注销 <span className="text-red-600 font-black">[{targetItem?.name}]</span> 将导致该部门下的员工失去组织归属。</p></div>
+           <div className="grid grid-cols-2 gap-4 w-full">
+              <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">取消</button>
+              <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-red-500/20 hover:bg-red-600 active:scale-95 transition-all">确认注销</button>
+           </div>
         </div>
       </Modal>
     </div>
