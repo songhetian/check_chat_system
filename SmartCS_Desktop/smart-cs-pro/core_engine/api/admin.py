@@ -54,15 +54,21 @@ async def get_agents(
     return {"status": "ok", "data": result, "total": total}
 
 @router.post("/command")
-async def send_command(data: dict, request: Request, current_user: dict = Depends(get_current_user)):
+async def send_command(data: dict, request: Request, user: dict = Depends(check_permission("command:input:lock"))):
+    """
+    [实战闭环] 指挥官指令物理下发：注入动作权限熔断
+    """
+    # ... 原有逻辑
     target_username, cmd_type, cmd_payload = data.get("username"), data.get("type"), data.get("payload", {})
     ws_manager = request.app.state.ws_manager
     if not ws_manager: return {"status": "error", "message": "指令中枢未挂载"}
-    await ws_manager.send_personal_message({"type": f"TACTICAL_{cmd_type}", "payload": cmd_payload, "commander": current_user["real_name"]}, target_username)
+    await ws_manager.send_personal_message({"type": f"TACTICAL_{cmd_type}", "payload": cmd_payload, "commander": user["real_name"]}, target_username)
     return {"status": "ok"}
 
 @router.get("/departments")
 async def get_departments(page: int = 1, size: int = 10, current_user: dict = Depends(get_current_user)):
+    # 列表查看仅需登录，但在 Layout 层面已通过 perm 过滤了入口
+
     offset = (page - 1) * size
     query = Department.filter(is_deleted=0).select_related("manager")
     if current_user["role_code"] == "ADMIN": query = query.filter(id=current_user["dept_id"])
