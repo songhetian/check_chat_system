@@ -1,108 +1,31 @@
-INFO:     Started server process [86904]
+INFO:     Started server process [88526]
 INFO:     Waiting for application startup.
-INFO:tortoise:Tortoise-ORM started, {'default': <tortoise.backends.mysql.client.MySQLClient object at 0x105b1f8c0>}, {'models': {'AuditLog': <class 'core.models.AuditLog'>, 'Customer': <class 'core.models.Customer'>, 'Department': <class 'core.models.Department'>, 'KnowledgeBase': <class 'core.models.KnowledgeBase'>, 'Notification': <class 'core.models.Notification'>, 'Permission': <class 'core.models.Permission'>, 'Platform': <class 'core.models.Platform'>, 'PolicyCategory': <class 'core.models.PolicyCategory'>, 'Product': <class 'core.models.Product'>, 'Role': <class 'core.models.Role'>, 'RolePermission': <class 'core.models.RolePermission'>, 'SensitiveWord': <class 'core.models.SensitiveWord'>, 'TrainingSession': <class 'core.models.TrainingSession'>, 'User': <class 'core.models.User'>, 'UserReward': <class 'core.models.UserReward'>, 'ViolationRecord': <class 'core.models.ViolationRecord'>}}
+INFO:tortoise:Tortoise-ORM started, {'default': <tortoise.backends.mysql.client.MySQLClient object at 0x10569c440>}, {'models': {'AuditLog': <class 'core.models.AuditLog'>, 'Customer': <class 'core.models.Customer'>, 'Department': <class 'core.models.Department'>, 'KnowledgeBase': <class 'core.models.KnowledgeBase'>, 'Notification': <class 'core.models.Notification'>, 'Permission': <class 'core.models.Permission'>, 'Platform': <class 'core.models.Platform'>, 'PolicyCategory': <class 'core.models.PolicyCategory'>, 'Product': <class 'core.models.Product'>, 'Role': <class 'core.models.Role'>, 'RolePermission': <class 'core.models.RolePermission'>, 'SensitiveWord': <class 'core.models.SensitiveWord'>, 'TrainingSession': <class 'core.models.TrainingSession'>, 'User': <class 'core.models.User'>, 'UserReward': <class 'core.models.UserReward'>, 'ViolationRecord': <class 'core.models.ViolationRecord'>}}
 INFO:SmartCS:🚀 Redis Connection Pool Initialized
 INFO:SmartCS:✅ Redis 战术缓存已激活
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     192.168.2.184:54520 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
 🚀 [战术核心] 架构标准化重塑完成: 0.0.0.0:8000
-INFO:     192.168.2.184:61468 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:61471 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     192.168.2.184:54530 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:54533 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:54536 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
 INFO:SmartCS:📡 [WS] 节点已挂载: admin
 INFO:     connection open
-INFO:     192.168.2.184:61472 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:     192.168.2.184:54532 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:54528 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:54529 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:54531 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:54528 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:54541 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
 INFO:SmartCS:📡 [WS] 节点已挂载: admin
 INFO:     connection open
-INFO:     192.168.2.184:61496 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:61691 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:61849 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:61878 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:61967 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:61984 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62123 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62299 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62384 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62397 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62432 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62555 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62723 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62789 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62801 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:62819 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63007 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63189 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63214 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63229 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63257 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63391 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63578 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63618 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63658 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63709 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:63827 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64007 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64089 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64129 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64140 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64249 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64426 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64444 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64463 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64476 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64595 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64823 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64857 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64865 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:64932 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:65041 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:65224 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:65301 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:65311 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:65322 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:65450 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:49243 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:49326 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:49414 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:49437 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:49584 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:49805 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:49910 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:49925 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:49938 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50060 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50223 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50270 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50317 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50343 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50444 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50528 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50703 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50732 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50829 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50860 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:50990 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51151 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51178 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51195 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51228 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51347 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51518 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51609 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51740 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51768 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:51985 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52143 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52156 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52166 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52184 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52396 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52398 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52548 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52558 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52592 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52666 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52754 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:52883 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:53048 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:53170 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
-INFO:     192.168.2.184:53187 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:54542 - "GET /api/admin/permissions HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:54547 - "GET /api/admin/role/permissions?role_id=2 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:54547 - "GET /api/admin/role/permissions?role_id=3 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:54547 - "GET /api/admin/role/permissions?role_id=2 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:54547 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK

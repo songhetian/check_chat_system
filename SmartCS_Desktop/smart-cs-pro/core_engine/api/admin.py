@@ -130,6 +130,12 @@ async def get_audit_logs(page: int = 1, size: int = 15, current_user: dict = Dep
 async def get_roles(current_user: dict = Depends(get_current_user)):
     return {"status": "ok", "data": await Role.filter(is_deleted=0).values("id", "name", "code")}
 
+@router.get("/permissions")
+async def get_permissions(current_user: dict = Depends(get_current_user)):
+    """[物理拉取] 获取全量原子级权限定义清单"""
+    data = await Permission.filter(is_deleted=0).values("id", "code", "name", "module")
+    return {"status": "ok", "data": data}
+
 @router.get("/role/permissions")
 async def get_role_permissions(role_id: int, current_user: dict = Depends(get_current_user)):
     perms = await RolePermission.filter(role_id=role_id, is_deleted=0).values_list("permission_code", flat=True)
