@@ -22,7 +22,7 @@ fi
 
 # 2. 进入核心目录执行初始化
 cd "$ROOT_DIR/SmartCS_Desktop/smart-cs-pro"
-$PYTHON_EXEC core_engine/init_system.py
+$PYTHON_EXEC core_engine/utils/init_system.py
 
 # 3. 启动进程守卫 (后台静默运行)
 echo "🛡️  正在启动进程守卫..."

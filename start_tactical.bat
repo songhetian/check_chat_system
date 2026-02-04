@@ -14,7 +14,7 @@ if exist "..\..\venv\Scripts\activate.bat" (
 )
 
 :: 3. 运行环境自检
-python core_engine\init_system.py
+python core_engine\utils\init_system.py
 
 :: 4. 启动守护进程 (最小化窗口运行)
 echo 🛡️  Launching Guardian Service...
