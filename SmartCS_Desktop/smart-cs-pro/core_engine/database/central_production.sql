@@ -180,8 +180,20 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 ('command:input:lock', '物理输入锁定', '实时指挥'),
 ('command:push:script', '战术话术弹射', '实时指挥'),
 ('audit:log:view', '合规审计流查看', '风险拦截'),
-('tool:secure:gen', '安全载荷生成', '全域提效');
+('tool:secure:gen', '安全载荷生成', '全域提效'),
+-- 坐席端行为权限
+('agent:status:sync', '个人态势同步', '坐席实战'),
+('agent:honor:view', '个人荣誉查看', '坐席实战'),
+('agent:training:execute', '实战培训执行', '坐席实战'),
+('agent:command:receive', '战术指令接收', '坐席实战');
 
 -- 授权 HQ 全量权限
 INSERT IGNORE INTO role_permissions (role_id, permission_code) 
 SELECT 3, code FROM permissions;
+
+-- 授权 坐席 基础实战权限
+INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES 
+(1, 'agent:status:sync'),
+(1, 'agent:honor:view'),
+(1, 'agent:training:execute'),
+(1, 'agent:command:receive');
