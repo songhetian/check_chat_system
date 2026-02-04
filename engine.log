@@ -3190,3 +3190,80 @@ INFO:     connection closed
 INFO:     192.168.2.184:50239 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
 INFO:     connection rejected (403 Forbidden)
 INFO:     connection closed
+INFO:     192.168.2.184:50258 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50259 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50260 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50373 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50395 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50396 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50399 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50400 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50401 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50440 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50441 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50442 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50663 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50664 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50665 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50688 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50695 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50696 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50697 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50698 - "GET /api/admin/agents?page=2&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50698 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50732 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50743 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50773 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50774 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     192.168.2.184:50776 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     connection closed
+INFO:     192.168.2.184:50777 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50772 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50775 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50778 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50779 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50780 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50781 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50784 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50785 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50786 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:50787 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed

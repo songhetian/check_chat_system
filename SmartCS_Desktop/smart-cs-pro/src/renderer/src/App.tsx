@@ -51,7 +51,7 @@ const AdminHome = () => {
     setErrorMsg(null)
     try {
       const res = await window.api.callApi({
-        url: `${CONFIG.API_BASE}/admin/agents?page=${page}&search=${search}`,
+        url: `${CONFIG.API_BASE}/admin/agents?page=${page}&size=10&search=${search}`,
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
