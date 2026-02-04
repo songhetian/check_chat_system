@@ -34,8 +34,8 @@ export const TacticalIsland = () => {
       <motion.div 
         layout
         className={cn(
-          "pointer-events-auto border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden transition-all duration-500 rounded-[38px]",
-          isGlassMode ? "bg-slate-950/85 backdrop-blur-3xl" : "bg-slate-950",
+          "pointer-events-auto border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden transition-all duration-500 rounded-[38px]",
+          isGlassMode ? "bg-slate-950/30 backdrop-blur-3xl" : "bg-slate-950",
           isAlerting && "border-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] ring-1 ring-red-500/20"
         )}
       >
@@ -78,10 +78,10 @@ export const TacticalIsland = () => {
               icon={isGlassMode ? <Ghost size={18} /> : <Square size={18} />} 
               active={!isGlassMode} 
               onClick={() => setGlassMode(!isGlassMode)}
-              title={isGlassMode ? "切换实色背景" : "切换磨砂玻璃"}
+              title={isGlassMode ? "切换实色背景" : "切换高透明磨砂"}
               color="white"
             />
-            <div className="w-px h-6 bg-white/5 mx-0.5" />
+            <div className="w-px h-6 bg-white/10 mx-0.5" />
             <HubBtn 
               icon={<GraduationCap size={18} />} 
               active={isOnboardingMode} 
@@ -112,7 +112,7 @@ export const TacticalIsland = () => {
             />
           </div>
 
-          {/* 右侧：退出 */}
+          {/* 右侧：功能控制 & 退出 */}
           <div className="flex items-center justify-end min-w-[60px]" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <button 
               onClick={() => { logout(); window.location.hash = '/login'; }}
