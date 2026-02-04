@@ -116,7 +116,7 @@ const AdminHome = () => {
            )}
            <button 
              onClick={() => fetchAgents()} 
-             className="p-4 bg-slate-50 text-slate-600 rounded-2xl hover:bg-slate-100 transition-all shadow-sm border border-slate-200 active:scale-95 flex items-center justify-center gap-2 group"
+             className="p-3 bg-slate-50 text-slate-600 rounded-2xl hover:bg-slate-100 transition-all shadow-sm border border-slate-200 active:scale-95 flex items-center justify-center gap-2 group"
              title="物理同步态势"
            >
              <RefreshCw size={20} className={cn(loading && "animate-spin", "group-hover:rotate-180 transition-transform duration-500")} />

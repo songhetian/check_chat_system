@@ -382,3 +382,1269 @@ INFO:     192.168.2.184:59477 - "GET /api/admin/notifications?size=5 HTTP/1.1" 4
 INFO:SmartCS:🔌 [WS] 节点已脱机: admin
 INFO:     connection closed
 INFO:     connection closed
+INFO:     192.168.2.184:62155 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62158 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62153 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62156 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62160 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:62154 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770187814414 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62157 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770187814415 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62167 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:62294 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62323 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62331 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62352 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62360 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:62372 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62375 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62370 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62373 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62377 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:62371 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188001350 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62374 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188001351 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62383 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:62435 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:62463 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62466 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62461 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62468 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     192.168.2.184:62464 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     connection open
+INFO:     192.168.2.184:62462 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188060327 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62465 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188060328 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62471 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:62564 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62803 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62820 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:62832 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62835 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62830 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62833 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62837 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:62831 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188161023 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62834 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188161024 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62838 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:62839 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62841 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62840 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62842 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62839 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188166811 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62840 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188166811 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62839 - "POST /api/admin/agents/delete HTTP/1.1" 403 Forbidden
+INFO:     192.168.2.184:62839 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188169960 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "POST /api/admin/agents/delete HTTP/1.1" 403 Forbidden
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188177737 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188180245 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188180999 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188181203 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188181425 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188181965 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188182416 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188182787 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188183024 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62849 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188183227 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62850 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62850 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188192809 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62850 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188193362 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62850 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188193548 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:62864 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62875 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62889 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62905 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62942 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62999 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:63015 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63017 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63020 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63018 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63016 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63019 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63022 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63015 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188383375 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63016 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188383379 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63025 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63244 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63279 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63299 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63319 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63320 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:63331 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63334 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63329 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63332 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63330 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63333 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63336 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63329 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188543368 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63330 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188543371 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63339 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63368 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63376 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63410 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63419 - "POST /api/admin/agents/delete HTTP/1.1" 403 Forbidden
+INFO:     192.168.2.184:63419 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188647246 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63422 - "POST /api/admin/agents/delete HTTP/1.1" 403 Forbidden
+INFO:     192.168.2.184:63422 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188654067 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63422 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188657719 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63422 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188658628 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63422 - "POST /api/admin/agents/delete HTTP/1.1" 403 Forbidden
+INFO:     192.168.2.184:63422 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188660751 HTTP/1.1" 200 OK
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:63422 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63457 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63460 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63456 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63458 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63459 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63462 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63422 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188661923 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63456 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188661930 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63467 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63477 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63689 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:63710 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63713 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63708 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63711 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63709 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63715 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     192.168.2.184:63712 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     connection open
+INFO:     192.168.2.184:63708 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188743142 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63709 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188743145 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63716 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63724 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63806 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63813 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63816 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770188854069 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63816 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63838 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63837 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770188855781 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63839 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770188855781 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63816 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770188857286 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63816 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770188858120 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63816 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63838 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63837 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188859246 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63839 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188859246 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63816 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188860635 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63816 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188861210 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63816 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188862216 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63816 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63880 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:63927 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63930 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63931 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection closed
+INFO:     192.168.2.184:63925 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     192.168.2.184:63928 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63932 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63926 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188910353 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63929 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188910355 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63933 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63972 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:63994 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63997 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63992 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63995 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63999 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:63993 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188959442 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63996 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770188959443 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64000 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:64061 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:64190 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64193 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64188 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64191 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64195 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:64192 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189004390 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64189 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189004390 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64282 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:64425 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64442 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64466 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:64484 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64487 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64488 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection closed
+INFO:     192.168.2.184:64482 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     192.168.2.184:64485 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64489 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:64483 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189120358 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64486 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189120360 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64490 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:64548 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:64590 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64593 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64588 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64591 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64595 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:64589 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189160392 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64592 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189160393 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64598 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:64631 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64651 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64669 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64698 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64933 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65007 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:65023 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65026 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65021 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65024 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65028 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:65022 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189380376 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65025 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189380377 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65029 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:65083 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65119 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:65140 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65144 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65138 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65142 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65145 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:65139 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189450344 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65143 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189450344 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65146 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:65199 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:65264 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65262 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65267 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65265 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65269 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:65263 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189502411 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65266 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189502412 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65274 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:65336 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65370 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65373 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189570180 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65373 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189570804 HTTP/1.1" 200 OK
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:65403 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65406 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65401 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65404 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65408 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:65402 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189580655 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65405 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189580657 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65409 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:65401 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65403 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65402 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189582925 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65404 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189582925 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189585014 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189585764 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189586181 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189586714 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189587231 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189587814 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189588314 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189588814 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65411 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65410 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65412 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770189591402 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65410 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770189591404 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770189592821 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770189593527 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770189594165 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65401 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770189594838 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65479 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65481 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65480 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189601686 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65482 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189601686 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65479 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65481 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65480 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189602776 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65482 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189602776 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49308 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49364 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49386 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189655129 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49388 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189655129 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49385 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49387 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49385 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49387 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49388 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189655994 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49386 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&_t=1770189655994 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49385 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49387 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49388 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189657596 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49386 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770189657595 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49386 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189658159 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49388 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189658159 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49385 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49387 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49408 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49422 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:49432 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49435 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49431 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189704384 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49437 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:49434 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189704386 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49422 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49433 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49438 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:49448 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189713449 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49449 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49452 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49451 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189713450 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49447 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49450 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49454 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:49455 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:49472 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49471 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189741369 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49475 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49474 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189741369 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49470 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49473 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49477 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:49478 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:49511 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49510 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189759982 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49514 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49513 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189759982 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49509 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49512 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49516 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:49519 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:49540 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49550 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49554 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49588 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:49599 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49602 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49598 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189883440 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49604 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:49601 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189883441 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49588 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49600 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49606 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:49620 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189894087 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49621 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49624 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49623 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770189894089 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:49619 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49626 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:49622 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:49628 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:49869 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49897 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49918 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:49976 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50015 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50014 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190042332 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50018 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50017 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190042333 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50013 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50016 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50020 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50021 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50049 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50048 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190063328 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50052 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50051 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190063328 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50047 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50050 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50054 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50055 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50081 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50080 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190075335 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50084 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50083 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190075335 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50079 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50082 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50086 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50087 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50128 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50138 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190113348 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50139 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50142 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50141 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190113348 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50137 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50140 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50144 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50145 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50160 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190120341 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50161 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50164 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50163 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190120342 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50159 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50162 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50166 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50167 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50178 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50177 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190128337 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50181 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50180 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190128338 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50176 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50179 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50183 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50184 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50204 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50215 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190162384 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50216 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50219 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50204 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50218 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190162385 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50217 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50221 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50222 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50245 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50244 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190183363 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50248 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50247 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190183364 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50243 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50246 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50250 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50253 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50245 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50244 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190187358 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50248 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50247 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190187359 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50243 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50246 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50258 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50259 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50302 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50301 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190200338 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50305 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50304 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190200339 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50300 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50307 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50303 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50316 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50539 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50538 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190209323 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50542 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50541 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190209324 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50537 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50540 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50544 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50550 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50621 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50620 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190236334 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50624 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50623 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190236334 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50619 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50622 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50626 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50627 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50659 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50673 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50699 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50726 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50746 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50745 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190372339 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50749 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50748 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190372339 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50744 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50747 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50751 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50754 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50759 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50783 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:50790 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190434344 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50791 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50794 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50793 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190434345 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:50783 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50792 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:50796 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50797 - "WebSocket /ws/risk?token=tk_33b4e8abdaf7ef19a0df3d221d6205ae&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:50808 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:50818 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:51038 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:51074 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:51074 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51076 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770190559672 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51077 - "GET /api/admin/agents?role_only=AGENT&search=&dept_id=&_t=1770190559672 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190562984 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:51077 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190562985 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:51074 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51076 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51076 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51077 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/ai/categories?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/ai/categories?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/departments?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/admin/departments?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/ai/categories?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/ai/categories?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51080 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51081 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51080 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51081 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51074 - "GET /api/ai/categories?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51075 - "GET /api/ai/categories?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51087 - "GET /api/admin/departments?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51088 - "GET /api/admin/departments?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51087 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51089 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51088 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51090 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51087 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770190579441 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51088 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770190579444 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51087 - "GET /api/admin/customers?page=1&size=12&search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:51088 - "GET /api/admin/customers?page=1&size=12&search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:51087 - "GET /api/admin/products?page=1&size=12&search=&_t=1770190580936 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1146, "Table 'smart_cs.products' doesn't exist")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 121, in get_products
+    await record_audit(user["real_name"], "DEPT_CREATE", name, "录入新战术单元")
+        ^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1486, in _execute
+    _, result = await self._db.execute_query(*self.query.get_parameterized_sql())
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1146, "Table 'smart_cs.products' doesn't exist")
+INFO:     192.168.2.184:51088 - "GET /api/admin/products?page=1&size=12&search=&_t=1770190580936 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1146, "Table 'smart_cs.products' doesn't exist")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 121, in get_products
+    await record_audit(user["real_name"], "DEPT_CREATE", name, "录入新战术单元")
+        ^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1486, in _execute
+    _, result = await self._db.execute_query(*self.query.get_parameterized_sql())
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1146, "Table 'smart_cs.products' doesn't exist")
+INFO:     192.168.2.184:51091 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:51094 - "GET /api/admin/products?page=1&size=12&search=&_t=1770190591278 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1146, "Table 'smart_cs.products' doesn't exist")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 121, in get_products
+    await record_audit(user["real_name"], "DEPT_CREATE", name, "录入新战术单元")
+        ^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1486, in _execute
+    _, result = await self._db.execute_query(*self.query.get_parameterized_sql())
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1146, "Table 'smart_cs.products' doesn't exist")
+INFO:     192.168.2.184:51102 - "GET /api/admin/products?page=1&size=12&search=&_t=1770190594035 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1146, "Table 'smart_cs.products' doesn't exist")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 121, in get_products
+    await record_audit(user["real_name"], "DEPT_CREATE", name, "录入新战术单元")
+        ^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1486, in _execute
+    _, result = await self._db.execute_query(*self.query.get_parameterized_sql())
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1146, "Table 'smart_cs.products' doesn't exist")
+INFO:     192.168.2.184:51103 - "GET /api/admin/products?page=1&size=12&search=&_t=1770190594035 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1146, "Table 'smart_cs.products' doesn't exist")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 121, in get_products
+    await record_audit(user["real_name"], "DEPT_CREATE", name, "录入新战术单元")
+        ^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1486, in _execute
+    _, result = await self._db.execute_query(*self.query.get_parameterized_sql())
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1146, "Table 'smart_cs.products' doesn't exist")
+INFO:     192.168.2.184:51106 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51107 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51108 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51109 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51106 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51107 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190597250 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:51109 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL&_t=1770190597250 HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:51106 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51108 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51121 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:51128 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:51187 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:51192 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51194 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51193 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51195 - "GET /api/admin/departments?size=100 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51192 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770190689255 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51193 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770190689256 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51192 - "POST /api/admin/agents/delete HTTP/1.1" 403 Forbidden
+INFO:     192.168.2.184:51192 - "GET /api/admin/agents?page=1&size=10&search=&dept_id=&role_only=&_t=1770190692455 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:51198 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
