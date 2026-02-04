@@ -97,11 +97,24 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
             data = await websocket.receive_text()
             msg = json.loads(data)
             if msg.get("type") == "CHAT_TRANSMISSION":
+                # 战术加固：实时扫描内容敏感词
+                from core.services import SmartScanner
+                scanner = SmartScanner()
+                content = msg.get("content", "")
+                await scanner.process(content, username=username, redis_client=app.state.redis, ws_manager=manager)
+                
                 await manager.broadcast({
                     "type": "LIVE_CHAT",
                     "username": username,
-                    "content": msg.get("content"),
+                    "content": content,
                     "target": msg.get("target")
+                })
+            elif msg.get("type") == "SCREEN_SYNC":
+                # 转发画面载荷至指挥中心
+                await manager.broadcast({
+                    "type": "SCREEN_SYNC",
+                    "username": username,
+                    "payload": msg.get("payload")
                 })
     except WebSocketDisconnect:
         manager.disconnect(username)

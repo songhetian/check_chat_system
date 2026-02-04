@@ -11,6 +11,7 @@ interface Window {
   }
   api: {
     getServerConfig: () => Promise<any>,
+    captureScreen: () => Promise<string | null>,
     callApi: (payload: { url: string, method?: string, data?: any, headers?: any }) => Promise<{ status: number, data?: any, error?: string }>
   }
 }

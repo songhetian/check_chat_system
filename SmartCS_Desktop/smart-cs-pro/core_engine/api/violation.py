@@ -44,6 +44,25 @@ async def get_violations(
 
     return {"status": "ok", "data": violations, "total": total}
 
+@router.post("/violation/resolve")
+async def resolve_violation(
+    data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    [战术对齐] 标记违规已解决，并记录解决方案
+    """
+    v_id, solution = data.get("id"), data.get("solution")
+    v = await ViolationRecord.get_or_none(id=v_id)
+    if v:
+        # 由于 models.py 可能还没加字段，这里使用临时处理或确保 models 已对齐
+        # 工业级做法：通过原子更新或 Tortoise 对象更新
+        v.solution = solution
+        v.status = "RESOLVED"
+        await v.save()
+        return {"status": "ok", "message": "战术解决库已同步"}
+    return {"status": "error", "message": "未找到相关记录"}
+
 async def get_custom_audio(keyword: str):
     """提取该词关联的自定义声音路径"""
     sw = await SensitiveWord.get_or_none(word=keyword, is_deleted=0)

@@ -1,5 +1,20 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, desktopCapturer } from 'electron'
 import { join } from 'path'
+// ... 其他保持不变
+
+// 核心：战术截屏接口 (用于实时监控)
+ipcMain.handle('capture-screen', async () => {
+  try {
+    const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width: 800, height: 450 } })
+    if (sources.length > 0) {
+      return sources[0].thumbnail.toDataURL()
+    }
+    return null
+  } catch (e) {
+    console.error('Screen capture failed', e)
+    return null
+  }
+})
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import fs from 'fs'

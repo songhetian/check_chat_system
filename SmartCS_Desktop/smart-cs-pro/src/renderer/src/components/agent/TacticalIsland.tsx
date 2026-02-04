@@ -4,7 +4,7 @@ import {
   Shield, BrainCircuit, Activity, Radar as RadarIcon, Trophy, BarChart, 
   ChevronRight, AlertCircle, Zap, Terminal, Target, LogOut, Cpu, LayoutGrid, Settings, MessageSquareOff,
   Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor,
-  Ghost, Square, History, Fingerprint
+  Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -20,14 +20,36 @@ export const TacticalIsland = () => {
   const { user, logout } = useAuthStore()
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'AI' | 'RADAR' | 'TOOLS'>('AI')
+  const [showHelpModal, setShowHelpModal] = useState(false)
+  const [helpText, setHelpText] = useState('')
+
+  const handleHelp = async (type: 'TEXT' | 'IMAGE') => {
+    let payload: any = { type: 'EMERGENCY_HELP', subType: type }
+    
+    if (type === 'IMAGE' && window.api?.captureScreen) {
+      const img = await window.api.captureScreen()
+      payload.image = img
+    } else {
+      payload.content = helpText
+    }
+
+    // 通过现有的 WS 链路发送
+    window.dispatchEvent(new CustomEvent('ws-send-message', { detail: payload }))
+    
+    setShowHelpModal(false)
+    setHelpText('')
+    window.dispatchEvent(new CustomEvent('trigger-toast', { 
+      detail: { title: '战术支援', message: '求助信号已加密发送', type: 'error' } 
+    }))
+  }
 
   // 灵动岛尺寸动态适配
   useEffect(() => {
     const width = 680
-    const height = isExpanded ? 800 : 100
+    const height = showHelpModal ? 400 : (isExpanded ? 800 : 100)
     window.electron.ipcRenderer.send('resize-window', { width, height })
     window.electron.ipcRenderer.send('set-always-on-top', true)
-  }, [isExpanded])
+  }, [isExpanded, showHelpModal])
 
   return (
     <div className="h-screen w-screen flex items-start justify-center pt-1 overflow-hidden pointer-events-none select-none bg-transparent">
@@ -106,6 +128,14 @@ export const TacticalIsland = () => {
               color="red"
             />
             <HubBtn 
+              icon={<Hand size={18} />} 
+              active={showHelpModal} 
+              onClick={() => setShowHelpModal(!showHelpModal)}
+              title="战术求助"
+              color="red"
+            />
+            <div className="w-px h-6 bg-white/5 mx-0.5" />
+            <HubBtn 
               icon={<LayoutGrid size={18} />} 
               active={isExpanded} 
               onClick={() => setIsExpanded(!isExpanded)} 
@@ -125,6 +155,62 @@ export const TacticalIsland = () => {
             </button>
           </div>
         </div>
+
+        {/* 3. 求助模态框 (Help Modal) */}
+        <AnimatePresence>
+          {showHelpModal && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="p-8 border-t border-white/10 bg-slate-900 flex flex-col gap-6"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                 <div className="w-1.5 h-4 bg-red-500 rounded-full" />
+                 <h4 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">发起战术支援请求</h4>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
+                 <button 
+                   onClick={() => handleHelp('IMAGE')}
+                   className="flex flex-col items-center gap-4 p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/30 transition-all group"
+                 >
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-red-500 group-hover:bg-red-500/10"><ImageIcon size={24} /></div>
+                    <div className="text-center">
+                       <p className="text-sm font-black text-white mb-1">图片求助</p>
+                       <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">自动截取当前屏幕</p>
+                    </div>
+                 </button>
+                 
+                 <button 
+                   onClick={() => { /* 仅切换视图，暂不发送 */ }}
+                   className="flex flex-col items-center gap-4 p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all group"
+                 >
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-cyan-500 group-hover:bg-cyan-500/10"><MessageSquareText size={24} /></div>
+                    <div className="text-center">
+                       <p className="text-sm font-black text-white mb-1">文字求助</p>
+                       <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">描述具体困难点</p>
+                    </div>
+                 </button>
+              </div>
+
+              <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
+                 <textarea 
+                   value={helpText}
+                   onChange={(e) => setHelpText(e.target.value)}
+                   placeholder="请输入求助详情（选填）..."
+                   className="w-full h-24 bg-black/40 border border-white/5 rounded-2xl p-4 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none"
+                 />
+                 <button 
+                   onClick={() => handleHelp('TEXT')}
+                   className="absolute bottom-3 right-3 px-4 py-2 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all uppercase tracking-widest shadow-lg"
+                 >
+                   立即下发
+                 </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* 2. 展开看板 (Dashboard - 深度优化) */}
         <AnimatePresence>
@@ -182,13 +268,38 @@ export const TacticalIsland = () => {
                       <div className="flex justify-between items-center px-4 mb-1">
                         <div className="flex items-center gap-2">
                            <History size={14} className="text-slate-500" />
-                           <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">物理拦截日志 (实时取证)</span>
+                           <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">物理拦截日志 ({violations.length})</span>
                         </div>
-                        <div className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[8px] font-black text-red-500 animate-pulse uppercase">Recording Active</div>
+                        <div className="flex items-center gap-4">
+                           <span className="text-[9px] font-black text-emerald-500/60 uppercase">解决库: {useRiskStore.getState().resolvedViolations.length}</span>
+                           <div className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[8px] font-black text-red-500 animate-pulse uppercase">Recording Active</div>
+                        </div>
                       </div>
                       <div className="space-y-3">
                         {violations.slice(0, 5).map((v, i) => (
-                          <div key={i} className="flex items-center gap-5 p-5 bg-white/[0.03] rounded-[28px] border border-white/5 hover:bg-white/[0.08] hover:border-red-500/30 transition-all group relative overflow-hidden">
+                          <div 
+                            key={i} 
+                            onClick={async () => {
+                               const solution = "坐席已确认风险并手动修正";
+                               try {
+                                 const res = await window.api.callApi({
+                                   url: `${CONFIG.API_BASE}/admin/violation/resolve`,
+                                   method: 'POST',
+                                   headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` },
+                                   data: { id: v.id, solution }
+                                 });
+                                 if (res.status === 200) {
+                                   useRiskStore.getState().resolveViolation(v.id, solution);
+                                   window.dispatchEvent(new CustomEvent('trigger-toast', { 
+                                     detail: { title: '战术对齐', message: '记录已成功存入解决库', type: 'success' } 
+                                   }));
+                                 }
+                               } catch (e) {
+                                 console.error("Resolve failed", e);
+                               }
+                            }}
+                            className="flex items-center gap-5 p-5 bg-white/[0.03] rounded-[28px] border border-white/5 hover:bg-white/[0.08] hover:border-emerald-500/30 transition-all group relative overflow-hidden cursor-pointer"
+                          >
                              <div className="w-11 h-11 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
                                 <AlertCircle size={22} />
                              </div>
@@ -201,10 +312,10 @@ export const TacticalIsland = () => {
                                    <Monitor size={12} className="opacity-40" /> 
                                    <span>{new Date(v.timestamp).toLocaleTimeString()}</span>
                                    <span className="w-1 h-1 rounded-full bg-slate-700" />
-                                   <span className="text-emerald-500/60 font-bold flex items-center gap-1"><Fingerprint size={10}/> 已自动固化取证</span>
+                                   <span className="text-emerald-500/40 group-hover:text-emerald-400 font-bold flex items-center gap-1 transition-colors"><CheckCircle2 size={10}/> 点击标记为已解决</span>
                                 </div>
                              </div>
-                             <ChevronRight size={16} className="text-slate-800 group-hover:text-cyan-500 transition-colors" />
+                             <ChevronRight size={16} className="text-slate-800 group-hover:text-emerald-500 transition-colors" />
                           </div>
                         ))}
                       </div>
@@ -224,7 +335,6 @@ export const TacticalIsland = () => {
                    <div className="grid grid-cols-2 gap-5">
                       <ToolCard icon={<Search size={24} />} title="全域战术检索" desc="检索知识库与标准话术矩阵" color="cyan" />
                       <ToolCard icon={<Video size={24} />} title="屏幕实时协同" desc="发起远程专家现场指导请求" color="amber" />
-                      <ToolCard icon={<AlertCircle size={24} />} title="高危风险求助" desc="一键触发人工接管与干预" color="red" />
                       <ToolCard icon={<Settings size={24} />} title="终端链路配置" desc="识别参数与自愈精度微调" color="slate" />
                    </div>
                  )}

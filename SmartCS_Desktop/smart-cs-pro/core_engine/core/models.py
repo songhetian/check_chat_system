@@ -117,6 +117,9 @@ class ViolationRecord(BaseModel):
     keyword = fields.CharField(max_length=100, index=True)
     context = fields.TextField()
     risk_score = fields.IntField(index=True)
+    solution = fields.TextField(null=True)
+    status = fields.CharField(max_length=20, default="PENDING")
+    screenshot_url = fields.TextField(null=True)
     timestamp = fields.DatetimeField(auto_now_add=True, index=True)
 
     class Meta:

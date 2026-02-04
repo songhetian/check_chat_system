@@ -32,6 +32,8 @@ export default function TacticalCommand() {
   const [isInputLocked, setIsInputLocked] = useState(false)
   const [search, setSearch] = useState('')
   const [liveChat, setLiveChat] = useState<any[]>([])
+  const [screenShot, setScreenShot] = useState<string | null>(null)
+  const [emergency, setEmergency] = useState<{username: string, msg: string} | null>(null)
   const [processing, setProcessing] = useState<string | null>(null)
   
   const violations = useRiskStore(s => s.violations)
@@ -84,13 +86,44 @@ export default function TacticalCommand() {
     const onNodeSync = () => {
       fetchData(true) // 静默刷新坐席矩阵状态
     }
+    const onScreenSync = (e: any) => {
+      const data = e.detail;
+      if (activeAgent && data.username === activeAgent.username) {
+        setScreenShot(data.payload);
+      }
+    }
+    const onEmergencyHelp = (e: any) => {
+      const data = e.detail;
+      if (data.type === 'EMERGENCY_HELP') {
+        const agentName = agents.find(a => a.username === data.username)?.real_name || data.username;
+        toast.error('🚨 [高危求助]', { 
+          description: `坐席 ${agentName} 发起紧急战术求援！`,
+          duration: 10000,
+          action: {
+            label: '立即切入',
+            onClick: () => {
+              const target = agents.find(a => a.username === data.username);
+              if (target) {
+                setActiveAgent(target);
+                setScreenShot(data.image || null);
+              }
+            }
+          }
+        });
+        setEmergency({ username: data.username, msg: data.content });
+      }
+    }
     window.addEventListener('ws-live-chat', onLiveChat)
     window.addEventListener('ws-tactical-node-sync', onNodeSync)
+    window.addEventListener('ws-screen-sync', onScreenSync)
+    window.addEventListener('ws-emergency-help', onEmergencyHelp)
     return () => {
       window.removeEventListener('ws-live-chat', onLiveChat)
       window.removeEventListener('ws-tactical-node-sync', onNodeSync)
+      window.removeEventListener('ws-screen-sync', onScreenSync)
+      window.removeEventListener('ws-emergency-help', onEmergencyHelp)
     }
-  }, [activeAgent])
+  }, [activeAgent, agents])
 
   const executeIntervention = async (type: string, description: string, payload: any = {}) => {
     if (!activeAgent || !token || processing) return
@@ -174,14 +207,18 @@ export default function TacticalCommand() {
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
                      <section className="space-y-4">
                         <div className="flex justify-between items-center ml-2"><h5 className="text-[11px] font-black text-cyan-600 uppercase tracking-[0.4em] flex items-center gap-2"><MonitorStop size={16} /> 实时传输 (物理监听)</h5><span className={cn("text-[9px] font-black uppercase italic", activeAgent.is_online ? "text-emerald-500 animate-pulse" : "text-slate-300")}>{activeAgent.is_online ? 'Transmission Active' : '脱机'}</span></div>
-                        <div className="bg-slate-950 rounded-[40px] p-8 border border-white/5 space-y-6 shadow-2xl relative overflow-hidden min-h-[340px]">
+                        <div className="bg-slate-950 rounded-[40px] p-2 border border-white/5 space-y-6 shadow-2xl relative overflow-hidden min-h-[340px] flex items-center justify-center">
                            <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
-                           <div className="space-y-4 relative z-10 font-sans">
-                              {liveChat.length === 0 ? (<div className="h-40 flex items-center justify-center text-slate-700 italic text-sm">等待坐席物理数据载荷上传...</div>) : liveChat.map((chat, idx) => (
-                                <div key={idx} className="flex gap-4 text-xs"><span className="text-slate-500 font-bold shrink-0 mt-2 uppercase">RAW:</span><span className="text-white/90 bg-white/5 px-4 py-3 rounded-3xl rounded-tl-none border border-white/5 backdrop-blur-md italic">"{chat.text}"</span></div>
-                              ))}
-                              {activeAgent.is_online && <div className="flex items-center gap-2 text-[10px] text-slate-500 italic"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" /> 链路已握手</div>}
-                           </div>
+                           {screenShot ? (
+                              <img src={screenShot} className="max-w-full max-h-full rounded-[32px] object-contain relative z-10 shadow-2xl border border-white/10" alt="Tactical Screen" />
+                           ) : (
+                              <div className="space-y-4 relative z-10 font-sans">
+                                 {liveChat.length === 0 ? (<div className="h-40 flex items-center justify-center text-slate-700 italic text-sm">等待坐席物理数据载荷上传...</div>) : liveChat.map((chat, idx) => (
+                                   <div key={idx} className="flex gap-4 text-xs"><span className="text-slate-500 font-bold shrink-0 mt-2 uppercase">RAW:</span><span className="text-white/90 bg-white/5 px-4 py-3 rounded-3xl rounded-tl-none border border-white/5 backdrop-blur-md italic">"{chat.text}"</span></div>
+                                 ))}
+                                 {activeAgent.is_online && <div className="flex items-center gap-2 text-[10px] text-slate-500 italic"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" /> 链路已握手</div>}
+                              </div>
+                           )}
                         </div>
                      </section>
                      <section className="p-10 bg-slate-900 text-white rounded-[48px] relative overflow-hidden shadow-2xl"><div className="absolute top-0 right-0 p-8 opacity-10"><BrainCircuit size={100} /></div><h5 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-2"><BrainCircuit size={16} /> 智脑实时研判</h5><p className="text-base font-medium text-slate-300 leading-relaxed italic relative z-10">"检测到该操作员处于诱导高发区。建议立即执行<span className="text-cyan-400 font-black underline underline-offset-4 mx-1">‘强制锁定’</span>以阻断违规闭环。"</p></section>

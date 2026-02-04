@@ -76,9 +76,27 @@ class SmartScanner:
         self.ocr = None
         self.last_hash = ""
 
-    async def process(self, text, username="admin", redis_client=None): # 演示用 admin
-        # 发现财务违规
-        if any(k in text for k in ["钱", "转账", "加微信"]):
-            # 调用事务函数
-            await execute_violation_workflow(username, "高危交易/引导", text, 10, redis_client=redis_client)
-            # await broadcast_event({"type": "VIOLATION", "keyword": "高危交易", "context": text})
+    async def process(self, text, username="admin", redis_client=None, ws_manager=None):
+        if not text: return
+        
+        # 1. 动态获取全量敏感词库
+        from core.models import SensitiveWord
+        words = await SensitiveWord.filter(is_active=1, is_deleted=0).values("word", "risk_level")
+        
+        for w in words:
+            if w["word"] in text:
+                # 2. 触发后端事务（存入数据库、更新分值、发送通知）
+                await execute_violation_workflow(username, w["word"], text, w["risk_level"], redis_client=redis_client)
+                
+                # 3. 如果提供了 WS 管理器，立即推送实时拦截信号
+                if ws_manager:
+                    await ws_manager.broadcast({
+                        "type": "VIOLATION",
+                        "username": username,
+                        "keyword": w["word"],
+                        "risk_level": w["risk_level"],
+                        "context": text,
+                        "timestamp": time.time() * 1000,
+                        "id": secrets.token_hex(12)
+                    })
+                break # 命中一个就触发

@@ -26,11 +26,36 @@ export const useRiskSocket = () => {
         console.log('✅ [WS链路] 物理握手成功');
         useRiskStore.getState().setOnline(true)
         retryCount = 0;
+
+        // 核心：启动画面同步链路
+        const screenInterval = setInterval(async () => {
+          if (socket?.readyState === WebSocket.OPEN && window.api?.captureScreen) {
+            const imgData = await window.api.captureScreen();
+            if (imgData) {
+              socket.send(JSON.stringify({
+                type: 'SCREEN_SYNC',
+                payload: imgData
+              }));
+            }
+          }
+        }, 3000); // 3秒/帧，平衡性能与实时性
+
+        // 存入清理逻辑
+        (socket as any)._screenTimer = screenInterval;
       }
 
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data)
         
+        // 0. 画面同步转发
+        if (data.type === 'SCREEN_SYNC') {
+          window.dispatchEvent(new CustomEvent('ws-screen-sync', { detail: data }));
+        }
+
+        if (data.type === 'EMERGENCY_HELP') {
+          window.dispatchEvent(new CustomEvent('ws-emergency-help', { detail: data }));
+        }
+
         // 1. 全局语音闭环
         if (data.voice_alert) {
           const utter = new SpeechSynthesisUtterance(data.voice_alert);
@@ -47,6 +72,14 @@ export const useRiskSocket = () => {
         if (data.type === 'VIOLATION') {
           addViolation(data)
           setAlerting(true)
+          
+          // 核心增强：如果是高危违规，立即触发本地“熔断”提示
+          if (data.risk_level >= 4) {
+             window.dispatchEvent(new CustomEvent('trigger-toast', { 
+               detail: { title: '违规拦截', message: `检测到敏感词 [${data.keyword}]，已执行物理阻断！`, type: 'error' } 
+             }))
+          }
+
           window.dispatchEvent(new CustomEvent('trigger-violation-alert', { 
             detail: { id: data.id, agent: data.agent || data.real_name, keyword: data.keyword } 
           }))
@@ -75,6 +108,7 @@ export const useRiskSocket = () => {
 
       socket.onclose = () => {
         useRiskStore.getState().setOnline(false)
+        if ((socket as any)._screenTimer) clearInterval((socket as any)._screenTimer);
         if (retryCount < maxRetries) {
           const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
           reconnectTimeout = setTimeout(connect, delay);

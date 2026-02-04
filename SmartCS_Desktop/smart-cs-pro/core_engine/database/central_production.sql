@@ -143,6 +143,9 @@ CREATE TABLE IF NOT EXISTS violation_records (
     keyword VARCHAR(100),
     context TEXT,
     risk_score INT,
+    solution TEXT,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    screenshot_url TEXT,
     is_deleted TINYINT DEFAULT 0,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
@@ -190,6 +193,7 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 ('command:input:lock', '物理输入锁定', '实时指挥'),
 ('command:push:script', '战术话术弹射', '实时指挥'),
 ('audit:log:view', '合规审计流查看', '风险拦截'),
+('admin:violation:resolve', '违规风险处置', '风险拦截'),
 ('tool:secure:gen', '安全载荷生成', '全域提效'),
 -- 坐席端行为权限
 ('agent:status:sync', '个人态势同步', '坐席实战'),
