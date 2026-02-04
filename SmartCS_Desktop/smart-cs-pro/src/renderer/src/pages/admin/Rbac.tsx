@@ -89,16 +89,21 @@ export default function RbacPage() {
       </header>
 
       <div className="grid grid-cols-12 gap-8 flex-1 overflow-hidden">
-        <div className="col-span-12 lg:col-span-3 flex flex-col gap-4 overflow-y-auto no-scrollbar pb-10">
+        {/* 左侧：角色选择 (稍微扩宽) */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 overflow-y-auto no-scrollbar pb-10">
            {roles.map((r) => (
-             <div key={r.id} onClick={() => setActiveRoleId(r.id)} className={cn("p-6 rounded-[28px] border transition-all cursor-pointer flex items-center justify-between group", activeRoleId === r.id ? "bg-slate-900 border-slate-900 shadow-xl" : "bg-white border-slate-100 hover:border-cyan-200")}>
-                <div className="flex items-center gap-4"><div className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-colors", activeRoleId === r.id ? "bg-cyan-500 text-slate-950" : "bg-slate-100 text-slate-400")}> <UserCog size={20} /> </div><span className={cn("text-base font-black uppercase tracking-tighter", activeRoleId === r.id ? "text-white" : "text-slate-900")}>{r.name}</span></div>
-                {activeRoleId === r.id && <motion.div layoutId="active-dot" className="w-2 h-2 bg-cyan-500 rounded-full" />}
+             <div key={r.id} onClick={() => setActiveRoleId(r.id)} className={cn("p-6 rounded-[28px] border transition-all cursor-pointer flex items-center justify-between group", activeRoleId === r.id ? "bg-slate-900 border-slate-900 shadow-xl" : "bg-white border-slate-100 hover:border-cyan-200 shadow-sm hover:shadow-md")}>
+                <div className="flex items-center gap-4">
+                   <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center transition-colors shadow-inner", activeRoleId === r.id ? "bg-cyan-500 text-slate-950" : "bg-slate-100 text-slate-400")}> <UserCog size={24} /> </div>
+                   <div className="flex flex-col"><span className={cn("text-lg font-black uppercase tracking-tighter", activeRoleId === r.id ? "text-white" : "text-slate-900")}>{r.name}</span><span className={cn("text-[9px] font-mono", activeRoleId === r.id ? "text-cyan-400" : "text-slate-400")}>ROLE_ID: {r.id}</span></div>
+                </div>
+                {activeRoleId === r.id && <motion.div layoutId="active-dot" className="w-2.5 h-2.5 bg-cyan-500 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.8)]" />}
              </div>
            ))}
         </div>
 
-        <div className="col-span-12 lg:col-span-9 bg-white rounded-[40px] border border-slate-200 shadow-sm flex flex-col overflow-hidden relative">
+        {/* 右侧：权限点定义 (收紧宽度) */}
+        <div className="col-span-12 lg:col-span-8 bg-white rounded-[40px] border border-slate-200 shadow-sm flex flex-col overflow-hidden relative bg-gradient-to-b from-white to-slate-50/30">
            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50/20">
               {loading ? <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black italic opacity-50"><Loader2 className="animate-spin" size={40} /><span>同步矩阵定义中...</span></div> : (
                 <div className="space-y-12">

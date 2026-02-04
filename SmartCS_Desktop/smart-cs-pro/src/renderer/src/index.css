@@ -51,15 +51,19 @@ body {
   text-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
 }
 
-/* 3. 扫描线滤镜优化 (降低透明度确保文字清晰) */
-.scanline::before {
-  content: " ";
-  display: block;
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-  z-index: 200;
-  background-size: 100% 4px;
-  pointer-events: none;
-  opacity: 0.15;
+/* 4. 工业级输入框规范 */
+input, textarea, select {
+  @apply text-slate-900 font-medium !important;
+}
+
+input::placeholder, textarea::placeholder {
+  @apply text-slate-400 font-normal;
+}
+
+/* 隐藏 Chrome 等浏览器的黄色自动填充背景 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #f8fafc inset !important;
+  -webkit-text-fill-color: #0f172a !important;
 }

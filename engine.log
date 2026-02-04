@@ -2565,3 +2565,503 @@ INFO:     connection closed
 INFO:     192.168.2.184:62930 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
 INFO:     connection rejected (403 Forbidden)
 INFO:     connection closed
+INFO:     192.168.2.184:62933 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:62937 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:62938 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63005 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63007 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63009 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63004 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63006 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63010 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63011 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63004 - "GET /api/admin/agents?page=2&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63004 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63012 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63013 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63004 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63005 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63005 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63016 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63004 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63006 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63004 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63005 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63004 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63005 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63006 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63016 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63004 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63021 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63022 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63004 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63005 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63004 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63005 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63004 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63005 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63004 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63032 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63005 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63033 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63004 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63005 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63046 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63047 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63050 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63052 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63051 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63053 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "POST /api/hq/user/update-role HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63051 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "POST /api/hq/user/update-role HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63051 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "POST /api/hq/user/update-role HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63051 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "POST /api/hq/user/update-role HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63051 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "POST /api/hq/user/update-role HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63051 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "POST /api/hq/user/update-role HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63051 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63057 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63060 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63050 - "POST /api/hq/user/update-role HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63051 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "POST /api/hq/user/update-role HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63050 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63051 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63063 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63064 - "GET /api/admin/agents?page=2&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63063 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63064 - "GET /api/admin/agents?page=3&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63063 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63064 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63065 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63066 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63065 - "GET /api/admin/departments/users?dept_id=1&search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:63067 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63068 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63069 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63067 - "GET /api/admin/departments?page=3&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63067 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63067 - "GET /api/admin/departments/users?dept_id=10&search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:63070 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63072 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63073 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63071 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63070 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63071 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63070 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63071 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63070 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63071 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63070 - "GET /api/admin/agents?page=2&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63070 - "GET /api/admin/agents?page=3&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63070 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63070 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63110 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63111 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63112 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63181 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63184 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63185 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63191 - "GET /api/ai/knowledge-base HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63192 - "GET /api/ai/categories?type=KNOWLEDGE HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63191 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63192 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63191 - "GET /api/ai/knowledge-base HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63192 - "GET /api/ai/categories?type=KNOWLEDGE HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63191 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63192 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63191 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63192 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63213 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63214 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63215 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63216 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63217 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63242 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63243 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63242 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63245 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63244 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63242 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63242 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63242 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63242 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63242 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63242 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63242 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63242 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63242 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63248 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63249 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63242 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:63250 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63251 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63250 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63250 - "POST /api/admin/notifications/read HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63250 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63396 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63397 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63398 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63399 - "GET /api/admin/permissions HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63396 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63396 - "GET /api/admin/role/permissions?role_id=2 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63396 - "GET /api/admin/role/permissions?role_id=3 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63396 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63415 - "GET /api/admin/role/permissions?role_id=2 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63415 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63416 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63417 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:63441 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63442 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63443 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63444 - "POST /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63448 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63461 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63462 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63461 - "GET /api/admin/departments/users?dept_id=1&search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:63463 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63466 - "GET /api/admin/departments/users?dept_id=1&search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:63467 - "POST /api/admin/departments/delete HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:63468 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63468 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63470 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63469 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63471 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63472 - "GET /api/admin/roles HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63473 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63521 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63524 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63525 - "GET /api/admin/products HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:63525 - "GET /api/admin/products HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:63526 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63527 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63528 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63529 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:63630 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63641 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63701 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63885 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63917 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:63992 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64004 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64016 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64019 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64017 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64015 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64014 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64018 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64021 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64022 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64023 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64025 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64026 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64029 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64030 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64035 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64036 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64049 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64053 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64054 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64131 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64134 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64129 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64130 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64135 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     192.168.2.184:64132 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     192.168.2.184:64133 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64143 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64144 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64145 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64146 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64149 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64150 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64157 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64158 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64170 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64171 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64172 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64594 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64597 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64592 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64593 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64595 - "GET /api/ai/sensitive-words HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64596 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64599 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64600 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64601 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64602 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64603 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64592 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64593 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64592 - "GET /api/admin/agents?page=2&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64592 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64604 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64605 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64610 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64611 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64638 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64639 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64876 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64879 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64877 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection closed
+INFO:     192.168.2.184:64880 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64875 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64878 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64881 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64882 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64885 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64886 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64887 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64888 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64898 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64901 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64902 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64905 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64916 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:64917 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     192.168.2.184:64919 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     connection closed
+INFO:     192.168.2.184:64920 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64918 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64915 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:64921 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64922 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64923 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:64924 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65086 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65087 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65094 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65099 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65100 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65111 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65115 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65114 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65116 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65117 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65115 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65127 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     192.168.2.184:65115 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     connection closed
+INFO:     192.168.2.184:65129 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65114 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65128 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65130 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65131 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65132 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65133 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65143 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65144 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65145 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65152 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65153 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65154 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65155 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:65157 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:65154 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65156 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65154 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65155 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65169 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:65171 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65172 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:65169 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65169 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65174 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65169 - "GET /api/admin/agents?page=2&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65169 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65169 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65174 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65169 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65174 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65174 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:65192 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:65169 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65191 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65169 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:65174 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK

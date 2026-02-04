@@ -46,6 +46,7 @@ const AdminHome = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const fetchAgents = async () => {
+    if (!token) return
     setLoading(true)
     setErrorMsg(null)
     try {
@@ -58,9 +59,9 @@ const AdminHome = () => {
         setAgents(res.data.data)
         setTotal(res.data.total)
       } else if (res.status === 401) {
-        setErrorMsg("身份认证已失效，请重新登录同步权责")
+        setErrorMsg("身份认证失效，请重新登录")
       } else {
-        setErrorMsg(res.error || "指挥中枢响应异常")
+        setErrorMsg(res.error || "中枢系统响应异常")
       }
     } catch (e) {
       setErrorMsg(`物理链路握手失败，请确认后端引擎 (${CONFIG.API_BASE}) 是否处于活跃状态`)
@@ -78,7 +79,7 @@ const AdminHome = () => {
         <button onClick={() => window.open('#/big-screen', '_blank')} className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-2xl active:scale-95 flex items-center gap-3 hover:bg-slate-800 transition-all uppercase tracking-widest"><Globe size={18} /> 激活态势投影</button>
       </div>
 
-      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0">
+      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0 relative">
         <div className="overflow-y-auto flex-1 custom-scrollbar">
           {errorMsg ? (
             <div className="h-full flex flex-col items-center justify-center p-10 text-center">
@@ -110,7 +111,12 @@ const AdminHome = () => {
                     <td className="px-6 py-5 text-center"><span className="text-[10px] font-black text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{agent.dept_name || '未分派'}</span></td>
                     <td className="px-6 py-5 text-center"><div className="flex justify-center gap-1">{agent.reward_count > 0 ? <div className="px-2 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100 flex items-center gap-1"><Award size={12}/> <span className="text-[10px] font-black">{agent.reward_count}</span></div> : <span className="opacity-20">-</span>}</div></td>
                     <td className="px-6 py-5 text-center"><div className="flex flex-col items-center gap-1"><div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-cyan-500" style={{ width: `${agent.training_progress || 0}%` }} /></div><span className="text-[8px] font-black text-slate-400">{agent.training_progress || 0}%</span></div></td>
-                    <td className="px-6 py-5 text-center"><div className="flex flex-col items-center gap-1.5"><div className="flex items-center gap-1 text-slate-900 italic font-black"><Activity size={14} className="text-cyan-500" /> {agent.tactical_score}</div>{agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-md border border-red-100 uppercase tracking-tighter">拦截: {agent.last_violation_type}</span>}</div></td>
+                    <td className="px-6 py-5 text-center">
+                      <div className="flex flex-col items-center gap-1.5">
+                         <div className="flex items-center gap-1 text-slate-900 italic font-black"><Activity size={14} className="text-cyan-500" /> {agent.tactical_score}</div>
+                         {agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-md border border-red-100 uppercase tracking-tighter">拦截: {agent.last_violation_type}</span>}
+                      </div>
+                    </td>
                     <td className="px-8 py-5 text-center"><button className="p-2.5 bg-slate-900 text-white rounded-xl hover:bg-cyan-500 hover:text-white transition-all shadow-lg active:scale-90"><ShieldCheck size={18} /></button></td>
                   </tr>
                 ))}
