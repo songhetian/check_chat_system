@@ -79,9 +79,9 @@ export const TacticalIsland = () => {
               active={!isGlassMode} 
               onClick={() => setGlassMode(!isGlassMode)}
               title={isGlassMode ? "切换实色背景" : "切换高透明磨砂"}
-              color="white"
+              color="muted"
             />
-            <div className="w-px h-6 bg-white/10 mx-0.5" />
+            <div className="w-px h-6 bg-white/5 mx-0.5" />
             <HubBtn 
               icon={<GraduationCap size={18} />} 
               active={isOnboardingMode} 
@@ -214,7 +214,7 @@ function HubBtn({ icon, active, onClick, title, color }: any) {
   const activeClassMap: any = {
     red: "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)] border-red-400",
     emerald: "bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.4)] border-emerald-400",
-    white: "bg-white text-black shadow-lg"
+    muted: "bg-slate-800 text-white border-white/20 shadow-md"
   }
 
   return (
