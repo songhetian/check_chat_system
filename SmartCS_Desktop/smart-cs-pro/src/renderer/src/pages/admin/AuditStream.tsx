@@ -1,61 +1,109 @@
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ShieldCheck, User, Clock, Info, Search } from 'lucide-react'
-import { useState } from 'react'
+import { ShieldCheck, User, Clock, Info, Search, Loader2, RefreshCw } from 'lucide-react'
+import { cn } from '../../lib/utils'
+import { CONFIG } from '../../lib/config'
+import { useAuthStore } from '../../store/useAuthStore'
+import { TacticalPagination } from '../../components/ui/TacticalTable'
 
 export default function AuditStreamPage() {
-  const [logs] = useState([
-    { id: 1, op: '张主管', action: 'VIEW_VIDEO', target: 'AGENT-002', details: '查看了违规视频取证', time: '14:20:05' },
-    { id: 2, op: 'SYSTEM', action: 'AUTO_MUTE', target: 'AGENT-005', details: '触发敏感词自动禁言', time: '13:15:22' },
-    { id: 3, op: '总部管理员', action: 'PUSH_POLICY', target: 'ALL_AGENTS', details: '更新了全局 AI 过滤阈值', time: '10:00:01' },
-  ])
+  const { token } = useAuthStore()
+  const [logs, setLogs] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+
+  const fetchLogs = async () => {
+    if (!token) return
+    setLoading(true)
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/audit-logs?page=${page}&size=15`,
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.status === 200) {
+        setLogs(res.data.data)
+        setTotal(res.data.total)
+      }
+    } catch (e) { console.error('审计同步异常', e) }
+    finally { setLoading(false) }
+  }
+
+  useEffect(() => { fetchLogs() }, [page, token])
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase">全局合规审计流</h2>
-        <p className="text-slate-500 text-sm">记录所有高级操作，确保系统管理透明且可追溯</p>
-      </div>
+    <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
+      <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">全局合规审计流</h2>
+          <p className="text-slate-500 text-sm mt-1 font-medium">记录所有高级操作与战术变动，确保系统管理 100% 透明可追溯</p>
+        </div>
+        <button onClick={fetchLogs} className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all flex items-center gap-2">
+          <RefreshCw size={16} className={cn(loading && "animate-spin")} /> 刷新同步
+        </button>
+      </header>
 
-      <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full text-center border-collapse">
-          <thead className="bg-slate-50 border-b border-slate-100">
-            <tr>
-              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">操作时间</th>
-              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">操作员</th>
-              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">战术动作</th>
-              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">目标对象</th>
-              <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">详细载荷</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {logs.map((log) => (
-              <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-500">
-                    <Clock size={12} /> {log.time}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-cyan-100 flex items-center justify-center text-[10px] text-cyan-600 font-bold">
-                      {log.op[0]}
-                    </div>
-                    <span className="text-xs font-black text-slate-900">{log.op}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex justify-center">
-                    <span className="px-2 py-1 bg-slate-900 text-white text-[9px] font-black rounded uppercase tracking-tighter">
-                      {log.action}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-xs font-bold text-slate-600 text-center">{log.target}</td>
-                <td className="px-6 py-4 text-xs text-slate-400 italic text-center">"{log.details}"</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {loading ? (
+            <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black italic opacity-50">
+              <Loader2 className="animate-spin" size={40} /><span>调取中枢审计存档...</span>
+            </div>
+          ) : (
+            <table className="w-full text-center border-collapse">
+              <thead className="sticky top-0 bg-slate-50/90 backdrop-blur-md z-10 border-b border-slate-100">
+                <tr>
+                  <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">操作时间</th>
+                  <th className="px-6 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">操作员</th>
+                  <th className="px-6 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">战术动作</th>
+                  <th className="px-6 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">目标对象</th>
+                  <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">物理审计载荷</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {logs.map((log) => (
+                  <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-8 py-5">
+                      <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-500 whitespace-nowrap">
+                        <Clock size={12} /> {new Date(log.created_at).toLocaleString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-black border border-cyan-100">
+                          {log.operator?.[0] || '?'}
+                        </div>
+                        <span className="text-sm font-black text-slate-900">{log.operator}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex justify-center">
+                        <span className="px-3 py-1 bg-slate-900 text-white text-[9px] font-black rounded-full uppercase tracking-tighter shadow-sm">
+                          {log.action}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-xs font-bold text-slate-600 text-center">{log.target || '-'}</td>
+                    <td className="px-8 py-5 text-xs text-slate-400 italic text-center max-w-md truncate">"{log.details}"</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {logs.length === 0 && !loading && (
+            <div className="h-64 flex flex-col items-center justify-center text-slate-200 gap-4 uppercase font-black italic opacity-20">
+               <ShieldCheck size={64} strokeWidth={1} />
+               <p>暂无合规操作记录</p>
+            </div>
+          )}
+        </div>
+        
+        {total > 15 && (
+          <div className="shrink-0 border-t border-slate-100 bg-white p-2">
+            <TacticalPagination total={total} pageSize={15} currentPage={page} onPageChange={setPage} />
+          </div>
+        )}
       </div>
     </div>
   )

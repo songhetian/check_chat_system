@@ -7,10 +7,13 @@ import json
 router = APIRouter(prefix="/api/ai", tags=["AI Policy"])
 
 @router.get("/categories")
-async def get_categories(type: str = None, current_user: dict = Depends(get_current_user)):
+async def get_categories(page: int = 1, size: int = 10, type: str = None, current_user: dict = Depends(get_current_user)):
     query = PolicyCategory.filter(is_deleted=0)
     if type: query = query.filter(type=type)
-    return {"status": "ok", "data": await query.all().values()}
+    
+    total = await query.count()
+    data = await query.offset((page - 1) * size).limit(size).order_by("-id").values()
+    return {"status": "ok", "data": data, "total": total}
 
 @router.post("/categories")
 async def save_category(data: dict, current_user: dict = Depends(check_permission("admin:policy:category"))):
@@ -22,11 +25,13 @@ async def save_category(data: dict, current_user: dict = Depends(check_permissio
     return {"status": "ok"}
 
 @router.get("/sensitive-words")
-async def get_sensitive_words(current_user: dict = Depends(get_current_user)):
-    words = await SensitiveWord.filter(is_deleted=0).select_related("category").all().values(
+async def get_sensitive_words(page: int = 1, size: int = 10, current_user: dict = Depends(get_current_user)):
+    query = SensitiveWord.filter(is_deleted=0)
+    total = await query.count()
+    words = await query.select_related("category").offset((page - 1) * size).limit(size).order_by("-id").values(
         "id", "word", "risk_level", "is_active", "category__name", "category_id"
     )
-    return {"status": "ok", "data": words}
+    return {"status": "ok", "data": words, "total": total}
 
 @router.post("/sensitive-words")
 async def save_sensitive_word(data: dict, request: Request, user: dict = Depends(check_permission("admin:ai:policy"))):

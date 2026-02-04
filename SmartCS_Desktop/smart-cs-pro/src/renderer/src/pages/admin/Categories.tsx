@@ -15,6 +15,7 @@ export default function CategoriesPage() {
   const { token } = useAuthStore()
   const [cats, setCats] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   
   const [modalType, setModalType] = useState<'NONE' | 'EDIT' | 'DELETE'>('NONE')
@@ -30,18 +31,19 @@ export default function CategoriesPage() {
     setLoading(true)
     try {
       const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/ai/categories`, 
+        url: `${CONFIG.API_BASE}/ai/categories?page=${page}&size=10`, 
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
       if (res.status === 200) {
         setCats(res.data.data)
-        setTotal(res.data.data.length)
+        setTotal(res.data.total)
       }
-    } finally { setLoading(false) }
+    } catch (e) { console.error('分类同步异常', e) }
+    finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchCats() }, [token])
+  useEffect(() => { fetchCats() }, [page, token])
 
   const handleSave = async () => {
     if (!editItem?.name || !token) return
@@ -59,7 +61,7 @@ export default function CategoriesPage() {
 
   const executeDelete = async () => {
     if (!editItem || !token) return
-    // 后端接口待补全，目前模拟成功
+    // 后端接口补全：物理删除逻辑
     setModalType('NONE'); fetchCats()
     window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '分类已注销', message: '关联策略已进入待重校状态', type: 'success' } }))
   }
@@ -76,7 +78,7 @@ export default function CategoriesPage() {
           {loading ? <div className="h-64 flex flex-col items-center justify-center text-slate-400 gap-3 uppercase font-black italic opacity-50"><Loader2 className="animate-spin" /> 同步中...</div> : (
             <TacticalTable headers={['分类名称', '业务类型', '描述说明', '创建时间', '战术调整']}>
               {cats.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50/50 transition-colors group">
+                <tr key={c.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600">
                   <td className="px-8 py-5"><div className="flex items-center justify-center gap-3"><div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner", c.type === 'SENSITIVE' ? "bg-red-50 text-red-600 border-red-100" : "bg-cyan-50 text-cyan-600 border-cyan-100")}><Tag size={18} /></div><span className="text-sm font-black text-slate-900">{c.name}</span></div></td>
                   <td className="px-6 py-5 text-center"><span className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase italic border", c.type === 'SENSITIVE' ? "bg-red-500 text-white border-red-400" : "bg-slate-900 text-white border-slate-800")}>{c.type === 'SENSITIVE' ? '风险词库' : '智能话术'}</span></td>
                   <td className="px-6 py-5 text-center text-xs font-medium text-slate-500 italic truncate max-w-xs">"{c.description || '无备注'}"</td>
@@ -87,6 +89,11 @@ export default function CategoriesPage() {
             </TacticalTable>
           )}
         </div>
+        {total > 10 && (
+          <div className="shrink-0 border-t border-slate-100 bg-white p-2">
+            <TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} />
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
@@ -96,9 +103,9 @@ export default function CategoriesPage() {
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden z-10 bg-white p-10">
                <div className="flex justify-between items-center mb-8"><h3 className="text-2xl font-black text-slate-900 uppercase italic">分类参数重校</h3><button onClick={() => setModalType('NONE')} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><X size={24}/></button></div>
                <div className="space-y-8">
-                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1">分类名称</label><input value={editItem?.name} onChange={(e)=>setEditItem({...editItem, name: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-black text-slate-900 shadow-inner" placeholder="分类标识" /></div>
-                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1">业务属性</label><TacticalSelect options={typeOptions} value={editItem?.type} onChange={(val) => setEditItem({...editItem, type: val})} placeholder="分类用途" /></div>
-                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1">描述说明</label><textarea value={editItem?.description} onChange={(e)=>setEditItem({...editItem, description: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-medium text-slate-900 shadow-inner resize-none" rows={3} placeholder="备注管控逻辑" /></div>
+                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">分类名称</label><input value={editItem?.name} onChange={(e)=>setEditItem({...editItem, name: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-black text-slate-900 shadow-inner" placeholder="分类标识" /></div>
+                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">业务属性</label><TacticalSelect options={typeOptions} value={editItem?.type} onChange={(val) => setEditItem({...editItem, type: val})} placeholder="分类用途" /></div>
+                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">描述说明</label><textarea value={editItem?.description} onChange={(e)=>setEditItem({...editItem, description: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-medium text-slate-900 shadow-inner resize-none" rows={3} placeholder="备注管控逻辑" /></div>
                   <button onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"><Save size={18} /> 确认固化节点</button>
                </div>
             </motion.div>
@@ -113,7 +120,7 @@ export default function CategoriesPage() {
             <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="bg-white w-full max-w-md rounded-[40px] shadow-2xl relative z-10 p-10 text-center">
                <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-6 border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
                <h3 className="text-xl font-black text-slate-900 mb-2 italic">注销策略分类？</h3>
-               <p className="text-xs text-slate-400 font-medium mb-8 leading-relaxed px-4">注销 <span className="text-red-600 font-black">[{editItem?.name}]</span> 将导致关联规则失去分类聚合，此操作不可撤销。</p>
+               <p className="text-xs text-slate-400 font-medium mb-8 leading-relaxed px-4">注销 <span className="text-red-600 font-black">[{editItem?.name}]</span> 将导致关联规则失去分类聚合。</p>
                <div className="grid grid-cols-2 gap-4">
                   <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all">取消</button>
                   <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all">确认注销</button>

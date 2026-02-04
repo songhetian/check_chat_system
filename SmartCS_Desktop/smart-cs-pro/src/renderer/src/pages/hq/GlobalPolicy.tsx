@@ -20,6 +20,8 @@ export default function GlobalPolicyPage() {
   const [kb, setKb] = useState<any[]>([])
   const [cats, setCats] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
   
   const [modalType, setModalType] = useState<'NONE' | 'EDIT' | 'DELETE'>('NONE')
   const [editItem, setEditItem] = useState<any>(null)
@@ -30,16 +32,29 @@ export default function GlobalPolicyPage() {
     try {
       const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
       const [resData, resCats] = await Promise.all([
-        window.api.callApi({ url: `${CONFIG.API_BASE}/${endpoint}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }),
-        window.api.callApi({ url: `${CONFIG.API_BASE}/ai/categories?type=${activeTab}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
+        window.api.callApi({ 
+          url: `${CONFIG.API_BASE}/${endpoint}?page=${page}&size=10`, 
+          method: 'GET', 
+          headers: { 'Authorization': `Bearer ${token}` } 
+        }),
+        window.api.callApi({ 
+          url: `${CONFIG.API_BASE}/ai/categories?type=${activeTab}`, 
+          method: 'GET', 
+          headers: { 'Authorization': `Bearer ${token}` } 
+        })
       ])
-      if (resData.status === 200) activeTab === 'WORDS' ? setWords(resData.data.data) : setKb(resData.data.data)
+      if (resData.status === 200) {
+        if (activeTab === 'WORDS') setWords(resData.data.data)
+        else setKb(resData.data.data)
+        setTotal(resData.data.total)
+      }
       if (resCats.status === 200) setCats(resCats.data.data)
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchData() }, [activeTab, token])
+  useEffect(() => { setPage(1) }, [activeTab])
+  useEffect(() => { fetchData() }, [activeTab, page, token])
 
   const handleSave = async () => {
     if (!token) return
@@ -104,6 +119,11 @@ export default function GlobalPolicyPage() {
               )
             )}
          </div>
+         {total > 10 && (
+           <div className="shrink-0 border-t border-slate-100 bg-white p-2">
+             <TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} />
+           </div>
+         )}
       </div>
 
       <AnimatePresence>

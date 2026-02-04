@@ -1,5 +1,38 @@
 from fastapi import APIRouter, Query, Request, Depends, HTTPException
-from core.models import User, Department, ViolationRecord, Role, Permission, RolePermission, PolicyCategory, SensitiveWord, KnowledgeBase, Notification
+from core.models import User, Department, ViolationRecord, Role, Permission, RolePermission, PolicyCategory, SensitiveWord, KnowledgeBase, Notification, AuditLog, Product, Customer, Platform
+
+# ... (在文件末尾追加)
+
+@router.get("/products")
+async def get_products(page: int = 1, size: int = 12, current_user: dict = Depends(get_current_user)):
+    query = Product.filter(is_deleted=0)
+    total = await query.count()
+    data = await query.offset((page - 1) * size).limit(size).order_by("-id").values()
+    return {"status": "ok", "data": data, "total": total}
+
+@router.get("/customers")
+async def get_customers(page: int = 1, size: int = 12, search: str = "", current_user: dict = Depends(get_current_user)):
+    query = Customer.filter(is_deleted=0)
+    if search: query = query.filter(Q(name__icontains=search) | Q(tags__icontains=search))
+    total = await query.count()
+    data = await query.offset((page - 1) * size).limit(size).order_by("-id").values()
+    return {"status": "ok", "data": data, "total": total}
+
+@router.get("/platforms")
+async def get_platforms(page: int = 1, size: int = 12, current_user: dict = Depends(get_current_user)):
+    query = Platform.filter(is_deleted=0)
+    total = await query.count()
+    data = await query.offset((page - 1) * size).limit(size).order_by("-id").values()
+    return {"status": "ok", "data": data, "total": total}
+
+# ... (末尾追加接口)
+
+@router.get("/audit-logs")
+async def get_audit_logs(page: int = 1, size: int = 15, current_user: dict = Depends(get_current_user)):
+    query = AuditLog.filter(is_deleted=0)
+    total = await query.count()
+    data = await query.order_by("-id").offset((page - 1) * size).limit(size).values()
+    return {"status": "ok", "data": data, "total": total}
 from api.auth import get_current_user, check_permission
 from tortoise.expressions import Q
 from tortoise.functions import Count
