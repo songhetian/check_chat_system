@@ -23,7 +23,8 @@ echo "🛡️  正在启动 macOS 兼容版进程守卫..."
 cd core_engine
 # 杀死可能残余的旧进程
 pkill -f "python engine.py" > /dev/null 2>&1
-python guardian.py > "$ROOT_DIR/engine.log" 2>&1 &
+# 关键修复：显式指定 venv 中的 python 路径
+"$ROOT_DIR/venv/bin/python" utils/guardian.py > "$ROOT_DIR/engine.log" 2>&1 &
 ENGINE_PID=$!
 cd ..
 
