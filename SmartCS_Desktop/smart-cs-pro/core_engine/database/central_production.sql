@@ -1,11 +1,10 @@
--- [Smart-CS Pro] 中央指挥部 MySQL 数据库初始化脚本 - 工业级正式版
--- 修复：将角色存储逻辑重构为 ID 关联模式
--- 校准：所有预设用户密码统一为 admin123 (Hash: eeea7af566eaa1ec19871a5074808e5bd4df3e28644fab20e81ebfc69ca6bb8a)
+-- [Smart-CS Pro] 中央指挥部 MySQL 数据库初始化脚本 - V3.0 原子权责版
+-- 强制执行：4-tier CRUD 权责模型固化
 
 CREATE DATABASE IF NOT EXISTS smart_cs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE smart_cs;
 
--- 1. 系统角色表 (实现 ID 关联管理)
+-- 1. 系统角色表
 CREATE TABLE IF NOT EXISTS roles (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL UNIQUE,
@@ -18,8 +17,7 @@ CREATE TABLE IF NOT EXISTS roles (
 CREATE TABLE IF NOT EXISTS departments (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL UNIQUE,
-    parent_id INT DEFAULT 0,
-    manager_id INT, -- 部门主管 ID
+    manager_id INT,
     is_deleted TINYINT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -33,120 +31,34 @@ CREATE TABLE IF NOT EXISTS users (
     real_name VARCHAR(50),
     role_id INT NOT NULL,
     department_id INT,
-    authorized_device_id VARCHAR(100),
     status TINYINT DEFAULT 1,
     is_deleted TINYINT DEFAULT 0,
-    streak_days INT DEFAULT 0,
-    handled_customers_count INT DEFAULT 0,
-    ai_adoption_count INT DEFAULT 0,
-    tactical_score INT DEFAULT 0,
-    rank_level VARCHAR(20) DEFAULT 'NOVICE',
-    graduated_at TIMESTAMP NULL,
-    last_login TIMESTAMP NULL,
+    tactical_score INT DEFAULT 100,
     FOREIGN KEY (department_id) REFERENCES departments(id),
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+) ENGINE=InnoDB;
+
+-- 4. 权限功能定义表 (原子级)
+CREATE TABLE IF NOT EXISTS permissions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    module VARCHAR(50),
+    is_deleted TINYINT DEFAULT 0
+) ENGINE=InnoDB;
+
+-- 5. 角色权限关联表
+CREATE TABLE IF NOT EXISTS role_permissions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    role_id INT NOT NULL,
+    permission_code VARCHAR(50) NOT NULL,
+    is_deleted TINYINT DEFAULT 0,
+    FOREIGN KEY (permission_code) REFERENCES permissions(code),
     FOREIGN KEY (role_id) REFERENCES roles(id),
-    INDEX idx_user (username)
+    UNIQUE INDEX idx_role_perm (role_id, permission_code)
 ) ENGINE=InnoDB;
 
--- 为部门表补齐主管外键
-ALTER TABLE departments ADD CONSTRAINT fk_dept_manager FOREIGN KEY (manager_id) REFERENCES users(id);
-
--- 4. 战术等级配置表
-CREATE TABLE IF NOT EXISTS rank_config (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    rank_name VARCHAR(20) UNIQUE,
-    display_name VARCHAR(50),
-    min_days INT DEFAULT 0,
-    min_volume INT DEFAULT 0,
-    min_ai_adoption INT DEFAULT 0,
-    icon_tag VARCHAR(20),
-    is_deleted TINYINT DEFAULT 0
-) ENGINE=InnoDB;
-
--- 5. 智能带教知识库
-CREATE TABLE IF NOT EXISTS knowledge_base (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    keyword VARCHAR(100) NOT NULL,
-    answer TEXT NOT NULL,
-    category_id INT NOT NULL,
-    is_active TINYINT DEFAULT 1,
-    is_deleted TINYINT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-
--- 6. 硬件设备白名单
-CREATE TABLE IF NOT EXISTS devices (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    hwid VARCHAR(100) NOT NULL UNIQUE,
-    user_id INT,
-    status ENUM('PENDING', 'APPROVED', 'BLOCKED') DEFAULT 'PENDING',
-    device_info TEXT,
-    is_deleted TINYINT DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB;
-
--- 7. 敏感词库
-CREATE TABLE IF NOT EXISTS sensitive_words (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    word VARCHAR(100) UNIQUE NOT NULL,
-    category_id INT NOT NULL,
-    risk_level INT DEFAULT 5,
-    custom_audio_path VARCHAR(255),
-    is_active TINYINT DEFAULT 1,
-    is_deleted TINYINT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-
--- 8. 违规取证记录
-CREATE TABLE IF NOT EXISTS violation_records (
-    id VARCHAR(50) PRIMARY KEY,
-    user_id INT NOT NULL,
-    keyword VARCHAR(100),
-    context TEXT,
-    risk_score INT,
-    screenshot_url VARCHAR(255),
-    video_path VARCHAR(255),
-    is_deleted TINYINT DEFAULT 0,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB;
-
--- 9. 全景客户画像
-CREATE TABLE IF NOT EXISTS customers (
-    name VARCHAR(100) PRIMARY KEY,
-    level VARCHAR(20) DEFAULT 'NEW',
-    tags TEXT,
-    ltv DECIMAL(12,2) DEFAULT 0.00,
-    frequency INT DEFAULT 1,
-    is_deleted TINYINT DEFAULT 0,
-    last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-
--- 10. 战术广播日志
-CREATE TABLE IF NOT EXISTS broadcasts (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(255),
-    content TEXT,
-    sender_id INT,
-    target_dept_id INT,
-    is_deleted TINYINT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sender_id) REFERENCES users(id),
-    FOREIGN KEY (target_dept_id) REFERENCES departments(id)
-) ENGINE=InnoDB;
-
--- 11. 语音预警协议表
-CREATE TABLE IF NOT EXISTS voice_protocols (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    min_level INT DEFAULT 1,
-    max_level INT DEFAULT 10,
-    protocol_name VARCHAR(50),
-    voice_text TEXT,
-    is_active TINYINT DEFAULT 1,
-    is_deleted TINYINT DEFAULT 0
-) ENGINE=InnoDB;
-
--- 12. 全局合规审计日志
+-- 6. 全局合规审计日志表
 CREATE TABLE IF NOT EXISTS audit_logs (
     id INT PRIMARY KEY AUTO_INCREMENT,
     operator VARCHAR(50) NOT NULL,
@@ -154,22 +66,66 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     target VARCHAR(100),
     details TEXT,
     is_deleted TINYINT DEFAULT 0,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 13. AI 效能统计表
-CREATE TABLE IF NOT EXISTS ai_usage_stats (
+-- 7. 策略分类中枢表
+CREATE TABLE IF NOT EXISTS policy_categories (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    action_type ENUM('OPTIMIZE', 'SUMMARIZE'),
-    chars_processed INT,
-    estimated_time_saved INT,
+    name VARCHAR(50) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    description VARCHAR(200),
     is_deleted TINYINT DEFAULT 0,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 14. 系统通知中心表
+-- 8. 敏感词库
+CREATE TABLE IF NOT EXISTS sensitive_words (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    word VARCHAR(100) UNIQUE NOT NULL,
+    category_id INT NOT NULL,
+    risk_level INT DEFAULT 5,
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES policy_categories(id)
+) ENGINE=InnoDB;
+
+-- 9. 智能带教知识库
+CREATE TABLE IF NOT EXISTS knowledge_base (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    keyword VARCHAR(100) NOT NULL,
+    answer TEXT NOT NULL,
+    category_id INT NOT NULL,
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES policy_categories(id)
+) ENGINE=InnoDB;
+
+-- 10. 商品战术资产表
+CREATE TABLE IF NOT EXISTS products (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    sku VARCHAR(50) NOT NULL UNIQUE,
+    price DECIMAL(10,2) NOT NULL,
+    usp TEXT,
+    stock INT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 11. 战术目标监控平台表
+CREATE TABLE IF NOT EXISTS platforms (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    keyword VARCHAR(50) NOT NULL UNIQUE,
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 12. 系统通知中心
 CREATE TABLE IF NOT EXISTS notifications (
     id VARCHAR(50) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -180,144 +136,52 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 15. 菜单配置表 (RBAC 核心)
-CREATE TABLE IF NOT EXISTS menu_config (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL,
-    path VARCHAR(100) NOT NULL,
-    icon_name VARCHAR(50),
-    min_role_id INT DEFAULT 2,
-    is_deleted TINYINT DEFAULT 0,
-    UNIQUE INDEX idx_path (path),
-    FOREIGN KEY (min_role_id) REFERENCES roles(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 16. 权限功能定义表
-CREATE TABLE IF NOT EXISTS permissions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(50) NOT NULL UNIQUE,
-    name VARCHAR(100) NOT NULL,
-    module VARCHAR(50),
-    is_deleted TINYINT DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 17. 角色权限关联表
-CREATE TABLE IF NOT EXISTS role_permissions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    role_id INT NOT NULL,
-    permission_code VARCHAR(50) NOT NULL,
-    is_deleted TINYINT DEFAULT 0, -- 补全逻辑删除位
-    FOREIGN KEY (permission_code) REFERENCES permissions(code),
-    FOREIGN KEY (role_id) REFERENCES roles(id),
-    UNIQUE INDEX idx_role_perm (role_id, permission_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 18. 策略分类中枢表
-CREATE TABLE IF NOT EXISTS policy_categories (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL,
-    type ENUM('SENSITIVE', 'KNOWLEDGE') NOT NULL,
-    description VARCHAR(200),
-    is_deleted TINYINT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE INDEX idx_name_type (name, type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 21. 员工战术奖励记录表
-CREATE TABLE IF NOT EXISTS user_rewards (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+-- 13. 违规取证记录
+CREATE TABLE IF NOT EXISTS violation_records (
+    id VARCHAR(50) PRIMARY KEY,
     user_id INT NOT NULL,
-    type VARCHAR(20) NOT NULL,
-    title VARCHAR(100) NOT NULL,
-    value INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 22. 新兵培训实战模式记录表
-CREATE TABLE IF NOT EXISTS training_sessions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    mode VARCHAR(50) DEFAULT 'SOP_GUIDE',
-    progress INT DEFAULT 0,
-    is_completed TINYINT DEFAULT 0,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 23. 商品战术资产表
-CREATE TABLE IF NOT EXISTS products (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    sku VARCHAR(50) NOT NULL UNIQUE,
-    price DECIMAL(10,2) NOT NULL,
-    usp TEXT,
-    stock INT DEFAULT 0,
+    keyword VARCHAR(100),
+    context TEXT,
+    risk_score INT,
     is_deleted TINYINT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 24. 战术目标软件平台表
-CREATE TABLE IF NOT EXISTS platforms (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL,
-    keyword VARCHAR(50) NOT NULL UNIQUE,
-    is_active TINYINT DEFAULT 1,
-    is_deleted TINYINT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
 
 -- ==========================================
--- 初始数据填充 (校准哈希)
+-- 初始数据填充
 -- ==========================================
 
--- 角色
+-- 核心角色
 INSERT IGNORE INTO roles (id, name, code) VALUES (1, '坐席', 'AGENT'), (2, '主管', 'ADMIN'), (3, '总部', 'HQ');
 
--- 部门
-INSERT IGNORE INTO departments (name) VALUES ('总经办'), ('销售一部'), ('技术部');
+-- 超级管理员 (Password: admin123)
+INSERT IGNORE INTO users (username, password_hash, salt, real_name, role_id) 
+VALUES ('admin', 'eeea7af566eaa1ec19871a5074808e5bd4df3e28644fab20e81ebfc69ca6bb8a', 'salt123', '超级管理员', 3);
 
--- 账号 (Password: admin123)
-INSERT IGNORE INTO users (username, password_hash, salt, real_name, role_id, department_id) 
-VALUES ('admin', 'eeea7af566eaa1ec19871a5074808e5bd4df3e28644fab20e81ebfc69ca6bb8a', 'salt123', '超级管理员', 3, 1);
-
--- 注册原子化 CRUD 权限
+-- 原子权限注册
 INSERT IGNORE INTO permissions (code, name, module) VALUES 
--- 1. 部门管理
 ('admin:dept:view', '部门列表查看', '组织架构'),
 ('admin:dept:create', '新部门录入', '组织架构'),
 ('admin:dept:update', '部门架构调整', '组织架构'),
 ('admin:dept:delete', '部门风险注销', '组织架构'),
--- 2. 成员管理
 ('admin:user:view', '操作员矩阵查看', '成员权限'),
 ('admin:user:create', '新成员入驻', '成员权限'),
 ('admin:user:update', '成员权责重校', '成员权限'),
 ('admin:user:delete', '成员节点注销', '成员权限'),
--- 3. 分类管理
 ('admin:cat:view', '策略分类查看', 'AI 决策中心'),
 ('admin:cat:create', '新分类定义', 'AI 决策中心'),
 ('admin:cat:update', '分类参数重校', 'AI 决策中心'),
 ('admin:cat:delete', '分类逻辑移除', 'AI 决策中心'),
--- 4. 策略管理
 ('admin:ai:view', '全域策略查看', 'AI 决策中心'),
 ('admin:ai:create', '新策略布控', 'AI 决策中心'),
 ('admin:ai:update', '策略阈值调整', 'AI 决策中心'),
 ('admin:ai:delete', '策略节点清除', 'AI 决策中心'),
--- 5. 指令控制
 ('command:input:lock', '物理输入锁定', '实时指挥'),
 ('command:push:script', '战术话术弹射', '实时指挥'),
--- 6. 审计与工具
 ('audit:log:view', '合规审计流查看', '风险拦截'),
 ('tool:secure:gen', '安全载荷生成', '全域提效');
 
-INSERT IGNORE INTO role_permissions (role_id, permission_code) SELECT 3, code FROM permissions;
-
--- 注册菜单
-INSERT IGNORE INTO menu_config (name, path, icon_name, min_role_id) VALUES 
-('战术指挥台', '/command', 'Zap', 2),
-('组织架构', '/departments', 'Building2', 3),
-('分类中枢', '/categories', 'Layers', 3),
-('成员矩阵', '/users', 'UserCog', 3),
-('权责定义', '/rbac', 'Shield', 3),
-('风险审计', '/alerts', 'ShieldAlert', 2),
-('消息中枢', '/notifications', 'Bell', 1);
+-- 授权 HQ 全量权限
+INSERT IGNORE INTO role_permissions (role_id, permission_code) 
+SELECT 3, code FROM permissions;
