@@ -173,7 +173,7 @@ export default function TacticalCommand() {
                   </section>
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
                      <section className="space-y-4">
-                        <div className="flex justify-between items-center ml-2"><h5 className="text-[11px] font-black text-cyan-600 uppercase tracking-[0.4em] flex items-center gap-2"><MonitorStop size={16} /> 实时传输 (物理监听)</h5><span className={cn("text-[9px] font-black uppercase italic", activeAgent.is_online ? "text-emerald-500 animate-pulse" : "text-slate-300")}>{activeAgent.is_online ? 'Transmission Active' : 'Offline'}</span></div>
+                        <div className="flex justify-between items-center ml-2"><h5 className="text-[11px] font-black text-cyan-600 uppercase tracking-[0.4em] flex items-center gap-2"><MonitorStop size={16} /> 实时传输 (物理监听)</h5><span className={cn("text-[9px] font-black uppercase italic", activeAgent.is_online ? "text-emerald-500 animate-pulse" : "text-slate-300")}>{activeAgent.is_online ? 'Transmission Active' : '脱机'}</span></div>
                         <div className="bg-slate-950 rounded-[40px] p-8 border border-white/5 space-y-6 shadow-2xl relative overflow-hidden min-h-[340px]">
                            <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
                            <div className="space-y-4 relative z-10 font-sans">

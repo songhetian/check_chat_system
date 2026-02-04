@@ -63,12 +63,12 @@ export const TacticalIsland = () => {
                 {user?.real_name || 'Node'}
                 {isOnboardingMode && <GraduationCap size={14} className="text-amber-400 animate-bounce" />}
               </span>
-              <span className={cn(
-                "text-[9px] font-bold uppercase tracking-widest opacity-60",
-                isOnline ? "text-emerald-500" : "text-red-500"
-              )}>
-                {isOnline ? 'Online' : 'Offline'}
-              </span>
+                 <span className={cn(
+                   "text-[10px] font-bold uppercase tracking-widest transition-colors",
+                   isOnline ? "text-emerald-500/80" : "text-red-500/80"
+                 )}>
+                   {isOnline ? '链路已激活' : '脱机'}
+                 </span>
             </div>
           </div>
 
