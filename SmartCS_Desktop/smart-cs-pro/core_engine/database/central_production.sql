@@ -245,6 +245,28 @@ CREATE TABLE IF NOT EXISTS training_sessions (
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 23. 商品战术资产表
+CREATE TABLE IF NOT EXISTS products (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    sku VARCHAR(50) NOT NULL UNIQUE,
+    price DECIMAL(10,2) NOT NULL,
+    usp TEXT,
+    stock INT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 24. 战术目标软件平台表
+CREATE TABLE IF NOT EXISTS platforms (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    keyword VARCHAR(50) NOT NULL UNIQUE,
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ==========================================
 -- 初始数据填充 (校准哈希)
 -- ==========================================
@@ -259,23 +281,34 @@ INSERT IGNORE INTO departments (name) VALUES ('总经办'), ('销售一部'), ('
 INSERT IGNORE INTO users (username, password_hash, salt, real_name, role_id, department_id) 
 VALUES ('admin', 'eeea7af566eaa1ec19871a5074808e5bd4df3e28644fab20e81ebfc69ca6bb8a', 'salt123', '超级管理员', 3, 1);
 
--- 注册权限与授权
+-- 注册原子化 CRUD 权限
 INSERT IGNORE INTO permissions (code, name, module) VALUES 
-('command:input:lock', '实时输入锁定', '实时指挥'),
-('command:assist:push', '话术弹射协助', '实时指挥'),
-('command:voice:alert', '强制语音告警', '实时指挥'),
-('audit:violation:view', '违规详单查看', '风险拦截'),
-('audit:evidence:export', '证据包导出', '风险拦截'),
-('admin:dept:manage', '部门增删改查', '组织架构'),
+-- 1. 部门管理
+('admin:dept:view', '部门列表查看', '组织架构'),
+('admin:dept:create', '新部门录入', '组织架构'),
+('admin:dept:update', '部门架构调整', '组织架构'),
 ('admin:dept:delete', '部门风险注销', '组织架构'),
-('admin:user:manage', '操作员矩阵管理', '成员权限'),
-('admin:user:import', '操作员批量导入', '成员权限'),
-('admin:rbac:config', '权责矩阵定义', '权限中心'),
-('admin:policy:category', '策略分类中枢', 'AI 决策中心'),
-('admin:ai:policy', '全域 AI 策略配置', 'AI 决策中心'),
-('admin:user:reward', '战术奖励发放', '成员权限'),
-('admin:user:training', '培训进度调控', '成员权限'),
-('tool:secure_img:gen', '安全图片生成', '全域提效');
+-- 2. 成员管理
+('admin:user:view', '操作员矩阵查看', '成员权限'),
+('admin:user:create', '新成员入驻', '成员权限'),
+('admin:user:update', '成员权责重校', '成员权限'),
+('admin:user:delete', '成员节点注销', '成员权限'),
+-- 3. 分类管理
+('admin:cat:view', '策略分类查看', 'AI 决策中心'),
+('admin:cat:create', '新分类定义', 'AI 决策中心'),
+('admin:cat:update', '分类参数重校', 'AI 决策中心'),
+('admin:cat:delete', '分类逻辑移除', 'AI 决策中心'),
+-- 4. 策略管理
+('admin:ai:view', '全域策略查看', 'AI 决策中心'),
+('admin:ai:create', '新策略布控', 'AI 决策中心'),
+('admin:ai:update', '策略阈值调整', 'AI 决策中心'),
+('admin:ai:delete', '策略节点清除', 'AI 决策中心'),
+-- 5. 指令控制
+('command:input:lock', '物理输入锁定', '实时指挥'),
+('command:push:script', '战术话术弹射', '实时指挥'),
+-- 6. 审计与工具
+('audit:log:view', '合规审计流查看', '风险拦截'),
+('tool:secure:gen', '安全载荷生成', '全域提效');
 
 INSERT IGNORE INTO role_permissions (role_id, permission_code) SELECT 3, code FROM permissions;
 
