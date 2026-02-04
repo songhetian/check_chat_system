@@ -206,6 +206,7 @@ CREATE TABLE IF NOT EXISTS role_permissions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     role_id INT NOT NULL,
     permission_code VARCHAR(50) NOT NULL,
+    is_deleted TINYINT DEFAULT 0, -- 补全逻辑删除位
     FOREIGN KEY (permission_code) REFERENCES permissions(code),
     FOREIGN KEY (role_id) REFERENCES roles(id),
     UNIQUE INDEX idx_role_perm (role_id, permission_code)

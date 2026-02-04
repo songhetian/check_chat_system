@@ -1740,3 +1740,583 @@ INFO:     connection closed
 INFO:     192.168.2.184:57691 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
 INFO:     connection rejected (403 Forbidden)
 INFO:     connection closed
+INFO:     192.168.2.184:57708 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57709 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57710 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57848 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57853 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57854 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57875 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57877 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57878 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57911 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57913 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57914 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58086 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58088 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58089 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58158 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58159 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58161 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58244 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58271 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58317 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58349 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58378 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58503 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58539 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58578 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58749 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58785 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58840 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58876 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58878 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58880 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58875 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:58877 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:58882 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58883 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58876 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58885 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58886 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58887 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58890 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58891 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:58895 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:58965 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59014 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59071 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59088 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59090 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59091 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59088 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59110 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59116 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59121 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59125 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59126 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59121 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59135 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59141 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59151 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59153 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59154 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59151 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59175 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59213 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59287 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59291 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59293 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59287 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59304 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59313 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59318 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59320 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59321 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59318 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59341 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59376 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59410 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59411 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59412 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:59410 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59467 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59573 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59578 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59578 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59598 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59604 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59609 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59609 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59624 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59636 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59641 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59641 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59656 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59665 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59687 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59687 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59697 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59703 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59718 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59718 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59733 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59739 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59744 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59744 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59756 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59818 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59823 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59823 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59847 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59892 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59995 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:59995 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60010 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60018 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60025 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60025 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60048 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60056 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60061 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60061 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60133 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60265 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60279 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60281 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60283 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60278 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60280 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60285 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60286 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60291 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60292 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60297 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60298 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60311 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60312 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60327 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60329 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60330 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60343 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60344 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60343 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/departments HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60346 - "GET /api/admin/departments HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60347 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/permissions HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60346 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60347 - "GET /api/admin/permissions HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60346 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60347 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:60344 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:60353 - "GET /api/admin/products HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:60353 - "GET /api/admin/products HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:60343 - "GET /api/ai/sensitive-words HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60346 - "GET /api/ai/sensitive-words HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60347 - "GET /api/ai/categories?type=WORDS HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60344 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60343 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60357 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60358 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60343 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/departments HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60363 - "GET /api/admin/departments HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60364 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/permissions HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60363 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60364 - "GET /api/admin/permissions HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60344 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60363 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60364 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60343 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:60344 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:60379 - "GET /api/admin/products HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:60379 - "GET /api/admin/products HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:60431 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60433 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60434 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60495 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60504 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60505 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60530 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60534 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60535 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60548 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60549 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60548 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60549 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60557 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60558 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60560 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60557 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60562 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60562 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60557 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60631 - "GET /api/admin/agents?page=2&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60631 - "GET /api/admin/agents?page=3&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60631 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60631 - "GET /api/admin/agents?page=2&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60631 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60631 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60631 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60686 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60631 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60686 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60631 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60686 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60686 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60631 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60707 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60735 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60737 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:60738 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection closed
+INFO:     192.168.2.184:60739 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60736 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60734 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60740 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60741 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60742 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60743 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60751 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60751 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60751 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:60757 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60758 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60761 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:60762 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed

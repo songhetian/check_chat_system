@@ -56,14 +56,22 @@ function createWindow(): void {
   // 核心：战术 API 转发桥
   ipcMain.handle('call-api', async (_, { url, method, data, headers }) => {
     try {
+      const finalHeaders: Record<string, string> = { 
+        'Content-Type': 'application/json',
+        ...(headers || {})
+      }
+
+      // 自动修复逻辑：如果提供了 token 但没加 Bearer 前缀，自动补全
+      if (finalHeaders['Authorization'] && !finalHeaders['Authorization'].startsWith('Bearer ')) {
+        finalHeaders['Authorization'] = `Bearer ${finalHeaders['Authorization']}`
+      }
+
+      console.log(`📡 [API 转发] ${method || 'GET'} -> ${url}`)
+      
       const response = await fetch(url, {
         method: method || 'GET',
-        headers: { 
-          'Content-Type': 'application/json',
-          ...(headers || {})
-        },
+        headers: finalHeaders,
         body: data ? JSON.stringify(data) : undefined,
-        // 设置 10 秒超时
         signal: AbortSignal.timeout(10000)
       })
       
@@ -85,10 +93,10 @@ function createWindow(): void {
     }
   })
 
-  // 核心：创建标准窗口 (初始默认为登录页尺寸)
+  // 核心：创建标准窗口 (初始提升至工业级宽屏尺寸)
   const mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 800,
+    width: 1440,
+    height: 960,
     show: false,
     frame: false,
     transparent: true,

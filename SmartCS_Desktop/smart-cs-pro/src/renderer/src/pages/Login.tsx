@@ -35,8 +35,8 @@ export default function Login() {
   }
 
   useEffect(() => {
-    // 登录页需要大窗口展示并居中
-    window.electron.ipcRenderer.send('resize-window', { width: 1000, height: 800, center: true })
+    // 登录页同步扩容至大窗口并居中
+    window.electron.ipcRenderer.send('resize-window', { width: 1440, height: 960, center: true })
     // 登录页不需要置顶
     window.electron.ipcRenderer.send('set-always-on-top', false)
 
