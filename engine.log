@@ -37,3 +37,362 @@ INFO:     192.168.2.184:54547 - "GET /api/admin/role/permissions?role_id=3 HTTP/
 INFO:     192.168.2.184:54561 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
 INFO:     192.168.2.184:54591 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
 INFO:     192.168.2.184:54628 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:54645 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:54648 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:54689 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:54765 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:54792 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.3:55358 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     192.168.2.184:54948 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55007 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55007 - "GET /api/admin/role/permissions?role_id=2 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55007 - "GET /api/admin/role/permissions?role_id=3 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55007 - "GET /api/admin/role/permissions?role_id=1 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55007 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55012 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55012 - "GET /api/admin/agents?role_only=AGENT&page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55007 - "GET /api/admin/agents?role_only=AGENT&page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55007 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed
+INFO:     192.168.2.184:55025 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55027 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55029 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:55024 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55026 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55030 - "WebSocket /ws/risk?token=mock-token-123&username=admin" [accepted]
+INFO:SmartCS:📡 [WS] 节点已挂载: admin
+INFO:     connection open
+INFO:     192.168.2.184:55034 - "GET /api/admin/agents?role_only=AGENT&page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55035 - "GET /api/admin/agents?role_only=AGENT&page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55061 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55083 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:55085 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:55082 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55084 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55082 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55083 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55087 - "GET /api/admin/agents?page=2&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55087 - "GET /api/admin/agents?page=3&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55087 - "GET /api/admin/agents?page=2&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55087 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55087 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55090 - "GET /api/admin/agents?page=2&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55090 - "GET /api/admin/agents?role_only=AGENT&page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55091 - "GET /api/admin/agents?role_only=AGENT&page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55095 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:55097 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:55094 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55096 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55094 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55095 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55095 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:55097 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 422 Unprocessable Content
+INFO:     192.168.2.184:55094 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55096 - "GET /api/admin/departments HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55095 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55094 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55094 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55113 - "GET /api/admin/agents?role_only=AGENT&page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55114 - "GET /api/admin/agents?role_only=AGENT&page=1&size=100&search= HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55117 - "POST /api/admin/command HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 184, in execute_insert
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'created_at' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 64, in send_command
+    await record_audit(user["real_name"], f"CMD_{cmd_type}", target_username, f"下发物理干预指令: {json.dumps(cmd_payload)}")
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 14, in record_audit
+    await AuditLog.create(operator=operator, action=action, target=target, details=details)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/models.py", line 1218, in create
+    await instance.save(using_db=db, force_create=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/models.py", line 1004, in save
+    await executor.execute_insert(self)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 188, in execute_insert
+    insert_result = await self.db.execute_insert(self.insert_query, values)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'created_at' in 'field list'")
+INFO:     192.168.2.184:55118 - "POST /api/admin/command HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 184, in execute_insert
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'created_at' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 64, in send_command
+    await record_audit(user["real_name"], f"CMD_{cmd_type}", target_username, f"下发物理干预指令: {json.dumps(cmd_payload)}")
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 14, in record_audit
+    await AuditLog.create(operator=operator, action=action, target=target, details=details)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/models.py", line 1218, in create
+    await instance.save(using_db=db, force_create=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/models.py", line 1004, in save
+    await executor.execute_insert(self)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 188, in execute_insert
+    insert_result = await self.db.execute_insert(self.insert_query, values)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'created_at' in 'field list'")
+INFO:     192.168.2.184:55119 - "POST /api/admin/command HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 184, in execute_insert
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'created_at' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 64, in send_command
+    await record_audit(user["real_name"], f"CMD_{cmd_type}", target_username, f"下发物理干预指令: {json.dumps(cmd_payload)}")
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 14, in record_audit
+    await AuditLog.create(operator=operator, action=action, target=target, details=details)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/models.py", line 1218, in create
+    await instance.save(using_db=db, force_create=True)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/models.py", line 1004, in save
+    await executor.execute_insert(self)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 188, in execute_insert
+    insert_result = await self.db.execute_insert(self.insert_query, values)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'created_at' in 'field list'")
+INFO:     192.168.2.184:55120 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:SmartCS:🔌 [WS] 节点已脱机: admin
+INFO:     connection closed
+INFO:     connection closed

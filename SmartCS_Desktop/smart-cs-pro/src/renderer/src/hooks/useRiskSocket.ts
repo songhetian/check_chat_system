@@ -15,13 +15,25 @@ export const useRiskSocket = () => {
     const maxRetries = 10;
 
     const connect = () => {
-      const currentUser = useAuthStore.getState().user;
-      if (!currentUser) return;
+      const state = useAuthStore.getState();
+      const currentUser = state.user;
+      const currentToken = state.token;
+      
+      if (!currentUser || !currentToken || !CONFIG.WS_BASE) {
+        console.warn('📡 [WS待命] 缺少必要凭证或基准地址');
+        return;
+      }
 
-      // 核心：从统一配置中获取 WS 基准地址
-      socket = new WebSocket(`${CONFIG.WS_BASE}/risk?token=mock-token-123&username=${currentUser.username}`)
+      console.log(`📡 [WS握手] 正在连接: ${CONFIG.WS_BASE}/risk`);
+      
+      // 核心：注入物理令牌与身份载荷
+      socket = new WebSocket(`${CONFIG.WS_BASE}/risk?token=${currentToken}&username=${currentUser.username}`)
 
-      socket.onmessage = (event) => {
+      socket.onopen = () => {
+        console.log('✅ [WS链路] 物理握手成功');
+        useRiskStore.getState().setOnline(true)
+        retryCount = 0;
+      }
         const data = JSON.parse(event.data)
         
         // 1. 全局语音闭环：只要有 voice_alert 就播报
