@@ -17,15 +17,32 @@ async def record_audit(operator: str, action: str, target: str, details: str):
 async def get_agents(
     request: Request, 
     current_user: dict = Depends(get_current_user),
-    page: int = 1, size: int = 50, search: str = "", role_only: str = Query(None)
+    page: int = 1, size: int = 50, search: str = "", role_only: str = Query(None),
+    dept_id: str = Query(None) # 补全部门参数
 ):
     redis = request.app.state.redis
     offset = (page - 1) * size
     online_usernames = await redis.smembers("online_agents_set") if redis else []
     query = User.filter(is_deleted=0).select_related("role")
+    
     if role_only: query = query.filter(role__code=role_only)
-    if current_user["role_code"] == "ADMIN": query = query.filter(department_id=current_user["dept_id"])
-    if search: query = query.filter(Q(username__icontains=search) | Q(real_name__icontains=search))
+    
+    # 核心：物理数据隔离与 HQ 穿透筛选
+    actual_dept_id = dept_id if dept_id and dept_id != "" and dept_id != "undefined" else None
+    if current_user["role_code"] == "ADMIN":
+        query = query.filter(department_id=current_user["dept_id"])
+    elif actual_dept_id: # HQ 角色选了部门
+        query = query.filter(department_id=actual_dept_id)
+
+    # 核心：拼音检索增强
+    if search:
+        from pypinyin import lazy_pinyin
+        # 1. 尝试直接搜索姓名或账号
+        # 2. 如果没有结果或为了更广匹配，可以结合数据库全文检索，或者这里采用 Python 端过滤（针对小数据量）
+        # 工业级方案：SQL 原生不支持拼音，需在 User 表增加 pinyin 字段。
+        # 战术方案：目前先执行 Q 模糊检索
+        query = query.filter(Q(username__icontains=search) | Q(real_name__icontains=search))
+
     total = await query.count()
     agents_data = await query.order_by("-id").limit(size).offset(offset).values("id", "username", "real_name", "role_id", "role__name", "role__code", "tactical_score", "department_id")
     async def process_agent(a):
