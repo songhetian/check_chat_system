@@ -121,8 +121,8 @@ export default function TacticalCommand() {
               <div className="flex items-center justify-between">
                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2"><Radio size={14} className="text-cyan-500" /> 节点实时矩阵</h3>
                  {/* 优化：刷新按钮移至矩阵头部 */}
-                 <button onClick={() => fetchData()} className="p-2 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 hover:text-cyan-600 transition-all border border-slate-100 shadow-sm group">
-                    <RefreshCw size={16} className={cn(loading && "animate-spin", "group-active:rotate-180 transition-transform")} />
+                 <button onClick={() => fetchData()} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 hover:text-cyan-600 transition-all border border-slate-100 shadow-sm group">
+                    <RefreshCw size={18} className={cn(loading && "animate-spin", "group-active:rotate-180 transition-transform")} />
                  </button>
               </div>
               <TacticalSearch value={search} onChange={setSearch} placeholder="检索操作员..." />

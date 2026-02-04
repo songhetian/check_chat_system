@@ -3,18 +3,20 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Plus, Trash2, Building2, Loader2, RefreshCw, 
   CheckCircle2, X, AlertTriangle, Edit3, Users2,
-  ShieldCheck, UserCog, Search, ShieldAlert
+  ShieldCheck, UserCog, Search, ShieldAlert, Save
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalTable, TacticalPagination } from '../../components/ui/TacticalTable'
+import { TacticalSearch } from '../../components/ui/TacticalSearch'
+import { toast } from 'sonner'
 
 function Modal({ isOpen, onClose, title, children }: any) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="relative w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden z-10 bg-white">
              <div className="p-10 text-slate-900">
@@ -37,6 +39,7 @@ export default function DepartmentsPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [processing, setProcessing] = useState(false)
   
   const [modalType, setModalType] = useState<'NONE' | 'ADD' | 'EDIT' | 'DELETE'>('NONE')
   const [targetItem, setTargetItem] = useState<any>(null)
@@ -45,13 +48,15 @@ export default function DepartmentsPage() {
   
   const [deptUsers, setDeptUsers] = useState<any[]>([])
   const [userSearch, setUserSearch] = useState('')
+  const [search, setSearch] = useState('') // Main list search
 
-  const fetchDepts = async () => {
+  const fetchDepts = async (silent = false) => {
     if (!token) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
+      // Note: Assuming backend supports search param for departments, adding it for consistency
       const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/admin/departments?page=${page}&size=10`, 
+        url: `${CONFIG.API_BASE}/admin/departments?page=${page}&size=10&search=${search}`, 
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -74,7 +79,7 @@ export default function DepartmentsPage() {
     } catch (e) { console.error(e) }
   }
 
-  useEffect(() => { fetchDepts() }, [page])
+  useEffect(() => { fetchDepts() }, [page, search])
   
   useEffect(() => {
     if (modalType === 'EDIT' && targetItem) {
@@ -83,30 +88,44 @@ export default function DepartmentsPage() {
   }, [modalType, userSearch])
 
   const handleSave = async () => {
-    if (!inputName.trim() || !token) return
+    if (!inputName.trim() || !token || processing) return
+    setProcessing(true)
     const isEdit = modalType === 'EDIT'
     const endpoint = isEdit ? '/departments/update' : '/departments'
-    const res = await window.api.callApi({
-      url: `${CONFIG.API_BASE}/admin${endpoint}`,
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      data: isEdit ? { id: targetItem.id, name: inputName, manager_id: managerId || null } : { name: inputName }
-    })
-    if (res.data.status === 'ok') { setModalType('NONE'); fetchDepts(); }
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin${endpoint}`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: isEdit ? { id: targetItem.id, name: inputName, manager_id: managerId || null } : { name: inputName }
+      })
+      if (res.data.status === 'ok') { 
+        setModalType('NONE'); 
+        fetchDepts(false); // Visible refresh
+        toast.success(isEdit ? '架构调整已生效' : '新战术单元已就绪', { description: `部门 ${inputName} 数据已同步至全域` })
+      }
+    } finally {
+      setProcessing(false)
+    }
   }
 
   const executeDelete = async () => {
-    if (!targetItem || !token) return
-    const res = await window.api.callApi({ 
-      url: `${CONFIG.API_BASE}/admin/departments/delete`, 
-      method: 'POST', 
-      headers: { 'Authorization': `Bearer ${token}` },
-      data: { id: targetItem.id } 
-    })
-    if (res.data.status === 'ok') { 
-      setModalType('NONE'); 
-      fetchDepts(); 
-      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '指令执行成功', message: '目标战术单元已物理注销', type: 'success' } }))
+    if (!targetItem || !token || processing) return
+    setProcessing(true)
+    try {
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/admin/departments/delete`, 
+        method: 'POST', 
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: { id: targetItem.id } 
+      })
+      if (res.data.status === 'ok') { 
+        setModalType('NONE'); 
+        fetchDepts(false); // Visible refresh
+        toast.success('战术单元已物理注销', { description: `部门 ${targetItem.name} 已从架构图中移除` })
+      }
+    } finally {
+      setProcessing(false)
     }
   }
 
@@ -119,6 +138,12 @@ export default function DepartmentsPage() {
           <button onClick={() => { setInputName(''); setManagerId(''); setModalType('ADD') }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800"><Plus size={16} /> 录入新部门</button>
         )}
       </header>
+
+      {/* 增强搜索区 */}
+      <div className="bg-white p-4 rounded-[24px] border border-slate-200 shadow-sm flex flex-wrap items-center gap-4 shrink-0">
+        <div className="flex-1 min-w-[240px]"><TacticalSearch value={search} onChange={setSearch} placeholder="检索部门名称..." /></div>
+        <button onClick={() => fetchDepts(false)} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group"><RefreshCw size={18} className={cn(loading && "animate-spin")} /></button>
+      </div>
 
       <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -153,16 +178,16 @@ export default function DepartmentsPage() {
         {total > 10 && <div className="shrink-0 border-t border-slate-100 bg-white p-2"><TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} /></div>}
       </div>
 
-      <Modal isOpen={modalType === 'ADD' || modalType === 'EDIT'} onClose={() => setModalType('NONE')} title={modalType === 'ADD' ? '录入新战术单元' : '调整组织架构'}>
+      <Modal isOpen={modalType === 'ADD' || modalType === 'EDIT'} onClose={() => !processing && setModalType('NONE')} title={modalType === 'ADD' ? '录入新战术单元' : '调整组织架构'}>
         <div className="space-y-8">
-          <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">部门标识名称</label><input autoFocus value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="输入名称..." className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-black text-slate-900 shadow-inner" /></div>
+          <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">部门标识名称</label><input disabled={processing} autoFocus value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="输入名称..." className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-black text-slate-900 shadow-inner disabled:opacity-50" /></div>
           {modalType === 'EDIT' && (
             <div className="space-y-4">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">指派实战主管</label>
-              <div className="relative group"><div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-cyan-500 transition-colors"><Search size={16} /></div><input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="检索姓名..." className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-900 shadow-inner" /></div>
+              <div className="relative group"><div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-cyan-500 transition-colors"><Search size={16} /></div><input disabled={processing} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="检索姓名..." className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-900 shadow-inner disabled:opacity-50" /></div>
               <div className="max-h-40 overflow-y-auto custom-scrollbar border border-slate-100 rounded-2xl p-2 bg-slate-50/30">
                  {deptUsers.map(u => (
-                   <div key={u.id} onClick={() => setManagerId(u.id)} className={cn("p-3 rounded-xl cursor-pointer flex justify-between items-center transition-all", managerId == u.id ? "bg-cyan-500 text-white shadow-lg" : "hover:bg-white text-slate-600")}>
+                   <div key={u.id} onClick={() => !processing && setManagerId(u.id)} className={cn("p-3 rounded-xl cursor-pointer flex justify-between items-center transition-all", managerId == u.id ? "bg-cyan-500 text-white shadow-lg" : "hover:bg-white text-slate-600", processing && "opacity-50 cursor-not-allowed")}>
                       <span className="text-xs font-black">{u.real_name} <span className={cn("text-[9px] opacity-50 ml-1 font-mono", managerId == u.id ? "text-white" : "text-slate-400")}>@{u.username}</span></span>
                       {managerId == u.id && <CheckCircle2 size={14} />}
                    </div>
@@ -170,17 +195,21 @@ export default function DepartmentsPage() {
               </div>
             </div>
           )}
-          <button onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"><ShieldCheck size={18} /> 确认并固化架构</button>
+          <button disabled={processing} onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:active:scale-100">
+            {processing ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 确认并固化架构
+          </button>
         </div>
       </Modal>
 
-      <Modal isOpen={modalType === 'DELETE'} onClose={() => setModalType('NONE')} title="物理注销确认">
+      <Modal isOpen={modalType === 'DELETE'} onClose={() => !processing && setModalType('NONE')} title="物理注销确认">
         <div className="space-y-8 flex flex-col items-center text-center">
            <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
            <div><h4 className="text-lg font-black text-slate-900 mb-2 italic">确认物理注销该部门？</h4><p className="text-sm text-slate-500 font-medium leading-relaxed px-4 text-center">注销 <span className="text-red-600 font-black">[{targetItem?.name}]</span> 将导致该单元关联的所有业务链条断裂。此操作受到动作级权限 <span className="text-slate-900 font-black">[admin:dept:delete]</span> 的严密监管。</p></div>
            <div className="grid grid-cols-2 gap-4 w-full">
-              <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all">放弃动作</button>
-              <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all">确认注销</button>
+              <button disabled={processing} onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all disabled:opacity-50">放弃动作</button>
+              <button disabled={processing} onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100">
+                 {processing && <Loader2 className="animate-spin" size={16} />} 确认注销
+              </button>
            </div>
         </div>
       </Modal>

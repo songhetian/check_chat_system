@@ -25,6 +25,7 @@ export default function GlobalPolicyPage() {
   
   const [modalType, setModalType] = useState<'NONE' | 'EDIT' | 'DELETE'>('NONE')
   const [editItem, setEditItem] = useState<any>(null)
+  const [processing, setProcessing] = useState(false)
 
   const fetchData = async () => {
     if (!token) return
@@ -49,26 +50,49 @@ export default function GlobalPolicyPage() {
   useEffect(() => { fetchData() }, [activeTab, page, token])
 
   const handleSave = async () => {
-    if (!token || !editItem) return
+    if (!token || !editItem || processing) return
     const isEdit = !!editItem.id
     // 增/改原子熔断
     const perm = isEdit ? 'admin:ai:update' : 'admin:ai:create'
     if (!hasPermission(perm)) return
 
-    const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
-    const res = await window.api.callApi({ 
-      url: `${CONFIG.API_BASE}/${endpoint}`, 
-      method: 'POST', 
-      headers: { 'Authorization': `Bearer ${token}` },
-      data: editItem 
-    })
-    if (res.data.status === 'ok') { setModalType('NONE'); fetchData(); }
+    setProcessing(true)
+    try {
+      const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/${endpoint}`, 
+        method: 'POST', 
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: editItem 
+      })
+      if (res.data.status === 'ok') { 
+        setModalType('NONE'); 
+        fetchData(); 
+      }
+    } finally {
+      setProcessing(false)
+    }
   }
 
   const executeDelete = async () => {
-    if (!editItem || !token || !hasPermission('admin:ai:delete')) return
-    setModalType('NONE'); fetchData();
-    window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '策略节点已清除', message: '战术规则已实时重载', type: 'success' } }))
+    if (!editItem || !token || !hasPermission('admin:ai:delete') || processing) return
+    setProcessing(true)
+    try {
+      const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words/delete' : 'ai/knowledge-base/delete'
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/${endpoint}`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: { id: editItem.id }
+      })
+      if (res.data.status === 'ok') {
+        setModalType('NONE'); 
+        fetchData();
+        window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '策略节点已清除', message: '战术规则已实时重载', type: 'success' } }))
+      }
+    } finally {
+      setProcessing(false)
+    }
   }
 
   return (
@@ -76,6 +100,9 @@ export default function GlobalPolicyPage() {
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0 gap-6">
         <div><h2 className="text-3xl font-black text-slate-900 uppercase italic">全域 AI 决策中心</h2><p className="text-slate-500 text-sm mt-1 font-medium">配置全局对话拦截权重与智能纠偏话术矩阵</p></div>
         <div className="flex flex-wrap gap-3">
+           <button onClick={fetchData} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+             <RefreshCw size={18} className={cn(loading && "animate-spin")} />
+           </button>
            <button className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-2xl text-[10px] font-black shadow-lg hover:bg-emerald-700 transition-all"><Download size={14} /> 模板</button>
            {/* 增：admin:ai:create */}
            {hasPermission('admin:ai:create') && (
@@ -165,7 +192,9 @@ export default function GlobalPolicyPage() {
                       <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">纠偏建议内容</label><textarea value={editItem?.answer} onChange={(e)=>setEditItem({...editItem, answer: e.target.value})} rows={4} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-medium text-slate-900 shadow-inner resize-none leading-relaxed" /></div>
                     </>
                   )}
-                  <button onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"><Save size={18} /> 确认并固化</button>
+                  <button disabled={processing} onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+                    {processing ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 确认并固化
+                  </button>
                </div>
             </motion.div>
           </div>
@@ -175,14 +204,16 @@ export default function GlobalPolicyPage() {
       <AnimatePresence>
         {modalType === 'DELETE' && (
           <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !processing && setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
             <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="bg-white w-full max-w-md rounded-[40px] shadow-2xl relative z-10 p-10 text-center">
                <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-6 border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
                <h3 className="text-xl font-black text-slate-900 mb-2 italic">注销该策略节点？</h3>
                <p className="text-xs text-slate-400 font-medium mb-8 leading-relaxed px-4">注销策略 <span className="text-red-600 font-black">[{editItem?.word || editItem?.keyword}]</span> 将导致 AI 引擎失去对应的实战识别能力。此操作受到动作级权限 <span className="text-slate-900 font-black">[admin:ai:delete]</span> 的严密监管。</p>
                <div className="grid grid-cols-2 gap-4">
-                  <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all">放弃动作</button>
-                  <button onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all">确认物理清除</button>
+                  <button disabled={processing} onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all disabled:opacity-50">放弃动作</button>
+                  <button disabled={processing} onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                    {processing && <Loader2 className="animate-spin" size={16} />} 确认物理清除
+                  </button>
                </div>
             </motion.div>
           </div>

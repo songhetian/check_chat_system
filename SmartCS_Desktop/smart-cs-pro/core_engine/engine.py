@@ -107,6 +107,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
     except Exception as e:
         logger.error(f"⚠️ WS 链路异常: {e}")
         manager.disconnect(username)
+        if redis_conn: await redis_conn.srem("online_agents_set", username)
 
 # --- 5. 物理引擎挂载 ---
 register_tortoise(

@@ -15,9 +15,10 @@ interface TacticalSelectProps {
   placeholder?: string
   className?: string
   showSearch?: boolean
+  disabled?: boolean
 }
 
-export function TacticalSelect({ options, value, onChange, placeholder = "请选择...", className, showSearch = true }: TacticalSelectProps) {
+export function TacticalSelect({ options, value, onChange, placeholder = "请选择...", className, showSearch = true, disabled = false }: TacticalSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [search, setSearch] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -46,10 +47,11 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
   return (
     <div className={cn("relative w-full", className)} ref={containerRef}>
       <div 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
         className={cn(
-          "w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-black flex items-center justify-between cursor-pointer transition-all shadow-sm group",
-          isOpen ? "ring-4 ring-cyan-500/10 border-cyan-500 shadow-lg" : "hover:border-slate-300"
+          "w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-black flex items-center justify-between transition-all shadow-sm group",
+          disabled ? "opacity-50 cursor-not-allowed bg-slate-50" : "cursor-pointer",
+          isOpen ? "ring-4 ring-cyan-500/10 border-cyan-500 shadow-lg" : (disabled ? "" : "hover:border-slate-300")
         )}
       >
         <span className={cn(selectedOption ? "text-slate-900" : "text-slate-400")}>

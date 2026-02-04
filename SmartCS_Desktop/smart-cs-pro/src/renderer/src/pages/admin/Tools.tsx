@@ -4,6 +4,7 @@ import { Wrench, ShieldCheck, Zap, Download, RefreshCw, Smartphone, Monitor } fr
 import axios from 'axios'
 import { CONFIG } from '../../lib/config'
 import { cn } from '../../lib/utils'
+import { toast } from 'sonner'
 
 export default function ToolsPage() {
   const [loading, setLoading] = useState(false)
@@ -15,21 +16,9 @@ export default function ToolsPage() {
       await new Promise(resolve => setTimeout(resolve, 1500))
       
       // 规范化：使用全局事件分发 Toast
-      window.dispatchEvent(new CustomEvent('trigger-toast', {
-        detail: { 
-          title: '战术工具执行成功', 
-          message: '安全加固图片已生成并同步至分发节点。', 
-          type: 'success' 
-        }
-      }))
+      toast.success('战术工具执行成功', { description: '安全加固图片已生成并同步至分发节点。' })
     } catch (e) {
-      window.dispatchEvent(new CustomEvent('trigger-toast', {
-        detail: { 
-          title: '工具链异常', 
-          message: '无法生成安全载荷，请检查本地环境依赖。', 
-          type: 'error' 
-        }
-      }))
+      toast.error('工具链异常', { description: '无法生成安全载荷，请检查本地环境依赖。' })
     } finally {
       setLoading(false)
     }

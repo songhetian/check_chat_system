@@ -7,6 +7,7 @@ import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalPagination } from '../../components/ui/TacticalTable'
+import { toast } from 'sonner'
 
 interface Customer {
   id: string
@@ -19,16 +20,17 @@ interface Customer {
 }
 
 export default function CustomersPage() {
-  const { token } = useAuthStore()
+  const { token, hasPermission } = useAuthStore()
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = async (silent = false) => {
     if (!token) return
-    setLoading(true)
+    if (!hasPermission('admin:customer:view')) return
+    if (!silent) setLoading(true)
     try {
       const res = await window.api.callApi({
         url: `${CONFIG.API_BASE}/admin/customers?page=${page}&size=12&search=${search}`,
@@ -38,6 +40,9 @@ export default function CustomersPage() {
       if (res.status === 200) {
         setCustomers(res.data.data)
         setTotal(res.data.total)
+        if (silent) {
+           toast.success('客户画像已对齐', { description: '全域客户数据已同步至最新物理刻度' })
+        }
       }
     } catch (e) { console.error('客户画像对齐失败', e) }
     finally { setLoading(false) }
@@ -45,17 +50,23 @@ export default function CustomersPage() {
 
   useEffect(() => { fetchCustomers() }, [page, token])
 
+  if (!hasPermission('admin:customer:view')) {
+    return <div className="h-full flex items-center justify-center text-slate-400 italic">权限熔断：您无权查看客户画像矩阵</div>
+  }
+
   return (
     <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
       <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
-        <div><h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">全视角客户画像</h2><p className="text-slate-500 text-sm mt-1 font-medium">基于中枢流的实时行为分析与战术画像面板</p></div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-2xl text-xs font-black shadow-xl hover:bg-emerald-700 transition-all"><Download size={16} /> 导出全量战术报告</button>
+        <div><h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">全视角客户画像</h2><p className="text-slate-500 text-sm mt-1 font-medium">基于中枢流的实时行为分析 with 战术画像面板</p></div>
+        {hasPermission('admin:customer:export') && (
+          <button className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-2xl text-xs font-black shadow-xl hover:bg-emerald-700 transition-all"><Download size={16} /> 导出全量战术报告</button>
+        )}
       </header>
 
       <div className="bg-white p-4 rounded-[24px] border border-slate-200 shadow-sm flex gap-4 shrink-0">
-        <TacticalSearch value={search} onChange={setSearch} onSearch={() => { setPage(1); fetchCustomers(); }} placeholder="搜索客户姓名、特征码或业务标签..." className="flex-1" />
-        <button onClick={() => { setPage(1); fetchCustomers(); }} className="px-6 bg-slate-50 text-slate-600 rounded-xl text-xs font-black hover:bg-slate-100 flex items-center gap-2 transition-all border border-slate-100">
-          <RefreshCw size={16} className={cn(loading && "animate-spin")} /> 立即对齐
+        <TacticalSearch value={search} onChange={setSearch} onSearch={() => { setPage(1); fetchCustomers(false); }} placeholder="搜索客户姓名、特征码或业务标签..." className="flex-1" />
+        <button onClick={() => { setPage(1); fetchCustomers(false); }} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+          <RefreshCw size={18} className={cn(loading && "animate-spin")} />
         </button>
       </div>
 

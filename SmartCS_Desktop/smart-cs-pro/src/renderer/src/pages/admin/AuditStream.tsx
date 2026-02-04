@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ShieldCheck, User, Clock, Info, Search, Loader2, RefreshCw } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalPagination } from '../../components/ui/TacticalTable'
+import { toast } from 'sonner'
 
 export default function AuditStreamPage() {
   const { token } = useAuthStore()
@@ -13,9 +14,9 @@ export default function AuditStreamPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
 
-  const fetchLogs = async () => {
+  const fetchLogs = async (silent = false) => {
     if (!token) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const res = await window.api.callApi({
         url: `${CONFIG.API_BASE}/admin/audit-logs?page=${page}&size=15`,
@@ -25,6 +26,7 @@ export default function AuditStreamPage() {
       if (res.status === 200) {
         setLogs(res.data.data)
         setTotal(res.data.total)
+        if (silent) toast.success('审计流已同步', { description: '最新合规操作记录已载入' })
       }
     } catch (e) { console.error('审计同步异常', e) }
     finally { setLoading(false) }
@@ -39,8 +41,8 @@ export default function AuditStreamPage() {
           <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">全局合规审计流</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium">记录所有高级操作与战术变动，确保系统管理 100% 透明可追溯</p>
         </div>
-        <button onClick={fetchLogs} className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all flex items-center gap-2">
-          <RefreshCw size={16} className={cn(loading && "animate-spin")} /> 刷新同步
+        <button onClick={() => fetchLogs(false)} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+          <RefreshCw size={18} className={cn(loading && "animate-spin")} />
         </button>
       </header>
 

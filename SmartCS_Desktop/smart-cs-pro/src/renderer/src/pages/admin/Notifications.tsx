@@ -8,6 +8,7 @@ import { TacticalPagination } from '../../components/ui/TacticalTable'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { useAuthStore } from '../../store/useAuthStore'
+import { toast } from 'sonner'
 
 interface Notification {
   id: string
@@ -26,9 +27,9 @@ export default function NotificationsPage() {
   const [total, setTotal] = useState(0)
   const [selectedMsg, setSelectedMsg] = useState<Notification | null>(null)
 
-  const fetchNotifs = async () => {
+  const fetchNotifs = async (silent = false) => {
     if (!token) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const res = await window.api.callApi({
         url: `${CONFIG.API_BASE}/admin/notifications?page=${page}&size=10`,
@@ -38,6 +39,7 @@ export default function NotificationsPage() {
       if (res.status === 200) {
         setNotifs(res.data.data)
         setTotal(res.data.total)
+        if (silent) toast.success('消息库已同步', { description: '全域指令集已刷新' })
       }
     } finally { setLoading(false) }
   }
@@ -57,7 +59,7 @@ export default function NotificationsPage() {
       if (selectedMsg?.id === id || id === 'ALL') {
         setSelectedMsg(id === 'ALL' ? null : prev => prev ? { ...prev, is_read: 1 } : null)
       }
-      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '指令已归档', message: '通知状态已同步至 MySQL', type: 'success' } }))
+      toast.success('指令已归档', { description: '通知状态已同步至 MySQL' })
     }
   }
 
@@ -65,8 +67,10 @@ export default function NotificationsPage() {
     <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
       <div className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
         <div><h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic">消息通知中心</h2><p className="text-slate-500 text-sm mt-1 font-medium">全域战术指令存档，确保每一条风险预警均已阅知</p></div>
-        <div className="flex gap-3">
-           <button onClick={fetchNotifs} className="px-6 py-3 bg-slate-50 text-slate-600 rounded-2xl text-xs font-black hover:bg-slate-100 transition-all border border-slate-100"><RefreshCw size={16} className={cn(loading && "animate-spin")} /> 刷新同步</button>
+        <div className="flex items-center gap-3">
+           <button onClick={() => fetchNotifs(false)} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+             <RefreshCw size={18} className={cn(loading && "animate-spin")} />
+           </button>
            <button onClick={() => markRead('ALL')} className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black hover:bg-slate-800 active:scale-95 transition-all"><CheckCheck size={16} /> 全部已读</button>
         </div>
       </div>

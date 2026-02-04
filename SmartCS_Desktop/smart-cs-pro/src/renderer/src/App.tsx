@@ -35,6 +35,8 @@ import { CONFIG } from './lib/config'
 import { TacticalSearch } from './components/ui/TacticalSearch'
 import { TacticalPagination } from './components/ui/TacticalTable'
 import { TacticalSelect } from './components/ui/TacticalSelect'
+import { Toaster } from './components/ui/sonner'
+import { toast } from 'sonner'
 
 // 1. 管理首页：集成链路异常感知 UI
 const AdminHome = () => {
@@ -75,9 +77,6 @@ const AdminHome = () => {
       if (res.status === 200) {
         setAgents(res.data.data)
         setTotal(res.data.total)
-        if (silent) {
-          window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '态势已对齐', message: '指挥中心数据已同步至最新物理刻度', type: 'success' } }))
-        }
       } else if (res.status === 401) {
         setErrorMsg("身份认证失效，请重新登录")
       } else {
@@ -91,7 +90,11 @@ const AdminHome = () => {
   }
 
   useEffect(() => { fetchDepts() }, [token])
-  useEffect(() => { fetchAgents() }, [page, search, deptId, token])
+  useEffect(() => { 
+    fetchAgents()
+    const timer = setInterval(() => fetchAgents(true), 5000)
+    return () => clearInterval(timer)
+  }, [page, search, deptId, token])
 
   return (
     <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
@@ -113,7 +116,7 @@ const AdminHome = () => {
            )}
            <button 
              onClick={() => fetchAgents()} 
-             className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 group"
+             className="p-4 bg-slate-50 text-slate-600 rounded-2xl hover:bg-slate-100 transition-all shadow-sm border border-slate-200 active:scale-95 flex items-center justify-center gap-2 group"
              title="物理同步态势"
            >
              <RefreshCw size={20} className={cn(loading && "animate-spin", "group-hover:rotate-180 transition-transform duration-500")} />
@@ -131,7 +134,7 @@ const AdminHome = () => {
                </div>
                <h3 className="text-2xl font-black text-slate-900 mb-2 italic uppercase">战术链路中断</h3>
                <p className="text-slate-400 text-sm font-medium max-w-md leading-relaxed mb-8 italic">"{errorMsg}"</p>
-               <button onClick={fetchAgents} className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl hover:bg-slate-800 active:scale-95 transition-all flex items-center gap-3 italic tracking-widest uppercase">
+               <button onClick={() => fetchAgents()} className="px-10 py-4 bg-slate-50 text-slate-600 rounded-2xl text-xs font-black shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all flex items-center gap-3 italic tracking-widest uppercase">
                   <RefreshCw size={16} /> 重新建立连接
                </button>
             </div>
@@ -174,33 +177,53 @@ const AdminHome = () => {
   )
 }
 
-// 2. 坐席视图容器 (保持之前的修复 ...)
+// 2. 坐席视图容器
 const AgentView = () => {
   const isRedAlert = useRiskStore(s => s.isRedAlert)
   const [activeSuggestion, setActiveSuggestion] = useState<any>(null)
   const [showFireworks, setShowFireworks] = useState(false)
   const [sopSteps, setSopSteps] = useState<string[] | null>(null)
   const [activeCustomer, setActiveCustomer] = useState<any>(null)
-  const [toast, setToast] = useState<any>(null)
   const [isMuted, setIsMuted] = useState(false)
 
   useEffect(() => {
-    const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
+    // 监听全局 Toast 事件 (兼容旧逻辑，转发给 sonner)
+    const onToast = (e: any) => { 
+      const { title, message, type, details, action } = e.detail
+      if (type === 'error') {
+        toast.error(title, { description: message || details, action: action ? { label: '立即取证', onClick: action } : undefined })
+      } else if (type === 'success') {
+        toast.success(title, { description: message || details })
+      } else {
+        toast(title, { description: message || details })
+      }
+    }
+    
     const onViolation = (e: any) => {
       if (!isMuted) {
         const audioPath = e.detail.audio_path || (e.detail.risk_score >= 8 ? '/assets/audio/red_alert.mp3' : '/assets/audio/warn.wav')
         const audio = new Audio(audioPath); audio.play().catch(() => console.warn('音频拦截: 物理路径脱机'))
       }
-      setToast({ title: '战术拦截', message: `检测到违规行为：[${e.detail.keyword}]`, type: 'error', details: e.detail.context, action: () => { window.location.hash = `/alerts?id=${e.detail.id}` } })
-      setTimeout(() => setToast(null), 10000)
+      // 使用 sonner 显示拦截警告
+      toast.error('战术拦截', {
+        description: `检测到违规行为：[${e.detail.keyword}]`,
+        duration: 10000,
+        action: {
+          label: '查看详情',
+          onClick: () => { window.location.hash = `/alerts?id=${e.detail.id}` }
+        }
+      })
     }
 
     window.addEventListener('trigger-toast', onToast)
     window.addEventListener('trigger-violation-alert', onViolation)
-    window.addEventListener('trigger-permission-toast', (e: any) => { setToast({ title: e.detail.title, message: e.detail.message, details: e.detail.details, type: 'info', duration: 10000 }) })
+    window.addEventListener('trigger-permission-toast', (e: any) => { 
+      toast.info(e.detail.title, { description: e.detail.message })
+    })
     
     return () => {
-      window.removeEventListener('trigger-toast', onToast); window.removeEventListener('trigger-violation-alert', onViolation)
+      window.removeEventListener('trigger-toast', onToast); 
+      window.removeEventListener('trigger-violation-alert', onViolation)
     }
   }, [isMuted])
 
@@ -210,17 +233,6 @@ const AgentView = () => {
         {isMuted ? <VolumeX size={18} className="text-red-400" /> : <Volume2 size={18} className="text-cyan-400" />}
       </button>
       <TacticalIsland />
-      <AnimatePresence>
-        {toast && (
-          <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="fixed top-20 left-1/2 -translate-x-1/2 z-[300]">
-            <div className={cn("px-8 py-5 rounded-[32px] shadow-2xl border flex items-center gap-6 backdrop-blur-xl group transition-all", toast.type === 'error' ? "bg-red-600/90 border-red-400 text-white" : "bg-slate-900/90 border-cyan-500/50 text-cyan-400")}>
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0 shadow-inner">{toast.type === 'error' ? <ShieldAlert size={24} className="animate-pulse" /> : <CheckCircle2 size={24} />}</div>
-              <div className="flex flex-col pr-6 border-r border-white/10 min-w-[200px]"><span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50 italic">{toast.title}</span><span className="text-base font-black leading-tight mt-1">{toast.message}</span>{toast.details && <p className="text-[9px] text-white/60 mt-2 font-medium italic line-clamp-1">{toast.details}</p>}</div>
-              {toast.action && <button onClick={toast.action} className="flex items-center gap-2 text-[10px] font-black uppercase italic whitespace-nowrap text-cyan-400 hover:text-white transition-colors">立即取证 <ArrowRight size={14} /></button>}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
@@ -230,6 +242,7 @@ function App() {
   useRiskSocket()
   return (
     <Router>
+      <Toaster />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/big-screen" element={<BigScreen />} />
@@ -258,5 +271,6 @@ function App() {
     </Router>
   )
 }
+
 
 export default App

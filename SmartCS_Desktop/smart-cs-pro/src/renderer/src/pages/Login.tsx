@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
 import { CONFIG } from '../lib/config'
 import axios from 'axios'
+import { toast } from 'sonner'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -50,6 +51,7 @@ export default function Login() {
             console.log('✅ [链路诊断] 神经握手成功');
           } catch (err: any) {
             setError(`链路初始化失败：加密中枢无法响应，请联系系统管理员`);
+            toast.error('链路初始化失败', { description: '加密中枢无法响应，请联系系统管理员' })
             speak('警告，物理链路脱机。');
           }
         };
@@ -77,7 +79,9 @@ export default function Login() {
           });
     
           if (res.status !== 200 || res.data.status !== 'ok') {
-            setError(res.data?.message || '身份特征校验未通过，请重新输入');
+            const msg = res.data?.message || '身份特征校验未通过，请重新输入'
+            setError(msg);
+            toast.error('登录失败', { description: msg })
             speak('身份核验未通过。');
             setIsLoading(false)
             return
@@ -104,6 +108,7 @@ export default function Login() {
         }
   
         speak(`欢迎进入系统，${user.real_name}。全链路已就绪。`)
+        toast.success(`欢迎归队，${user.real_name}`, { description: '全链路战术系统已就绪' })
         
         // 3. 持久化至中央状态库
         setAuth({ 
@@ -123,13 +128,16 @@ export default function Login() {
         // 服务器返回了错误 (如 401, 404, 500)
         const msg = err.response.data?.message || '指挥中枢拒绝了访问请求'
         setError(`链路错误: ${msg}`)
+        toast.error('链路错误', { description: msg })
         speak('身份核验未通过。')
       } else if (err.request) {
         // 请求发出了但没收到响应 (网络断了或引擎没开)
         setError(`无法建立战术连接：中枢服务器脱机 (目标: ${CONFIG.API_BASE})`)
+        toast.error('连接失败', { description: `中枢服务器脱机 (目标: ${CONFIG.API_BASE})` })
         speak('警告，无法建立远程连接。')
       } else {
         setError(`初始化失败: ${err.message}`)
+        toast.error('初始化失败', { description: err.message })
       }
     } finally {
       setIsLoading(false)

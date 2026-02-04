@@ -91,37 +91,56 @@ async def send_command(data: dict, request: Request, user: dict = Depends(check_
     return {"status": "ok"}
 
 @router.get("/departments")
-async def get_departments(page: int = 1, size: int = 10, current_user: dict = Depends(get_current_user)):
+async def get_departments(request: Request, page: int = 1, size: int = 10, current_user: dict = Depends(get_current_user)):
+    redis = request.app.state.redis
+    # 针对 HQ 角色获取全量列表（size=100）进行战术缓存
+    is_hq_full_fetch = current_user["role_code"] == "HQ" and size >= 100
+    cache_key = "cache:static:depts_full"
+    
+    if is_hq_full_fetch and redis:
+        cached = await redis.get(cache_key)
+        if cached: return {"status": "ok", "data": json.loads(cached), "total": len(json.loads(cached)), "source": "tactical_cache"}
+
     offset = (page - 1) * size
     query = Department.filter(is_deleted=0).select_related("manager")
     if current_user["role_code"] == "ADMIN": query = query.filter(id=current_user["dept_id"])
     total = await query.count()
     depts_data = await query.limit(size).offset(offset).annotate(member_count=Count("users")).values("id", "name", "member_count", "manager__username", "manager__real_name")
+    
+    if is_hq_full_fetch and redis:
+        await redis.setex(cache_key, 1800, json.dumps(depts_data)) # 缓存 30 分钟
+        
     return {"status": "ok", "data": depts_data, "total": total}
 
 @router.post("/departments")
-async def save_department(data: dict, user: dict = Depends(check_permission("admin:dept:create"))):
+async def save_department(data: dict, request: Request, user: dict = Depends(check_permission("admin:dept:create"))):
     name = data.get("name")
+    redis = request.app.state.redis
     async with in_transaction() as conn:
         await Department.create(name=name, using_db=conn)
         await record_audit(user["real_name"], "DEPT_CREATE", name, "录入新战术单元")
+    if redis: await redis.delete("cache:static:depts_full")
     return {"status": "ok"}
 
 @router.post("/departments/update")
-async def update_department(data: dict, user: dict = Depends(check_permission("admin:dept:update"))):
+async def update_department(data: dict, request: Request, user: dict = Depends(check_permission("admin:dept:update"))):
     dept_id, name, manager_id = data.get("id"), data.get("name"), data.get("manager_id")
+    redis = request.app.state.redis
     async with in_transaction() as conn:
         await Department.filter(id=dept_id).update(name=name, manager_id=manager_id, using_db=conn)
         await record_audit(user["real_name"], "DEPT_UPDATE", name, f"调整组织架构, 主管ID: {manager_id}")
+    if redis: await redis.delete("cache:static:depts_full")
     return {"status": "ok"}
 
 @router.post("/departments/delete")
-async def delete_department(data: dict, user: dict = Depends(check_permission("admin:dept:delete"))):
+async def delete_department(data: dict, request: Request, user: dict = Depends(check_permission("admin:dept:delete"))):
     dept_id = data.get("id")
+    redis = request.app.state.redis
     async with in_transaction() as conn:
         dept = await Department.get(id=dept_id)
         await Department.filter(id=dept_id).update(is_deleted=1, using_db=conn)
         await record_audit(user["real_name"], "DEPT_DELETE", dept.name, "物理注销战术单元")
+    if redis: await redis.delete("cache:static:depts_full")
     return {"status": "ok"}
 
 @router.get("/products")
@@ -132,14 +151,14 @@ async def get_products(page: int = 1, size: int = 12, current_user: dict = Depen
     return {"status": "ok", "data": data, "total": total}
 
 @router.post("/products")
-async def save_product(data: dict, user: dict = Depends(check_permission("admin:ai:create"))):
+async def save_product(data: dict, user: dict = Depends(check_permission("admin:asset:create"))):
     async with in_transaction() as conn:
         p = await Product.create(**data, using_db=conn)
         await record_audit(user["real_name"], "PROD_CREATE", p.name, "同步新商品资产")
     return {"status": "ok"}
 
 @router.post("/products/delete")
-async def delete_product(data: dict, user: dict = Depends(check_permission("admin:ai:delete"))):
+async def delete_product(data: dict, user: dict = Depends(check_permission("admin:asset:delete"))):
     p_id = data.get("id")
     async with in_transaction() as conn:
         p = await Product.get(id=p_id)
@@ -148,7 +167,7 @@ async def delete_product(data: dict, user: dict = Depends(check_permission("admi
     return {"status": "ok"}
 
 @router.post("/platforms/delete")
-async def delete_platform(data: dict, user: dict = Depends(check_permission("admin:ai:delete"))):
+async def delete_platform(data: dict, user: dict = Depends(check_permission("admin:platform:delete"))):
     p_id = data.get("id")
     async with in_transaction() as conn:
         p = await Platform.get(id=p_id)
@@ -171,13 +190,28 @@ async def get_audit_logs(page: int = 1, size: int = 15, current_user: dict = Dep
     return {"status": "ok", "data": data, "total": total}
 
 @router.get("/roles")
-async def get_roles(current_user: dict = Depends(get_current_user)):
-    return {"status": "ok", "data": await Role.filter(is_deleted=0).values("id", "name", "code")}
+async def get_roles(request: Request, current_user: dict = Depends(get_current_user)):
+    redis = request.app.state.redis
+    cache_key = "cache:static:roles"
+    if redis:
+        cached = await redis.get(cache_key)
+        if cached: return {"status": "ok", "data": json.loads(cached), "source": "tactical_cache"}
+    
+    data = await Role.filter(is_deleted=0).values("id", "name", "code")
+    if redis: await redis.setex(cache_key, 3600, json.dumps(data))
+    return {"status": "ok", "data": data}
 
 @router.get("/permissions")
-async def get_permissions(current_user: dict = Depends(get_current_user)):
+async def get_permissions(request: Request, current_user: dict = Depends(get_current_user)):
     """[物理拉取] 获取全量原子级权限定义清单"""
+    redis = request.app.state.redis
+    cache_key = "cache:static:permissions"
+    if redis:
+        cached = await redis.get(cache_key)
+        if cached: return {"status": "ok", "data": json.loads(cached), "source": "tactical_cache"}
+
     data = await Permission.filter(is_deleted=0).values("id", "code", "name", "module")
+    if redis: await redis.setex(cache_key, 3600, json.dumps(data))
     return {"status": "ok", "data": data}
 
 @router.get("/role/permissions")
@@ -198,6 +232,8 @@ async def update_role_permissions(data: dict, request: Request, user: dict = Dep
     if redis:
         role = await Role.get_or_none(id=role_id)
         await redis.set(f"cache:role_perms:{role.code if role else 'UNKNOWN'}", json.dumps(new_perms))
+        # 关键：清除全量权限缓存
+        await redis.delete("cache:static:permissions")
     return {"status": "ok"}
 
 @router.get("/notifications")

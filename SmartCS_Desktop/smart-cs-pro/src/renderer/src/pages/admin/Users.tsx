@@ -12,6 +12,7 @@ import { TacticalTable, TacticalPagination } from '../../components/ui/TacticalT
 import { TacticalSearch } from '../../components/ui/TacticalSearch'
 import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { useAuthStore } from '../../store/useAuthStore'
+import { toast } from 'sonner'
 
 function Modal({ isOpen, onClose, title, children }: any) {
   return (
@@ -48,6 +49,7 @@ export default function UsersPage() {
   const [modalType, setModalType] = useState<'NONE' | 'EDIT' | 'DELETE' | 'ROLE_CONFIRM'>('NONE')
   const [targetUser, setTargetUser] = useState<any>(null)
   const [pendingRole, setPendingRole] = useState<any>(null)
+  const [processing, setProcessing] = useState(false)
 
   const fetchData = async (silent = false) => {
     if (!token) return
@@ -86,30 +88,41 @@ export default function UsersPage() {
   }
 
   const executeRoleChange = async () => {
-    if (!targetUser || !pendingRole || !token) return
-    const res = await window.api.callApi({
-      url: `${CONFIG.API_BASE}/hq/user/update-role`,
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      data: { username: targetUser.username, new_role_id: pendingRole.id }
-    })
-    if (res.data.status === 'ok') {
-      setModalType('NONE'); fetchData(true)
-      window.dispatchEvent(new CustomEvent('trigger-toast', { detail: { title: '权责已重置', message: `操作员 ${targetUser.real_name} 已切换至 ${pendingRole.name}`, type: 'success' } }))
+    if (!targetUser || !pendingRole || !token || processing) return
+    setProcessing(true)
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/hq/user/update-role`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: { username: targetUser.username, new_role_id: pendingRole.id }
+      })
+      if (res.data.status === 'ok') {
+        setModalType('NONE'); fetchData(false) // 触发显式刷新
+        toast.success('权责已重置', { description: `操作员 ${targetUser.real_name} 已切换至 ${pendingRole.name}` })
+      }
+    } finally {
+      setProcessing(false)
     }
   }
 
   // --- 操作执行：信息编辑 ---
   const handleEditSave = async () => {
-    if (!targetUser || !token) return
-    const res = await window.api.callApi({
-      url: `${CONFIG.API_BASE}/admin/agents/update-info`,
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      data: { username: targetUser.username, real_name: targetUser.real_name, department_id: targetUser.department_id }
-    })
-    if (res.data.status === 'ok') {
-      setModalType('NONE'); fetchData(true)
+    if (!targetUser || !token || processing) return
+    setProcessing(true)
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/agents/update-info`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: { username: targetUser.username, real_name: targetUser.real_name, department_id: targetUser.department_id }
+      })
+      if (res.data.status === 'ok') {
+        setModalType('NONE'); fetchData(false) // 触发显式刷新
+        toast.success('信息已更新', { description: `操作员 ${targetUser.real_name} 的档案已同步` })
+      }
+    } finally {
+      setProcessing(false)
     }
   }
 
@@ -124,7 +137,7 @@ export default function UsersPage() {
       <div className="bg-white p-4 rounded-[24px] border border-slate-200 shadow-sm flex flex-wrap items-center gap-4 shrink-0">
         <div className="flex-1 min-w-[240px]"><TacticalSearch value={search} onChange={setSearch} placeholder="检索拼音、账号..." /></div>
         <div className="w-56"><TacticalSelect options={[{id: '', name: '全域战术单元'}, ...depts]} value={deptId} onChange={(val) => { setDeptId(val); setPage(1); }} /></div>
-        <button onClick={() => fetchData(true)} className="p-4 bg-slate-900 text-white rounded-2xl shadow-xl active:scale-9 group"><RefreshCw size={18} className={cn(loading && "animate-spin")} /></button>
+        <button onClick={() => fetchData(false)} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group"><RefreshCw size={18} className={cn(loading && "animate-spin")} /></button>
       </div>
 
       <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
@@ -165,35 +178,56 @@ export default function UsersPage() {
       </div>
 
       {/* 模态框矩阵 */}
-      <Modal isOpen={modalType === 'EDIT'} onClose={() => setModalType('NONE')} title="重校成员身份">
+      <Modal isOpen={modalType === 'EDIT'} onClose={() => !processing && setModalType('NONE')} title="重校成员身份">
          <div className="space-y-8">
-            <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">真实姓名</label><input value={targetUser?.real_name} onChange={(e)=>setTargetUser({...targetUser, real_name: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-black text-slate-900 shadow-inner" /></div>
+            <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">真实姓名</label><input disabled={processing} value={targetUser?.real_name} onChange={(e)=>setTargetUser({...targetUser, real_name: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-black text-slate-900 shadow-inner disabled:opacity-50" /></div>
             <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">所属战术单元</label>
-               <TacticalSelect options={depts} value={targetUser?.department_id} onChange={(val)=>setTargetUser({...targetUser, department_id: val})} placeholder="指派归属部门" />
+               <TacticalSelect disabled={processing} options={depts} value={targetUser?.department_id} onChange={(val)=>setTargetUser({...targetUser, department_id: val})} placeholder="指派归属部门" />
             </div>
-            <button onClick={handleEditSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"><Save size={18} /> 固化重校变更</button>
+            <button disabled={processing} onClick={handleEditSave} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:active:scale-100">
+              {processing ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 固化重校变更
+            </button>
          </div>
       </Modal>
 
-      <Modal isOpen={modalType === 'ROLE_CONFIRM'} onClose={() => setModalType('NONE')} title="权责重设预警">
+      <Modal isOpen={modalType === 'ROLE_CONFIRM'} onClose={() => !processing && setModalType('NONE')} title="权责重设预警">
          <div className="space-y-8 flex flex-col items-center text-center">
             <div className="w-20 h-20 rounded-full bg-cyan-50 text-cyan-500 flex items-center justify-center border border-cyan-100 shadow-inner animate-pulse"><UserCog size={40} /></div>
             <div><h4 className="text-lg font-black text-slate-900 mb-2 italic">确认重设操作员权责？</h4><p className="text-sm text-slate-500 font-medium leading-relaxed px-4">您正在将 <span className="text-cyan-600 font-black">[{targetUser?.real_name}]</span> 的身份切换为 <span className="text-slate-900 font-black">[{pendingRole?.name}]</span>。系统将物理记录此项高危变更至审计流。</p></div>
             <div className="grid grid-cols-2 gap-4 w-full">
-               <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all">放弃动作</button>
-               <button onClick={executeRoleChange} className="py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-xl active:scale-95 transition-all">确认授权</button>
+               <button disabled={processing} onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all disabled:opacity-50">放弃动作</button>
+               <button disabled={processing} onClick={executeRoleChange} className="py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100">
+                 {processing && <Loader2 className="animate-spin" size={16} />} 确认授权
+               </button>
             </div>
          </div>
       </Modal>
 
-      <Modal isOpen={modalType === 'DELETE'} onClose={() => setModalType('NONE')} title="节点注销警报">
+      <Modal isOpen={modalType === 'DELETE'} onClose={() => !processing && setModalType('NONE')} title="节点注销警报">
          <div className="space-y-8 flex flex-col items-center text-center text-slate-900">
             <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
             <h3 className="text-xl font-black mb-2 italic text-red-600">物理注销确认</h3>
             <p className="text-xs text-slate-400 font-medium mb-8">注销操作员 <span className="text-red-600 font-black">[@{targetUser?.username}]</span>。此行为将被物理审计。</p>
-            <div className="grid grid-cols-2 gap-4 w-full"><button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase">取消</button><button onClick={async() => { if(!targetUser || !token) return; await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/agents/delete`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: { username: targetUser.username } }); setModalType('NONE'); fetchData(true); }} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600">确认注销</button></div>
+            <div className="grid grid-cols-2 gap-4 w-full">
+              <button disabled={processing} onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase disabled:opacity-50">取消</button>
+              <button disabled={processing} onClick={async() => { 
+                if(!targetUser || !token || processing) return; 
+                setProcessing(true)
+                try {
+                  await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/agents/delete`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: { username: targetUser.username } }); 
+                  setModalType('NONE'); 
+                  fetchData(false); // 触发显式刷新
+                  toast.success('节点已物理注销', { description: `操作员 ${targetUser.username} 已从矩阵中移除` }); 
+                } finally {
+                  setProcessing(false)
+                }
+              }} className="py-4 bg-red-500 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:bg-red-600 flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100">
+                {processing && <Loader2 className="animate-spin" size={16} />} 确认注销
+              </button>
+            </div>
          </div>
       </Modal>
     </div>
   )
 }
+

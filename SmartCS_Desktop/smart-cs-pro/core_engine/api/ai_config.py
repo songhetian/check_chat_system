@@ -37,7 +37,7 @@ async def save_category(data: dict, user: dict = Depends(check_permission("admin
 async def delete_category(data: dict, user: dict = Depends(check_permission("admin:cat:delete"))):
     cat_id = data.get("id")
     async with in_transaction() as conn:
-        await PolicyCategory.filter(id=cat_id).update(is_deleted=1)
+        await PolicyCategory.filter(id=cat_id).update(is_deleted=1, using_db=conn)
         await record_audit(user["real_name"], "CAT_DELETE", f"ID:{cat_id}", "注销策略分类")
     return {"status": "ok"}
 
@@ -59,8 +59,8 @@ async def save_sensitive_word(data: dict, request: Request, user: dict = Depends
 
     payload = {"word": data.get("word"), "category_id": data.get("category_id"), "risk_level": data.get("risk_level", 5)}
     async with in_transaction() as conn:
-        if word_id: await SensitiveWord.filter(id=word_id).update(**payload)
-        else: await SensitiveWord.create(**payload)
+        if word_id: await SensitiveWord.filter(id=word_id).update(**payload, using_db=conn)
+        else: await SensitiveWord.create(**payload, using_db=conn)
         
         redis = request.app.state.redis
         if redis:
@@ -85,7 +85,12 @@ async def delete_sensitive_word(data: dict, request: Request, user: dict = Depen
 
 @router.get("/knowledge-base")
 async def get_knowledge_base(page: int = 1, size: int = 10, current_user: dict = Depends(get_current_user)):
-    # ... 原有逻辑保持
+    query = KnowledgeBase.filter(is_deleted=0)
+    total = await query.count()
+    data = await query.select_related("category").offset((page - 1) * size).limit(size).order_by("-id").values(
+        "id", "keyword", "answer", "is_active", "category__name", "category_id"
+    )
+    return {"status": "ok", "data": data, "total": total}
 
 @router.post("/knowledge-base/delete")
 async def delete_knowledge_item(data: dict, request: Request, user: dict = Depends(check_permission("admin:ai:delete"))):
@@ -110,8 +115,8 @@ async def save_knowledge_item(data: dict, request: Request, user: dict = Depends
 
     payload = {"keyword": data.get("keyword"), "answer": data.get("answer"), "category_id": data.get("category_id")}
     async with in_transaction() as conn:
-        if item_id: await KnowledgeBase.filter(id=item_id).update(**payload)
-        else: await KnowledgeBase.create(**payload)
+        if item_id: await KnowledgeBase.filter(id=item_id).update(**payload, using_db=conn)
+        else: await KnowledgeBase.create(**payload, using_db=conn)
 
         redis = request.app.state.redis
         if redis:

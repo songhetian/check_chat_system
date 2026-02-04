@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/useAuthStore'
 import { CONFIG } from '../lib/config'
 
 export const useRiskSocket = () => {
+  const { user, token } = useAuthStore()
   const addViolation = useRiskStore((s) => s.addViolation)
   const setAlerting = useRiskStore((s) => s.setAlerting)
 
@@ -14,16 +15,12 @@ export const useRiskSocket = () => {
     const maxRetries = 10;
 
     const connect = () => {
-      const state = useAuthStore.getState();
-      const currentUser = state.user;
-      const currentToken = state.token;
-      
-      if (!currentUser || !currentToken || !CONFIG.WS_BASE) {
+      if (!user || !token || !CONFIG.WS_BASE) {
         return;
       }
 
       // 核心：建立物理连接
-      socket = new WebSocket(`${CONFIG.WS_BASE}/risk?token=${currentToken}&username=${currentUser.username}`)
+      socket = new WebSocket(`${CONFIG.WS_BASE}/risk?token=${token}&username=${user.username}`)
 
       socket.onopen = () => {
         console.log('✅ [WS链路] 物理握手成功');
@@ -96,5 +93,5 @@ export const useRiskSocket = () => {
       socket?.close();
       clearTimeout(reconnectTimeout);
     }
-  }, [])
+  }, [user, token])
 }

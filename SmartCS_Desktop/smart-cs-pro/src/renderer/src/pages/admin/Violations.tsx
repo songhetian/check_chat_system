@@ -13,6 +13,7 @@ import { TacticalSearch } from '../../components/ui/TacticalSearch'
 import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
+import { toast } from 'sonner'
 
 // --- 证据详单弹窗 ---
 function EvidenceModal({ isOpen, onClose, data }: any) {
@@ -101,6 +102,7 @@ export default function ViolationsPage() {
       if (res.status === 200) {
         setData(res.data.data)
         setTotal(res.data.total)
+        if (silent) toast.success('审计库已同步', { description: '最新违规记录已调取' })
       }
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
@@ -145,7 +147,7 @@ export default function ViolationsPage() {
           />
         </div>
 
-        <button onClick={() => fetchViolations(true)} className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 transition-all shadow-xl active:scale-95 group">
+        <button onClick={() => fetchViolations(false)} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
           <RefreshCw size={18} className={cn(loading && "animate-spin")} />
         </button>
       </div>
