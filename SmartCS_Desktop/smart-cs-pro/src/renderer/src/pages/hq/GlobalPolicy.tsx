@@ -28,9 +28,9 @@ export default function GlobalPolicyPage() {
   const [editItem, setEditItem] = useState<any>(null)
   const [processing, setProcessing] = useState(false)
 
-  const fetchData = async () => {
+  const fetchData = async (silent = false) => {
     if (!token) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
       const [resData, resCats] = await Promise.all([
@@ -41,6 +41,7 @@ export default function GlobalPolicyPage() {
         if (activeTab === 'WORDS') setWords(resData.data.data)
         else setKb(resData.data.data)
         setTotal(resData.data.total)
+        if (silent) toast.success('策略已同步')
       }
       if (resCats.status === 200) setCats(resCats.data.data)
     } catch (e) { console.error(e) }
@@ -68,7 +69,7 @@ export default function GlobalPolicyPage() {
       })
       if (res.data.status === 'ok') { 
         setModalType('NONE'); 
-        fetchData(); 
+        fetchData(false); // Visible refresh
         toast.success(isEdit ? '策略已优化' : '新策略已就绪', { description: '战术规则矩阵已同步至全域' })
       }
     } finally {
@@ -89,7 +90,7 @@ export default function GlobalPolicyPage() {
       })
       if (res.data.status === 'ok') {
         setModalType('NONE'); 
-        fetchData();
+        fetchData(false); // Visible refresh
         toast.success('策略节点已清除', { description: '战术规则已实时重载' })
       }
     } finally {
@@ -102,7 +103,7 @@ export default function GlobalPolicyPage() {
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0 gap-6">
         <div><h2 className="text-3xl font-black text-slate-900 uppercase italic">全域 AI 决策中心</h2><p className="text-slate-500 text-sm mt-1 font-medium">配置全局对话拦截权重与智能纠偏话术矩阵</p></div>
         <div className="flex flex-wrap gap-3">
-           <button onClick={fetchData} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+           <button onClick={() => fetchData(false)} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
              <RefreshCw size={18} className={cn(loading && "animate-spin")} />
            </button>
            <button className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-2xl text-[10px] font-black shadow-lg hover:bg-emerald-700 transition-all"><Download size={14} /> 模板</button>

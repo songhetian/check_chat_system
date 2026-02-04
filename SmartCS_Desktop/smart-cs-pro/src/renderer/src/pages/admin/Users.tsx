@@ -165,7 +165,7 @@ export default function UsersPage() {
                          <button onClick={() => { setTargetUser({...u, department_id: u.department_id || ''}); setModalType('EDIT'); }} className="p-2.5 bg-slate-100 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>
                        )}
                        {hasPermission('admin:user:delete') && (
-                         <button onClick={() => { setTargetUser(u); setModalType('DELETE'); }} className="p-2.5 bg-slate-100 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>
+                         <button onClick={() => { setTargetUser(u); setModalType('DELETE'); }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>
                        )}
                     </div>
                   </td>

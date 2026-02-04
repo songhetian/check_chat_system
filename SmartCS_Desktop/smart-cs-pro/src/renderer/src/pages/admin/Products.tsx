@@ -103,8 +103,8 @@ export default function ProductsPage() {
                   <div className="flex justify-between items-start">
                     <div className="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center border border-cyan-100 shadow-inner"><Package size={24} /></div>
                     <div className="flex gap-1">
-                      {hasPermission('admin:asset:update') && <button className="p-2 text-slate-400 hover:text-cyan-600 transition-colors"><Edit3 size={16} /></button>}
-                      {hasPermission('admin:asset:delete') && <button onClick={() => { setTargetItem(product); setModalType('DELETE'); }} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>}
+                      {hasPermission('admin:asset:update') && <button className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>}
+                      {hasPermission('admin:asset:delete') && <button onClick={() => { setTargetItem(product); setModalType('DELETE'); }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>}
                     </div>
                   </div>
                   <div><h3 className="text-base font-black text-slate-900 leading-tight mb-1 truncate">{product.name}</h3><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">SKU: {product.sku}</span></div>

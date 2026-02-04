@@ -119,7 +119,7 @@ const AdminHome = () => {
              className="p-3 bg-slate-50 text-slate-600 rounded-2xl hover:bg-slate-100 transition-all shadow-sm border border-slate-200 active:scale-95 flex items-center justify-center gap-2 group"
              title="物理同步态势"
            >
-             <RefreshCw size={20} className={cn(loading && "animate-spin", "group-hover:rotate-180 transition-transform duration-500")} />
+             <RefreshCw size={18} className={cn(loading && "animate-spin", "group-hover:rotate-180 transition-transform duration-500")} />
            </button>
            <button onClick={() => window.open('#/big-screen', '_blank')} className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-2xl active:scale-95 flex items-center gap-3 hover:bg-slate-800 transition-all uppercase tracking-widest"><Globe size={18} /> 激活态势投影</button>
         </div>
