@@ -58,7 +58,7 @@ export const TacticalIsland = () => {
             <div className="flex flex-col">
               <span className="text-[14px] font-black text-white tracking-widest uppercase flex items-center gap-2">
                 {user?.real_name || 'System Node'}
-                {isOnboardingMode && <GraduationCap size={14} className="text-amber-400 animate-bounce" title="培训模式激活" />}
+                {isOnboardingMode && <GraduationCap size={14} className="text-amber-400 animate-bounce" />}
               </span>
               <div className="flex items-center gap-2">
                  <span className={cn(
