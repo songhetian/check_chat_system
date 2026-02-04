@@ -127,4 +127,5 @@ register_tortoise(
 if __name__ == "__main__":
     host, port = os.getenv("SERVER_HOST", "0.0.0.0"), int(os.getenv("SERVER_PORT", 8000))
     print(f"🚀 [战术核心] 架构标准化重塑完成: {host}:{port}")
-    uvicorn.run(app, host=host, port=port)
+    # 强制指定高性能组件，解决环境兼容性导致的 WebSocket 识别失败
+    uvicorn.run(app, host=host, port=port, ws='websockets', loop='uvloop', http='httptools')
