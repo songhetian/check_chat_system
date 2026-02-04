@@ -84,7 +84,7 @@ app.include_router(rbac_router)
 app.include_router(ai_router)
 
 # --- 4. WebSocket 战术链路 ---
-@app.websocket("/ws/risk")
+@app.websocket("/api/ws/risk")
 async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), username: str = Query(...)):
     await manager.connect(username, websocket)
     redis_conn = app.state.redis

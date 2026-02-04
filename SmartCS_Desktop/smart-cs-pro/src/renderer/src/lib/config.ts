@@ -28,8 +28,8 @@ export const initDynamicConfig = async () => {
         if (centralUrl.endsWith('/')) centralUrl = centralUrl.slice(0, -1);
         
         CONFIG.API_BASE = centralUrl;
-        // 自动转换协议：http -> ws
-        CONFIG.WS_BASE = centralUrl.replace('/api', '/ws').replace('http', 'ws');
+        // 自动转换协议：http -> ws，并保持 /api 前缀后追加 /ws 路径
+        CONFIG.WS_BASE = centralUrl.replace('http', 'ws') + '/ws';
         
         console.log(`🌐 [战术同步] 链路已锁定指挥中心: ${CONFIG.API_BASE}`);
       }

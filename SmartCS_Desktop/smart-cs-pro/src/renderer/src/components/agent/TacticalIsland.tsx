@@ -24,7 +24,7 @@ export const TacticalIsland = () => {
   // 灵动岛尺寸动态适配
   useEffect(() => {
     const width = 680
-    const height = isExpanded ? 780 : 100
+    const height = isExpanded ? 800 : 100
     window.electron.ipcRenderer.send('resize-window', { width, height })
     window.electron.ipcRenderer.send('set-always-on-top', true)
   }, [isExpanded])
@@ -33,11 +33,13 @@ export const TacticalIsland = () => {
     <div className="h-screen w-screen flex items-start justify-center pt-1 overflow-hidden pointer-events-none select-none bg-transparent">
       <motion.div 
         layout
+        initial={false}
         className={cn(
-          "pointer-events-auto border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden transition-all duration-500 rounded-[38px]",
+          "pointer-events-auto border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden rounded-[38px]",
           isGlassMode ? "bg-slate-950/30 backdrop-blur-3xl" : "bg-slate-950",
           isAlerting && "border-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] ring-1 ring-red-500/20"
         )}
+        style={{ borderRadius: '38px' }}
       >
         {/* 1. 战术中枢条 (Main Bar) */}
         <div 
@@ -229,7 +231,7 @@ export const TacticalIsland = () => {
               </div>
               
               {/* 底部页脚 */}
-              <div className="p-6 bg-black/60 border-t border-white/10 flex justify-between items-center px-10">
+              <div className="p-6 bg-black/60 border-t border-white/10 flex justify-between items-center px-10 rounded-b-[38px]">
                  <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
                     <span className="text-[10px] font-mono text-slate-500 uppercase font-black tracking-[0.2em]">Link Secure · Protocol v2.4</span>
