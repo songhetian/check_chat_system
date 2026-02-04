@@ -39,11 +39,27 @@ import { TacticalPagination } from './components/ui/TacticalTable'
 const AdminHome = () => {
   const { user, token } = useAuthStore() 
   const [agents, setAgents] = useState<any[]>([])
+  const [depts, setDepts] = useState<any[]>([])
+  const [deptId, setDeptId] = useState<string>('')
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  const isHQ = user?.role_code === 'HQ'
+
+  const fetchDepts = async () => {
+    if (!isHQ || !token) return
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/departments?size=100`,
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.status === 200) setDepts(res.data.data)
+    } catch (e) { console.error(e) }
+  }
 
   const fetchAgents = async () => {
     if (!token) return
@@ -51,7 +67,7 @@ const AdminHome = () => {
     setErrorMsg(null)
     try {
       const res = await window.api.callApi({
-        url: `${CONFIG.API_BASE}/admin/agents?page=${page}&size=10&search=${search}`,
+        url: `${CONFIG.API_BASE}/admin/agents?page=${page}&size=10&search=${search}&dept_id=${deptId}`,
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -70,13 +86,36 @@ const AdminHome = () => {
     }
   }
 
-  useEffect(() => { fetchAgents() }, [page, search])
+  useEffect(() => { fetchDepts() }, [token])
+  useEffect(() => { fetchAgents() }, [page, search, deptId, token])
 
   return (
-    <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6">
+    <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
       <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0 flex justify-between items-center">
-        <div><h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow leading-none">全域态势矩阵</h2><p className="text-slate-400 text-sm mt-2 font-medium">实时监听操作员实战状态，包括战术评分、违规拦截及新兵结业进度</p></div>
-        <button onClick={() => window.open('#/big-screen', '_blank')} className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-2xl active:scale-95 flex items-center gap-3 hover:bg-slate-800 transition-all uppercase tracking-widest"><Globe size={18} /> 激活态势投影</button>
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow leading-none">全域态势矩阵</h2>
+          <p className="text-slate-400 text-sm mt-2 font-medium">实时监听操作员实战状态，包括战术评分、违规拦截及新兵结业进度</p>
+        </div>
+        <div className="flex items-center gap-4">
+           {isHQ && (
+             <select 
+               value={deptId} 
+               onChange={(e) => { setDeptId(e.target.value); setPage(1); }}
+               className="bg-slate-50 border border-slate-100 rounded-2xl text-xs font-black px-6 py-3 outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all"
+             >
+               <option value="">全域战术单元</option>
+               {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+             </select>
+           )}
+           <button 
+             onClick={fetchAgents} 
+             className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
+             title="实时同步态势"
+           >
+             <RefreshCw size={20} className={cn(loading && "animate-spin")} />
+           </button>
+           <button onClick={() => window.open('#/big-screen', '_blank')} className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-2xl active:scale-95 flex items-center gap-3 hover:bg-slate-800 transition-all uppercase tracking-widest"><Globe size={18} /> 激活态势投影</button>
+        </div>
       </div>
 
       <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0 relative">

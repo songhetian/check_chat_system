@@ -21,8 +21,10 @@ const getAgentStatusTheme = (score: number, isOnline: boolean) => {
 }
 
 export default function TacticalCommand() {
-  const { token } = useAuthStore()
+  const { token, user } = useAuthStore()
   const [agents, setAgents] = useState<any[]>([])
+  const [depts, setDepts] = useState<any[]>([])
+  const [deptId, setDeptId] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [activeAgent, setActiveAgent] = useState<any>(null)
   const [isInputLocked, setIsInputLocked] = useState(false)
@@ -30,14 +32,26 @@ export default function TacticalCommand() {
   const [liveChat, setLiveChat] = useState<any[]>([])
   
   const violations = useRiskStore(s => s.violations)
+  const isHQ = user?.role_code === 'HQ'
 
-  // 1. 数据对齐：默认仅看坐席，应用部门隔离
+  const fetchDepts = async () => {
+    if (!isHQ || !token) return
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/departments?size=100`,
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.status === 200) setDepts(res.data.data)
+    } catch (e) { console.error(e) }
+  }
+
   const fetchData = async (silent = false) => {
     if (!token) return
     if (!silent) setLoading(true)
     try {
       const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/admin/agents?role_only=AGENT&page=1&size=100&search=${search}`, 
+        url: `${CONFIG.API_BASE}/admin/agents?role_only=AGENT&search=${search}&dept_id=${deptId}`, 
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -46,9 +60,9 @@ export default function TacticalCommand() {
     finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchData() }, [search, token])
+  useEffect(() => { fetchDepts() }, [token])
+  useEffect(() => { fetchData() }, [search, deptId, token])
 
-  // 2. 实时传输：对接物理 WS 数据流
   useEffect(() => {
     const onLiveChat = (e: any) => {
       const msg = e.detail
@@ -60,7 +74,6 @@ export default function TacticalCommand() {
     return () => window.removeEventListener('ws-live-chat', onLiveChat)
   }, [activeAgent])
 
-  // 3. 物理下发：调用后端指令中枢
   const executeIntervention = async (type: string, description: string, payload: any = {}) => {
     if (!activeAgent || !token) return
     const res = await window.api.callApi({
@@ -79,15 +92,24 @@ export default function TacticalCommand() {
     <div className="flex flex-col h-full font-sans bg-slate-50/50 p-4 lg:p-6 gap-6 overflow-hidden select-none text-slate-900">
       <header className="flex justify-between items-center bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
         <div className="flex items-center gap-6"><div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl"><Radar size={24} className="text-cyan-400 animate-pulse" /></div><div><h2 className="text-2xl font-black text-slate-900 italic tracking-tighter uppercase leading-none">战术监控指挥中枢</h2><div className="flex items-center gap-2 mt-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest"><span className="flex items-center gap-1 text-emerald-500"><Globe size={10}/> 实时链路已激活</span></div></div></div>
-        <div className="flex gap-4">
+        <div className="flex items-center gap-4">
+           {isHQ && (
+             <select 
+               value={deptId} 
+               onChange={(e) => setDeptId(e.target.value)}
+               className="bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black px-4 py-2 outline-none focus:ring-2 focus:ring-cyan-500/20 shadow-inner"
+             >
+               <option value="">全域战术单元</option>
+               {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+             </select>
+           )}
            <StatBox label="监控节点" value={agents.length} color="text-cyan-500" />
            <StatBox label="在线坐席" value={agents.filter(a => a.is_online).length} color="text-emerald-500" />
-           <StatBox label="拦截频次" value={violations.length} color="text-red-500" />
+           <button onClick={() => fetchData()} className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 border border-slate-100 transition-all shadow-sm"><RefreshCw size={18} className={cn(loading && "animate-spin")} /></button>
         </div>
       </header>
 
       <main className="flex-1 flex gap-6 min-h-0">
-        {/* 左侧监控墙 */}
         <div className="w-full lg:w-[380px] flex flex-col bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden shrink-0">
            <div className="p-6 border-b border-slate-100 space-y-4"><h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2"><Radio size={14} className="text-cyan-500" /> 节点实时矩阵</h3><TacticalSearch value={search} onChange={setSearch} placeholder="检索操作员..." /></div>
            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-3 bg-slate-50/30">
@@ -107,12 +129,10 @@ export default function TacticalCommand() {
            </div>
         </div>
 
-        {/* 右侧指挥舱 */}
         <div className="flex-1 flex flex-col min-w-0 bg-white rounded-[40px] border border-slate-200 shadow-2xl relative overflow-hidden">
            <AnimatePresence mode='wait'>
               {activeAgent ? (
                 <motion.div key={activeAgent.username} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col h-full">
-                  {/* 1. 指令矩阵：置顶，极速反应区 */}
                   <section className="p-8 border-b border-slate-100 bg-slate-50/30 shrink-0">
                      <div className="flex items-center justify-between mb-6"><div className="flex items-center gap-3"><div className="w-1.5 h-4 bg-cyan-500 rounded-full" /><h5 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.4em]">指挥官干预指令矩阵</h5></div><div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm"><span className="text-[9px] font-black text-slate-400">正在指挥: {activeAgent.real_name}</span></div></div>
                      <div className="grid grid-cols-4 gap-6">
@@ -122,9 +142,7 @@ export default function TacticalCommand() {
                         <TacticalButton onClick={() => executeIntervention('SOP', '推送 SOP')} icon={FileText} label="推送 SOP" sub="TACTICAL SOP" color="bg-white" textColor="text-slate-900" border="border-2 border-slate-100" />
                      </div>
                   </section>
-
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
-                     {/* 2. 对话全透视：物理数据流 */}
                      <section className="space-y-4">
                         <div className="flex justify-between items-center ml-2"><h5 className="text-[11px] font-black text-cyan-600 uppercase tracking-[0.4em] flex items-center gap-2"><MonitorStop size={16} /> 实时传输 (物理监听)</h5><span className={cn("text-[9px] font-black uppercase italic", activeAgent.is_online ? "text-emerald-500 animate-pulse" : "text-slate-300")}>{activeAgent.is_online ? 'Transmission Active' : 'Offline'}</span></div>
                         <div className="bg-slate-950 rounded-[40px] p-8 border border-white/5 space-y-6 shadow-2xl relative overflow-hidden min-h-[340px]">
@@ -133,12 +151,11 @@ export default function TacticalCommand() {
                               {liveChat.length === 0 ? (<div className="h-40 flex items-center justify-center text-slate-700 italic text-sm">等待坐席物理数据载荷上传...</div>) : liveChat.map((chat, idx) => (
                                 <div key={idx} className="flex gap-4 text-xs"><span className="text-slate-500 font-bold shrink-0 mt-2 uppercase">RAW:</span><span className="text-white/90 bg-white/5 px-4 py-3 rounded-3xl rounded-tl-none border border-white/5 backdrop-blur-md italic">"{chat.text}"</span></div>
                               ))}
-                              {activeAgent.is_online && <div className="flex items-center gap-2 text-[10px] text-slate-500 italic"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" /> 物理连接已握手，监听频率 10Hz</div>}
+                              {activeAgent.is_online && <div className="flex items-center gap-2 text-[10px] text-slate-500 italic"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" /> 物理连接已握手</div>}
                            </div>
                         </div>
                      </section>
-
-                     <section className="p-10 bg-slate-900 text-white rounded-[48px] relative overflow-hidden shadow-2xl"><div className="absolute top-0 right-0 p-8 opacity-10"><BrainCircuit size={100} /></div><h5 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-2"><BrainCircuit size={16} /> 智脑实时研判</h5><p className="text-base font-medium text-slate-300 leading-relaxed italic relative z-10">"检测到该操作员处于诱导高发区。监测到其输入缓冲区存在社交平台引流关键词。建议指挥官立即执行<span className="text-cyan-400 font-black underline underline-offset-4 mx-1">‘强制锁定’</span>以阻断违规闭环。"</p></section>
+                     <section className="p-10 bg-slate-900 text-white rounded-[48px] relative overflow-hidden shadow-2xl"><div className="absolute top-0 right-0 p-8 opacity-10"><BrainCircuit size={100} /></div><h5 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-2"><BrainCircuit size={16} /> 智脑实时研判</h5><p className="text-base font-medium text-slate-300 leading-relaxed italic relative z-10">"检测到该操作员处于诱导高发区。建议指挥官立即执行<span className="text-cyan-400 font-black underline underline-offset-4 mx-1">‘强制锁定’</span>以阻断违规闭环。"</p></section>
                   </div>
                 </motion.div>
               ) : (
