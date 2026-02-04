@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Users, ShieldAlert, Activity, Radio, MessageSquare, 
   Zap, BrainCircuit, Mic, FileText, ArrowUpRight,
   Loader2, CheckCircle2, Lock, Unlock, Send,
   X, RefreshCw, AlertTriangle, TrendingDown, BellRing,
-  Search, Filter, ChevronDown, MonitorStop
+  Search, Filter, ChevronDown, MonitorStop, Globe, ShieldCheck,
+  Power, PowerOff, Cpu, Radar
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
@@ -13,11 +14,41 @@ import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalSearch } from '../../components/ui/TacticalSearch'
 
-const getAgentTheme = (score: number, isOnline: boolean) => {
-  if (!isOnline) return { border: 'border-slate-200', bg: 'bg-white', text: 'text-slate-400', label: '离线脱机', accent: 'bg-slate-100' }
-  if (score < 60) return { border: 'border-red-500', bg: 'bg-red-50', text: 'text-red-600', label: '高危监控', accent: 'bg-red-500', glow: 'animate-pulse ring-4 ring-red-500/20' }
-  if (score < 85) return { border: 'border-amber-500', bg: 'bg-amber-50', text: 'text-amber-600', label: '合规警告', accent: 'bg-amber-500' }
-  return { border: 'border-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-600', label: '运行正常', accent: 'bg-emerald-500' }
+// --- 核心：座舱式主题色彩映射 ---
+const getAgentStatusTheme = (score: number, isOnline: boolean) => {
+  if (!isOnline) return { 
+    border: 'border-slate-200', 
+    bg: 'bg-white', 
+    text: 'text-slate-400', 
+    label: '脱机', 
+    accent: 'bg-slate-100',
+    dot: 'bg-slate-300'
+  }
+  if (score < 60) return { 
+    border: 'border-red-500', 
+    bg: 'bg-red-50/50', 
+    text: 'text-red-600', 
+    label: '高危', 
+    accent: 'bg-red-500', 
+    dot: 'bg-red-500 animate-ping',
+    glow: 'ring-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
+  }
+  if (score < 85) return { 
+    border: 'border-amber-500', 
+    bg: 'bg-amber-50/50', 
+    text: 'text-amber-600', 
+    label: '风险', 
+    accent: 'bg-amber-500',
+    dot: 'bg-amber-500'
+  }
+  return { 
+    border: 'border-emerald-500', 
+    bg: 'bg-emerald-50/50', 
+    text: 'text-emerald-600', 
+    label: '稳定', 
+    accent: 'bg-emerald-500',
+    dot: 'bg-emerald-500'
+  }
 }
 
 export default function TacticalCommand() {
@@ -61,74 +92,264 @@ export default function TacticalCommand() {
   const executeIntervention = async (type: string, description: string) => {
     if (!activeAgent || !token) return
     if (type === 'LOCK') setIsInputLocked(!isInputLocked)
+    
+    // 工业级视觉反馈触发
     window.dispatchEvent(new CustomEvent('trigger-toast', {
-      detail: { title: '战术指令已执行', message: `针对 ${activeAgent.real_name} 的 [${description}] 指令已下发`, type: 'success' }
+      detail: { 
+        title: '战术指令已固化', 
+        message: `已对节点 [${activeAgent.real_name}] 下发 [${description}]`, 
+        type: 'success' 
+      }
     }))
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full font-sans select-none bg-slate-50/50 p-4 lg:p-6 text-slate-900">
-      <header className="grid grid-cols-12 gap-6 shrink-0">
-        <div className="col-span-12 lg:col-span-4 bg-white p-8 rounded-[40px] border border-slate-200 shadow-sm flex items-center gap-6 relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="absolute top-0 right-0 p-10 opacity-[0.02] rotate-12"><BrainCircuit size={120} /></div>
-          <div className="w-16 h-16 bg-cyan-500 rounded-2xl flex items-center justify-center shadow-lg relative z-10 group-hover:scale-110 transition-transform"><Zap size={36} className="text-white animate-pulse" /></div>
-          <div className="relative z-10"><h2 className="text-2xl font-black tracking-tighter text-slate-900 italic uppercase leading-none">实时战术指挥台</h2><div className="flex items-center gap-2 mt-2"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" /><p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">中枢链路已加密</p></div></div>
+    <div className="flex flex-col h-full font-sans bg-slate-50/50 p-4 lg:p-6 gap-6 overflow-hidden select-none">
+      
+      {/* 1. 战术顶部看板 */}
+      <header className="flex justify-between items-center bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
+        <div className="flex items-center gap-6">
+          <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl">
+            <Radar size={24} className="text-cyan-400 animate-pulse" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 italic tracking-tighter uppercase leading-none">战术监控指挥中枢</h2>
+            <div className="flex items-center gap-2 mt-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+               <span className="flex items-center gap-1"><Cpu size={10}/> 系统引擎已挂载</span>
+               <span className="mx-2 opacity-20">|</span>
+               <span className="flex items-center gap-1 text-emerald-500"><Globe size={10}/> 实时链路 100%</span>
+            </div>
+          </div>
         </div>
-        <div className="col-span-12 lg:col-span-8 bg-white p-4 rounded-[40px] border border-slate-200 shadow-sm flex items-center overflow-hidden">
-           <div className="grid grid-cols-3 w-full gap-4">
-              <div className="flex flex-col items-center justify-center bg-slate-50/50 rounded-3xl py-6 border border-slate-100"><span className="text-[9px] font-black text-slate-400 uppercase mb-1 tracking-[0.2em]">管控节点</span><span className="text-3xl font-black text-slate-900 italic">{agents.length}</span></div>
-              <div className="flex flex-col items-center justify-center bg-slate-50/50 rounded-3xl py-6 border border-slate-100"><span className="text-[9px] font-black text-slate-400 uppercase mb-1 tracking-[0.2em]">在线监听</span><span className="text-3xl font-black text-emerald-500 italic">{agents.filter(a => a.is_online).length}</span></div>
-              <div className="flex flex-col items-center justify-center bg-red-50/50 rounded-3xl py-6 border border-red-100"><span className="text-[9px] font-black text-red-400 uppercase mb-1 tracking-[0.2em]">今日拦截</span><span className="text-3xl font-black text-red-600 italic">{violations.length}</span></div>
-           </div>
+        
+        <div className="flex gap-4">
+           <StatBox label="在线节点" value={agents.filter(a => a.is_online).length} color="text-cyan-500" />
+           <StatBox label="风险预警" value={violations.length} color="text-red-500" />
+           <button onClick={() => fetchData()} className="p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-400 transition-all border border-slate-100">
+              <RefreshCw size={20} className={cn(isRefreshing && "animate-spin")} />
+           </button>
         </div>
       </header>
 
-      <div className="grid grid-cols-12 gap-8 flex-1 min-h-0">
-        <div className="col-span-12 xl:col-span-7 flex flex-col gap-6 min-h-0">
-          <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm flex flex-col flex-1 overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-white flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
-               <div className="flex items-center gap-3"><div className="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center"><Users size={20} /></div><div><h3 className="text-sm font-black text-slate-900">实时节点矩阵</h3><div className="flex items-center gap-2"><span className="text-[9px] font-black text-slate-400 uppercase">按风险权重自动置顶</span>{isRefreshing && <RefreshCw size={10} className="text-cyan-500 animate-spin" />}</div></div></div>
-               <div className="w-full md:w-72"><TacticalSearch value={search} onChange={setSearch} onSearch={() => fetchData()} placeholder="搜索坐席姓名、账号..." /></div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-slate-50/20">
-              <AnimatePresence>
-                {agents.map((a) => {
-                  const theme = getAgentTheme(a.tactical_score, a.is_online);
-                  return (
-                    <motion.div 
-                      key={a.username} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                      whileHover={{ y: -4, scale: 1.02 }} onClick={() => setActiveAgent(a)}
-                      className={cn("p-6 rounded-[32px] border transition-all cursor-pointer relative flex flex-col gap-4 shadow-sm", activeAgent?.username === a.username ? "bg-slate-900 border-slate-900 shadow-2xl ring-4 ring-cyan-500/20" : cn("bg-white border-slate-100 hover:border-cyan-200 hover:shadow-lg", theme.bg, theme.border, theme.glow))}
-                    >
-                      <div className="flex items-center gap-4"><div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl italic transition-all shadow-sm", activeAgent?.username === a.username ? "bg-cyan-500 text-slate-950" : "bg-white border border-slate-100 text-slate-400")}>{a.real_name[0]}</div><div className="flex flex-col min-w-0"><span className={cn("text-base font-black truncate", activeAgent?.username === a.username ? "text-white" : "text-slate-900")}>{a.real_name}</span><div className="flex items-center gap-2"><span className="text-[10px] text-slate-500 font-mono tracking-tighter">@{a.username}</span><span className={cn("text-[8px] font-black px-1.5 py-0.5 rounded uppercase border border-current", theme.text, "bg-white/50")}>{theme.label}</span></div></div></div>
-                      <div className={cn("flex justify-between items-center px-4 py-3 rounded-2xl border transition-all", activeAgent?.username === a.username ? "bg-white/5 border-white/10" : "bg-white/80 border-slate-100 shadow-inner")}><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">战术评分</span><span className={cn("text-xl font-black italic tracking-tighter", a.tactical_score < 60 ? "text-red-500" : "text-cyan-500")}>{a.tactical_score}</span></div>
-                    </motion.div>
-                  )
-                })}
-              </AnimatePresence>
-            </div>
-          </div>
+      {/* 2. 指挥部主战区 */}
+      <main className="flex-1 flex gap-6 min-h-0">
+        
+        {/* 2.1 左侧：高密度态势监控墙 (占据 1/3) */}
+        <div className="w-full lg:w-[400px] flex flex-col bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden shrink-0">
+           <div className="p-6 border-b border-slate-100 space-y-4">
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                 <Radio size={14} className="text-cyan-500" /> 节点实时矩阵
+              </h3>
+              <TacticalSearch value={search} onChange={setSearch} placeholder="检索操作员..." />
+           </div>
+           
+           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-3 bg-slate-50/30">
+              {agents.map(a => {
+                const theme = getAgentStatusTheme(a.tactical_score, a.is_online)
+                const isActive = activeAgent?.username === a.username
+                return (
+                  <motion.div 
+                    key={a.username}
+                    onClick={() => setActiveAgent(a)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={cn(
+                      "p-4 rounded-[28px] border transition-all cursor-pointer flex items-center gap-4 group relative overflow-hidden",
+                      isActive ? "bg-slate-900 border-slate-900 shadow-2xl" : cn("bg-white border-slate-100 hover:border-cyan-200", theme.glow)
+                    )}
+                  >
+                    {isActive && <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent pointer-events-none" />}
+                    <div className={cn(
+                      "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl italic shrink-0",
+                      isActive ? "bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20" : "bg-slate-50 text-slate-400 border border-slate-100"
+                    )}>{a.real_name[0]}</div>
+                    
+                    <div className="flex-1 min-w-0">
+                       <div className="flex items-center justify-between mb-1">
+                          <span className={cn("text-sm font-black truncate", isActive ? "text-white" : "text-slate-900")}>{a.real_name}</span>
+                          <div className={cn("w-2 h-2 rounded-full", theme.dot)} />
+                       </div>
+                       <div className="flex items-center justify-between">
+                          <span className="text-[9px] font-mono text-slate-400 tracking-tighter">@{a.username}</span>
+                          <span className={cn("text-[9px] font-black uppercase tracking-widest italic", a.tactical_score < 60 ? "text-red-500" : "text-cyan-500")}>{a.tactical_score} PT</span>
+                       </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+           </div>
         </div>
 
-        <div className="col-span-12 xl:col-span-5 flex flex-col min-h-0">
-          <div className="bg-white rounded-[40px] border border-slate-200 shadow-2xl flex flex-col h-full relative overflow-hidden bg-gradient-to-b from-white to-slate-50/50">
-            <AnimatePresence mode='wait'>
+        {/* 2.2 右侧：实战干预座舱 (占据 2/3) */}
+        <div className="flex-1 flex flex-col min-w-0 bg-white rounded-[40px] border border-slate-200 shadow-2xl relative overflow-hidden">
+           <AnimatePresence mode='wait'>
               {activeAgent ? (
-                <motion.div key={activeAgent.username} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col h-full">
-                  <div className="p-10 border-b border-slate-100 flex items-center justify-between bg-white/50 shrink-0"><div className="flex items-center gap-6"><div className="w-20 h-20 rounded-[32px] bg-slate-900 text-white flex items-center justify-center font-black text-3xl italic shadow-2xl border-4 border-white relative">{activeAgent.real_name[0]}{activeAgent.is_online && <div className="absolute -right-1 -top-1 w-6 h-6 bg-emerald-500 border-4 border-white rounded-full animate-pulse shadow-lg" />}</div><div className="flex flex-col gap-1"><div className="flex items-center gap-3"><h4 className="text-3xl font-black text-slate-900 tracking-tighter">{activeAgent.real_name}</h4><span className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest", activeAgent.is_online ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500")}>{activeAgent.is_online ? '实时监听中' : '节点已脱机'}</span></div><p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">{activeAgent.dept_name} / 战略前哨节点</p></div></div><button onClick={() => setActiveAgent(null)} className="p-4 bg-slate-100 text-slate-400 rounded-full hover:bg-red-50 hover:text-red-500 transition-all shadow-sm"><X size={24}/></button></div>
-                  <div className="flex-1 overflow-y-auto custom-scrollbar p-10 space-y-10">
-                     <section className="space-y-4"><div className="flex justify-between items-center"><h5 className="text-[11px] font-black text-cyan-600 uppercase tracking-[0.3em] flex items-center gap-2"><MonitorStop size={16} /> 实时对话全透视</h5><span className="text-[9px] font-black text-slate-400 uppercase italic">加密实时同步中</span></div><div className="bg-slate-950 rounded-[32px] p-6 border border-white/5 space-y-4 shadow-2xl relative overflow-hidden"><div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" /><div className="space-y-3 relative z-10"><div className="flex gap-3 text-xs"><span className="text-slate-500 font-bold shrink-0">客户:</span><span className="text-white bg-white/5 px-3 py-2 rounded-2xl rounded-tl-none border border-white/5">这个产品什么时候能发货？</span></div><div className="flex gap-3 text-xs flex-row-reverse"><span className="text-cyan-500 font-bold shrink-0 text-right">坐席:</span><span className="text-slate-900 bg-cyan-400 px-3 py-2 rounded-2xl rounded-tr-none font-medium">亲亲，48小时内顺丰发出哦。</span></div><div className={cn("flex gap-3 text-xs flex-row-reverse animate-pulse", isInputLocked && "opacity-50")}><span className="text-red-500 font-bold shrink-0 text-right">正在输入:</span><span className="text-slate-400 italic">正在录入敏感信息...</span></div></div></div></section>
-                     <section className="space-y-6"><h5 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2"><Mic size={16} /> 战术中枢指令模块</h5><div className="grid grid-cols-2 gap-6"><button disabled={!activeAgent.is_online} onClick={() => executeIntervention('LOCK', isInputLocked ? '解除锁定' : '一键锁定')} className={cn("flex flex-col items-center justify-center gap-4 p-8 rounded-[40px] transition-all shadow-2xl border-2", isInputLocked ? "bg-red-600 border-red-400 text-white" : "bg-slate-900 border-slate-800 text-white hover:bg-slate-800 disabled:opacity-20")}>{isInputLocked ? <Unlock size={32} /> : <Lock size={32} />}<span className="text-xs font-black uppercase tracking-widest">{isInputLocked ? '解除输入锁定' : '一键锁定输入'}</span></button><button onClick={() => executeIntervention('PUSH', '话术弹射')} className="flex flex-col items-center justify-center gap-4 p-8 bg-cyan-500 border-2 border-cyan-400 rounded-[40px] text-slate-950 hover:bg-cyan-400 transition-all shadow-xl shadow-cyan-100 group"><Send size={32} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /><span className="text-xs font-black uppercase tracking-widest">话术弹射协助</span></button></div></section>
-                     <section className="p-10 bg-slate-900 text-white rounded-[48px] relative overflow-hidden shadow-2xl"><div className="absolute top-0 right-0 p-8 opacity-10"><BrainCircuit size={100} /></div><h5 className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-2"><BrainCircuit size={16} /> 智脑实战研判</h5><p className="text-base font-medium text-slate-300 leading-relaxed italic relative z-10">"检测到该节点输入缓冲区存在大量情绪化词汇。建议主管立即执行<span className="text-cyan-400 font-black underline underline-offset-4 mx-1">‘一键锁定’</span>并弹射标准致歉话术。"</p></section>
+                <motion.div 
+                  key={activeAgent.username}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="flex flex-col h-full"
+                >
+                  {/* 座舱头：节点身份 */}
+                  <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-white">
+                     <div className="flex items-center gap-6">
+                        <div className="relative">
+                           <div className="w-20 h-20 rounded-[32px] bg-slate-900 text-white flex items-center justify-center text-3xl font-black italic border-4 border-white shadow-2xl">
+                              {activeAgent.real_name[0]}
+                           </div>
+                           {activeAgent.is_online && <div className="absolute -right-1 -top-1 w-6 h-6 bg-emerald-500 border-4 border-white rounded-full animate-pulse shadow-xl" />}
+                        </div>
+                        <div>
+                           <div className="flex items-center gap-3">
+                              <h4 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">{activeAgent.real_name}</h4>
+                              <span className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border", activeAgent.is_online ? "bg-emerald-500 text-white border-emerald-400 shadow-lg" : "bg-slate-100 text-slate-400 border-slate-200")}>
+                                 {activeAgent.is_online ? '在线通讯中' : '节点离线'}
+                              </span>
+                           </div>
+                           <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-[0.3em] italic">{activeAgent.dept_name || '中枢待分派'} / 前哨监控站</p>
+                        </div>
+                     </div>
+                     <button onClick={() => setActiveAgent(null)} className="p-4 bg-slate-50 text-slate-400 rounded-full hover:bg-red-50 hover:text-red-500 transition-all border border-slate-100"><X size={24}/></button>
+                  </div>
+
+                  {/* 座舱中部：实时传输与智脑建议 */}
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
+                     
+                     <div className="grid grid-cols-12 gap-8">
+                        {/* 2.2.1 实时对话全透视 */}
+                        <section className="col-span-12 xl:col-span-7 space-y-4">
+                           <div className="flex justify-between items-center ml-2">
+                              <h5 className="text-[11px] font-black text-cyan-600 uppercase tracking-[0.4em] flex items-center gap-2"><MonitorStop size={16} /> 实时对话全透视</h5>
+                              <span className="text-[9px] font-black text-slate-300 uppercase italic animate-pulse">Live Transmission...</span>
+                           </div>
+                           <div className="bg-slate-950 rounded-[40px] p-8 border border-white/5 space-y-6 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                              <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
+                              <div className="space-y-4 relative z-10 font-sans">
+                                 <div className="flex gap-4 text-xs"><span className="text-slate-500 font-bold shrink-0 mt-2 uppercase">USR:</span><span className="text-white/90 bg-white/5 px-4 py-3 rounded-3xl rounded-tl-none border border-white/5 backdrop-blur-md">这件衣服起球吗？质量怎么样？</span></div>
+                                 <div className="flex gap-4 text-xs flex-row-reverse"><span className="text-cyan-500 font-bold shrink-0 mt-2 uppercase text-right">AGT:</span><span className="text-slate-950 bg-cyan-400 px-4 py-3 rounded-3xl rounded-tr-none font-bold shadow-lg shadow-cyan-500/20">亲亲，这款是新疆长绒棉材质，不易起球哦。</span></div>
+                                 <div className="flex gap-4 text-xs"><span className="text-slate-500 font-bold shrink-0 mt-2 uppercase">USR:</span><span className="text-white/90 bg-white/5 px-4 py-3 rounded-3xl rounded-tl-none border border-white/5 backdrop-blur-md">能不能加你微信，发一下实拍？</span></div>
+                                 <div className={cn("flex gap-4 text-xs flex-row-reverse animate-pulse transition-all", isInputLocked && "opacity-20 grayscale")}>
+                                    <span className="text-red-500 font-bold shrink-0 mt-2 uppercase text-right">INP:</span>
+                                    <span className="text-slate-400 italic py-3">节点正在输入敏感战术负载...</span>
+                                 </div>
+                              </div>
+                           </div>
+                        </section>
+
+                        {/* 2.2.2 智脑战术研判 */}
+                        <section className="col-span-12 xl:col-span-5 space-y-4">
+                           <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-2 flex items-center gap-2"><BrainCircuit size={16} /> 智脑实时研判</h5>
+                           <div className="p-8 bg-slate-900 rounded-[40px] border border-white/5 h-[340px] relative overflow-hidden flex flex-col justify-center">
+                              <div className="absolute top-0 right-0 p-6 opacity-5"><BrainCircuit size={120} className="text-cyan-400" /></div>
+                              <p className="text-base font-medium text-slate-300 leading-relaxed italic relative z-10">
+                                 "检测到该操作员处于 <span className="text-red-400 font-black underline underline-offset-4">高危诱导区</span>。监测到其输入缓冲区存在大量社交平台引流关键词。建议指挥官立即执行 <span className="text-cyan-400 font-black italic">‘强制锁定’</span> 指令并弹射标准致歉话术。"
+                              </p>
+                              <div className="mt-8 flex items-center gap-3 relative z-10">
+                                 <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden"><div className="h-full bg-red-500" style={{ width: '85%' }} /></div>
+                                 <span className="text-[10px] font-black text-red-400 uppercase">风险阈值 85%</span>
+                              </div>
+                           </div>
+                        </section>
+                     </div>
+
+                     {/* 座舱底部：指令干预矩阵 */}
+                     <section className="space-y-6 pt-4">
+                        <div className="flex items-center gap-3 ml-2"><div className="w-1 h-4 bg-slate-900 rounded-full" /><h5 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.4em]">指挥官干预指令矩阵</h5></div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                           <TacticalButton 
+                             disabled={!activeAgent.is_online}
+                             active={isInputLocked}
+                             onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁输入' : '锁定输入')}
+                             icon={isInputLocked ? Unlock : Lock}
+                             label={isInputLocked ? '解除锁定' : '强制锁定'}
+                             sub="Input Freeze"
+                             color={isInputLocked ? 'bg-red-600' : 'bg-slate-900'}
+                           />
+                           <TacticalButton 
+                             onClick={() => executeIntervention('PUSH', '话术弹射')}
+                             icon={Send}
+                             label="话术弹射"
+                             sub="Push Script"
+                             color="bg-cyan-500"
+                             textColor="text-slate-950"
+                           />
+                           <TacticalButton 
+                             onClick={() => executeIntervention('VOICE', '语音警告')}
+                             icon={Mic}
+                             label="语音告警"
+                             sub="Voice Alert"
+                             color="bg-white"
+                             textColor="text-red-600"
+                             border="border-2 border-red-100 shadow-lg shadow-red-500/5"
+                           />
+                           <TacticalButton 
+                             onClick={() => executeIntervention('SOP', 'SOP下发')}
+                             icon={FileText}
+                             label="推送 SOP"
+                             sub="SOP Push"
+                             color="bg-white"
+                             textColor="text-slate-900"
+                             border="border-2 border-slate-100"
+                           />
+                        </div>
+                     </section>
                   </div>
                 </motion.div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-slate-200 gap-10 uppercase font-black tracking-[0.5em] text-center p-10 italic"><div className="relative"><Activity size={120} strokeWidth={1} className="opacity-10 animate-pulse text-cyan-500" /><div className="absolute inset-0 flex items-center justify-center opacity-20"><Zap size={40} className="text-cyan-400" /></div></div><div className="space-y-3"><p className="text-slate-300 text-xl">等待指挥目标</p><p className="text-[10px] text-slate-400 font-bold opacity-50 tracking-normal leading-relaxed">请在左侧节点矩阵中点击选中目标<br/>开启深度战术干预链路</p></div></div>
+                <div className="flex-1 flex flex-col items-center justify-center text-slate-200 gap-12 p-20 text-center italic uppercase font-black">
+                   <div className="relative">
+                      <Radar size={160} strokeWidth={0.5} className="opacity-10 animate-spin-slow text-cyan-500" />
+                      <div className="absolute inset-0 flex items-center justify-center"><Activity size={48} className="text-cyan-400 opacity-20 animate-pulse" /></div>
+                   </div>
+                   <div className="space-y-4">
+                      <p className="text-2xl tracking-[0.5em] text-slate-300">等待拦截目标</p>
+                      <p className="text-[10px] tracking-normal font-bold text-slate-400 leading-relaxed max-w-sm mx-auto">请在左侧态势矩阵中点击选中实战节点<br/>以激活深度战术指挥链路</p>
+                   </div>
+                </div>
               )}
-            </AnimatePresence>
-          </div>
+           </AnimatePresence>
         </div>
-      </div>
+      </main>
+
+      <style>{`
+        .animate-spin-slow { animation: spin 8s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .bg-grid-white\/\[0.02\] { background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 30px 30px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
+      `}</style>
     </div>
+  )
+}
+
+function StatBox({ label, value, color }: any) {
+  return (
+    <div className="bg-slate-50/50 px-6 py-3 rounded-2xl border border-slate-100 flex flex-col items-center min-w-[100px]">
+       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</span>
+       <span className={cn("text-xl font-black italic", color)}>{value}</span>
+    </div>
+  )
+}
+
+function TacticalButton({ onClick, icon: Icon, label, sub, color, textColor = 'text-white', border, active, disabled }: any) {
+  return (
+    <motion.button 
+      disabled={disabled}
+      whileHover={{ y: -4, scale: 1.02 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
+      className={cn(
+        "flex flex-col items-center justify-center gap-3 p-6 rounded-[32px] transition-all shadow-xl group disabled:opacity-20",
+        color, border, textColor
+      )}
+    >
+       <div className={cn("transition-transform group-hover:scale-110", active && "animate-bounce")}><Icon size={28} strokeWidth={2.5} /></div>
+       <div className="text-center">
+          <p className="text-xs font-black uppercase tracking-tighter leading-none mb-1">{label}</p>
+          <p className="text-[8px] font-bold opacity-40 uppercase tracking-widest font-mono">{sub}</p>
+       </div>
+    </motion.button>
   )
 }
