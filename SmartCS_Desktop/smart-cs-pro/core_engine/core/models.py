@@ -143,3 +143,36 @@ class Notification(BaseModel):
 
     class Meta:
         table = "notifications"
+
+class AuditLog(BaseModel):
+    id = fields.IntField(pk=True)
+    operator = fields.CharField(max_length=50)
+    action = fields.CharField(max_length=50)
+    target = fields.CharField(max_length=100, null=True)
+    details = fields.TextField()
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "audit_logs"
+
+class Product(BaseModel):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=100)
+    sku = fields.CharField(max_length=50, unique=True)
+    price = fields.DecimalField(max_digits=10, decimal_places=2)
+    usp = fields.TextField()
+    stock = fields.IntField(default=0)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "products"
+
+class Platform(BaseModel):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=50)
+    keyword = fields.CharField(max_length=50, unique=True)
+    is_active = fields.IntField(default=1)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "platforms"
