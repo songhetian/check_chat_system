@@ -10,6 +10,7 @@ import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { TacticalTable, TacticalPagination } from '../../components/ui/TacticalTable'
 import { TacticalSearch } from '../../components/ui/TacticalSearch'
+import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 
@@ -19,7 +20,7 @@ function EvidenceModal({ isOpen, onClose, data }: any) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-5xl bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] z-10">
             <div className="p-8 border-b flex justify-between items-center bg-slate-50/50">
@@ -66,8 +67,8 @@ export default function ViolationsPage() {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [deptId, setDeptId] = useState('')
-  const [riskLevel, setRiskLevel] = useState('ALL')
+  const [deptId, setDeptId] = useState<string | number>('')
+  const [riskLevel, setRiskLevel] = useState<string | number>('ALL')
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [selectedItem, setSelectedItem] = useState<any>(null)
@@ -80,7 +81,7 @@ export default function ViolationsPage() {
     if (!token) return
     try {
       const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/admin/departments`, 
+        url: `${CONFIG.API_BASE}/admin/departments?size=100`, 
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -93,7 +94,7 @@ export default function ViolationsPage() {
     if (!silent) setLoading(true)
     try {
       const res = await window.api.callApi({
-        url: `${CONFIG.API_BASE}/admin/violations?page=${page}&username=${search}&dept_id=${deptId}&risk_level=${riskLevel}`,
+        url: `${CONFIG.API_BASE}/admin/violations?page=${page}&username=${search}&dept_id=${deptId}&risk_level=${riskLevel}&_t=${Date.now()}`,
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -105,32 +106,54 @@ export default function ViolationsPage() {
     finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchDepts() }, [])
-  useEffect(() => { fetchViolations() }, [page, deptId, riskLevel])
+  useEffect(() => { fetchDepts() }, [token])
+  useEffect(() => { fetchViolations() }, [page, deptId, riskLevel, token])
   useEffect(() => { if (violationsCount > 0) fetchViolations(true) }, [violationsCount])
 
   const openEvidence = (item: any) => { setSelectedItem(item); setIsModalOpen(true) }
 
   return (
-    <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6">
+    <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0 gap-6">
-        <div><h2 className="text-3xl font-black text-slate-900 uppercase italic">风险拦截取证中枢</h2><p className="text-slate-500 text-sm mt-1 font-medium">全域违规捕获、多媒体证据链固化与 AI 复盘系统</p></div>
-        <div className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 border rounded-2xl flex items-center gap-3"><div className="w-2 h-2 bg-green-500 rounded-full animate-ping" /><span className="text-sm font-black text-slate-700 uppercase tracking-widest">实时链路已激活</span></div>
+        <div><h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">风险拦截审计</h2><p className="text-slate-500 text-sm mt-1 font-medium">全域违规捕获、多媒体证据链固化与物理审计系统</p></div>
+        <div className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 border rounded-2xl flex items-center gap-3"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" /><span className="text-sm font-black text-slate-700 uppercase tracking-widest">实时链路已激活</span></div>
       </header>
 
       <div className="bg-white p-4 rounded-[24px] border border-slate-200 shadow-sm shrink-0 flex items-center gap-4">
-        <TacticalSearch value={search} onChange={setSearch} onSearch={() => fetchViolations()} placeholder="搜索坐席姓名或账号..." className="flex-1" />
-        <select value={deptId} onChange={(e) => setDeptId(e.target.value)} className="bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-600 focus:ring-2 focus:ring-cyan-500/20 py-2 px-4 min-w-[140px] shrink-0">
-          <option value="">全域部门</option>
-          {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-        </select>
-        <button onClick={() => fetchViolations()} className="px-6 py-2 bg-slate-900 text-white rounded-xl text-xs font-black hover:bg-slate-800 flex items-center gap-2 shrink-0 transition-all active:scale-95 shadow-lg"><RefreshCw size={14} className={cn(loading && "animate-spin")} /> 立即同步</button>
+        <TacticalSearch value={search} onChange={setSearch} placeholder="搜索坐席拼音、账号..." className="flex-1" />
+        
+        <div className="w-56">
+          <TacticalSelect 
+            options={[{id: '', name: '全域战术单元'}, ...depts]} 
+            value={deptId} 
+            onChange={(val) => { setDeptId(val); setPage(1); }} 
+            placeholder="部门过滤" 
+          />
+        </div>
+
+        <div className="w-48">
+          <TacticalSelect 
+            options={[
+              {id: 'ALL', name: '全部风险等级'},
+              {id: 'SERIOUS', name: '严重 (8+)'},
+              {id: 'MEDIUM', name: '中级 (5-7)'},
+              {id: 'LOW', name: '低级 (<5)'}
+            ]} 
+            value={riskLevel} 
+            onChange={(val) => { setRiskLevel(val); setPage(1); }} 
+            placeholder="风险过滤" 
+          />
+        </div>
+
+        <button onClick={() => fetchViolations(true)} className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 transition-all shadow-xl active:scale-95 group">
+          <RefreshCw size={18} className={cn(loading && "animate-spin")} />
+        </button>
       </div>
 
       <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {loading ? <div className="h-64 flex items-center justify-center text-slate-400 gap-3 italic font-bold uppercase tracking-widest"><Loader2 className="animate-spin" /> 正在调取中枢取证库...</div> : (
-            <TacticalTable headers={['发生时间', '坐席信息', '所属部门', '拦截关键词', '风险等级', '管理操作']}>
+          {loading ? <div className="h-64 flex items-center justify-center text-slate-400 gap-3 italic font-bold uppercase tracking-widest"><Loader2 className="animate-spin" size={40} /><span>调取中枢审计库...</span></div> : (
+            <TacticalTable headers={['发生时间', '坐席信息', '所属部门', '命中内容', '风险权重', '战术审计']}>
               {data.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group cursor-pointer" onClick={() => openEvidence(item)}>
                   <td className="px-8 py-5 text-center text-xs font-bold text-slate-500 whitespace-nowrap">{new Date(item.timestamp).toLocaleString()}</td>
