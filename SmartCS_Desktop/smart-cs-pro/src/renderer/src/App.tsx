@@ -28,35 +28,45 @@ import GlobalPolicyPage from './pages/hq/GlobalPolicy'
 import AiPerformancePage from './pages/hq/AiPerformance'
 import { 
   CheckCircle2, AlertCircle, ShieldAlert, User, Search, Filter, Activity, 
-  Globe, ShieldCheck, Users, ArrowRight, Award, GraduationCap, Volume2, VolumeX
+  Globe, ShieldCheck, Users, ArrowRight, Award, GraduationCap, Volume2, VolumeX, RefreshCw
 } from 'lucide-react'
 import { cn } from './lib/utils'
 import { CONFIG } from './lib/config'
 import { TacticalSearch } from './components/ui/TacticalSearch'
 import { TacticalPagination } from './components/ui/TacticalTable'
 
-// 1. 管理首页：补全奖励与进度展示，修复请求鉴权
+// 1. 管理首页：集成链路异常感知 UI
 const AdminHome = () => {
   const { user, token } = useAuthStore() 
   const [agents, setAgents] = useState<any[]>([])
-  const [depts, setDepts] = useState<any[]>([])
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const fetchAgents = async () => {
     setLoading(true)
+    setErrorMsg(null)
     try {
       const res = await window.api.callApi({
         url: `${CONFIG.API_BASE}/admin/agents?page=${page}&search=${search}`,
-        method: 'GET'
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
       })
       if (res.status === 200) {
         setAgents(res.data.data)
         setTotal(res.data.total)
+      } else if (res.status === 401) {
+        setErrorMsg("身份认证已失效，请重新登录同步权责")
+      } else {
+        setErrorMsg(res.error || "指挥中枢响应异常")
       }
-    } finally { setLoading(false) }
+    } catch (e) {
+      setErrorMsg(`物理链路握手失败，请确认后端引擎 (${CONFIG.API_BASE}) 是否处于活跃状态`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { fetchAgents() }, [page, search])
@@ -70,58 +80,52 @@ const AdminHome = () => {
 
       <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0">
         <div className="overflow-y-auto flex-1 custom-scrollbar">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
-                <th className="px-8 py-5 text-center">节点名称</th>
-                <th className="px-6 py-5 text-center">战术单元</th>
-                <th className="px-6 py-5 text-center">奖励/荣誉</th>
-                <th className="px-6 py-5 text-center">实战结业</th>
-                <th className="px-6 py-5 text-center">评分/风险</th>
-                <th className="px-8 py-5 text-center">战术指挥</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {agents.map((agent) => (
-                <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors text-sm font-bold text-slate-600">
-                  <td className="px-8 py-5">
-                    <div className="flex items-center justify-center gap-3">
-                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-black", agent.is_online ? "bg-cyan-500 text-white shadow-lg" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div>
-                      <div className="flex flex-col text-left"><span className="text-sm font-black text-slate-900">{agent.real_name}</span><span className="text-[9px] text-slate-400 font-mono italic">@{agent.username}</span></div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-center"><span className="text-[10px] font-black text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{agent.dept_name || '未分派'}</span></td>
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex justify-center gap-1">
-                       {agent.reward_count > 0 ? <div className="px-2 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100 flex items-center gap-1"><Award size={12}/> <span className="text-[10px] font-black">{agent.reward_count}</span></div> : <span className="opacity-20">-</span>}
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex flex-col items-center gap-1">
-                       <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-cyan-500" style={{ width: `${agent.training_progress || 0}%` }} /></div>
-                       <span className="text-[8px] font-black text-slate-400">{agent.training_progress || 0}%</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-center">
-                    <div className="flex flex-col items-center gap-1.5">
-                       <div className="flex items-center gap-1 text-slate-900 italic font-black"><Activity size={14} className="text-cyan-500" /> {agent.tactical_score}</div>
-                       {agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-md border border-red-100 uppercase tracking-tighter">拦截: {agent.last_violation_type}</span>}
-                    </div>
-                  </td>
-                  <td className="px-8 py-5 text-center"><button className="p-2.5 bg-slate-900 text-white rounded-xl hover:bg-cyan-500 hover:text-white transition-all shadow-lg active:scale-90"><ShieldCheck size={18} /></button></td>
+          {errorMsg ? (
+            <div className="h-full flex flex-col items-center justify-center p-10 text-center">
+               <div className="w-24 h-24 rounded-[40px] bg-red-50 text-red-500 flex items-center justify-center mb-6 border border-red-100 shadow-inner">
+                  <ShieldAlert size={48} className="animate-pulse" />
+               </div>
+               <h3 className="text-2xl font-black text-slate-900 mb-2 italic uppercase">战术链路中断</h3>
+               <p className="text-slate-400 text-sm font-medium max-w-md leading-relaxed mb-8 italic">"{errorMsg}"</p>
+               <button onClick={fetchAgents} className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl hover:bg-slate-800 active:scale-95 transition-all flex items-center gap-3 italic tracking-widest uppercase">
+                  <RefreshCw size={16} /> 重新建立连接
+               </button>
+            </div>
+          ) : (
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
+                  <th className="px-8 py-5 text-center">节点名称</th>
+                  <th className="px-6 py-5 text-center">战术单元</th>
+                  <th className="px-6 py-5 text-center">奖励/荣誉</th>
+                  <th className="px-6 py-5 text-center">实战结业</th>
+                  <th className="px-6 py-5 text-center">评分/风险</th>
+                  <th className="px-8 py-5 text-center">战术指挥</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {agents.length === 0 && !loading && <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black tracking-widest italic opacity-30"><Users size={64} strokeWidth={1} /><p>中枢未发现活跃实战节点</p></div>}
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {agents.map((agent) => (
+                  <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors text-sm font-bold text-slate-600">
+                    <td className="px-8 py-5"><div className="flex items-center justify-center gap-3"><div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-black", agent.is_online ? "bg-cyan-500 text-white shadow-lg" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div><div className="flex flex-col text-left"><span className="text-sm font-black text-slate-900">{agent.real_name}</span><span className="text-[9px] text-slate-400 font-mono italic">@{agent.username}</span></div></div></td>
+                    <td className="px-6 py-5 text-center"><span className="text-[10px] font-black text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{agent.dept_name || '未分派'}</span></td>
+                    <td className="px-6 py-5 text-center"><div className="flex justify-center gap-1">{agent.reward_count > 0 ? <div className="px-2 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100 flex items-center gap-1"><Award size={12}/> <span className="text-[10px] font-black">{agent.reward_count}</span></div> : <span className="opacity-20">-</span>}</div></td>
+                    <td className="px-6 py-5 text-center"><div className="flex flex-col items-center gap-1"><div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-cyan-500" style={{ width: `${agent.training_progress || 0}%` }} /></div><span className="text-[8px] font-black text-slate-400">{agent.training_progress || 0}%</span></div></td>
+                    <td className="px-6 py-5 text-center"><div className="flex flex-col items-center gap-1.5"><div className="flex items-center gap-1 text-slate-900 italic font-black"><Activity size={14} className="text-cyan-500" /> {agent.tactical_score}</div>{agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-md border border-red-100 uppercase tracking-tighter">拦截: {agent.last_violation_type}</span>}</div></td>
+                    <td className="px-8 py-5 text-center"><button className="p-2.5 bg-slate-900 text-white rounded-xl hover:bg-cyan-500 hover:text-white transition-all shadow-lg active:scale-90"><ShieldCheck size={18} /></button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {agents.length === 0 && !loading && !errorMsg && <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black tracking-widest italic opacity-30"><Users size={64} strokeWidth={1} /><p>中枢未发现活跃实战节点</p></div>}
         </div>
-        {total > 10 && <div className="shrink-0 border-t border-slate-100 p-2"><TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} /></div>}
+        {total > 10 && !errorMsg && <div className="shrink-0 border-t border-slate-100 p-2"><TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} /></div>}
       </div>
     </div>
   )
 }
 
-// 2. 坐席视图：补全声音播报守卫
+// 2. 坐席视图容器 (保持之前的修复 ...)
 const AgentView = () => {
   const isRedAlert = useRiskStore(s => s.isRedAlert)
   const [activeSuggestion, setActiveSuggestion] = useState<any>(null)
@@ -135,7 +139,6 @@ const AgentView = () => {
     const onToast = (e: any) => { setToast(e.detail); setTimeout(() => setToast(null), 3000) }
     const onViolation = (e: any) => {
       if (!isMuted) {
-        // 核心：等级声音策略
         const audioPath = e.detail.audio_path || (e.detail.risk_score >= 8 ? '/assets/audio/red_alert.mp3' : '/assets/audio/warn.wav')
         const audio = new Audio(audioPath); audio.play().catch(() => console.warn('音频拦截: 物理路径脱机'))
       }
@@ -143,10 +146,9 @@ const AgentView = () => {
       setTimeout(() => setToast(null), 10000)
     }
 
-    window.addEventListener('trigger-toast', onToast); window.addEventListener('trigger-violation-alert', onViolation)
-    window.addEventListener('trigger-fireworks', () => setShowFireworks(true))
-    window.addEventListener('trigger-sop', (e: any) => setSopSteps(e.detail))
-    window.addEventListener('trigger-customer', (e: any) => setActiveCustomer(e.detail))
+    window.addEventListener('trigger-toast', onToast)
+    window.addEventListener('trigger-violation-alert', onViolation)
+    window.addEventListener('trigger-permission-toast', (e: any) => { setToast({ title: e.detail.title, message: e.detail.message, details: e.detail.details, type: 'info', duration: 10000 }) })
     
     return () => {
       window.removeEventListener('trigger-toast', onToast); window.removeEventListener('trigger-violation-alert', onViolation)
@@ -155,28 +157,16 @@ const AgentView = () => {
 
   return (
     <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600")}>
-      {/* 声音控制浮窗 */}
       <button onClick={() => setIsMuted(!isMuted)} className="fixed top-24 right-10 z-[400] w-10 h-10 rounded-full bg-slate-900/80 backdrop-blur-md text-white flex items-center justify-center hover:scale-110 active:scale-90 transition-all border border-white/10 shadow-2xl">
         {isMuted ? <VolumeX size={18} className="text-red-400" /> : <Volume2 size={18} className="text-cyan-400" />}
       </button>
-
       <TacticalIsland />
       <AnimatePresence>
-        {activeSuggestion && <SuggestionPopup products={activeSuggestion} onDismiss={() => setActiveSuggestion(null)} />}
-        {showFireworks && <Fireworks onComplete={() => setShowFireworks(false)} />}
-        {sopSteps && <SOPOverlay steps={sopSteps} onDismiss={() => setSopSteps(null)} />}
-        {activeCustomer && <CustomerHUD data={activeCustomer} onDismiss={() => setActiveCustomer(null)} />}
         {toast && (
           <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="fixed top-20 left-1/2 -translate-x-1/2 z-[300]">
             <div className={cn("px-8 py-5 rounded-[32px] shadow-2xl border flex items-center gap-6 backdrop-blur-xl group transition-all", toast.type === 'error' ? "bg-red-600/90 border-red-400 text-white" : "bg-slate-900/90 border-cyan-500/50 text-cyan-400")}>
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0 shadow-inner">
-                {toast.type === 'error' ? <ShieldAlert size={24} className="animate-pulse" /> : <CheckCircle2 size={24} />}
-              </div>
-              <div className="flex flex-col pr-6 border-r border-white/10 min-w-[200px]">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50 italic">{toast.title}</span>
-                <span className="text-base font-black leading-tight mt-1">{toast.message}</span>
-                {toast.details && <p className="text-[9px] text-white/60 mt-2 font-medium italic line-clamp-1">{toast.details}</p>}
-              </div>
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0 shadow-inner">{toast.type === 'error' ? <ShieldAlert size={24} className="animate-pulse" /> : <CheckCircle2 size={24} />}</div>
+              <div className="flex flex-col pr-6 border-r border-white/10 min-w-[200px]"><span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50 italic">{toast.title}</span><span className="text-base font-black leading-tight mt-1">{toast.message}</span>{toast.details && <p className="text-[9px] text-white/60 mt-2 font-medium italic line-clamp-1">{toast.details}</p>}</div>
               {toast.action && <button onClick={toast.action} className="flex items-center gap-2 text-[10px] font-black uppercase italic whitespace-nowrap text-cyan-400 hover:text-white transition-colors">立即取证 <ArrowRight size={14} /></button>}
             </div>
           </motion.div>
@@ -189,7 +179,6 @@ const AgentView = () => {
 function App() {
   const { user } = useAuthStore()
   useRiskSocket()
-
   return (
     <Router>
       <Routes>

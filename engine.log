@@ -1,1 +1,1742 @@
-/usr/local/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/guardian.py': [Errno 2] No such file or directory
+INFO:     Started server process [82568]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+🚀 [战术核心] 架构重构完成 (Modular Structure): 0.0.0.0:8000
+INFO:     127.0.0.1:55861 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55902 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55922 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55924 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55929 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55921 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:55923 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:55933 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55934 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55922 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55936 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55937 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55938 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55936 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55922 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55960 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55962 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55964 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55959 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:55961 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:55965 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55966 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55968 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55969 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:55971 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55980 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     192.168.2.184:55982 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55984 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55980 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:55983 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:55982 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:55986 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56033 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56224 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56259 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56386 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56475 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56492 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56751 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56832 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56861 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56897 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56897 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56908 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56909 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56910 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:56912 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:56914 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:56915 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:56920 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:56921 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:56940 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:56941 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57476 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57478 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57480 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57475 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:57477 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:57482 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57483 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57485 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57486 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57487 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:57489 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:57492 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:57494 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57495 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57496 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57497 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57495 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57496 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57495 - "GET /api/admin/departments HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57496 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57500 - "GET /api/admin/departments HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57501 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57495 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57496 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57495 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57496 - "GET /api/admin/permissions HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57500 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57501 - "GET /api/admin/permissions HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57495 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57496 - "GET /api/ai/categories HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57495 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57496 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57506 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57507 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57495 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57496 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57500 - "GET /api/admin/roles HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57501 - "GET /api/admin/agents?page=1&size=10&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57495 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57496 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57528 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57529 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57538 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     192.168.2.184:57539 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57541 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57538 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:57540 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:57543 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:57544 - "GET /api/admin/agents?page=1&search= HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 50, in translate_exceptions_
+    return await func(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 209, in execute_query
+    await cursor.execute(query, values)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 75, in get_agents
+    result = await asyncio.gather(*[process_agent(a) for a in agents_data])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/SmartCS_Desktop/smart-cs-pro/core_engine/api/admin.py", line 54, in process_agent
+    t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/queryset.py", line 1234, in _execute
+    instance_list = await self._db.executor_class(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/base/executor.py", line 108, in execute_select
+    _, raw_results = await self.db.execute_query(sql, values)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/song/Projects/check_chat_system/venv/lib/python3.14/site-packages/tortoise/backends/mysql/client.py", line 58, in translate_exceptions_
+    raise OperationalError(exc)
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'is_deleted' in 'field list'")
+INFO:     192.168.2.184:57566 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57567 - "GET /api/admin/agents?page=1&size=100&search= HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57566 - "GET /api/admin/departments HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57567 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57581 - "GET /api/admin/departments HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57582 - "GET /api/admin/violations?page=1&username=&dept_id=&risk_level=ALL HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57566 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57567 - "GET /api/admin/notifications?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57566 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57567 - "GET /api/admin/departments?page=1&size=10 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57566 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:57567 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:57640 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:57641 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57642 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:57643 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57645 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57646 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57647 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57649 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57650 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57657 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57658 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57667 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:57668 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57669 - "GET /api/admin/customers?search= HTTP/1.1" 404 Not Found
+INFO:     192.168.2.184:57670 - "GET /api/admin/notifications?size=5 HTTP/1.1" 401 Unauthorized
+INFO:     192.168.2.184:57671 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57672 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57673 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57675 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57676 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57681 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57682 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57690 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     192.168.2.184:57691 - "WebSocket /ws/risk?token=mock-token-123&username=admin" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed

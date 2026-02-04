@@ -10,16 +10,22 @@ function createWindow(): void {
   const envPath = join(appPath, '.env')
   const configPath = join(appPath, 'server_config.json')
   
-  let serverConfig = { network: { central_server_url: 'http://127.0.0.1:8000/api' } }
+  let serverConfig = { 
+    network: { 
+      central_server_url: '', // 初始置空，由环境解析注入
+      local_port: '8000' 
+    } 
+  }
   
   // 1. 读取基础 JSON
   try {
     if (fs.existsSync(configPath)) {
-      serverConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+      const baseConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+      serverConfig = { ...serverConfig, ...baseConfig }
     }
   } catch (e) { console.error('Base config load failed', e) }
 
-  // 2. 解析 .env 并覆盖关键字段 (局域网支持)
+  // 2. 解析 .env 并全量覆盖关键字段
   try {
     if (fs.existsSync(envPath)) {
       const envContent = fs.readFileSync(envPath, 'utf-8')
@@ -39,29 +45,43 @@ function createWindow(): void {
       
       // 动态重构中央指挥部地址
       serverConfig.network.central_server_url = `http://${host}:${port}/api`
-      console.log(`🌐 [配置系统] 已加载环境: ${envPath}`)
-      console.log(`🌐 [配置系统] 指挥中心定向为: ${serverConfig.network.central_server_url}`)
-    } else {
-      console.warn(`⚠️ [配置系统] 未找到 .env 文件: ${envPath}`)
+      serverConfig.network.local_port = port
+      console.log(`🌐 [配置系统] 已加载环境，中枢锁定: ${serverConfig.network.central_server_url}`)
     }
   } catch (e) { console.error('Env override failed', e) }
 
   // 暴露配置给前端
   ipcMain.handle('get-server-config', () => serverConfig)
 
-  // 核心：战术 API 转发桥 (解决局域网 CORS/Network Error 的终极方案)
-  ipcMain.handle('call-api', async (_, { url, method, data }) => {
+  // 核心：战术 API 转发桥
+  ipcMain.handle('call-api', async (_, { url, method, data, headers }) => {
     try {
-      // 在 Node.js 环境下发起请求，不经过浏览器沙箱
       const response = await fetch(url, {
         method: method || 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        body: data ? JSON.stringify(data) : undefined
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(headers || {})
+        },
+        body: data ? JSON.stringify(data) : undefined,
+        // 设置 10 秒超时
+        signal: AbortSignal.timeout(10000)
       })
+      
       const result = await response.json()
       return { status: response.status, data: result }
     } catch (e: any) {
-      return { status: 500, error: e.message }
+      console.error(`❌ [API 转发失败] URL: ${url} | Error: ${e.message}`)
+      
+      // 区分错误类型
+      let errorMsg = "中枢通讯链路断开"
+      if (e.name === 'TimeoutError') errorMsg = "战术响应超时"
+      else if (e.message.includes('ECONNREFUSED')) errorMsg = "指挥中心处于脱机状态"
+      
+      return { 
+        status: 500, 
+        error: errorMsg,
+        details: e.message 
+      }
     }
   })
 
