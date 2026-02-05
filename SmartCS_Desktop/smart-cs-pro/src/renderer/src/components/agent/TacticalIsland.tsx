@@ -84,12 +84,11 @@ export const TacticalIsland = () => {
   }, [isExpanded, showHelpModal, showBigScreenModal])
 
   return (
-    <div className="h-screen w-screen flex items-start justify-center overflow-hidden pointer-events-none select-none bg-transparent">
-      {/* 核心：SVG 强制裁剪路径 (解决 Electron 圆角失效的终极方案) */}
+    <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent">
+      {/* 核心：SVG 强制裁剪路径 */}
       <svg width="0" height="0" className="absolute">
         <defs>
           <clipPath id="tactical-island-clip" clipPathUnits="objectBoundingBox">
-            {/* 使用一个高精度的圆角矩形路径模拟 38px */}
             <rect x="0" y="0" width="1" height="1" rx="0.06" ry="0.06" />
           </clipPath>
         </defs>
@@ -100,14 +99,14 @@ export const TacticalIsland = () => {
         initial={false}
         animate={{ 
           width: showBigScreenModal ? 1280 : 640,
-          height: showBigScreenModal ? 850 : (showHelpModal ? 400 : (isExpanded ? 680 : 80)),
+          height: showBigScreenModal ? 850 : (showHelpModal ? 400 : (isExpanded ? 600 : 80)),
           borderRadius: showBigScreenModal ? '0px' : '38px'
         }}
         className={cn(
-          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500",
+          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 shadow-2xl",
           isGlassMode ? "bg-slate-950/30 backdrop-blur-3xl" : "bg-slate-950",
           isAlerting && "border-red-500 ring-1 ring-red-500/20",
-          showBigScreenModal ? "border-none shadow-none" : "rounded-[38px]"
+          showBigScreenModal ? "border-none" : "rounded-[38px]"
         )}
         style={{ 
           clipPath: showBigScreenModal ? 'none' : 'url(#tactical-island-clip)', 
@@ -116,11 +115,11 @@ export const TacticalIsland = () => {
       >
         {/* 1. 战术中枢条 (Main Bar) */}
         <div 
-          className="flex items-center justify-between px-5 h-[64px] shrink-0 cursor-move" 
+          className="flex items-center px-5 h-[80px] shrink-0 cursor-move relative" 
           style={{ WebkitAppRegion: 'drag' } as any}
         >
-          {/* 左侧：用户信息 & 状态 */}
-          <div className="flex items-center gap-3 min-w-[150px]">
+          {/* 左侧：用户信息 & 状态 (绝对定位或固定宽度以支持中间居中) */}
+          <div className="flex items-center gap-3 w-[180px] shrink-0">
             <div className="relative">
               <div className={cn(
                 "w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm transition-all duration-500",
@@ -150,8 +149,8 @@ export const TacticalIsland = () => {
             </div>
           </div>
 
-          {/* 中间：核心控制组 */}
-          <div className="flex items-center gap-1.5" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          {/* 中间：核心控制组 (填充剩余空间并居中) */}
+          <div className="flex-1 flex items-center justify-center gap-1.5" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <HubBtn 
               icon={isGlassMode ? <Ghost size={16} /> : <Square size={16} />} 
               active={!isGlassMode} 
@@ -199,8 +198,8 @@ export const TacticalIsland = () => {
             />
           </div>
 
-          {/* 右侧：退出 */}
-          <div className="flex items-center justify-end min-w-[40px]" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          {/* 右侧：退出 (固定宽度以保持对称) */}
+          <div className="flex items-center justify-end w-[180px] shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <button 
               onClick={() => { logout(); window.location.hash = '/login'; }}
               className="w-8 h-8 rounded-lg bg-white/5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center transition-all group border border-white/5"
@@ -272,7 +271,7 @@ export const TacticalIsland = () => {
           {isExpanded && (
             <motion.div 
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
+              animate={{ height: 520, opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               className="flex-1 flex flex-col overflow-hidden border-t border-white/5 bg-gradient-to-b from-black/20 via-slate-900/40 to-black/60 rounded-b-[38px]"
             >
