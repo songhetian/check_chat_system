@@ -30,7 +30,7 @@ interface RiskState {
   isOnboardingMode: boolean
   isAiOptimizeEnabled: boolean
   layoutMode: 'FLOAT' | 'SIDE'
-  activeSideTool: 'PRODUCTS' | 'KNOWLEDGE' | null
+  activeSideTool: 'PRODUCTS' | 'KNOWLEDGE' | 'CUSTOMERS' | null
   isCustomerHudEnabled: boolean
   currentCustomer: any | null
   violations: Violation[]
