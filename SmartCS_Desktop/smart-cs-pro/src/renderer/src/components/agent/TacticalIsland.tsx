@@ -5,7 +5,7 @@ import {
   ChevronRight, AlertCircle, Zap, Terminal, Target, LogOut, Cpu, LayoutGrid, Settings, MessageSquareOff,
   Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor,
   Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X, Maximize2,
-  Package, BookOpen, Tags, SearchCheck, Filter, ChevronLeft, AlertOctagon, Wallet, Heart, Ban
+  Package, BookOpen, Tags, SearchCheck, Filter, ChevronLeft, AlertOctagon, Wallet, Heart, Ban, Undo2
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -26,16 +26,18 @@ export const TacticalIsland = () => {
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [showBigScreenModal, setShowBigScreenModal] = useState(false)
   
+  // 侧边搜索状态
   const [searchQuery, setSearchText] = useState('')
   const [filterPrice, setFilterPrice] = useState<string>('')
   const [filterMaterial, setFilterMaterial] = useState<string>('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   
+  // 求助状态
   const [helpText, setHelpText] = useState('')
   const [helpSuggestions, setHelpSuggestions] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 1. 核心：侧边栏与悬浮岛物理位移逻辑
+  // 1. 物理位置控制逻辑 (修正：确保 layoutMode 变化时强制触发 resize)
   useEffect(() => {
     const screenWidth = window.screen.availWidth
     const screenHeight = window.screen.availHeight
@@ -44,6 +46,7 @@ export const TacticalIsland = () => {
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 64)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
+    // 关键修正：只有在 FLOAT 模式且非大屏时才强制居中
     let center = layoutMode === 'FLOAT' && !showBigScreenModal
 
     if (showBigScreenModal) {
@@ -52,41 +55,41 @@ export const TacticalIsland = () => {
       width = 420; height = screenHeight - 100; x = screenWidth - 440; y = 50; center = false
     }
 
+    console.log(`📡 [战术调度] 模式: ${layoutMode} | 尺寸: ${width}x${height} | 居中: ${center}`);
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
-    window.electron.ipcRenderer.send('set-always-on-top', layoutMode === 'FLOAT')
+    window.electron.ipcRenderer.send('set-always-on-top', !showBigScreenModal)
   }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode])
 
-  // 2. 战术对策实时检索 (求助前置自救)
-  const handleSuggestionSearch = async (keyword: string) => {
-    if (!keyword || keyword.length < 2) { setHelpSuggestions([]); return; }
-    try {
+  // 2. 战术自愈搜索
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!helpText || helpText.length < 2) { setHelpSuggestions([]); return; }
       const res = await tacticalRequest({
-        url: `${CONFIG.API_BASE}/admin/violations?keyword=${keyword}&status=RESOLVED&size=3`,
+        url: `${CONFIG.API_BASE}/admin/violations?keyword=${helpText}&status=RESOLVED&size=2`,
         method: 'GET',
         headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` }
       });
       if (res.status === 200) setHelpSuggestions(res.data.data);
-    } catch (e) { console.error(e) }
-  }
-
-  useEffect(() => {
-    const timer = setTimeout(() => handleSuggestionSearch(helpText), 500);
+    }, 500);
     return () => clearTimeout(timer);
   }, [helpText])
 
+  // 3. 客户态度监控 (破屏警告)
+  useEffect(() => {
+    if (isCustomerHudEnabled && lastAiAnalysis?.sentiment_score && lastAiAnalysis.sentiment_score < -0.6) {
+      setShowCriticalAlert(true);
+      const t = setTimeout(() => setShowCriticalAlert(false), 6000);
+      return () => clearTimeout(t);
+    }
+  }, [lastAiAnalysis, isCustomerHudEnabled])
+
   const executeSearch = async () => {
     const apiType = activeSideTool === 'PRODUCTS' ? 'products' : 'violations'; 
-    let url = `${CONFIG.API_BASE}/admin/${apiType}?keyword=${searchQuery}&size=10`;
+    let url = `${CONFIG.API_BASE}/admin/${apiType}?keyword=${searchQuery}&size=15`;
     if (filterPrice) url += `&max_price=${filterPrice}`;
     if (filterMaterial) url += `&material=${filterMaterial}`;
-
-    try {
-      const res = await tacticalRequest({
-        url, method: 'GET',
-        headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` }
-      });
-      if (res.status === 200) setSearchResults(res.data.data);
-    } catch (e) { console.error(e) }
+    const res = await tacticalRequest({ url, method: 'GET', headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` } });
+    if (res.status === 200) setSearchResults(res.data.data);
   }
 
   const handleHelp = async (type: 'TEXT' | 'IMAGE') => {
@@ -99,17 +102,18 @@ export const TacticalIsland = () => {
 
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent">
+      {/* 核心：SVG 强制裁剪路径 */}
       <svg width="0" height="0" className="absolute"><defs><clipPath id="tactical-island-clip" clipPathUnits="objectBoundingBox"><rect x="0" y="0" width="1" height="1" rx="0.06" ry="0.06" /></clipPath></defs></svg>
 
-      {/* 智脑全屏高危红色预警 */}
+      {/* --- 智脑全屏高危红色预警 (破屏级) --- */}
       <AnimatePresence>
         {showCriticalAlert && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1000] flex items-center justify-center pointer-events-none bg-red-600/20 backdrop-blur-xl">
-             <div className="p-20 rounded-[64px] border-8 border-red-500 bg-black/90 flex flex-col items-center gap-10 shadow-[0_0_150px_rgba(239,68,68,0.8)]">
-                <AlertOctagon size={160} className="text-red-500 animate-bounce" />
-                <div className="text-center space-y-4">
-                   <h2 className="text-7xl font-black text-white italic tracking-tighter uppercase">智脑战术警告</h2>
-                   <p className="text-3xl font-black text-red-400 uppercase tracking-[0.4em]">检测到客户极度恶劣态度 · 立即执行心理防御话术</p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1000] flex items-center justify-center pointer-events-none bg-red-600/20 backdrop-blur-2xl">
+             <div className="p-20 rounded-[64px] border-8 border-red-500 bg-black/90 flex flex-col items-center gap-10 shadow-[0_0_200px_rgba(239,68,68,1)]">
+                <AlertOctagon size={180} className="text-red-500 animate-pulse" />
+                <div className="text-center space-y-6">
+                   <h2 className="text-8xl font-black text-white italic tracking-tighter uppercase">智脑战术警告</h2>
+                   <p className="text-3xl font-black text-red-400 uppercase tracking-[0.4em]">检测到客户极度恶劣态度 · 请立即启用危机公关话术</p>
                 </div>
              </div>
           </motion.div>
@@ -132,18 +136,7 @@ export const TacticalIsland = () => {
         )}
         style={{ clipPath: (showBigScreenModal || layoutMode === 'SIDE') ? 'none' : 'url(#tactical-island-clip)', WebkitClipPath: (showBigScreenModal || layoutMode === 'SIDE') ? 'none' : 'url(#tactical-island-clip)' }}
       >
-        {/* --- 侧边栏模式头部：增加显眼的返回按钮 --- */}
-        {layoutMode === 'SIDE' && (
-          <div className="p-8 bg-emerald-600 text-white flex justify-between items-center shrink-0" style={{ WebkitAppRegion: 'drag' } as any}>
-             <div className="flex items-center gap-4">
-                <button onClick={() => { setLayoutMode('FLOAT'); setActiveSideTool(null); setIsExpanded(false); }} className="p-3 bg-black/20 hover:bg-black/40 rounded-2xl transition-all flex items-center gap-2 font-black text-xs uppercase"><ChevronLeft size={18}/> 返回战术岛</button>
-                <h4 className="text-xl font-black italic tracking-tighter">{activeSideTool === 'PRODUCTS' ? '商品资产检索' : '实战知识矩阵'}</h4>
-             </div>
-             <div className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">侧边战术模式</div>
-          </div>
-        )}
-
-        {/* 1. 战术中枢条 (Main Bar) - FLOAT 模式 */}
+        {/* --- 1. 战术中枢条 (Main Bar) --- */}
         {layoutMode === 'FLOAT' && (
           <div className="flex items-center px-5 h-[64px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
             <div className="flex items-center gap-2.5 w-[120px] shrink-0">
@@ -157,14 +150,15 @@ export const TacticalIsland = () => {
               </div>
             </div>
 
+            {/* 核心功能按钮大集成 (不再隐藏) */}
             <div className="flex-1 flex items-center justify-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
-              <HubBtn icon={<Ghost size={18} />} active={isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观" color="muted" />
-              <HubBtn icon={<GraduationCap size={18} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
-              <HubBtn icon={isCustomerHudEnabled ? <Tags size={18} /> : <UserIcon size={18} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="客户画像" color="emerald" />
+              <HubBtn icon={<Package size={18} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS'); }} title="商品资产" color="white" />
+              <HubBtn icon={<BookOpen size={18} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE'); }} title="战术知识" color="white" />
+              <HubBtn icon={<Tags size={18} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="客户画像" color="emerald" />
               <div className="w-px h-5 bg-white/10 mx-0.5" />
-              <HubBtn icon={<Globe size={18} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景" color="emerald" />
-              <HubBtn icon={<Hand size={18} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="求助" color="red" />
-              <HubBtn icon={<LayoutGrid size={18} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="功能" color="emerald" />
+              <HubBtn icon={<Globe size={18} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景看板" color="emerald" />
+              <HubBtn icon={<Hand size={18} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="战术求助" color="red" />
+              <HubBtn icon={<LayoutGrid size={18} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="系统配置" color="muted" />
             </div>
 
             <div className="flex items-center justify-end w-[120px] shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
@@ -173,104 +167,82 @@ export const TacticalIsland = () => {
           </div>
         )}
 
-        {/* --- 侧边栏搜索与列表层 --- */}
+        {/* --- 2. 侧边战术检索面板 (重塑 UI) --- */}
         {layoutMode === 'SIDE' && (
-          <div className="flex-1 flex flex-col bg-slate-900 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as any}>
-             <div className="p-8 bg-black/40 space-y-6 border-b border-white/10">
-                <div className="relative">
-                   <Search className="absolute left-5 top-5 text-slate-500" size={20} />
-                   <input value={searchQuery} onChange={(e) => setSearchText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && executeSearch()} placeholder="输入关键字并按下回车执行搜索..." className="w-full bg-white/5 border-2 border-white/10 rounded-[24px] py-5 pl-14 pr-8 text-base text-white focus:border-cyan-500 outline-none transition-all font-bold" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                   <div className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/5"><Wallet size={16} className="text-cyan-500" /><input placeholder="最高价限制" value={filterPrice} onChange={e => setFilterPrice(e.target.value)} className="bg-transparent w-full text-xs outline-none text-white" /></div>
-                   <div className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/5"><Box size={16} className="text-cyan-500" /><input placeholder="材质/分类关键词" value={filterMaterial} onChange={e => setFilterMaterial(e.target.value)} className="bg-transparent w-full text-xs outline-none text-white" /></div>
+          <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as any}>
+             <div className="p-8 bg-cyan-500 text-slate-950 flex justify-between items-center shrink-0">
+                <button onClick={() => { setLayoutMode('FLOAT'); setActiveSideTool(null); }} className="px-5 py-2 bg-black/10 hover:bg-black/20 rounded-xl flex items-center gap-2 font-black text-[11px] uppercase transition-all shadow-inner"><Undo2 size={16}/> 回归战术岛</button>
+                <div className="flex items-center gap-3">
+                   {activeSideTool === 'PRODUCTS' ? <Package size={24}/> : <BookOpen size={24}/>}
+                   <h4 className="text-xl font-black italic tracking-tighter uppercase">{activeSideTool === 'PRODUCTS' ? '商品资产库' : '战术知识矩阵'}</h4>
                 </div>
              </div>
-             <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-6">
+             
+             <div className="p-8 bg-black/40 space-y-6 border-b border-white/5">
+                <div className="relative">
+                   <Search className="absolute left-5 top-5 text-cyan-500/50" size={20} />
+                   <input value={searchQuery} onChange={(e) => setSearchText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && executeSearch()} placeholder="输入关键字并按回车搜索..." className="w-full bg-white/5 border-2 border-white/10 rounded-[24px] py-5 pl-14 pr-8 text-base text-white focus:border-cyan-500 outline-none transition-all font-bold placeholder:text-slate-600" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/5"><Wallet size={16} className="text-cyan-500" /><input placeholder="最高价格" value={filterPrice} onChange={e => setFilterPrice(e.target.value)} className="bg-transparent w-full text-xs outline-none text-white font-black" /></div>
+                   <div className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/5"><Box size={16} className="text-cyan-500" /><input placeholder="材质/规格" value={filterMaterial} onChange={e => setFilterMaterial(e.target.value)} className="bg-transparent w-full text-xs outline-none text-white font-black" /></div>
+                </div>
+             </div>
+
+             <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-6 bg-gradient-to-b from-transparent to-cyan-500/5">
                 {searchResults.map((item, i) => (
-                  <div key={i} className="p-6 rounded-[32px] bg-white/[0.03] border border-white/5 hover:border-cyan-500/40 transition-all group">
-                     <div className="text-[10px] font-black text-cyan-500 uppercase mb-3 tracking-[0.2em]">匹配战术资产</div>
-                     <div className="text-xl font-black text-white mb-3 leading-tight">{item.name || item.keyword}</div>
-                     <div className="p-4 bg-black/60 rounded-2xl text-sm text-slate-300 italic border border-white/5 leading-relaxed">"{item.usp || item.solution}"</div>
+                  <div key={i} className="p-6 rounded-[32px] bg-white/[0.03] border border-white/5 hover:border-cyan-500/40 transition-all group relative overflow-hidden">
+                     <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity"><Cpu size={60}/></div>
+                     <div className="text-[10px] font-black text-cyan-500 uppercase mb-3 tracking-[0.2em]">{activeSideTool === 'PRODUCTS' ? 'ASSET IDENTIFIED' : 'STRATEGY MATCHED'}</div>
+                     <div className="text-2xl font-black text-white mb-3 leading-tight italic">{item.name || item.keyword}</div>
+                     <div className="p-5 bg-black/60 rounded-3xl text-sm text-slate-200 font-medium italic border border-white/5 leading-relaxed shadow-inner">"{item.usp || item.solution}"</div>
                   </div>
                 ))}
-                {searchResults.length === 0 && <div className="h-64 flex flex-col items-center justify-center opacity-30 gap-4 uppercase font-black tracking-widest italic text-xs text-center px-10"><Search size={48} strokeWidth={1}/><p>等待输入搜索指令以检索库</p></div>}
+                {searchResults.length === 0 && <div className="h-full flex flex-col items-center justify-center opacity-30 gap-6 grayscale"><RadarIcon size={80} strokeWidth={1} className="animate-spin-slow"/><p className="text-[11px] font-black uppercase tracking-[0.5em]">正在监听指令载荷...</p></div>}
              </div>
           </div>
         )}
 
-        {/* --- 客户画像侧挂气泡 --- */}
+        {/* --- 3. 客户画像侧挂气泡 (更加精密) --- */}
         <AnimatePresence>
           {isCustomerHudEnabled && layoutMode === 'FLOAT' && (
-            <motion.div initial={{ x: 100, opacity: 0 }} animate={{ x: 335, opacity: 1 }} exit={{ x: 100, opacity: 0 }} className="absolute top-0 h-[64px] bg-emerald-500 backdrop-blur-xl border-2 border-emerald-400 rounded-[24px] p-4 flex items-center gap-5 shadow-[0_0_50px_rgba(16,185,129,0.4)] z-0">
-               <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center text-white border border-white/10 shadow-inner"><UserIcon size={22}/></div>
+            <motion.div initial={{ x: 100, opacity: 0 }} animate={{ x: 335, opacity: 1 }} exit={{ x: 100, opacity: 0 }} className="absolute top-0 h-[64px] bg-emerald-500/95 backdrop-blur-2xl border-2 border-emerald-400 rounded-[24px] p-4 flex items-center gap-5 shadow-[0_0_60px_rgba(16,185,129,0.5)] z-0">
+               <div className="w-10 h-10 rounded-xl bg-black/30 flex items-center justify-center text-white border border-white/10 shadow-inner"><UserIcon size={22}/></div>
                <div className="pr-5 border-r-2 border-white/20">
                   <p className="text-[10px] font-black text-emerald-950 uppercase tracking-widest">当前接入客户</p>
-                  <p className="text-base font-black text-white italic">李先生 · 核心VIP</p>
+                  <p className="text-base font-black text-white italic">李先生 · 钻石核心VIP</p>
                </div>
-               <div className="flex gap-5 px-3">
-                  <div className="flex flex-col items-center gap-1"><Wallet size={16} className="text-emerald-950"/><span className="text-[9px] font-black text-white uppercase tracking-tighter">极强购买力</span></div>
-                  <div className="flex flex-col items-center gap-1"><Heart size={16} className="text-emerald-950"/><span className="text-[9px] font-black text-white uppercase tracking-tighter">态度较友好</span></div>
-                  <div className="flex flex-col items-center gap-1 text-red-900 animate-pulse"><Ban size={16}/><span className="text-[9px] font-black uppercase tracking-tighter">禁止谈折扣</span></div>
+               <div className="flex gap-6 px-3">
+                  <div className="flex flex-col items-center gap-1"><Wallet size={18} className="text-emerald-950"/><span className="text-[9px] font-black text-white uppercase">强购买力</span></div>
+                  <div className="flex flex-col items-center gap-1"><Heart size={18} className="text-emerald-950"/><span className="text-[9px] font-black text-white uppercase">态度友好</span></div>
+                  <div className="flex flex-col items-center gap-1 text-red-900 animate-pulse"><Ban size={18}/><span className="text-[9px] font-black uppercase">忌谈折扣</span></div>
                </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* 3. 求助模态框 (包含自救建议) */}
+        {/* --- 4. 求助模态框 (集成对策) --- */}
         <AnimatePresence>
           {showHelpModal && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 416, opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-8 border-t border-white/10 bg-slate-900 flex flex-col gap-6 rounded-b-[32px]">
               <div className="flex items-center gap-3 mb-2"><div className="w-1.5 h-4 bg-red-500 rounded-full" /><h4 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">发起紧急战术支援请求</h4></div>
               <div className="grid grid-cols-2 gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
                  <button onClick={() => handleHelp('IMAGE')} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/10 transition-all group"><div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-red-500"><ImageIcon size={20} /></div><div className="text-left"><p className="text-xs font-black text-white">截图求助</p><p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">物理载荷上传</p></div></button>
-                 <button className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-cyan-500/10 transition-all group"><div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-cyan-500"><MessageSquareText size={20} /></div><div className="text-left"><p className="text-xs font-black text-white">文字求助</p><p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">具体困境描述</p></div></button>
+                 <button className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-cyan-500/10 transition-all group"><div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-cyan-500"><MessageSquareText size={20} /></div><div className="text-left"><p className="text-xs font-black text-white">说明求助</p><p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">具体困境描述</p></div></button>
               </div>
               <div className="flex flex-col gap-4 flex-1 min-h-0">
                  <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
-                    <textarea value={helpText} onChange={(e) => setHelpText(e.target.value)} placeholder="描述您的困境，系统将实时检索对策..." className="w-full h-24 bg-black/40 border border-white/5 rounded-2xl p-4 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none font-bold" />
-                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-5 py-2 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all shadow-lg uppercase">下发请求</button>
+                    <textarea value={helpText} onChange={(e) => setHelpText(e.target.value)} placeholder="描述困境，智脑将自动匹配解决库案例..." className="w-full h-24 bg-black/40 border border-white/5 rounded-2xl p-4 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none font-bold" />
+                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-5 py-2 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all shadow-lg uppercase tracking-widest">立即下发</button>
                  </div>
-                 <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
+                 <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
                     {helpSuggestions.length > 0 && (
-                       <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20"><h5 className="text-[9px] font-black text-emerald-500 uppercase flex items-center gap-2 mb-3 tracking-widest"><SearchCheck size={12}/> 匹配方案：建议优先自救</h5>
-                          {helpSuggestions.map((s, i) => (<div key={i} className="mb-2 p-3 bg-black/20 rounded-xl border border-white/5"><div className="text-[11px] font-black text-white mb-1">对策: {s.keyword}</div><div className="text-[10px] text-emerald-400 font-medium italic">方案: {s.solution}</div></div>))}
+                       <div className="p-4 rounded-3xl bg-emerald-500/5 border border-emerald-500/20"><h5 className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-2 mb-3 tracking-widest"><SearchCheck size={14}/> 发现匹配方案 · 建议优先尝试</h5>
+                          {helpSuggestions.map((s, i) => (<div key={i} className="mb-2 last:mb-0 p-4 bg-black/40 rounded-2xl border border-white/5"><div className="text-[12px] font-black text-white mb-1">策略: {s.keyword}</div><div className="text-[11px] text-emerald-400/80 font-medium italic">方案: {s.solution}</div></div>))}
                        </div>
                     )}
                  </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* 2. 展开看板 - TOOLS */}
-        <AnimatePresence>
-          {isExpanded && layoutMode === 'FLOAT' && (
-            <motion.div initial={{ height: 0 }} animate={{ height: 500 }} exit={{ height: 0 }} className="flex-1 flex flex-col border-t border-white/5 bg-slate-900/80">
-              <div className="flex p-2 gap-2 bg-black/20"><TabBtn id="AI" active={activeTab} set={setActiveTab} icon={<Target size={16}/>} label="智脑" /><TabBtn id="RADAR" active={activeTab} set={setActiveTab} icon={<RadarIcon size={16}/>} label="雷达" /><TabBtn id="TOOLS" active={activeTab} set={setActiveTab} icon={<Box size={16}/>} label="工具" /></div>
-              <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
-                 {activeTab === 'TOOLS' && (
-                   <div className="grid grid-cols-2 gap-4">
-                      <ToolCard icon={<Package size={24}/>} title="商品资产" desc="切换至右侧战术检索面板" color="cyan" onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS'); }} />
-                      <ToolCard icon={<BookOpen size={24}/>} title="战术知识" desc="切换至右侧战术检索面板" color="amber" onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE'); }} />
-                      <ToolCard icon={<Search size={24}/>} title="全域检索" desc="跨模块实战搜索引擎" color="cyan" onClick={() => setShowBigScreenModal(true)} />
-                      <ToolCard icon={<Settings size={24}/>} title="系统配置" desc="链路参数与自愈微调" color="slate" />
-                   </div>
-                 )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* 6. 全景大屏模态框 */}
-        <AnimatePresence>
-          {showBigScreenModal && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[500] bg-slate-950 flex flex-col">
-              <div className="flex justify-between items-center p-8 bg-black/60 border-b border-white/10 shrink-0" style={{ WebkitAppRegion: 'drag' } as any}>
-                 <div className="flex items-center gap-4"><div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg animate-pulse"><Maximize2 size={20} className="text-white" /></div><div><h4 className="text-xl font-black text-white uppercase italic">全景战术态势指挥中枢</h4><p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em]">指挥中心 · 实时链路激活</p></div></div>
-                 <button onClick={() => setShowBigScreenModal(false)} className="px-8 py-3 bg-red-500 text-white rounded-2xl text-[11px] font-black uppercase transition-all shadow-xl active:scale-95">退出全景模式</button>
-              </div>
-              <div className="flex-1 bg-black relative" style={{ WebkitAppRegion: 'no-drag' } as any}><iframe src="#/big-screen" className="w-full h-full border-none" title="Tactical Big Screen" /><div className="absolute inset-0 pointer-events-none border-[1px] border-white/5 shadow-[inset_0_0_150px_rgba(0,0,0,0.9)]" /></div>
             </motion.div>
           )}
         </AnimatePresence>
