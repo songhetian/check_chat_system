@@ -19,11 +19,14 @@ export const useRiskSocket = () => {
         return;
       }
 
-      // 核心：建立物理连接
-      socket = new WebSocket(`${CONFIG.WS_BASE}/risk?token=${token}&username=${user.username}`)
+      // 核心：建立物理连接，对参数进行编码以防止特殊字符干扰
+      const wsUrl = `${CONFIG.WS_BASE}/risk?token=${encodeURIComponent(token)}&username=${encodeURIComponent(user.username)}`;
+      console.log(`📡 [WS链路] 正在尝试建立战术握手: ${wsUrl}`);
+      
+      socket = new WebSocket(wsUrl)
 
       socket.onopen = () => {
-        console.log('✅ [WS链路] 物理握手成功');
+        console.log('✅ [WS链路] 物理握手成功，节点已激活');
         useRiskStore.getState().setOnline(true)
         retryCount = 0;
 

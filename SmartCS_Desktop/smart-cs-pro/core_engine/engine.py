@@ -62,6 +62,25 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+async def online_status_cleaner():
+    """[物理自愈] 循环检查心跳，清理异常断开的死节点"""
+    from utils.redis_utils import redis_mgr
+    while True:
+        try:
+            client = await redis_mgr.connect()
+            if client:
+                online_set = await client.smembers("online_agents_set")
+                for username in online_set:
+                    # 检查心跳 Key 是否还存在
+                    has_heartbeat = await client.exists(f"agent_heartbeat:{username}")
+                    if not has_heartbeat:
+                        await redis_mgr.mark_offline(username)
+                        await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
+                        logger.info(f"🧹 [自愈] 已清理僵尸节点: {username}")
+        except Exception as e:
+            logger.error(f"⚠️ [自愈循环异常]: {e}")
+        await asyncio.sleep(45) # 每 45 秒扫描一次 (心跳 TTL 是 60s)
+
 # --- 3. FastAPI 应用配置 ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -71,6 +90,8 @@ async def lifespan(app: FastAPI):
     if client:
         app.state.redis = client
         logger.info("✅ Redis 战术缓存已激活")
+        # 启动自愈清洗任务
+        asyncio.create_task(online_status_cleaner())
     else:
         logger.error("❌ Redis 初始化失败")
     
@@ -140,14 +161,17 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
         return
 
     await manager.connect(username, websocket, role=role)
-    redis_conn = app.state.redis
-    if redis_conn: 
-        await redis_conn.sadd("online_agents_set", username)
-        await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "ONLINE"})
+    from utils.redis_utils import redis_mgr
+    await redis_mgr.mark_online(username)
+    await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "ONLINE"})
     
     try:
         while True:
+            # 战术心跳：由前端定时发送 SCREEN_SYNC 或其他消息维持
             data = await websocket.receive_text()
+            # 每次收到消息都刷新心跳 TTL
+            await redis_mgr.mark_online(username)
+            
             msg = json.loads(data)
             if msg.get("type") == "CHAT_TRANSMISSION":
                 # 战术加固：实时扫描内容敏感词
@@ -198,15 +222,15 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
                 })
     except WebSocketDisconnect:
         manager.disconnect(username)
-        if redis_conn: 
-            await redis_conn.srem("online_agents_set", username)
-            await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
+        from utils.redis_utils import redis_mgr
+        await redis_mgr.mark_offline(username)
+        await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
     except Exception as e:
         logger.error(f"⚠️ WS 链路异常: {e}")
         manager.disconnect(username)
-        if redis_conn: 
-            await redis_conn.srem("online_agents_set", username)
-            await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
+        from utils.redis_utils import redis_mgr
+        await redis_mgr.mark_offline(username)
+        await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
 
 # --- 5. 物理引擎挂载 ---
 register_tortoise(
