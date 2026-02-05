@@ -70,10 +70,13 @@ export const TacticalIsland = () => {
       height = 850
     }
 
+    // 关键：仅在初始模式（非大屏、非求助、非展开）且需要对齐时居中，其他情况保持位置
+    const shouldCenter = false; 
+
     window.electron.ipcRenderer.send('resize-window', { 
       width, 
       height, 
-      center: (!isExpanded && !showHelpModal && !showBigScreenModal) || showBigScreenModal 
+      center: shouldCenter 
     })
     
     // 大屏模式下不需要强制置顶，方便操作
@@ -168,9 +171,9 @@ export const TacticalIsland = () => {
             <div className="w-px h-5 bg-white/5 mx-0.5" />
             <HubBtn 
               icon={<Globe size={16} />} 
-              active={false} 
-              onClick={() => window.open('#/personal-screen', '_blank')}
-              title="个人战术态势"
+              active={showBigScreenModal} 
+              onClick={() => setShowBigScreenModal(!showBigScreenModal)}
+              title="实时全景态势"
               color="white"
             />
             <HubBtn 

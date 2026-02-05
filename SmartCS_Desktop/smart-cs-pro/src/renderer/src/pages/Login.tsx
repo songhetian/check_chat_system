@@ -116,7 +116,9 @@ export default function Login() {
         }
   
         speak(`欢迎进入系统，${user.real_name}。全链路已就绪。`)
-        toast.success(`欢迎归队，${user.real_name}`, { description: '全链路战术系统已就绪' })
+        if (user.role_code !== 'AGENT') {
+          toast.success(`欢迎归队，${user.real_name}`, { description: '全链路战术系统已就绪' })
+        }
         
         // 3. 持久化至中央状态库
         setAuth({ 
