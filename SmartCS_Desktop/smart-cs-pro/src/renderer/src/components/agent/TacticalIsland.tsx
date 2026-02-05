@@ -223,7 +223,7 @@ export const TacticalIsland = () => {
                    <div className="grid grid-cols-2 gap-4">
                       <ToolCard icon={<Package size={24}/>} title="商品资产" desc="点击进入右侧检索模式" color="cyan" onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS'); }} />
                       <ToolCard icon={<BookOpen size={24}/>} title="战术知识" desc="点击进入右侧检索模式" color="amber" onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE'); }} />
-                      <ToolCard icon={<Search size={24}/>} title="全域检索" desc="全局对策搜索引擎" color="cyan" onClick={() => setShowSearchModal(true)} />
+                      <ToolCard icon={<Search size={24}/>} title="全域检索" desc="全局对策搜索引擎" color="cyan" onClick={() => setShowBigScreenModal(true)} />
                       <ToolCard icon={<Settings size={24}/>} title="链路配置" desc="系统底层参数调整" color="slate" />
                    </div>
                  )}
