@@ -82,22 +82,34 @@ async def online_status_cleaner():
             logger.error(f"⚠️ [自愈循环异常]: {e}")
         await asyncio.sleep(45)
 
+from tortoise import Tortoise
+
 # --- 3. FastAPI 应用配置 ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 初始化 Redis
+    # 1. 物理初始化数据库 (取代之前的 register_tortoise 以获得更高级别的控制)
+    try:
+        db_url = f"mysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+        await Tortoise.init(
+            db_url=db_url,
+            modules={"models": ["core.models"]}
+        )
+        logger.info("✅ [数据库链路] 物理连接已锚定")
+    except Exception as e:
+        logger.error(f"❌ [数据库链路] 初始化失败: {e}")
+
+    # 2. 初始化 Redis
     from utils.redis_utils import redis_mgr
     client = await redis_mgr.connect()
     if client:
         app.state.redis = client
         logger.info("✅ Redis 战术缓存已激活")
-        # 启动自愈清洗任务
         asyncio.create_task(online_status_cleaner())
-    else:
-        logger.error("❌ Redis 初始化失败")
     
     app.state.ws_manager = manager
     yield
+    # 释放资源
+    await Tortoise.close_connections()
     await redis_mgr.disconnect()
 
 app = FastAPI(lifespan=lifespan)
@@ -233,14 +245,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
         await redis_mgr.mark_offline(username)
         await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
 
-# --- 5. 物理引擎挂载 ---
-register_tortoise(
-    app,
-    db_url=f"mysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}",
-    modules={"models": ["core.models"]},
-    generate_schemas=False,
-    add_exception_handlers=True,
-)
+# --- 5. 物理引擎挂载已移至 lifespan ---
 
 if __name__ == "__main__":
     host, port = os.getenv("SERVER_HOST", "0.0.0.0"), int(os.getenv("SERVER_PORT", 8000))
