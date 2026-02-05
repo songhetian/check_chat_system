@@ -55,10 +55,14 @@ function createWindow(): void {
         env[key] = value
       })
 
-      const host = env['DB_HOST'] || '127.0.0.1'
-      const port = env['SERVER_PORT'] || '8000'
-      
       // 动态重构中央指挥部地址
+      const defaultHost = serverConfig.network.central_server_url ? 
+                         new URL(serverConfig.network.central_server_url).hostname : 
+                         '127.0.0.1';
+      
+      const host = env['DB_HOST'] || defaultHost;
+      const port = env['SERVER_PORT'] || '8000';
+      
       serverConfig.network.central_server_url = `http://${host}:${port}/api`
       serverConfig.network.local_port = port
       console.log(`🌐 [配置系统] 已加载环境，中枢锁定: ${serverConfig.network.central_server_url}`)

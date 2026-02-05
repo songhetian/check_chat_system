@@ -28,17 +28,25 @@ export const initDynamicConfig = async () => {
         if (centralUrl.endsWith('/')) centralUrl = centralUrl.slice(0, -1);
         
         CONFIG.API_BASE = centralUrl;
-        // 自动转换协议：http -> ws，并保持 /api 前缀后追加 /ws 路径
-        CONFIG.WS_BASE = centralUrl.replace('http', 'ws') + '/ws';
+        
+        // 智能协议转换：使用 URL 对象安全重构
+        const wsUrl = new URL(centralUrl);
+        wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+        // 保持 /api 路径并追加 /ws
+        CONFIG.WS_BASE = wsUrl.toString() + '/ws';
         
         console.log(`🌐 [战术同步] 链路已锁定指挥中心: ${CONFIG.API_BASE}`);
+        console.log(`📡 [WS 同步] 实时链路地址: ${CONFIG.WS_BASE}`);
       }
     } else {
       // --- Web 模式适配 ---
-      // 如果不在 Electron 环境，自动锁定当前 origin
       const webOrigin = window.location.origin;
       CONFIG.API_BASE = `${webOrigin}/api`;
-      CONFIG.WS_BASE = webOrigin.replace('http', 'ws') + '/api/ws';
+      
+      const wsUrl = new URL(webOrigin);
+      wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+      CONFIG.WS_BASE = wsUrl.origin + '/api/ws';
+      
       console.log(`🌐 [Web模式] 链路已对齐当前服务器: ${CONFIG.API_BASE}`);
     }
 
