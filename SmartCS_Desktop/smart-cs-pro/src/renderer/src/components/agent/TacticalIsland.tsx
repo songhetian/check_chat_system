@@ -169,13 +169,15 @@ export const TacticalIsland = () => {
               color="red"
             />
             <div className="w-px h-5 bg-white/5 mx-0.5" />
-            <HubBtn 
-              icon={<Globe size={16} />} 
-              active={showBigScreenModal} 
-              onClick={() => setShowBigScreenModal(!showBigScreenModal)}
-              title="实时全景态势"
-              color="white"
-            />
+            {hasPermission('agent:view:big_screen') && (
+              <HubBtn 
+                icon={<Globe size={16} />} 
+                active={showBigScreenModal} 
+                onClick={() => setShowBigScreenModal(!showBigScreenModal)}
+                title="实时全景态势"
+                color="emerald"
+              />
+            )}
             <HubBtn 
               icon={<Hand size={16} />} 
               active={showHelpModal} 
@@ -446,35 +448,6 @@ export const TacticalIsland = () => {
                 )}
               </AnimatePresence>
 
-              {/* 5. 实时全景大屏模态框 (Big Screen Modal) */}
-              <AnimatePresence>
-                {showBigScreenModal && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="absolute inset-0 z-[110] bg-slate-950 flex flex-col"
-                  >
-                    <div className="flex justify-between items-center p-8 bg-black/40 border-b border-white/10 shrink-0">
-                       <h4 className="text-[11px] font-black text-cyan-400 uppercase tracking-[0.4em] flex items-center gap-2">
-                         <Maximize2 size={14} /> 全景战术态势指挥面板
-                       </h4>
-                       <button onClick={() => setShowBigScreenModal(false)} className="px-6 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                         关闭战术窗口 / CLOSE
-                       </button>
-                    </div>
-                    <div className="flex-1 bg-black relative">
-                       <iframe 
-                         src="#/big-screen" 
-                         className="w-full h-full border-none"
-                         title="Tactical Big Screen"
-                       />
-                       <div className="absolute inset-0 pointer-events-none border-[20px] border-black/20 shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              
               {/* 底部页脚 */}
               <div className="p-6 bg-black/60 border-t border-white/10 flex justify-between items-center px-10 rounded-b-[38px]">
                  <div className="flex items-center gap-3">
@@ -482,6 +455,35 @@ export const TacticalIsland = () => {
                     <span className="text-[10px] font-mono text-slate-500 uppercase font-black tracking-[0.2em]">Link Secure · Protocol v2.4</span>
                  </div>
                  <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic">{CONFIG.APP_VERSION}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 5. 实时全景大屏模态框 (提升至最高层级) */}
+        <AnimatePresence>
+          {showBigScreenModal && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="absolute inset-0 z-[200] bg-slate-950 flex flex-col"
+            >
+              <div className="flex justify-between items-center p-8 bg-black/40 border-b border-white/10 shrink-0">
+                 <h4 className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.4em] flex items-center gap-2">
+                   <Maximize2 size={14} /> 全景战术态势指挥面板
+                 </h4>
+                 <button onClick={() => setShowBigScreenModal(false)} className="px-6 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+                   关闭战术窗口 / CLOSE
+                 </button>
+              </div>
+              <div className="flex-1 bg-black relative">
+                 <iframe 
+                   src="#/big-screen" 
+                   className="w-full h-full border-none"
+                   title="Tactical Big Screen"
+                 />
+                 <div className="absolute inset-0 pointer-events-none border-[20px] border-black/20 shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" />
               </div>
             </motion.div>
           )}
