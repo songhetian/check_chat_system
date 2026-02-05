@@ -245,13 +245,13 @@ if __name__ == "__main__":
     host, port = os.getenv("SERVER_HOST", "0.0.0.0"), int(os.getenv("SERVER_PORT", 8000))
     print(f"🚀 [战术核心] 架构标准化重塑完成: {host}:{port}")
     
-    # 智能驱动自适应：检测环境是否支持高性能 WebSocket
-    ws_driver = "auto"
+    # 强制自检：验证 WebSocket 驱动
+    ws_driver = "websockets"
     try:
         import websockets
-        ws_driver = "websockets"
-        print("  ✅ 已激活 websockets 高性能驱动")
+        print(f"  ✅ [自检] 物理驱动加载成功: websockets v{websockets.__version__}")
     except ImportError:
-        print("  ⚠️  未检测到 websockets 库，将使用 uvicorn 默认驱动")
+        print("  ❌ [自检失败] 缺失 websockets 库，正在尝试回退...")
+        ws_driver = "auto"
 
-    uvicorn.run(app, host=host, port=port, ws=ws_driver)
+    uvicorn.run(app, host=host, port=port, ws=ws_driver, log_level="info")
