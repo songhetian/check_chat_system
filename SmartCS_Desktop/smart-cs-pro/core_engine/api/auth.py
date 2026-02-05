@@ -49,28 +49,6 @@ async def login(data: dict, request: Request):
         }
     }
 
-@router.get("/me")
-async def get_me(user_info: dict = Depends(get_current_user)):
-    """[物理同步] 获取当前登录操作员的最新实战态势数据"""
-    user = await User.get_or_none(username=user_info["username"]).select_related("department", "role")
-    if not user: raise HTTPException(status_code=404, detail="操作员不存在")
-    
-    # 同步最新权限 (防止管理员在后台修改后未立即生效)
-    perms = await RolePermission.filter(role_id=user.role_id).values_list("permission_code", flat=True)
-    
-    return {
-        "status": "ok",
-        "data": {
-            "username": user.username,
-            "real_name": user.real_name,
-            "role_id": user.role_id,
-            "role_code": user.role.code,
-            "dept_name": user.department.name if user.department else "独立战术单元",
-            "tactical_score": user.tactical_score,
-            "permissions": list(perms)
-        }
-    }
-
 async def get_current_user(request: Request, creds: HTTPAuthorizationCredentials = Depends(security)):
     token = creds.credentials
     redis = request.app.state.redis
@@ -94,3 +72,25 @@ def check_permission(required_perm: str):
             raise HTTPException(status_code=403, detail=f"权限熔断：缺失动作权限 [{required_perm}]")
         return user
     return _check
+
+@router.get("/me")
+async def get_me(user_info: dict = Depends(get_current_user)):
+    """[物理同步] 获取当前登录操作员的最新实战态势数据"""
+    user = await User.get_or_none(username=user_info["username"]).select_related("department", "role")
+    if not user: raise HTTPException(status_code=404, detail="操作员不存在")
+    
+    # 同步最新权限 (防止管理员在后台修改后未立即生效)
+    perms = await RolePermission.filter(role_id=user.role_id).values_list("permission_code", flat=True)
+    
+    return {
+        "status": "ok",
+        "data": {
+            "username": user.username,
+            "real_name": user.real_name,
+            "role_id": user.role_id,
+            "role_code": user.role.code,
+            "dept_name": user.department.name if user.department else "独立战术单元",
+            "tactical_score": user.tactical_score,
+            "permissions": list(perms)
+        }
+    }
