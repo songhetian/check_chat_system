@@ -241,7 +241,7 @@ function App() {
   useRiskSocket()
   return (
     <Router>
-      <Toaster />
+      <Toaster position="bottom-right" expand={true} richColors />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/big-screen" element={<BigScreen />} />
