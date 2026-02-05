@@ -215,3 +215,9 @@ INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES
 (1, 'agent:command:receive'),
 (1, 'agent:hud:view');INSERT IGNORE INTO permissions (code, name, module) VALUES ('agent:view:big_screen', '实时大屏态势', '个人战术舱');
 INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (1, 'agent:view:big_screen'), (3, 'agent:view:big_screen');
+-- [战术升级] 侧边面板与客户感知功能权限注册
+
+INSERT IGNORE INTO permissions (code, name, module) VALUES ('agent:action:side_panel', '侧边面板控制', '实战交互'), ('agent:view:customer_insight', '深度客户洞察', '实战支撑'), ('agent:alert:attitude', '态度风险预警', '风险感知');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (1, 'agent:action:side_panel'), (1, 'agent:view:customer_insight'), (1, 'agent:alert:attitude'), (3, 'agent:action:side_panel'), (3, 'agent:view:customer_insight'), (3, 'agent:alert:attitude');
+
