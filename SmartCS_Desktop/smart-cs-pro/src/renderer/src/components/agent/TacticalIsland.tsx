@@ -63,15 +63,15 @@ export const TacticalIsland = () => {
   // 灵动岛尺寸动态适配
   useEffect(() => {
     let width = 640
-    let height = showHelpModal ? 400 : (isExpanded ? 800 : 80)
+    let height = showHelpModal ? 400 : (isExpanded ? 564 : 64)
     
     if (showBigScreenModal) {
       width = 1280
       height = 850
     }
 
-    // 关键：仅在初始模式（非大屏、非求助、非展开）且需要对齐时居中，其他情况保持位置
-    const shouldCenter = false; 
+    // 关键：仅在初始模式且需要对齐时居中，大屏模式也居中
+    const shouldCenter = showBigScreenModal; 
 
     window.electron.ipcRenderer.send('resize-window', { 
       width, 
@@ -106,7 +106,7 @@ export const TacticalIsland = () => {
           "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 shadow-2xl",
           isGlassMode ? "bg-slate-950/30 backdrop-blur-3xl" : "bg-slate-950",
           isAlerting && "border-red-500 ring-1 ring-red-500/20",
-          showBigScreenModal ? "border-none" : "rounded-[38px]"
+          showBigScreenModal ? "border-none" : "rounded-[32px]"
         )}
         style={{ 
           clipPath: showBigScreenModal ? 'none' : 'url(#tactical-island-clip)', 
@@ -118,27 +118,26 @@ export const TacticalIsland = () => {
           className="flex items-center px-5 h-[64px] shrink-0 cursor-move relative" 
           style={{ WebkitAppRegion: 'drag' } as any}
         >
-          {/* 左侧：用户信息 & 状态 (更饱满的布局) */}
-          <div className="flex items-center gap-3 w-[150px] shrink-0">
+          {/* 左侧：用户信息 & 状态 (精简布局) */}
+          <div className="flex items-center gap-2 w-[120px] shrink-0">
             <div className="relative">
               <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm transition-all duration-500",
-                isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]" : "bg-slate-900 text-slate-600 border border-white/5"
+                "w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm transition-all duration-500",
+                isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5"
               )}>
-                {user?.real_name ? user.real_name[0] : <UserIcon size={20} />}
+                {user?.real_name ? user.real_name[0] : <UserIcon size={18} />}
               </div>
               <div className={cn(
-                "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[2px] border-slate-950",
+                "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-[2px] border-slate-950 transition-all duration-500",
                 isOnline ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : "bg-red-500 animate-pulse"
               )} />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[13px] font-black text-white truncate leading-none mb-1 flex items-center gap-1">
+              <span className="text-[12px] font-black text-white truncate leading-none mb-0.5">
                 {user?.real_name || 'Node'}
-                {isOnboardingMode && <GraduationCap size={12} className="text-amber-400" />}
               </span>
               <span className={cn(
-                "text-[8px] font-bold uppercase opacity-60 truncate tracking-widest",
+                "text-[7px] font-bold uppercase tracking-widest opacity-60 truncate",
                 isOnline ? "text-emerald-500" : "text-red-500"
               )}>
                 {isOnline ? 'Online' : 'Offline'}
@@ -146,8 +145,8 @@ export const TacticalIsland = () => {
             </div>
           </div>
 
-          {/* 中间：核心控制组 (图标增大，间距优化) */}
-          <div className="flex-1 flex items-center justify-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          {/* 中间：核心控制组 (收紧间距) */}
+          <div className="flex-1 flex items-center justify-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <HubBtn 
               icon={isGlassMode ? <Ghost size={18} /> : <Square size={18} />} 
               active={!isGlassMode} 
@@ -169,7 +168,7 @@ export const TacticalIsland = () => {
               title="静音"
               color="red"
             />
-            <div className="w-px h-5 bg-white/10 mx-1" />
+            <div className="w-px h-5 bg-white/10 mx-0.5" />
             {hasPermission('agent:view:big_screen') && (
               <HubBtn 
                 icon={<Globe size={18} />} 
@@ -195,11 +194,11 @@ export const TacticalIsland = () => {
             />
           </div>
 
-          {/* 右侧：退出 (更饱满的宽度) */}
-          <div className="flex items-center justify-end w-[150px] shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          {/* 右侧：退出 (精简布局) */}
+          <div className="flex items-center justify-end w-[120px] shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <button 
               onClick={() => { logout(); window.location.hash = '/login'; }}
-              className="w-10 h-10 rounded-xl bg-white/5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center transition-all group border border-white/5 shadow-lg"
+              className="w-9 h-9 rounded-xl bg-white/5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center transition-all group border border-white/5"
               title="退出登录"
             >
               <LogOut size={18} />
@@ -268,7 +267,7 @@ export const TacticalIsland = () => {
           {isExpanded && (
             <motion.div 
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 520, opacity: 1 }}
+              animate={{ height: 500, opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               className="flex-1 flex flex-col overflow-hidden border-t border-white/5 bg-gradient-to-b from-black/20 via-slate-900/40 to-black/60 rounded-b-[38px]"
             >
@@ -363,7 +362,7 @@ export const TacticalIsland = () => {
                                    <Monitor size={12} className="opacity-40" /> 
                                    <span>{new Date(v.timestamp).toLocaleTimeString()}</span>
                                    <span className="w-1 h-1 rounded-full bg-slate-700" />
-                                   <span className="text-emerald-500/40 group-hover:text-emerald-400 font-bold flex items-center gap-1 transition-colors"><CheckCircle2 size={10}/> 点击标记为已解决</span>
+                                   <span className="text-emerald-400 font-bold flex items-center gap-1"><CheckCircle2 size={10}/> 点击解决</span>
                                 </div>
                              </div>
                              <ChevronRight size={16} className="text-slate-800 group-hover:text-emerald-500 transition-colors" />
