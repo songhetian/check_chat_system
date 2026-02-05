@@ -154,9 +154,9 @@ export const TacticalIsland = () => {
               <div className="w-px h-5 bg-white/10 mx-0.5" />
               
               {/* 实战支撑按钮组 */}
-              <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS'); }} title="商品资产" color="white" />
-              <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE'); }} title="战术知识" color="white" />
-              <HubBtn icon={<UserSearch size={20} />} active={activeSideTool === 'CUSTOMERS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('CUSTOMERS'); }} title="客户画像" color="emerald" />
+              <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="商品资产" color="white" />
+              <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="战术知识" color="white" />
+              <HubBtn icon={<UserSearch size={20} />} active={activeSideTool === 'CUSTOMERS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('CUSTOMERS' as any); }} title="客户画像" color="emerald" />
               
               <div className="w-px h-5 bg-white/10 mx-0.5" />
               
