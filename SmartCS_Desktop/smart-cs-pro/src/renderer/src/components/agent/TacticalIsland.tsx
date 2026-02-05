@@ -37,7 +37,7 @@ export const TacticalIsland = () => {
   const [helpSuggestions, setHelpSuggestions] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 1. 物理位置控制逻辑 (修正：确保 layoutMode 变化时强制触发 resize)
+  // 1. 物理位置控制逻辑 (修正：FLOAT 模式停靠屏幕右上方)
   useEffect(() => {
     const screenWidth = window.screen.availWidth
     const screenHeight = window.screen.availHeight
@@ -46,21 +46,23 @@ export const TacticalIsland = () => {
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 64)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
-    // 关键修正：只有在 FLOAT 模式且非大屏时才强制居中
-    let center = layoutMode === 'FLOAT' && !showBigScreenModal
+    let center = false // 永远不强制居中，除非是大屏
 
     if (showBigScreenModal) {
       width = 1280; height = 850; center = true
     } else if (layoutMode === 'SIDE') {
-      width = 420; height = screenHeight - 100; x = screenWidth - 440; y = 50; center = false
+      width = 420; height = screenHeight - 100; x = screenWidth - 440; y = 50
+    } else {
+      // FLOAT 模式：固定在右上方 (留出一定边缘)
+      width = 640; x = screenWidth - 680; y = 40
     }
 
-    console.log(`📡 [战术调度] 模式: ${layoutMode} | 尺寸: ${width}x${height} | 居中: ${center}`);
+    console.log(`📡 [物理调度] 模式: ${layoutMode} | 位置: ${x},${y} | 尺寸: ${width}x${height}`);
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', !showBigScreenModal)
   }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode])
 
-  // 2. 战术自愈搜索
+  // 2. 战术对策实时检索
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (!helpText || helpText.length < 2) { setHelpSuggestions([]); return; }
@@ -102,15 +104,14 @@ export const TacticalIsland = () => {
 
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent">
-      {/* 核心：SVG 强制裁剪路径 */}
       <svg width="0" height="0" className="absolute"><defs><clipPath id="tactical-island-clip" clipPathUnits="objectBoundingBox"><rect x="0" y="0" width="1" height="1" rx="0.06" ry="0.06" /></clipPath></defs></svg>
 
-      {/* --- 智脑全屏高危红色预警 (破屏级) --- */}
+      {/* --- 智脑全屏高危红色预警 --- */}
       <AnimatePresence>
         {showCriticalAlert && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1000] flex items-center justify-center pointer-events-none bg-red-600/20 backdrop-blur-2xl">
              <div className="p-20 rounded-[64px] border-8 border-red-500 bg-black/90 flex flex-col items-center gap-10 shadow-[0_0_200px_rgba(239,68,68,1)]">
-                <AlertOctagon size={180} className="text-red-500 animate-pulse" />
+                <AlertOctagon size={180} className="text-red-500 animate-bounce" />
                 <div className="text-center space-y-6">
                    <h2 className="text-8xl font-black text-white italic tracking-tighter uppercase">智脑战术警告</h2>
                    <p className="text-3xl font-black text-red-400 uppercase tracking-[0.4em]">检测到客户极度恶劣态度 · 请立即启用危机公关话术</p>
@@ -150,35 +151,38 @@ export const TacticalIsland = () => {
               </div>
             </div>
 
-            {/* 核心功能按钮大集成 (不再隐藏) */}
+            {/* 核心功能按钮大集成 (图标放大至 20) */}
             <div className="flex-1 flex items-center justify-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
-              <HubBtn icon={<Package size={18} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS'); }} title="商品资产" color="white" />
-              <HubBtn icon={<BookOpen size={18} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE'); }} title="战术知识" color="white" />
-              <HubBtn icon={<Tags size={18} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="客户画像" color="emerald" />
+              <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观切换" color="muted" />
+              <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="实战培训" color="emerald" />
               <div className="w-px h-5 bg-white/10 mx-0.5" />
-              <HubBtn icon={<Globe size={18} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景看板" color="emerald" />
-              <HubBtn icon={<Hand size={18} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="战术求助" color="red" />
-              <HubBtn icon={<LayoutGrid size={18} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="系统配置" color="muted" />
+              <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS'); }} title="商品资产" color="white" />
+              <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE'); }} title="战术知识" color="white" />
+              <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="客户画像" color="emerald" />
+              <div className="w-px h-5 bg-white/10 mx-0.5" />
+              <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景看板" color="emerald" />
+              <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="战术求助" color="red" />
+              <HubBtn icon={<LayoutGrid size={20} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="功能面板" color="muted" />
             </div>
 
             <div className="flex items-center justify-end w-[120px] shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
-              <button onClick={() => { logout(); window.location.hash = '/login'; }} className="w-9 h-9 rounded-xl bg-white/5 text-slate-500 hover:text-red-500 flex items-center justify-center transition-all border border-white/5"><LogOut size={18} /></button>
+              <button onClick={() => { logout(); window.location.hash = '/login'; }} className="w-9 h-9 rounded-xl bg-white/5 text-slate-500 hover:text-red-500 flex items-center justify-center transition-all border border-white/5"><LogOut size={20} /></button>
             </div>
           </div>
         )}
 
-        {/* --- 2. 侧边战术检索面板 (重塑 UI) --- */}
+        {/* --- 2. 侧边战术检索面板 --- */}
         {layoutMode === 'SIDE' && (
           <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as any}>
              <div className="p-8 bg-cyan-500 text-slate-950 flex justify-between items-center shrink-0">
-                <button onClick={() => { setLayoutMode('FLOAT'); setActiveSideTool(null); }} className="px-5 py-2 bg-black/10 hover:bg-black/20 rounded-xl flex items-center gap-2 font-black text-[11px] uppercase transition-all shadow-inner"><Undo2 size={16}/> 回归战术岛</button>
+                <button onClick={() => { setLayoutMode('FLOAT'); setActiveSideTool(null); setIsExpanded(false); }} className="px-5 py-2 bg-black/10 hover:bg-black/20 rounded-xl flex items-center gap-2 font-black text-[11px] uppercase transition-all shadow-inner"><Undo2 size={16}/> 返回战术岛</button>
                 <div className="flex items-center gap-3">
                    {activeSideTool === 'PRODUCTS' ? <Package size={24}/> : <BookOpen size={24}/>}
                    <h4 className="text-xl font-black italic tracking-tighter uppercase">{activeSideTool === 'PRODUCTS' ? '商品资产库' : '战术知识矩阵'}</h4>
                 </div>
              </div>
              
-             <div className="p-8 bg-black/40 space-y-6 border-b border-white/5">
+             <div className="p-8 bg-black/40 space-y-6 border-b border-white/10">
                 <div className="relative">
                    <Search className="absolute left-5 top-5 text-cyan-500/50" size={20} />
                    <input value={searchQuery} onChange={(e) => setSearchText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && executeSearch()} placeholder="输入关键字并按回车搜索..." className="w-full bg-white/5 border-2 border-white/10 rounded-[24px] py-5 pl-14 pr-8 text-base text-white focus:border-cyan-500 outline-none transition-all font-bold placeholder:text-slate-600" />
@@ -192,7 +196,6 @@ export const TacticalIsland = () => {
              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-6 bg-gradient-to-b from-transparent to-cyan-500/5">
                 {searchResults.map((item, i) => (
                   <div key={i} className="p-6 rounded-[32px] bg-white/[0.03] border border-white/5 hover:border-cyan-500/40 transition-all group relative overflow-hidden">
-                     <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity"><Cpu size={60}/></div>
                      <div className="text-[10px] font-black text-cyan-500 uppercase mb-3 tracking-[0.2em]">{activeSideTool === 'PRODUCTS' ? 'ASSET IDENTIFIED' : 'STRATEGY MATCHED'}</div>
                      <div className="text-2xl font-black text-white mb-3 leading-tight italic">{item.name || item.keyword}</div>
                      <div className="p-5 bg-black/60 rounded-3xl text-sm text-slate-200 font-medium italic border border-white/5 leading-relaxed shadow-inner">"{item.usp || item.solution}"</div>
@@ -203,14 +206,14 @@ export const TacticalIsland = () => {
           </div>
         )}
 
-        {/* --- 3. 客户画像侧挂气泡 (更加精密) --- */}
+        {/* --- 3. 客户画像侧挂气泡 --- */}
         <AnimatePresence>
           {isCustomerHudEnabled && layoutMode === 'FLOAT' && (
             <motion.div initial={{ x: 100, opacity: 0 }} animate={{ x: 335, opacity: 1 }} exit={{ x: 100, opacity: 0 }} className="absolute top-0 h-[64px] bg-emerald-500/95 backdrop-blur-2xl border-2 border-emerald-400 rounded-[24px] p-4 flex items-center gap-5 shadow-[0_0_60px_rgba(16,185,129,0.5)] z-0">
                <div className="w-10 h-10 rounded-xl bg-black/30 flex items-center justify-center text-white border border-white/10 shadow-inner"><UserIcon size={22}/></div>
                <div className="pr-5 border-r-2 border-white/20">
                   <p className="text-[10px] font-black text-emerald-950 uppercase tracking-widest">当前接入客户</p>
-                  <p className="text-base font-black text-white italic">李先生 · 钻石核心VIP</p>
+                  <p className="text-base font-black text-white italic">李先生 · 核心VIP</p>
                </div>
                <div className="flex gap-6 px-3">
                   <div className="flex flex-col items-center gap-1"><Wallet size={18} className="text-emerald-950"/><span className="text-[9px] font-black text-white uppercase">强购买力</span></div>
@@ -221,7 +224,7 @@ export const TacticalIsland = () => {
           )}
         </AnimatePresence>
 
-        {/* --- 4. 求助模态框 (集成对策) --- */}
+        {/* --- 4. 求助模态框 --- */}
         <AnimatePresence>
           {showHelpModal && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 416, opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-8 border-t border-white/10 bg-slate-900 flex flex-col gap-6 rounded-b-[32px]">
@@ -233,16 +236,29 @@ export const TacticalIsland = () => {
               <div className="flex flex-col gap-4 flex-1 min-h-0">
                  <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
                     <textarea value={helpText} onChange={(e) => setHelpText(e.target.value)} placeholder="描述困境，智脑将自动匹配解决库案例..." className="w-full h-24 bg-black/40 border border-white/5 rounded-2xl p-4 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none font-bold" />
-                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-5 py-2 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all shadow-lg uppercase tracking-widest">立即下发</button>
+                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-5 py-2 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all shadow-lg uppercase">立即下发</button>
                  </div>
                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
                     {helpSuggestions.length > 0 && (
                        <div className="p-4 rounded-3xl bg-emerald-500/5 border border-emerald-500/20"><h5 className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-2 mb-3 tracking-widest"><SearchCheck size={14}/> 发现匹配方案 · 建议优先尝试</h5>
-                          {helpSuggestions.map((s, i) => (<div key={i} className="mb-2 last:mb-0 p-4 bg-black/40 rounded-2xl border border-white/5"><div className="text-[12px] font-black text-white mb-1">策略: {s.keyword}</div><div className="text-[11px] text-emerald-400/80 font-medium italic">方案: {s.solution}</div></div>))}
+                          {helpSuggestions.map((s, i) => (<div key={i} className="mb-2 last:mb-0 p-4 bg-black/40 rounded-2xl border border-white/5"><div className="text-[12px] font-black text-white mb-1">对策: {s.keyword}</div><div className="text-[11px] text-emerald-400/80 font-medium italic">方案: {s.solution}</div></div>))}
                        </div>
                     )}
                  </div>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 6. 全景大屏模态框 */}
+        <AnimatePresence>
+          {showBigScreenModal && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[500] bg-slate-950 flex flex-col">
+              <div className="flex justify-between items-center p-8 bg-black/60 border-b border-white/10 shrink-0" style={{ WebkitAppRegion: 'drag' } as any}>
+                 <div className="flex items-center gap-4"><div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg animate-pulse"><Maximize2 size={20} className="text-white" /></div><div><h4 className="text-xl font-black text-white uppercase italic">全景战术态势指挥中枢</h4><p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em]">指挥中心 · 实时链路激活</p></div></div>
+                 <button onClick={() => setShowBigScreenModal(false)} className="px-8 py-3 bg-red-500 text-white rounded-2xl text-[11px] font-black uppercase transition-all shadow-xl active:scale-95">退出全景模式</button>
+              </div>
+              <div className="flex-1 bg-black relative" style={{ WebkitAppRegion: 'no-drag' } as any}><iframe src="#/big-screen" className="w-full h-full border-none" title="Tactical Big Screen" /><div className="absolute inset-0 pointer-events-none border-[1px] border-white/5 shadow-[inset_0_0_150px_rgba(0,0,0,0.9)]" /></div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -267,5 +283,5 @@ function ToolCard({ icon, title, desc, color, onClick }: any) {
 }
 
 function DetailCard({ label, value, isCyan, sub, icon }: any) {
-  return (<div className="bg-white/5 p-5 rounded-[32px] border border-white/5 group hover:border-white/10 transition-all relative overflow-hidden"><div className="absolute right-4 top-4 text-white/5 group-hover:text-white/10">{icon}</div><div className="text-[10px] font-black text-slate-500 uppercase mb-1 tracking-widest">{label}</div><div className={cn("text-xl font-black mb-0.5 tracking-tighter", isCyan ? "text-cyan-400" : "text-white")}>{value}</div><div className="text-[7px] font-bold text-slate-600 uppercase italic opacity-50">{sub}</div></div>)
+  return (<div className="bg-white/5 p-5 rounded-[32px] border border-white/5 group hover:border-white/10 transition-all relative overflow-hidden"><div className="absolute right-4 top-4 text-white/5 group-hover:text-white/10">{icon}</div><div className="text-[9px] font-black text-slate-500 uppercase mb-1 tracking-widest">{label}</div><div className={cn("text-xl font-black mb-0.5 tracking-tighter", isCyan ? "text-cyan-400" : "text-white")}>{value}</div><div className="text-[7px] font-bold text-slate-600 uppercase italic opacity-50">{sub}</div></div>)
 }
