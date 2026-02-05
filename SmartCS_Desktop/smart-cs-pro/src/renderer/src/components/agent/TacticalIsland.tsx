@@ -118,26 +118,27 @@ export const TacticalIsland = () => {
           className="flex items-center px-5 h-[64px] shrink-0 cursor-move relative" 
           style={{ WebkitAppRegion: 'drag' } as any}
         >
-          {/* 左侧：用户信息 & 状态 (更紧凑的宽度) */}
-          <div className="flex items-center gap-2.5 w-[130px] shrink-0">
+          {/* 左侧：用户信息 & 状态 (更饱满的布局) */}
+          <div className="flex items-center gap-3 w-[150px] shrink-0">
             <div className="relative">
               <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs transition-all duration-500",
-                isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5"
+                "w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm transition-all duration-500",
+                isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]" : "bg-slate-900 text-slate-600 border border-white/5"
               )}>
-                {user?.real_name ? user.real_name[0] : <UserIcon size={16} />}
+                {user?.real_name ? user.real_name[0] : <UserIcon size={20} />}
               </div>
               <div className={cn(
-                "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-[2px] border-slate-950",
+                "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[2px] border-slate-950",
                 isOnline ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : "bg-red-500 animate-pulse"
               )} />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[11px] font-black text-white truncate leading-none mb-0.5">
+              <span className="text-[13px] font-black text-white truncate leading-none mb-1 flex items-center gap-1">
                 {user?.real_name || 'Node'}
+                {isOnboardingMode && <GraduationCap size={12} className="text-amber-400" />}
               </span>
               <span className={cn(
-                "text-[7px] font-bold uppercase opacity-60 truncate",
+                "text-[8px] font-bold uppercase opacity-60 truncate tracking-widest",
                 isOnline ? "text-emerald-500" : "text-red-500"
               )}>
                 {isOnline ? 'Online' : 'Offline'}
@@ -145,33 +146,33 @@ export const TacticalIsland = () => {
             </div>
           </div>
 
-          {/* 中间：核心控制组 (紧凑布局) */}
-          <div className="flex-1 flex items-center justify-center gap-1" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          {/* 中间：核心控制组 (图标增大，间距优化) */}
+          <div className="flex-1 flex items-center justify-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <HubBtn 
-              icon={isGlassMode ? <Ghost size={14} /> : <Square size={14} />} 
+              icon={isGlassMode ? <Ghost size={18} /> : <Square size={18} />} 
               active={!isGlassMode} 
               onClick={() => setGlassMode(!isGlassMode)}
               title="外观"
               color="muted"
             />
             <HubBtn 
-              icon={<GraduationCap size={14} />} 
+              icon={<GraduationCap size={18} />} 
               active={isOnboardingMode} 
               onClick={() => setOnboardingMode(!isOnboardingMode)}
               title="培训"
               color="emerald"
             />
             <HubBtn 
-              icon={isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />} 
+              icon={isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />} 
               active={isMuted} 
               onClick={() => setMuted(!isMuted)}
               title="静音"
               color="red"
             />
-            <div className="w-px h-4 bg-white/5 mx-0.5" />
+            <div className="w-px h-5 bg-white/10 mx-1" />
             {hasPermission('agent:view:big_screen') && (
               <HubBtn 
-                icon={<Globe size={14} />} 
+                icon={<Globe size={18} />} 
                 active={showBigScreenModal} 
                 onClick={() => setShowBigScreenModal(!showBigScreenModal)}
                 title="全景"
@@ -179,14 +180,14 @@ export const TacticalIsland = () => {
               />
             )}
             <HubBtn 
-              icon={<Hand size={14} />} 
+              icon={<Hand size={18} />} 
               active={showHelpModal} 
               onClick={() => setShowHelpModal(!showHelpModal)}
               title="求助"
               color="red"
             />
             <HubBtn 
-              icon={<LayoutGrid size={14} />} 
+              icon={<LayoutGrid size={18} />} 
               active={isExpanded} 
               onClick={() => setIsExpanded(!isExpanded)} 
               title="看板"
@@ -194,14 +195,14 @@ export const TacticalIsland = () => {
             />
           </div>
 
-          {/* 右侧：退出 (更紧凑的宽度) */}
-          <div className="flex items-center justify-end w-[130px] shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          {/* 右侧：退出 (更饱满的宽度) */}
+          <div className="flex items-center justify-end w-[150px] shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <button 
               onClick={() => { logout(); window.location.hash = '/login'; }}
-              className="w-7 h-7 rounded-lg bg-white/5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center transition-all group"
-              title="退出"
+              className="w-10 h-10 rounded-xl bg-white/5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center transition-all group border border-white/5 shadow-lg"
+              title="退出登录"
             >
-              <LogOut size={14} />
+              <LogOut size={18} />
             </button>
           </div>
         </div>
@@ -518,7 +519,7 @@ function HubBtn({ icon, active, onClick, title, color }: any) {
       onClick={onClick}
       title={title}
       className={cn(
-        "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 active:scale-90 border border-transparent",
+        "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90 border border-transparent",
         active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white"
       )}
     >
