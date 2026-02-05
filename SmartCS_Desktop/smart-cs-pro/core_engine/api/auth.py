@@ -46,16 +46,25 @@ async def login(data: dict, request: Request):
         if not user: return {"status": "error", "message": "身份核验未通过"}
         if get_hash(p, user.salt) != user.password_hash: return {"status": "error", "message": "访问密钥错误"}
 
-        # 核心修复：安全拉取权限列表，确保不会出现 NoneType 迭代错误
+        # 核心修复：采用极其严谨的权限拉取逻辑
         role_id = user.role_id if user.role_id else 0
         perms = []
-        if role_id > 0:
-            perms_data = await RolePermission.filter(role_id=role_id).values_list("permission_code", flat=True)
-            perms = list(perms_data) if perms_data else []
+        try:
+            if role_id > 0:
+                perms_data = await RolePermission.filter(role_id=role_id).values_list("permission_code", flat=True)
+                if perms_data is not None:
+                    # 强制转换为列表，并过滤掉任何潜在的 None 值
+                    perms = [str(p) for p in perms_data if p is not None]
+        except Exception as perm_err:
+            logger.error(f"⚠️ [权限拉取轻微异常]: {perm_err}")
+            perms = [] # 降级处理，不中断登录
 
-        role_code = user.role.code if user.role else "GUEST"
+        role_code = user.role.code if (user.role and hasattr(user.role, 'code')) else "GUEST"
         dept_id = user.department_id if user.department_id else 0
-        dept_name = user.department.name if user.department else "独立战术单元"
+        # 再次确保 dept_name 绝对安全
+        dept_name = "独立战术单元"
+        if user.department and hasattr(user.department, 'name'):
+            dept_name = user.department.name
 
         token = "tk_" + secrets.token_hex(16)
         user_payload = {
