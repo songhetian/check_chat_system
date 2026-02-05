@@ -143,14 +143,18 @@ function createWindow(): void {
     mainWindow.setFullScreen(flag)
   })
 
-  // 响应前端尺寸变化
-  ipcMain.on('resize-window', (_, { width, height, center }) => {
-    // 回归 1:1 紧凑尺寸，移除阴影余量
-    const adjustedWidth = (process.platform === 'darwin' ? width + 20 : width)
-    const adjustedHeight = (process.platform === 'darwin' ? height + 20 : height)
+  // 响应前端尺寸变化 (支持坐标定位)
+  ipcMain.on('resize-window', (_, { width, height, center, x, y }) => {
+    const adjustedWidth = Math.round(process.platform === 'darwin' ? width + 20 : width)
+    const adjustedHeight = Math.round(process.platform === 'darwin' ? height + 20 : height)
     
-    mainWindow.setSize(Math.round(adjustedWidth), Math.round(adjustedHeight), true)
-    if (center) mainWindow.center()
+    mainWindow.setSize(adjustedWidth, adjustedHeight, true)
+    
+    if (center) {
+      mainWindow.center()
+    } else if (x !== undefined && y !== undefined) {
+      mainWindow.setPosition(Math.round(x), Math.round(y), true)
+    }
   })
 
   // 切换至大屏模式逻辑
