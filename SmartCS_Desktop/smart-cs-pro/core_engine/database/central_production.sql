@@ -213,4 +213,5 @@ INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES
 (1, 'agent:honor:view'),
 (1, 'agent:training:execute'),
 (1, 'agent:command:receive'),
-(1, 'agent:hud:view');
+(1, 'agent:hud:view');INSERT IGNORE INTO permissions (code, name, module) VALUES ('agent:view:big_screen', '实时大屏态势', '个人战术舱');
+INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (1, 'agent:view:big_screen'), (3, 'agent:view:big_screen');

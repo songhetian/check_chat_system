@@ -4,7 +4,7 @@ import {
   Shield, BrainCircuit, Activity, Radar as RadarIcon, Trophy, BarChart, 
   ChevronRight, AlertCircle, Zap, Terminal, Target, LogOut, Cpu, LayoutGrid, Settings, MessageSquareOff,
   Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor,
-  Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X
+  Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X, Maximize2
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -17,11 +17,12 @@ export const TacticalIsland = () => {
     isOnboardingMode, setOnboardingMode, isAiOptimizeEnabled, setAiOptimize,
     isGlassMode, setGlassMode
   } = useRiskStore()
-  const { user, logout } = useAuthStore()
+  const { user, logout, hasPermission } = useAuthStore()
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'AI' | 'RADAR' | 'TOOLS'>('AI')
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [showSearchModal, setShowSearchModal] = useState(false)
+  const [showBigScreenModal, setShowBigScreenModal] = useState(false)
   const [searchText, setSearchText] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [helpText, setHelpText] = useState('')
@@ -61,11 +62,23 @@ export const TacticalIsland = () => {
 
   // 灵动岛尺寸动态适配
   useEffect(() => {
-    const width = 640
-    const height = showHelpModal ? 400 : (isExpanded ? 800 : 80)
-    window.electron.ipcRenderer.send('resize-window', { width, height, center: !isExpanded && !showHelpModal })
-    window.electron.ipcRenderer.send('set-always-on-top', true)
-  }, [isExpanded, showHelpModal])
+    let width = 640
+    let height = showHelpModal ? 400 : (isExpanded ? 800 : 80)
+    
+    if (showBigScreenModal) {
+      width = 1280
+      height = 850
+    }
+
+    window.electron.ipcRenderer.send('resize-window', { 
+      width, 
+      height, 
+      center: (!isExpanded && !showHelpModal && !showBigScreenModal) || showBigScreenModal 
+    })
+    
+    // 大屏模式下不需要强制置顶，方便操作
+    window.electron.ipcRenderer.send('set-always-on-top', !showBigScreenModal)
+  }, [isExpanded, showHelpModal, showBigScreenModal])
 
   return (
     <div className="h-screen w-screen flex items-start justify-center overflow-hidden pointer-events-none select-none bg-transparent">
@@ -374,6 +387,15 @@ export const TacticalIsland = () => {
                       />
                       <ToolCard icon={<Video size={24} />} title="屏幕实时协同" desc="发起远程专家现场指导请求" color="amber" />
                       <ToolCard icon={<Settings size={24} />} title="终端链路配置" desc="识别参数与自愈精度微调" color="slate" />
+                      {hasPermission('agent:view:big_screen') && (
+                        <ToolCard 
+                          icon={<Maximize2 size={24} />} 
+                          title="全景大屏态势" 
+                          desc="切换至指挥中心同步视觉面板" 
+                          color="cyan" 
+                          onClick={() => setShowBigScreenModal(true)}
+                        />
+                      )}
                    </div>
                  )}
               </div>
@@ -416,6 +438,35 @@ export const TacticalIsland = () => {
                          </div>
                        ))}
                        {searchResults.length === 0 && searchText && <div className="h-full flex items-center justify-center text-slate-600 italic text-[10px] uppercase tracking-widest">未找到匹配的战术载荷</div>}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* 5. 实时全景大屏模态框 (Big Screen Modal) */}
+              <AnimatePresence>
+                {showBigScreenModal && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="absolute inset-0 z-[110] bg-slate-950 flex flex-col"
+                  >
+                    <div className="flex justify-between items-center p-8 bg-black/40 border-b border-white/10 shrink-0">
+                       <h4 className="text-[11px] font-black text-cyan-400 uppercase tracking-[0.4em] flex items-center gap-2">
+                         <Maximize2 size={14} /> 全景战术态势指挥面板
+                       </h4>
+                       <button onClick={() => setShowBigScreenModal(false)} className="px-6 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+                         关闭战术窗口 / CLOSE
+                       </button>
+                    </div>
+                    <div className="flex-1 bg-black relative">
+                       <iframe 
+                         src="#/big-screen" 
+                         className="w-full h-full border-none"
+                         title="Tactical Big Screen"
+                       />
+                       <div className="absolute inset-0 pointer-events-none border-[20px] border-black/20 shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" />
                     </div>
                   </motion.div>
                 )}
@@ -491,7 +542,7 @@ function DetailCard({ label, value, isCyan, sub, icon }: any) {
   )
 }
 
-function ToolCard({ icon, title, desc, color }: any) {
+function ToolCard({ icon, title, desc, color, onClick }: any) {
   const colors: any = {
     cyan: "text-cyan-400 bg-cyan-400/5 border-cyan-400/15",
     amber: "text-amber-400 bg-amber-400/5 border-amber-400/15",
@@ -499,7 +550,7 @@ function ToolCard({ icon, title, desc, color }: any) {
     slate: "text-slate-400 bg-white/5 border-white/10"
   }
   return (
-    <button className={cn("p-6 rounded-[28px] border flex flex-col items-start gap-3.5 transition-all hover:scale-[1.02] active:scale-[0.98] text-left group", colors[color])}>
+    <button onClick={onClick} className={cn("p-6 rounded-[28px] border flex flex-col items-start gap-3.5 transition-all hover:scale-[1.02] active:scale-[0.98] text-left group", colors[color])}>
        <div className="w-11 h-11 rounded-[18px] flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors shadow-inner">
           {icon}
        </div>
