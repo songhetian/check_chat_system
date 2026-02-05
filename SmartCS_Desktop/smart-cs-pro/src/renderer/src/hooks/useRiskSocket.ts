@@ -99,6 +99,17 @@ export const useRiskSocket = () => {
            }))
         }
 
+        if (data.type === 'TERMINATE_SESSION') {
+          window.dispatchEvent(new CustomEvent('trigger-toast', { 
+            detail: { title: '会话冲突', message: data.message, type: 'error' } 
+          }))
+          setTimeout(() => {
+            useAuthStore.getState().logout();
+            window.location.hash = '/login';
+          }, 2000);
+          return;
+        }
+
         if (data.type === 'ROLE_CHANGED') {
           const userState = useAuthStore.getState().user;
           if (data.target_user === userState?.username) {

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { ROLE_ID } from '../lib/constants'
+import { CONFIG } from '../lib/config'
 
 interface User {
   username: string
@@ -31,7 +32,18 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       setAuth: (user, token) => set({ user, token }),
       setUser: (user) => set({ user }),
-      logout: () => set({ user: null, token: null }),
+      logout: () => {
+        const token = get().token
+        if (token) {
+          // 异步通知后端销毁令牌 (不阻塞前端退出)
+          window.api.callApi({
+            url: `${CONFIG.API_BASE}/auth/logout`,
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          }).catch(() => console.warn('🔒 [安全退出] 后端令牌销毁失败，可能已过期'))
+        }
+        set({ user: null, token: null })
+      },
       hasPermission: (code) => {
         const user = get().user
         if (!user) return false

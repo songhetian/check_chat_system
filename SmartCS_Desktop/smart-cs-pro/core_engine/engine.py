@@ -118,10 +118,26 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
         # 模拟 Request 对象以复用鉴权逻辑
         class MockRequest:
             def __init__(self, app): self.app = app
-        user_info = await get_current_user(MockRequest(app), type('MockCreds', (), {'credentials': token}))
+        
+        # 关键修正：传入实例而非类，并确保 credentials 属性可访问
+        class MockCreds:
+            def __init__(self, t): self.credentials = t
+            
+        user_info = await get_current_user(MockRequest(app), MockCreds(token))
         role = user_info.get("role_id", RoleID.AGENT)
-    except:
-        role = RoleID.AGENT
+        
+        # 校验令牌中的用户名与请求用户名是否一致，防止非法劫持链路
+        if user_info.get("username") != username:
+            logger.error(f"🚨 [WS 拒绝] 用户名不匹配: Token({user_info.get('username')}) vs Query({username})")
+            await websocket.close(code=1008)
+            return
+        
+        logger.info(f"✅ [WS 鉴权成功] 操作员 {username} 已建立物理链路")
+
+    except Exception as e:
+        logger.error(f"🚨 [WS 拒绝] 鉴权失败: {e}")
+        await websocket.close(code=1008)
+        return
 
     await manager.connect(username, websocket, role=role)
     redis_conn = app.state.redis
