@@ -26,6 +26,7 @@ async def login(data: dict, request: Request):
         "id": user.id,
         "username": user.username,
         "real_name": user.real_name,
+        "role_id": user.role_id,
         "role_code": user.role.code,
         "dept_id": user.department_id,
         "permissions": list(perms) # 下发权限集

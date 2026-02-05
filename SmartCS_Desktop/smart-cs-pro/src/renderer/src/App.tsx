@@ -52,7 +52,7 @@ const AdminHome = () => {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  const isHQ = user?.role_id === ROLE_ID.HQ
+  const isHQ = user?.role_id === ROLE_ID.HQ || user?.role_code === 'HQ'
 
   const fetchDepts = async () => {
     if (!isHQ || !token) return
@@ -246,7 +246,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/big-screen" element={<BigScreen />} />
         <Route path="/personal-screen" element={ !user ? <Navigate to="/login" /> : <PersonalScreen />} />
-        <Route path="/*" element={ !user ? <Navigate to="/login" /> : ( user.role_id === ROLE_ID.AGENT ? <AgentView /> : (
+        <Route path="/*" element={ !user ? <Navigate to="/login" /> : ( (user.role_id === ROLE_ID.AGENT || user.role_code === 'AGENT') ? <AgentView /> : (
           <DashboardLayout>
             <Routes>
               <Route path="/" element={<AdminHome />} />

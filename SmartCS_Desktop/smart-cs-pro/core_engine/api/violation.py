@@ -24,20 +24,23 @@ async def get_violations(
     """
     query = ViolationRecord.filter(is_deleted=0).select_related("user", "user__department")
 
+    role_id = current_user.get("role_id")
+    role_code = current_user.get("role_code")
+
     # 核心：物理隔离逻辑
-    if current_user["role_id"] == RoleID.AGENT:
+    if role_id == RoleID.AGENT or role_code == "AGENT":
         if status == "RESOLVED":
             # 战术共享：允许坐席检索全域已解决的方案作为“战术对策”
             pass
         else:
             # 坐席身份：强制锁定本人 username
             query = query.filter(user__username=current_user["username"])
-    elif current_user["role_id"] == RoleID.ADMIN:
+    elif role_id == RoleID.ADMIN or role_code == "ADMIN":
         # 主管身份：锁定本部门
         query = query.filter(user__department_id=current_user["dept_id"])
         if username: # 主管可在部门内搜人
             query = query.filter(Q(user__username__icontains=username) | Q(user__real_name__icontains=username))
-    elif current_user["role_id"] == RoleID.HQ and dept_id:
+    elif (role_id == RoleID.HQ or role_code == "HQ") and dept_id:
         # 总部身份：全域穿透
         query = query.filter(user__department_id=dept_id)
         if username:

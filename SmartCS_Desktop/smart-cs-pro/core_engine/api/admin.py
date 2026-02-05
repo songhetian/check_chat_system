@@ -28,9 +28,12 @@ async def get_agents(
     
     if role_only: query = query.filter(role__code=role_only)
     
+    role_id = current_user.get("role_id")
+    role_code = current_user.get("role_code")
+
     # 核心：物理数据隔离与 HQ 穿透筛选
     actual_dept_id = dept_id if dept_id and dept_id != "" and dept_id != "undefined" else None
-    if current_user["role_id"] == RoleID.ADMIN:
+    if role_id == RoleID.ADMIN or role_code == "ADMIN":
         query = query.filter(department_id=current_user["dept_id"])
     elif actual_dept_id: # HQ 角色选了部门
         query = query.filter(department_id=actual_dept_id)
@@ -94,8 +97,11 @@ async def send_command(data: dict, request: Request, user: dict = Depends(check_
 @router.get("/departments")
 async def get_departments(request: Request, page: int = 1, size: int = 10, current_user: dict = Depends(get_current_user)):
     redis = request.app.state.redis
+    role_id = current_user.get("role_id")
+    role_code = current_user.get("role_code")
+
     # 针对 HQ 角色获取全量列表（size=100）进行战术缓存
-    is_hq_full_fetch = current_user["role_id"] == RoleID.HQ and size >= 100
+    is_hq_full_fetch = (role_id == RoleID.HQ or role_code == "HQ") and size >= 100
     cache_key = "cache:static:depts_full"
     
     if is_hq_full_fetch and redis:
@@ -104,7 +110,7 @@ async def get_departments(request: Request, page: int = 1, size: int = 10, curre
 
     offset = (page - 1) * size
     query = Department.filter(is_deleted=0).select_related("manager")
-    if current_user["role_id"] == RoleID.ADMIN: query = query.filter(id=current_user["dept_id"])
+    if role_id == RoleID.ADMIN or role_code == "ADMIN": query = query.filter(id=current_user["dept_id"])
     total = await query.count()
     depts_data = await query.limit(size).offset(offset).annotate(member_count=Count("users")).values("id", "name", "member_count", "manager__username", "manager__real_name")
     

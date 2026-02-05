@@ -1,5 +1,12 @@
-import json, time, asyncio, re, hashlib, secrets, os, logging, subprocess, shutil, platform
+import json, time, asyncio, re, hashlib, secrets, os, logging, subprocess, shutil, platform, sys
 from contextlib import asynccontextmanager
+
+# 强制设置标准输出编码为 UTF-8，解决 Windows 环境乱码
+if sys.platform == "win32":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -45,7 +52,8 @@ class ConnectionManager:
         [物理隔离] 仅向 ADMIN 和 HQ 节点推送敏感数据 (如画面、求助)
         """
         for user, connection in self.active_connections.items():
-            if self.user_roles.get(user) in ["ADMIN", "HQ"]:
+            role = self.user_roles.get(user)
+            if role in [RoleID.ADMIN, RoleID.HQ]:
                 await connection.send_json(message)
 
     async def broadcast(self, message: dict):

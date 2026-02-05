@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
         const user = get().user
         if (!user) return false
         // 总部 (HQ) 默认拥有全量权限，加速判定
-        if (user.role_id === ROLE_ID.HQ) return true
+        if (user.role_id === ROLE_ID.HQ || user.role_code === 'HQ') return true
         return user.permissions?.includes(code) || false
       }
     }),

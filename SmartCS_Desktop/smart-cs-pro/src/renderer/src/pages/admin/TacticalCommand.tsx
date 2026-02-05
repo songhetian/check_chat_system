@@ -38,7 +38,7 @@ export default function TacticalCommand() {
   const [processing, setProcessing] = useState<string | null>(null)
   
   const violations = useRiskStore(s => s.violations)
-  const isHQ = user?.role_id === ROLE_ID.HQ
+  const isHQ = user?.role_id === ROLE_ID.HQ || user?.role_code === 'HQ'
 
   const fetchDepts = async () => {
     if (!isHQ || !token) return
