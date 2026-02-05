@@ -98,15 +98,20 @@ export const TacticalIsland = () => {
       <motion.div 
         layout
         initial={false}
+        animate={{ 
+          width: showBigScreenModal ? 1280 : 640,
+          height: showBigScreenModal ? 850 : (showHelpModal ? 400 : (isExpanded ? 680 : 80)),
+          borderRadius: showBigScreenModal ? '0px' : '38px'
+        }}
         className={cn(
-          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden",
+          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500",
           isGlassMode ? "bg-slate-950/30 backdrop-blur-3xl" : "bg-slate-950",
-          isAlerting && "border-red-500 ring-1 ring-red-500/20"
+          isAlerting && "border-red-500 ring-1 ring-red-500/20",
+          showBigScreenModal ? "border-none shadow-none" : "rounded-[38px]"
         )}
         style={{ 
-          clipPath: 'url(#tactical-island-clip)', 
-          borderRadius: '38px',
-          WebkitClipPath: 'url(#tactical-island-clip)'
+          clipPath: showBigScreenModal ? 'none' : 'url(#tactical-island-clip)', 
+          WebkitClipPath: showBigScreenModal ? 'none' : 'url(#tactical-island-clip)'
         }}
       >
         {/* 1. 战术中枢条 (Main Bar) */}
@@ -464,26 +469,38 @@ export const TacticalIsland = () => {
         <AnimatePresence>
           {showBigScreenModal && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="absolute inset-0 z-[200] bg-slate-950 flex flex-col"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[500] bg-slate-950 flex flex-col"
             >
-              <div className="flex justify-between items-center p-8 bg-black/40 border-b border-white/10 shrink-0">
-                 <h4 className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.4em] flex items-center gap-2">
-                   <Maximize2 size={14} /> 全景战术态势指挥面板
-                 </h4>
-                 <button onClick={() => setShowBigScreenModal(false)} className="px-6 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                   关闭战术窗口 / CLOSE
+              <div className="flex justify-between items-center p-8 bg-black/60 border-b border-white/10 shrink-0" style={{ WebkitAppRegion: 'drag' } as any}>
+                 <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 animate-pulse">
+                       <Maximize2 size={20} className="text-white" />
+                    </div>
+                    <div>
+                       <h4 className="text-xl font-black text-white uppercase italic tracking-tighter">
+                         全景战术态势指挥中枢
+                       </h4>
+                       <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] opacity-70">Strategic Command Center · Active</p>
+                    </div>
+                 </div>
+                 <button 
+                   onClick={(e) => { e.stopPropagation(); setShowBigScreenModal(false); }} 
+                   className="px-8 py-3 bg-red-500 text-white hover:bg-red-600 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl shadow-red-500/20 active:scale-95"
+                   style={{ WebkitAppRegion: 'no-drag' } as any}
+                 >
+                   退出全景模式 / EXIT
                  </button>
               </div>
-              <div className="flex-1 bg-black relative">
+              <div className="flex-1 bg-black relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
                  <iframe 
                    src="#/big-screen" 
                    className="w-full h-full border-none"
                    title="Tactical Big Screen"
                  />
-                 <div className="absolute inset-0 pointer-events-none border-[20px] border-black/20 shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" />
+                 <div className="absolute inset-0 pointer-events-none border-[1px] border-white/5 shadow-[inset_0_0_150px_rgba(0,0,0,0.9)]" />
               </div>
             </motion.div>
           )}
