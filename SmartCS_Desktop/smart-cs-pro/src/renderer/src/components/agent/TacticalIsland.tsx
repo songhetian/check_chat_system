@@ -63,14 +63,14 @@ export const TacticalIsland = () => {
   // 灵动岛尺寸动态适配
   useEffect(() => {
     let width = 640
-    let height = showHelpModal ? 400 : (isExpanded ? 564 : 64)
+    let height = showHelpModal ? 480 : (isExpanded ? 564 : 64)
     
     if (showBigScreenModal) {
       width = 1280
       height = 850
     }
 
-    // 关键：仅在初始模式且需要对齐时居中，大屏模式也居中
+    // 关键：仅在大屏模式下居中
     const shouldCenter = showBigScreenModal; 
 
     window.electron.ipcRenderer.send('resize-window', { 
@@ -99,7 +99,7 @@ export const TacticalIsland = () => {
         initial={false}
         animate={{ 
           width: showBigScreenModal ? 1280 : 640,
-          height: showBigScreenModal ? 850 : (showHelpModal ? 400 : (isExpanded ? 564 : 64)),
+          height: showBigScreenModal ? 850 : (showHelpModal ? 480 : (isExpanded ? 564 : 64)),
           borderRadius: showBigScreenModal ? '0px' : '32px'
         }}
         className={cn(
@@ -118,8 +118,8 @@ export const TacticalIsland = () => {
           className="flex items-center px-5 h-[64px] shrink-0 cursor-move relative" 
           style={{ WebkitAppRegion: 'drag' } as any}
         >
-          {/* 左侧：用户信息 & 状态 (精简布局) */}
-          <div className="flex items-center gap-2 w-[120px] shrink-0">
+          {/* 左侧：用户信息 & 状态 (字体强化) */}
+          <div className="flex items-center gap-2.5 w-[120px] shrink-0">
             <div className="relative">
               <div className={cn(
                 "w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm transition-all duration-500",
@@ -133,39 +133,40 @@ export const TacticalIsland = () => {
               )} />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[12px] font-black text-white truncate leading-none mb-0.5">
-                {user?.real_name || 'Node'}
+              <span className="text-[14px] font-black text-white truncate leading-none mb-1 flex items-center gap-1">
+                {user?.real_name || '实战节点'}
+                {isOnboardingMode && <GraduationCap size={12} className="text-amber-400" />}
               </span>
               <span className={cn(
-                "text-[7px] font-bold uppercase tracking-widest opacity-60 truncate",
+                "text-[10px] font-bold uppercase tracking-widest truncate",
                 isOnline ? "text-emerald-500" : "text-red-500"
               )}>
-                {isOnline ? 'Online' : 'Offline'}
+                {isOnline ? '在线状态' : '脱机离线'}
               </span>
             </div>
           </div>
 
-          {/* 中间：核心控制组 (收紧间距) */}
+          {/* 中间：核心控制组 (全面汉化) */}
           <div className="flex-1 flex items-center justify-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <HubBtn 
               icon={isGlassMode ? <Ghost size={18} /> : <Square size={18} />} 
               active={!isGlassMode} 
               onClick={() => setGlassMode(!isGlassMode)}
-              title="外观"
+              title="外观切换"
               color="muted"
             />
             <HubBtn 
               icon={<GraduationCap size={18} />} 
               active={isOnboardingMode} 
               onClick={() => setOnboardingMode(!isOnboardingMode)}
-              title="培训"
+              title="实战培训"
               color="emerald"
             />
             <HubBtn 
               icon={isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />} 
               active={isMuted} 
               onClick={() => setMuted(!isMuted)}
-              title="静音"
+              title="静音控制"
               color="red"
             />
             <div className="w-px h-5 bg-white/10 mx-0.5" />
@@ -174,7 +175,7 @@ export const TacticalIsland = () => {
                 icon={<Globe size={18} />} 
                 active={showBigScreenModal} 
                 onClick={() => setShowBigScreenModal(!showBigScreenModal)}
-                title="全景"
+                title="全景看板"
                 color="emerald"
               />
             )}
@@ -182,42 +183,42 @@ export const TacticalIsland = () => {
               icon={<Hand size={18} />} 
               active={showHelpModal} 
               onClick={() => setShowHelpModal(!showHelpModal)}
-              title="求助"
+              title="战术求助"
               color="red"
             />
             <HubBtn 
               icon={<LayoutGrid size={18} />} 
               active={isExpanded} 
               onClick={() => setIsExpanded(!isExpanded)} 
-              title="看板"
+              title="功能面板"
               color="emerald"
             />
           </div>
 
-          {/* 右侧：退出 (精简布局) */}
+          {/* 右侧：退出 */}
           <div className="flex items-center justify-end w-[120px] shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <button 
               onClick={() => { logout(); window.location.hash = '/login'; }}
               className="w-9 h-9 rounded-xl bg-white/5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center transition-all group border border-white/5"
-              title="退出登录"
+              title="注销登录"
             >
               <LogOut size={18} />
             </button>
           </div>
         </div>
 
-        {/* 3. 求助模态框 (Help Modal) */}
+        {/* 3. 求助模态框 (Help Modal - 扩容修正) */}
         <AnimatePresence>
           {showHelpModal && (
             <motion.div 
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
+              animate={{ height: 416, opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="p-8 border-t border-white/10 bg-slate-900 flex flex-col gap-6 rounded-b-[38px]"
+              className="p-8 border-t border-white/10 bg-slate-900 flex flex-col gap-6 rounded-b-[32px]"
             >
               <div className="flex items-center gap-3 mb-2">
                  <div className="w-1.5 h-4 bg-red-500 rounded-full" />
-                 <h4 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">发起战术支援请求</h4>
+                 <h4 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">发起紧急战术支援请求</h4>
               </div>
               
               <div className="grid grid-cols-2 gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
@@ -227,18 +228,18 @@ export const TacticalIsland = () => {
                  >
                     <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-red-500 group-hover:bg-red-500/10"><ImageIcon size={24} /></div>
                     <div className="text-center">
-                       <p className="text-sm font-black text-white mb-1">图片求助</p>
+                       <p className="text-sm font-black text-white mb-1">物理载荷求助</p>
                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">自动截取当前屏幕</p>
                     </div>
                  </button>
                  
                  <button 
-                   onClick={() => { /* 仅切换视图，暂不发送 */ }}
+                   onClick={() => { /* 仅切换视图 */ }}
                    className="flex flex-col items-center gap-4 p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all group"
                  >
                     <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-cyan-500 group-hover:bg-cyan-500/10"><MessageSquareText size={24} /></div>
                     <div className="text-center">
-                       <p className="text-sm font-black text-white mb-1">文字求助</p>
+                       <p className="text-sm font-black text-white mb-1">文字说明求助</p>
                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">描述具体困难点</p>
                     </div>
                  </button>
@@ -248,32 +249,32 @@ export const TacticalIsland = () => {
                  <textarea 
                    value={helpText}
                    onChange={(e) => setHelpText(e.target.value)}
-                   placeholder="请输入求助详情（选填）..."
-                   className="w-full h-24 bg-black/40 border border-white/5 rounded-2xl p-4 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none"
+                   placeholder="请输入具体求助说明载荷（选填）..."
+                   className="w-full h-28 bg-black/40 border border-white/5 rounded-2xl p-4 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none font-bold"
                  />
                  <button 
                    onClick={() => handleHelp('TEXT')}
-                   className="absolute bottom-3 right-3 px-4 py-2 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all uppercase tracking-widest shadow-lg"
+                   className="absolute bottom-3 right-3 px-6 py-2 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all uppercase tracking-widest shadow-lg"
                  >
-                   立即下发
+                   确认下发请求
                  </button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* 2. 展开看板 (Dashboard - 深度优化) */}
+        {/* 2. 展开看板 (Dashboard - 深度汉化) */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div 
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 500, opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="flex-1 flex flex-col overflow-hidden border-t border-white/5 bg-gradient-to-b from-black/20 via-slate-900/40 to-black/60 rounded-b-[38px]"
+              className="flex-1 flex flex-col overflow-hidden border-t border-white/5 bg-gradient-to-b from-black/20 via-slate-900/40 to-black/60 rounded-b-[32px]"
             >
               <div className="flex p-2.5 bg-black/40 gap-2.5 shrink-0" style={{ WebkitAppRegion: 'no-drag' } as any}>
-                 <TabBtn id="AI" active={activeTab} set={setActiveTab} icon={<Target size={17}/>} label="智脑核对" />
-                 <TabBtn id="RADAR" active={activeTab} set={setActiveTab} icon={<RadarIcon size={17}/>} label="全域雷达" />
+                 <TabBtn id="AI" active={activeTab} set={setActiveTab} icon={<Target size={17}/>} label="智脑对策" />
+                 <TabBtn id="RADAR" active={activeTab} set={setActiveTab} icon={<RadarIcon size={17}/>} label="拦截雷达" />
                  <TabBtn id="TOOLS" active={activeTab} set={setActiveTab} icon={<Box size={17}/>} label="战术工具" />
               </div>
 
@@ -281,18 +282,16 @@ export const TacticalIsland = () => {
                  {activeTab === 'AI' && (
                    <div className="space-y-7">
                       <div className="p-7 bg-white/[0.03] border border-white/10 rounded-[32px] relative overflow-hidden group">
-                         {/* AI 扫描动效 */}
                          <motion.div 
                            animate={{ y: [0, 240, 0] }} 
                            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
                            className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent z-10"
                          />
-                         
                          <div className="absolute -top-10 -right-10 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-1000">
                             <BrainCircuit size={180} />
                          </div>
                          <h4 className="text-[11px] font-black text-cyan-400 uppercase mb-4 flex items-center gap-2.5 tracking-widest">
-                           <Terminal size={15} /> 智脑实时干预策略
+                           <Terminal size={15} /> 智脑实时干预指令
                          </h4>
                          <div className="bg-black/40 backdrop-blur-md p-5 rounded-2xl border border-white/5 shadow-inner">
                             <p className="text-[15px] text-slate-100 leading-relaxed font-semibold">
@@ -303,12 +302,12 @@ export const TacticalIsland = () => {
                             <div className="flex -space-x-2">
                                {[1,2,3].map(i => <div key={i} className="w-5 h-5 rounded-full bg-cyan-500/20 border border-slate-900 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" /></div>)}
                             </div>
-                            <span className="text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest italic">Neural Link Processing...</span>
+                            <span className="text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest italic">神经链路同步中...</span>
                          </div>
                       </div>
                       <div className="grid grid-cols-2 gap-5">
-                         <DetailCard label="风险评估指数" value={`${lastAiAnalysis?.risk_score || 0}%`} sub="Real-time Risk Index" icon={<Shield size={14} />} />
-                         <DetailCard label="情感共鸣偏移" value={lastAiAnalysis?.sentiment_score || 0} isCyan sub="Sentiment Analysis" icon={<Activity size={14} />} />
+                         <DetailCard label="风险评估指数" value={`${lastAiAnalysis?.risk_score || 0}%`} sub="实时风险评级" icon={<Shield size={14} />} />
+                         <DetailCard label="情感共鸣偏移" value={lastAiAnalysis?.sentiment_score || 0} isCyan sub="语义情感分析" icon={<Activity size={14} />} />
                       </div>
                    </div>
                  )}
@@ -322,7 +321,7 @@ export const TacticalIsland = () => {
                         </div>
                         <div className="flex items-center gap-4">
                            <span className="text-[9px] font-black text-emerald-500/60 uppercase">解决库: {useRiskStore.getState().resolvedViolations.length}</span>
-                           <div className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[8px] font-black text-red-500 animate-pulse uppercase">Recording Active</div>
+                           <div className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[8px] font-black text-red-500 animate-pulse uppercase">实时录制中</div>
                         </div>
                       </div>
                       <div className="space-y-3">
@@ -330,7 +329,7 @@ export const TacticalIsland = () => {
                           <div 
                             key={i} 
                             onClick={async () => {
-                               const solution = "坐席已确认风险并手动修正";
+                               const solution = "操作员已确认风险并执行手动纠偏";
                                try {
                                  const res = await window.api.callApi({
                                    url: `${CONFIG.API_BASE}/admin/violation/resolve`,
@@ -344,9 +343,7 @@ export const TacticalIsland = () => {
                                      detail: { title: '战术对齐', message: '记录已成功存入解决库', type: 'success' } 
                                    }));
                                  }
-                               } catch (e) {
-                                 console.error("Resolve failed", e);
-                               }
+                               } catch (e) { console.error(e) }
                             }}
                             className="flex items-center gap-5 p-5 bg-white/[0.03] rounded-[28px] border border-white/5 hover:bg-white/[0.08] hover:border-emerald-500/30 transition-all group relative overflow-hidden cursor-pointer"
                           >
@@ -356,13 +353,13 @@ export const TacticalIsland = () => {
                              <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
                                    <div className="text-[13px] font-black text-white truncate">{v.keyword}</div>
-                                   <div className="px-1.5 py-0.5 rounded bg-white/5 text-[8px] font-mono text-slate-500 uppercase">LV.{v.risk_level || '5'}</div>
+                                   <div className="px-1.5 py-0.5 rounded bg-white/5 text-[8px] font-mono text-slate-500 uppercase">级别.{v.risk_level || '5'}</div>
                                 </div>
                                 <div className="text-[10px] text-slate-500 font-mono uppercase flex items-center gap-2">
                                    <Monitor size={12} className="opacity-40" /> 
                                    <span>{new Date(v.timestamp).toLocaleTimeString()}</span>
                                    <span className="w-1 h-1 rounded-full bg-slate-700" />
-                                   <span className="text-emerald-400 font-bold flex items-center gap-1"><CheckCircle2 size={10}/> 点击解决</span>
+                                   <span className="text-emerald-400 font-bold flex items-center gap-1 transition-colors"><CheckCircle2 size={10}/> 点击存档</span>
                                 </div>
                              </div>
                              <ChevronRight size={16} className="text-slate-800 group-hover:text-emerald-500 transition-colors" />
@@ -375,7 +372,7 @@ export const TacticalIsland = () => {
                                <RadarIcon size={64} className="animate-pulse" />
                                <motion.div animate={{ scale: [1, 2], opacity: [0.5, 0] }} transition={{ duration: 2, repeat: Infinity }} className="absolute inset-0 bg-cyan-500/20 rounded-full" />
                             </div>
-                            <span className="text-[13px] font-black tracking-[0.4em] uppercase">雷达扫描空网中</span>
+                            <span className="text-[13px] font-black tracking-[0.4em] uppercase">雷达扫描净空中</span>
                          </div>
                       )}
                    </div>
@@ -395,7 +392,7 @@ export const TacticalIsland = () => {
                       {hasPermission('agent:view:big_screen') && (
                         <ToolCard 
                           icon={<Maximize2 size={24} />} 
-                          title="全景大屏态势" 
+                          title="全景看板态势" 
                           desc="切换至指挥中心同步视觉面板" 
                           color="cyan" 
                           onClick={() => setShowBigScreenModal(true)}
@@ -420,7 +417,6 @@ export const TacticalIsland = () => {
                        </h4>
                        <button onClick={() => setShowSearchModal(false)} className="text-slate-500 hover:text-white transition-colors"><X size={18}/></button>
                     </div>
-                    
                     <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
                        <input 
                          value={searchText}
@@ -431,11 +427,10 @@ export const TacticalIsland = () => {
                        />
                        <button onClick={handleSearch} className="absolute right-3 top-3 p-2 bg-cyan-500 text-slate-950 rounded-xl hover:bg-cyan-400 transition-all shadow-lg"><ArrowRight size={18}/></button>
                     </div>
-
                     <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
                        {searchResults.map((r, i) => (
                          <div key={i} className="p-5 rounded-3xl bg-white/[0.03] border border-white/5 hover:border-cyan-500/30 transition-all">
-                            <div className="text-[9px] font-black text-cyan-500 uppercase mb-2 tracking-widest">Matched Strategy</div>
+                            <div className="text-[9px] font-black text-cyan-500 uppercase mb-2 tracking-widest">已匹配实战对策</div>
                             <div className="text-[13px] font-black text-white mb-2 leading-tight">{r.keyword}</div>
                             <div className="text-[11px] font-bold text-slate-100 leading-relaxed bg-cyan-500/10 p-3 rounded-2xl border border-cyan-500/20 italic">
                                方案: {r.solution}
@@ -448,11 +443,10 @@ export const TacticalIsland = () => {
                 )}
               </AnimatePresence>
 
-              {/* 底部页脚 */}
-              <div className="p-6 bg-black/60 border-t border-white/10 flex justify-between items-center px-10 rounded-b-[38px]">
+              <div className="p-6 bg-black/60 border-t border-white/10 flex justify-between items-center px-10 rounded-b-[32px]">
                  <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
-                    <span className="text-[10px] font-mono text-slate-500 uppercase font-black tracking-[0.2em]">Link Secure · Protocol v2.4</span>
+                    <span className="text-[10px] font-mono text-slate-500 uppercase font-black tracking-[0.2em]">安全链路已激活 · 协议 v2.4</span>
                  </div>
                  <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic">{CONFIG.APP_VERSION}</span>
               </div>
@@ -478,7 +472,7 @@ export const TacticalIsland = () => {
                        <h4 className="text-xl font-black text-white uppercase italic tracking-tighter">
                          全景战术态势指挥中枢
                        </h4>
-                       <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] opacity-70">Strategic Command Center · Active</p>
+                       <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] opacity-70">指挥中心 · 实时链路激活</p>
                     </div>
                  </div>
                  <button 
@@ -486,7 +480,7 @@ export const TacticalIsland = () => {
                    className="px-8 py-3 bg-red-500 text-white hover:bg-red-600 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl shadow-red-500/20 active:scale-95"
                    style={{ WebkitAppRegion: 'no-drag' } as any}
                  >
-                   退出全景模式 / EXIT
+                   退出全景模式
                  </button>
               </div>
               <div className="flex-1 bg-black relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
