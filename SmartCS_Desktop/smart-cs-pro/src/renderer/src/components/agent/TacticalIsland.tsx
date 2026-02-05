@@ -34,21 +34,22 @@ export const TacticalIsland = () => {
   const [helpSuggestions, setHelpSuggestions] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // --- 测试数据模拟逻辑 (调试完成后可删除) ---
+  // --- 模拟测试数据池 ---
+  const mockCustomer = useMemo(() => ({
+    name: "李先生",
+    level: "核心钻石 VIP",
+    total_value: "128,400",
+    attitude: "A+ 极度友好",
+    insights: [
+      { title: "极强购买力", desc: "对旗舰系列、新款极度敏感，建议优先推介。", color: "emerald", icon: <Wallet size={16}/> },
+      { title: "沟通忌讳点", desc: "禁止提及“折扣”，会导致客户产生不信任感。", color: "red", icon: <Ban size={16}/> },
+      { title: "实战建议", desc: "当前处于成交高发区，建议申请主管赠礼授权。", color: "cyan", icon: <Zap size={16}/> }
+    ]
+  }), []);
+
   useEffect(() => {
     if (isCustomerHudEnabled) {
-      // 模拟识别到高价值客户
-      setCurrentCustomer({
-        name: "李先生",
-        level: "钻石核心VIP",
-        total_value: "128,400",
-        attitude: "A+ 友好",
-        insights: [
-          { title: "极强购买力", desc: "对旗舰系列、新款极度敏感，建议优先推介。", color: "emerald", icon: <Wallet size={16}/> },
-          { title: "沟通忌讳点", desc: "禁止提及“折扣”，会导致客户产生不信任感。", color: "red", icon: <Ban size={16}/> }
-        ]
-      });
-      // 自动弹出面板
+      setCurrentCustomer(mockCustomer);
       setLayoutMode('SIDE');
       setActiveSideTool('CUSTOMERS' as any);
     } else {
@@ -58,7 +59,7 @@ export const TacticalIsland = () => {
         setActiveSideTool(null);
       }
     }
-  }, [isCustomerHudEnabled])
+  }, [isCustomerHudEnabled, mockCustomer])
 
   // 1. 物理停靠：FLOAT 模式停靠屏幕右上方
   useEffect(() => {
