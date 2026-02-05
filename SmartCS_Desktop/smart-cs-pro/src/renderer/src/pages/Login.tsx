@@ -209,7 +209,7 @@ export default function Login() {
                           value={formData.username}
                           onChange={(e) => setFormData({...formData, username: e.target.value})}
                           placeholder="请输入账号" 
-                          className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-black transition-all outline-none placeholder:text-slate-400 font-black" 
+                          className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 px-6 text-sm !text-white focus:border-cyan-500/50 focus:bg-black transition-all outline-none placeholder:text-slate-400 !font-black" 
                         />
                       </div>
             
@@ -220,7 +220,7 @@ export default function Login() {
                           value={formData.password}
                           onChange={(e) => setFormData({...formData, password: e.target.value})}
                           placeholder="请输入密码" 
-                          className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-cyan-500/50 focus:bg-black transition-all outline-none placeholder:text-slate-400 font-mono tracking-widest font-black" 
+                          className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 px-6 text-sm !text-white focus:border-cyan-500/50 focus:bg-black transition-all outline-none placeholder:text-slate-400 font-mono tracking-widest !font-black" 
                         />          </div>
 
           <button

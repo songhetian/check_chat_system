@@ -53,17 +53,18 @@ body {
 
 /* 4. 工业级输入框规范 */
 input, textarea, select {
-  @apply text-slate-900 font-medium !important;
+  @apply font-medium;
 }
 
 input::placeholder, textarea::placeholder {
   @apply text-slate-400 font-normal;
 }
 
-/* 隐藏 Chrome 等浏览器的黄色自动填充背景 */
+/* 隐藏 Chrome 等浏览器的黄色自动填充背景，并强制文字为亮色 */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #f8fafc inset !important;
-  -webkit-text-fill-color: #0f172a !important;
+  -webkit-box-shadow: 0 0 0px 1000px #020617 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
