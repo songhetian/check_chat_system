@@ -38,12 +38,35 @@ async def login(data: dict, request: Request):
             "user": {
                 "username": user.username, 
                 "real_name": user.real_name, 
+                "role_id": user.role_id,
                 "role_code": user.role.code,
                 "dept_name": user.department.name if user.department else "独立战术单元",
                 "tactical_score": user.tactical_score,
                 "permissions": list(perms)
             }, 
             "token": token
+        }
+    }
+
+@router.get("/me")
+async def get_me(user_info: dict = Depends(get_current_user)):
+    """[物理同步] 获取当前登录操作员的最新实战态势数据"""
+    user = await User.get_or_none(username=user_info["username"]).select_related("department", "role")
+    if not user: raise HTTPException(status_code=404, detail="操作员不存在")
+    
+    # 同步最新权限 (防止管理员在后台修改后未立即生效)
+    perms = await RolePermission.filter(role_id=user.role_id).values_list("permission_code", flat=True)
+    
+    return {
+        "status": "ok",
+        "data": {
+            "username": user.username,
+            "real_name": user.real_name,
+            "role_id": user.role_id,
+            "role_code": user.role.code,
+            "dept_name": user.department.name if user.department else "独立战术单元",
+            "tactical_score": user.tactical_score,
+            "permissions": list(perms)
         }
     }
 

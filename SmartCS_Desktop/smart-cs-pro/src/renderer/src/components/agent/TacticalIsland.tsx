@@ -4,11 +4,11 @@ import {
   Shield, BrainCircuit, Activity, Radar as RadarIcon, Trophy, BarChart, 
   ChevronRight, AlertCircle, Zap, Terminal, Target, LogOut, Cpu, LayoutGrid, Settings, MessageSquareOff,
   Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor,
-  Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe
+  Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
-import { cn } from '../../lib/utils'
+import { cn, tacticalRequest } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 
 export const TacticalIsland = () => {
@@ -21,7 +21,22 @@ export const TacticalIsland = () => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'AI' | 'RADAR' | 'TOOLS'>('AI')
   const [showHelpModal, setShowHelpModal] = useState(false)
+  const [showSearchModal, setShowSearchModal] = useState(false)
+  const [searchText, setSearchText] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
   const [helpText, setHelpText] = useState('')
+
+  const handleSearch = async () => {
+    if (!searchText) return;
+    try {
+      const res = await tacticalRequest({
+        url: `${CONFIG.API_BASE}/admin/violations?keyword=${searchText}&status=RESOLVED&size=5`,
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` }
+      });
+      if (res.status === 200) setSearchResults(res.data.data);
+    } catch (e) { console.error(e) }
+  }
 
   const handleHelp = async (type: 'TEXT' | 'IMAGE') => {
     let payload: any = { type: 'EMERGENCY_HELP', subType: type }
@@ -30,11 +45,12 @@ export const TacticalIsland = () => {
       const img = await window.api.captureScreen()
       payload.image = img
     } else {
+      if (!helpText) return
       payload.content = helpText
     }
 
-    // 通过现有的 WS 链路发送
-    window.dispatchEvent(new CustomEvent('ws-send-message', { detail: payload }))
+    // 通过 WS 链路发送 (由 useRiskSocket 监听)
+    window.dispatchEvent(new CustomEvent('send-risk-msg', { detail: payload }))
     
     setShowHelpModal(false)
     setHelpText('')
@@ -53,16 +69,29 @@ export const TacticalIsland = () => {
 
   return (
     <div className="h-screen w-screen flex items-start justify-center overflow-hidden pointer-events-none select-none bg-transparent">
+      {/* 核心：SVG 强制裁剪路径 (解决 Electron 圆角失效的终极方案) */}
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <clipPath id="tactical-island-clip" clipPathUnits="objectBoundingBox">
+            {/* 使用一个高精度的圆角矩形路径模拟 38px */}
+            <rect x="0" y="0" width="1" height="1" rx="0.06" ry="0.06" />
+          </clipPath>
+        </defs>
+      </svg>
+
       <motion.div 
         layout
         initial={false}
-        animate={{ borderRadius: '38px' }}
         className={cn(
-          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden rounded-[38px]",
+          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden",
           isGlassMode ? "bg-slate-950/30 backdrop-blur-3xl" : "bg-slate-950",
           isAlerting && "border-red-500 ring-1 ring-red-500/20"
         )}
-        style={{ borderRadius: '38px' }}
+        style={{ 
+          clipPath: 'url(#tactical-island-clip)', 
+          borderRadius: '38px',
+          WebkitClipPath: 'url(#tactical-island-clip)'
+        }}
       >
         {/* 1. 战术中枢条 (Main Bar) */}
         <div 
@@ -127,8 +156,8 @@ export const TacticalIsland = () => {
             <HubBtn 
               icon={<Globe size={16} />} 
               active={false} 
-              onClick={() => window.open('#/big-screen', '_blank')}
-              title="全景战术投影"
+              onClick={() => window.open('#/personal-screen', '_blank')}
+              title="个人战术态势"
               color="white"
             />
             <HubBtn 
@@ -155,17 +184,6 @@ export const TacticalIsland = () => {
               title="退出登录"
             >
               <LogOut size={16} />
-            </button>
-          </div>
-
-          {/* 右侧：退出 */}
-          <div className="flex items-center justify-end min-w-[60px]" style={{ WebkitAppRegion: 'no-drag' } as any}>
-            <button 
-              onClick={() => { logout(); window.location.hash = '/login'; }}
-              className="w-10 h-10 rounded-2xl bg-white/5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center transition-all group border border-white/5"
-              title="退出登录"
-            >
-              <LogOut size={18} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>
@@ -347,12 +365,61 @@ export const TacticalIsland = () => {
 
                  {activeTab === 'TOOLS' && (
                    <div className="grid grid-cols-2 gap-5">
-                      <ToolCard icon={<Search size={24} />} title="全域战术检索" desc="检索知识库与标准话术矩阵" color="cyan" />
+                      <ToolCard 
+                        icon={<Search size={24} />} 
+                        title="全域战术检索" 
+                        desc="检索知识库与标准话术矩阵" 
+                        color="cyan" 
+                        onClick={() => setShowSearchModal(true)}
+                      />
                       <ToolCard icon={<Video size={24} />} title="屏幕实时协同" desc="发起远程专家现场指导请求" color="amber" />
                       <ToolCard icon={<Settings size={24} />} title="终端链路配置" desc="识别参数与自愈精度微调" color="slate" />
                    </div>
                  )}
               </div>
+
+              {/* 4. 战术检索模态框 (Search Modal) */}
+              <AnimatePresence>
+                {showSearchModal && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    className="absolute inset-0 z-[100] bg-slate-950 p-8 flex flex-col gap-6"
+                  >
+                    <div className="flex justify-between items-center">
+                       <h4 className="text-[11px] font-black text-cyan-400 uppercase tracking-[0.4em] flex items-center gap-2">
+                         <Search size={14} /> 战术对策检索中枢
+                       </h4>
+                       <button onClick={() => setShowSearchModal(false)} className="text-slate-500 hover:text-white transition-colors"><X size={18}/></button>
+                    </div>
+                    
+                    <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
+                       <input 
+                         value={searchText}
+                         onChange={(e) => setSearchText(e.target.value)}
+                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                         placeholder="输入关键词（如：转账、投诉）..."
+                         className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white focus:border-cyan-500/50 outline-none transition-all"
+                       />
+                       <button onClick={handleSearch} className="absolute right-3 top-3 p-2 bg-cyan-500 text-slate-950 rounded-xl hover:bg-cyan-400 transition-all shadow-lg"><ArrowRight size={18}/></button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
+                       {searchResults.map((r, i) => (
+                         <div key={i} className="p-5 rounded-3xl bg-white/[0.03] border border-white/5 hover:border-cyan-500/30 transition-all">
+                            <div className="text-[9px] font-black text-cyan-500 uppercase mb-2 tracking-widest">Matched Strategy</div>
+                            <div className="text-[13px] font-black text-white mb-2 leading-tight">{r.keyword}</div>
+                            <div className="text-[11px] font-bold text-slate-100 leading-relaxed bg-cyan-500/10 p-3 rounded-2xl border border-cyan-500/20 italic">
+                               方案: {r.solution}
+                            </div>
+                         </div>
+                       ))}
+                       {searchResults.length === 0 && searchText && <div className="h-full flex items-center justify-center text-slate-600 italic text-[10px] uppercase tracking-widest">未找到匹配的战术载荷</div>}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               
               {/* 底部页脚 */}
               <div className="p-6 bg-black/60 border-t border-white/10 flex justify-between items-center px-10 rounded-b-[38px]">

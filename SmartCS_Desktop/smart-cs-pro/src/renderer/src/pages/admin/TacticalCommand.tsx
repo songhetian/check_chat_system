@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
+import { ROLE_ID } from '../../lib/constants'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalSearch } from '../../components/ui/TacticalSearch'
@@ -37,7 +38,7 @@ export default function TacticalCommand() {
   const [processing, setProcessing] = useState<string | null>(null)
   
   const violations = useRiskStore(s => s.violations)
-  const isHQ = user?.role_code === 'HQ'
+  const isHQ = user?.role_id === ROLE_ID.HQ
 
   const fetchDepts = async () => {
     if (!isHQ || !token) return

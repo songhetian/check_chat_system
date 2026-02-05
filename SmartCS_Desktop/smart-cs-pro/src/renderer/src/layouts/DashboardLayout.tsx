@@ -7,6 +7,7 @@ import {
 import { useAuthStore } from '../store/useAuthStore'
 import { cn } from '../lib/utils'
 import { CONFIG } from '../lib/config'
+import { toast } from 'sonner'
 
 interface Notification {
   id: string
@@ -105,6 +106,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       fetchRecentNotifs()
     }
   }
+
+  useEffect(() => {
+    const onToast = (e: any) => { 
+      const { title, message, type, details } = e.detail
+      if (type === 'error') {
+        toast.error(title, { description: message || details })
+      } else if (type === 'success') {
+        toast.success(title, { description: message || details })
+      } else {
+        toast(title, { description: message || details })
+      }
+    }
+    window.addEventListener('trigger-toast', onToast)
+    return () => window.removeEventListener('trigger-toast', onToast)
+  }, [])
 
   const handleLogout = () => {
     logout()

@@ -56,6 +56,13 @@ export const useRiskSocket = () => {
           window.dispatchEvent(new CustomEvent('ws-emergency-help', { detail: data }));
         }
 
+        if (data.type === 'REWARD') {
+          window.dispatchEvent(new CustomEvent('trigger-toast', { 
+            detail: { title: '战术奖励', message: `恭喜！获得 [${data.title}] 奖励 +${data.value} PT`, type: 'success' } 
+          }))
+          window.dispatchEvent(new CustomEvent('ws-reward-received', { detail: data }));
+        }
+
         // 1. 全局语音闭环
         if (data.voice_alert) {
           const utter = new SpeechSynthesisUtterance(data.voice_alert);
@@ -122,10 +129,19 @@ export const useRiskSocket = () => {
     }
 
     connect();
+
+    // 核心：监听外部发送指令请求
+    const handleSendMsg = (e: any) => {
+      if (socket?.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(e.detail));
+      }
+    }
+    window.addEventListener('send-risk-msg', handleSendMsg);
     
     return () => {
       socket?.close();
       clearTimeout(reconnectTimeout);
+      window.removeEventListener('send-risk-msg', handleSendMsg);
     }
   }, [user, token])
 }

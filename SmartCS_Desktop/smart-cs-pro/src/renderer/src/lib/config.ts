@@ -33,15 +33,17 @@ export const initDynamicConfig = async () => {
         
         console.log(`🌐 [战术同步] 链路已锁定指挥中心: ${CONFIG.API_BASE}`);
       }
-
-      // 同步品牌自定义信息
-      if (serverConfig?.branding) {
-        CONFIG.BRANDING.company = serverConfig.branding.company_name;
-        CONFIG.BRANDING.name = serverConfig.branding.system_name;
-        CONFIG.BRANDING.subName = serverConfig.branding.system_sub_name;
-        CONFIG.BRANDING.logoText = serverConfig.branding.logo_text;
-      }
+    } else {
+      // --- Web 模式适配 ---
+      // 如果不在 Electron 环境，自动锁定当前 origin
+      const webOrigin = window.location.origin;
+      CONFIG.API_BASE = `${webOrigin}/api`;
+      CONFIG.WS_BASE = webOrigin.replace('http', 'ws') + '/api/ws';
+      console.log(`🌐 [Web模式] 链路已对齐当前服务器: ${CONFIG.API_BASE}`);
     }
+
+    // 同步品牌自定义信息 (Web 模式下尝试从 API 获取)
+    // ...
   } catch (e) {
     console.error('❌ [战术同步] 配置文件加载失败，请检查 .env');
   }

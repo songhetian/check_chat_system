@@ -23,6 +23,7 @@ import CategoriesPage from './pages/admin/Categories'
 import AuditStreamPage from './pages/admin/AuditStream'
 import PlatformsPage from './pages/admin/Platforms'
 import BigScreen from './pages/admin/BigScreen'
+import PersonalScreen from './pages/agent/PersonalScreen'
 import NotificationsPage from './pages/admin/Notifications'
 import GlobalPolicyPage from './pages/hq/GlobalPolicy'
 import AiPerformancePage from './pages/hq/AiPerformance'
@@ -32,6 +33,7 @@ import {
 } from 'lucide-react'
 import { cn } from './lib/utils'
 import { CONFIG } from './lib/config'
+import { ROLE_ID } from './lib/constants'
 import { TacticalSearch } from './components/ui/TacticalSearch'
 import { TacticalPagination } from './components/ui/TacticalTable'
 import { TacticalSelect } from './components/ui/TacticalSelect'
@@ -50,7 +52,7 @@ const AdminHome = () => {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  const isHQ = user?.role_code === 'HQ'
+  const isHQ = user?.role_id === ROLE_ID.HQ
 
   const fetchDepts = async () => {
     if (!isHQ || !token) return
@@ -243,7 +245,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/big-screen" element={<BigScreen />} />
-        <Route path="/*" element={ !user ? <Navigate to="/login" /> : ( user.role_code === 'AGENT' ? <AgentView /> : (
+        <Route path="/personal-screen" element={ !user ? <Navigate to="/login" /> : <PersonalScreen />} />
+        <Route path="/*" element={ !user ? <Navigate to="/login" /> : ( user.role_id === ROLE_ID.AGENT ? <AgentView /> : (
           <DashboardLayout>
             <Routes>
               <Route path="/" element={<AdminHome />} />

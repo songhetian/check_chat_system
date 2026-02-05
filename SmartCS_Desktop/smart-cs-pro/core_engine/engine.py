@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from api.auth import router as auth_router
 from api.admin import router as admin_router
 from api.violation import router as violation_router
+from core.constants import RoleID
 from api.coach import router as coach_router
 from api.growth import router as growth_router
 from api.rbac import router as rbac_router
@@ -25,20 +26,27 @@ logging.basicConfig(level=logging.INFO)
 class ConnectionManager:
     def __init__(self):
         self.active_connections: dict[str, WebSocket] = {}
+        self.user_roles: dict[str, str] = {} # 存储节点角色
 
-    async def connect(self, username: str, websocket: WebSocket):
+    async def connect(self, username: str, websocket: WebSocket, role: str = "AGENT"):
         await websocket.accept()
         self.active_connections[username] = websocket
-        logger.info(f"📡 [WS] 节点已挂载: {username}")
+        self.user_roles[username] = role
+        logger.info(f"📡 [WS] 节点已挂载: {username} ({role})")
 
     def disconnect(self, username: str):
         if username in self.active_connections:
             del self.active_connections[username]
+            if username in self.user_roles: del self.user_roles[username]
             logger.info(f"🔌 [WS] 节点已脱机: {username}")
 
-    async def send_personal_message(self, message: dict, username: str):
-        if username in self.active_connections:
-            await self.active_connections[username].send_json(message)
+    async def broadcast_to_command(self, message: dict):
+        """
+        [物理隔离] 仅向 ADMIN 和 HQ 节点推送敏感数据 (如画面、求助)
+        """
+        for user, connection in self.active_connections.items():
+            if self.user_roles.get(user) in ["ADMIN", "HQ"]:
+                await connection.send_json(message)
 
     async def broadcast(self, message: dict):
         for connection in self.active_connections.values():
@@ -96,7 +104,18 @@ else:
 # --- 4. WebSocket 战术链路 ---
 @app.websocket("/api/ws/risk")
 async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), username: str = Query(...)):
-    await manager.connect(username, websocket)
+    # 鉴权并提取角色
+    from api.auth import get_current_user
+    try:
+        # 模拟 Request 对象以复用鉴权逻辑
+        class MockRequest:
+            def __init__(self, app): self.app = app
+        user_info = await get_current_user(MockRequest(app), type('MockCreds', (), {'credentials': token}))
+        role = user_info.get("role_id", RoleID.AGENT)
+    except:
+        role = RoleID.AGENT
+
+    await manager.connect(username, websocket, role=role)
     redis_conn = app.state.redis
     if redis_conn: 
         await redis_conn.sadd("online_agents_set", username)
@@ -121,9 +140,10 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
                     count = await app.state.redis.incr(counter_key)
                     if count >= 50:
                         # 达到阈值，触发自愈奖励 (+1 PT)
+                        from core.models import User
                         u_obj = await User.get_or_none(username=username)
                         if u_obj:
-                            await grant_user_reward(u_obj.id, 'SCORE', '净空自愈奖励', 1)
+                            await grant_user_reward(u_obj.id, 'SCORE', '净空自愈奖励', 1, ws_manager=manager)
                             await app.state.redis.set(counter_key, 0) # 重置计数
                             logger.info(f"🌿 [自愈] 操作员 {username} 已完成 50 条净空对话，奖励 1 PT")
                 elif is_violated and app.state.redis:
@@ -137,11 +157,20 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
                     "target": msg.get("target")
                 })
             elif msg.get("type") == "SCREEN_SYNC":
-                # 转发画面载荷至指挥中心
-                await manager.broadcast({
+                # 物理隔离：仅向指挥中心同步画面
+                await manager.broadcast_to_command({
                     "type": "SCREEN_SYNC",
                     "username": username,
                     "payload": msg.get("payload")
+                })
+            elif msg.get("type") == "EMERGENCY_HELP":
+                # 物理隔离：仅向指挥中心推送求助信号
+                await manager.broadcast_to_command({
+                    "type": "EMERGENCY_HELP",
+                    "username": username,
+                    "content": msg.get("content"),
+                    "image": msg.get("image"),
+                    "subType": msg.get("subType")
                 })
     except WebSocketDisconnect:
         manager.disconnect(username)

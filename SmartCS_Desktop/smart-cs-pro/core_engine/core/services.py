@@ -46,9 +46,9 @@ async def execute_violation_workflow(username: str, keyword: str, context: str, 
         logger.error(f"❌ [事务失败] 违规处理回滚: {e}")
         return False
 
-async def grant_user_reward(user_id: int, type: str, title: str, value: int):
+async def grant_user_reward(user_id: int, type: str, title: str, value: int, ws_manager=None):
     """
-    [实战奖励] 为操作员注入战术奖励 (积分/勋章)
+    [实战奖励] 为操作员注入战术奖励 (积分/勋章) 并实时推送信号
     """
     from core.models import UserReward
     async with in_transaction() as conn:
@@ -61,6 +61,17 @@ async def grant_user_reward(user_id: int, type: str, title: str, value: int):
         await UserReward.create(
             user=user, type=type, title=title, value=value, using_db=conn
         )
+
+        if ws_manager:
+            import time
+            await ws_manager.broadcast({
+                "type": "REWARD",
+                "username": user.username,
+                "reward_type": type,
+                "title": title,
+                "value": value,
+                "timestamp": time.time() * 1000
+            })
     return True
 
 async def start_recruit_training(user_id: int):

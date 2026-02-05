@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query, Request
 from core.models import ViolationRecord, User, SensitiveWord
 from api.auth import get_current_user
+from core.constants import RoleID
 from tortoise.expressions import Q
 import json
 
@@ -13,31 +14,39 @@ async def get_violations(
     username: str = Query(None),
     dept_id: int = Query(None),
     keyword: str = Query(None),
+    status: str = Query(None),
     risk_level: str = Query("ALL"),
     page: int = 1,
     size: int = 20
 ):
     """
-    [实战审计] 违规记录隔离：主管锁定部门，总部全域穿透，坐席强制自看
+    [实战审计] 违规记录隔离：主管锁定部门，总部全域穿透，坐席强制自看 (RESOLVED 状态允许全域战术共享)
     """
     query = ViolationRecord.filter(is_deleted=0).select_related("user", "user__department")
 
     # 核心：物理隔离逻辑
-    if current_user["role_code"] == "AGENT":
-        # 坐席身份：强制锁定本人 username，无视前端传参
-        query = query.filter(user__username=current_user["username"])
-    elif current_user["role_code"] == "ADMIN":
+    if current_user["role_id"] == RoleID.AGENT:
+        if status == "RESOLVED":
+            # 战术共享：允许坐席检索全域已解决的方案作为“战术对策”
+            pass
+        else:
+            # 坐席身份：强制锁定本人 username
+            query = query.filter(user__username=current_user["username"])
+    elif current_user["role_id"] == RoleID.ADMIN:
         # 主管身份：锁定本部门
         query = query.filter(user__department_id=current_user["dept_id"])
         if username: # 主管可在部门内搜人
             query = query.filter(Q(user__username__icontains=username) | Q(user__real_name__icontains=username))
-    elif current_user["role_code"] == "HQ" and dept_id:
+    elif current_user["role_id"] == RoleID.HQ and dept_id:
         # 总部身份：全域穿透
         query = query.filter(user__department_id=dept_id)
         if username:
             query = query.filter(Q(user__username__icontains=username) | Q(user__real_name__icontains=username))
+    
     if keyword:
         query = query.filter(keyword__icontains=keyword)
+    if status:
+        query = query.filter(status=status)
     
     if risk_level == "SERIOUS": query = query.filter(risk_score__gte=8)
     elif risk_level == "MEDIUM": query = query.filter(risk_score__range=(5, 7))
@@ -45,7 +54,7 @@ async def get_violations(
 
     total = await query.count()
     violations = await query.order_by("-timestamp").limit(size).offset((page - 1) * size).values(
-        "id", "keyword", "context", "risk_score", "timestamp",
+        "id", "keyword", "context", "risk_score", "timestamp", "status", "solution",
         "user__username", "user__real_name", "user__department__name"
     )
 
@@ -54,6 +63,7 @@ async def get_violations(
 @router.post("/violation/resolve")
 async def resolve_violation(
     data: dict,
+    request: Request,
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -68,9 +78,9 @@ async def resolve_violation(
         v.status = "RESOLVED"
         await v.save()
         
-        # 2. 注入贡献奖励：通过事务补回分数
+        # 2. 注入贡献奖励：通过事务补回分数，并推送信号
         from core.services import grant_user_reward
-        await grant_user_reward(v.user.id, 'SCORE', '解决库贡献奖', 2)
+        await grant_user_reward(v.user.id, 'SCORE', '解决库贡献奖', 2, ws_manager=request.app.state.ws_manager)
         
         return {"status": "ok", "message": "战术解决库已同步，奖励 2 PT 已发放"}
     return {"status": "error", "message": "未找到相关记录"}

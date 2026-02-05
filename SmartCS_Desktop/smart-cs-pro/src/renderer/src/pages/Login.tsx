@@ -9,12 +9,20 @@ import { toast } from 'sonner'
 
 export default function Login() {
   const navigate = useNavigate()
+  const user = useAuthStore(s => s.user)
   const setAuth = useAuthStore((s) => s.setAuth)
   const [bootStatus, setBootStatus] = useState('等待身份验证...')
   const [progress, setProgress] = useState(0)
   const [formData, setFormData] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // 核心：已登录自动重定向
+  useEffect(() => {
+    if (user) {
+      navigate('/')
+    }
+  }, [user])
 
   const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
   const handleClose = () => window.electron.ipcRenderer.send('close-window')
@@ -114,12 +122,12 @@ export default function Login() {
         setAuth({ 
           username: user.username, 
           real_name: user.real_name, 
-          role: user.role, 
+          role: user.role_code as any, 
+          role_id: user.role_id,
           role_code: user.role_code, 
-          permissions: user.permissions, // 新增：持久化细粒度权限集
-          department: user.department,
-          rank: user.rank,
-          score: user.score
+          permissions: user.permissions,
+          department: user.dept_name,
+          tactical_score: user.tactical_score
         }, token)
         
         // 强制使用 replace 导航，防止返回键导致的逻辑混乱
