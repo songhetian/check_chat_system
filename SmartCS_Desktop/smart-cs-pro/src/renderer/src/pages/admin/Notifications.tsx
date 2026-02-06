@@ -154,10 +154,10 @@ export default function NotificationsPage() {
           ) : (
             <TacticalTable headers={['消息标题', '发生时间', '内容摘要', '阅知状态', '管理操作']}>
               {notifs.map((n: Notification) => (
-                <tr key={n.id} className={cn("hover:bg-slate-50/50 transition-colors group cursor-pointer text-center", n.is_read && "opacity-60")} onClick={() => setSelectedMsg(n)}>
+                <tr key={n.id} className={cn("hover:bg-slate-50/50 transition-colors group cursor-pointer", n.is_read && "opacity-60")} onClick={() => setSelectedMsg(n)}>
                   <td className="px-8 py-3 text-left">
                     <div className="flex items-center gap-3">
-                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border shadow-inner", n.is_read ? "bg-slate-50 text-slate-400" : "bg-cyan-50 text-cyan-600 border-cyan-100")}>
+                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border shadow-inner", n.is_read ? "bg-slate-50 text-slate-400" : "bg-cyan-100 text-cyan-700 border-cyan-200")}>
                         {n.is_read ? <MailOpen size={14} /> : <Bell size={14} className="animate-swing" />}
                       </div>
                       <span className="text-xs font-black text-slate-900 truncate max-w-[180px]">{n.title}</span>
@@ -166,7 +166,7 @@ export default function NotificationsPage() {
                   <td className="px-6 py-3 text-center text-[10px] font-bold text-slate-900 whitespace-nowrap">{new Date(n.created_at).toLocaleString()}</td>
                   <td className="px-6 py-3 text-center text-[10px] font-medium text-slate-800 italic truncate max-w-md">"{n.content}"</td>
                   <td className="px-6 py-3 text-center">
-                    <div className="flex justify-center">
+                    <div className="flex justify-center items-center h-full">
                       {n.is_read ? (
                         <span className="text-[9px] font-black text-slate-500 uppercase">已归档</span>
                       ) : (
@@ -178,7 +178,7 @@ export default function NotificationsPage() {
                     <div className="flex items-center justify-center gap-2">
                        <button onClick={(e) => { e.stopPropagation(); setSelectedMsg(n); }} className="p-2 bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white rounded-lg transition-all shadow-sm"><ArrowUpRight size={14} /></button>
                        {!n.is_read && (
-                         <button onClick={(e) => { e.stopPropagation(); markRead(n.id); }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-lg transition-all shadow-sm border border-cyan-100"><CheckCircle2 size={14} /></button>
+                         <button onClick={(e) => { e.stopPropagation(); markRead(n.id); }} className="p-2 bg-cyan-100 text-cyan-700 hover:bg-cyan-600 hover:text-white rounded-lg transition-all shadow-sm border border-cyan-200"><CheckCircle2 size={14} /></button>
                        )}
                     </div>
                   </td>
