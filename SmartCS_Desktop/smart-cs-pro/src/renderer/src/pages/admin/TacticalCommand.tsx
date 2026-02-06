@@ -6,7 +6,7 @@ import {
   Loader2, CheckCircle2, Lock, Unlock, Send,
   X, RefreshCw, AlertTriangle, TrendingDown, BellRing,
   Search, Filter, ChevronDown, MonitorStop, Globe, ShieldCheck,
-  Power, PowerOff, Cpu, Radar, Shield
+  Power, PowerOff, Cpu, Radar, Shield, Maximize2, MonitorPlay, MonitorX
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
@@ -18,15 +18,20 @@ import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { TacticalTable } from '../../components/ui/TacticalTable'
 import { toast } from 'sonner'
 
-// 1. 状态与身份样式标准 (V3.13)
-const getAgentStatusTheme = (score: number, isOnline: boolean) => {
-  if (!isOnline) return { border: 'border-slate-200', bg: 'bg-slate-100', text: 'text-slate-400', label: '离线', dot: 'bg-slate-300' }
-  if (score < 60) return { border: 'border-red-500', bg: 'bg-red-50/50', text: 'text-red-600', label: '异常', dot: 'bg-red-500 animate-ping' }
+// 1. 状态与身份样式标准 (V3.14)
+const getAgentStatusTheme = (score: number, isOnline: boolean, roleId: number) => {
+  if (!isOnline) return { border: 'border-slate-200', bg: 'bg-slate-100', text: 'text-slate-400', label: '脱机', dot: 'bg-slate-300' }
+  
+  // V3.14: HQ 和 ADMIN 永远显示稳定
+  const isManagement = roleId === ROLE_ID.HQ || roleId === ROLE_ID.ADMIN;
+  
+  if (!isManagement && score < 60) return { border: 'border-red-500', bg: 'bg-red-50/50', text: 'text-red-600', label: '风险', dot: 'bg-red-500 animate-ping' }
+  
   return { 
     border: 'border-emerald-500', 
     bg: 'bg-emerald-500/10', 
     text: 'text-emerald-600', 
-    label: '在线', 
+    label: '稳定', 
     dot: 'bg-emerald-500 shadow-[0_0_8px_#10b981]' 
   }
 }
@@ -57,6 +62,10 @@ export default function TacticalCommand() {
   const [screenShot, setScreenShot] = useState<string | null>(null)
   const [processing, setProcessing] = useState<string | null>(null)
   
+  // 实时链路控制状态
+  const [isLinkEnabled, setIsLinkEnabled] = useState(true)
+  const [isMaximized, setIsMaximized] = useState(false)
+  
   const isHQ = user?.role_id === ROLE_ID.HQ || user?.role_code === 'HQ'
 
   const fetchDepts = async () => {
@@ -75,17 +84,15 @@ export default function TacticalCommand() {
     if (!token) return
     if (!silent) setLoading(true)
     try {
-      // V3.13: 移除 role_only=AGENT，改为获取所有可监控成员
       const res = await window.api.callApi({ 
         url: `${CONFIG.API_BASE}/admin/agents?search=${search}&dept_id=${deptId}&_t=${Date.now()}`, 
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
       if (res.status === 200) {
-        // 2. 增强排序逻辑：在线优先 > 身份等级优先 (HQ > ADMIN > AGENT)
         const sorted = [...res.data.data].sort((a, b) => {
           if (a.is_online !== b.is_online) return a.is_online ? -1 : 1
-          if (a.role_id !== b.role_id) return b.role_id - a.role_id // ID 越大等级越高
+          if (a.role_id !== b.role_id) return b.role_id - a.role_id
           return 0
         })
         setAgents(sorted)
@@ -103,6 +110,7 @@ export default function TacticalCommand() {
 
   useEffect(() => {
     const onLiveChat = (e: any) => {
+      if (!isLinkEnabled) return;
       const msg = e.detail
       if (activeAgent && msg.username === activeAgent.username) {
         setLiveChat(prev => [...prev.slice(-15), { sender: 'USR', text: msg.content, time: new Date().toLocaleTimeString() }])
@@ -110,6 +118,7 @@ export default function TacticalCommand() {
     }
     const onNodeSync = () => fetchData(true)
     const onScreenSync = (e: any) => {
+      if (!isLinkEnabled) return;
       const data = e.detail;
       if (activeAgent && data.username === activeAgent.username) setScreenShot(data.payload)
     }
@@ -121,7 +130,7 @@ export default function TacticalCommand() {
       window.removeEventListener('ws-tactical-node-sync', onNodeSync)
       window.removeEventListener('ws-screen-sync', onScreenSync)
     }
-  }, [activeAgent])
+  }, [activeAgent, isLinkEnabled])
 
   const executeIntervention = async (type: string, description: string, payload: any = {}) => {
     if (!activeAgent || !token || processing) return
@@ -185,10 +194,10 @@ export default function TacticalCommand() {
            <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
               <TacticalTable headers={['成员', '部门', '状态', '评分', '身份']}>
                 {agents.map(a => {
-                  const theme = getAgentStatusTheme(a.tactical_score, a.is_online);
+                  const theme = getAgentStatusTheme(a.tactical_score, a.is_online, a.role_id);
                   const isActive = activeAgent?.username === a.username;
                   return (
-                    <tr key={a.username} onClick={() => { setActiveAgent(a); setLiveChat([]); }} className={cn("cursor-pointer transition-all duration-300", isActive ? "bg-cyan-600/10 text-cyan-900" : "hover:bg-cyan-50/50 text-black")}>
+                    <tr key={a.username} onClick={() => { setActiveAgent(a); setLiveChat([]); setScreenShot(null); }} className={cn("cursor-pointer transition-all duration-300", isActive ? "bg-cyan-600/10 text-cyan-900" : "hover:bg-cyan-50/50 text-black")}>
                       <td className="px-4 py-3 text-left">
                         <div className="flex items-center gap-2">
                           <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-all", a.is_online ? "bg-emerald-500/10 text-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.1)]" : "bg-slate-100 text-slate-400")}>{a.real_name[0]}</div>
@@ -202,7 +211,7 @@ export default function TacticalCommand() {
                         <div className="flex justify-center items-center gap-1.5"><div className={cn("w-1.5 h-1.5 rounded-full transition-all", theme.dot)} /><span className={cn("text-[9px] font-black uppercase", isActive ? "text-cyan-700" : "text-slate-500")}>{theme.label}</span></div>
                       </td>
                       <td className="px-2 py-3 text-center">
-                        <span className={cn("text-[10px] font-black", a.tactical_score < 60 ? "text-red-500" : (isActive ? "text-cyan-700" : "text-cyan-600"))}>{a.tactical_score}</span>
+                        <span className={cn("text-[10px] font-black", a.tactical_score < 60 && a.role_id === ROLE_ID.AGENT ? "text-red-500" : (isActive ? "text-cyan-700" : "text-cyan-600"))}>{a.role_id === ROLE_ID.AGENT ? a.tactical_score : '-'}</span>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <RoleBadge roleId={a.role_id} roleName={a.role_name} />
@@ -214,7 +223,7 @@ export default function TacticalCommand() {
            </div>
         </div>
 
-        <div className="flex-1 flex flex-col min-w-0 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden text-black">
            <AnimatePresence mode='wait'>
               {activeAgent ? (
                 <motion.div key={activeAgent.username} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col h-full">
@@ -223,7 +232,7 @@ export default function TacticalCommand() {
                         <h5 className="text-[10px] font-black text-cyan-800 uppercase tracking-widest flex items-center gap-2"><Cpu size={14}/> 实时干预矩阵</h5>
                         <div className="flex items-center gap-2">
                            <RoleBadge roleId={activeAgent.role_id} roleName={activeAgent.role_name} />
-                           <span className="text-[9px] font-bold text-cyan-600 italic">节点: {activeAgent.real_name}</span>
+                           <span className="text-[9px] font-bold text-cyan-600 italic font-mono uppercase">Target: {activeAgent.real_name}</span>
                         </div>
                      </div>
                      <div className="grid grid-cols-4 gap-4">
@@ -235,13 +244,38 @@ export default function TacticalCommand() {
                   </section>
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
                      <section className="space-y-3">
-                        <h5 className="text-[10px] font-black text-cyan-700 uppercase tracking-widest flex items-center gap-2"><MonitorStop size={14} /> 实时桌面链路 (只读)</h5>
-                        <div className="bg-slate-900 rounded-2xl p-1.5 min-h-[300px] flex items-center justify-center relative overflow-hidden border border-slate-200">
-                           {screenShot ? (
-                              <img src={screenShot} className="max-w-full max-h-full rounded-xl object-contain relative z-10" alt="Screen" />
+                        <div className="flex items-center justify-between">
+                           <h5 className="text-[10px] font-black text-cyan-700 uppercase tracking-widest flex items-center gap-2"><MonitorStop size={14} /> 实时桌面链路 (只读)</h5>
+                           <div className="flex items-center gap-2">
+                              <button onClick={() => setIsLinkEnabled(!isLinkEnabled)} className={cn("px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1.5 transition-all shadow-sm border", isLinkEnabled ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-red-50 text-red-600 border-red-100")}>
+                                 {isLinkEnabled ? <><MonitorPlay size={12}/> 链路已激活</> : <><MonitorX size={12}/> 链路已挂断</>}
+                              </button>
+                              <button onClick={() => setIsMaximized(true)} disabled={!isLinkEnabled || !screenShot} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-cyan-50 hover:text-cyan-600 transition-all border border-slate-200 disabled:opacity-30">
+                                 <Maximize2 size={14} />
+                              </button>
+                           </div>
+                        </div>
+                        <div className="bg-slate-900 rounded-2xl p-1.5 min-h-[300px] flex items-center justify-center relative overflow-hidden border border-slate-200 shadow-inner group">
+                           {!isLinkEnabled ? (
+                              <div className="flex flex-col items-center gap-3 opacity-40">
+                                 <MonitorX size={40} className="text-slate-500" />
+                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">链路已手动断开</p>
+                              </div>
+                           ) : screenShot ? (
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                 <img src={screenShot} className="max-w-full max-h-full rounded-xl object-contain relative z-10" alt="Screen" />
+                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 pointer-events-none">
+                                    <span className="bg-black/60 text-white px-4 py-2 rounded-full text-xs font-black backdrop-blur-md border border-white/10 uppercase tracking-widest flex items-center gap-2"><Globe size={12} className="animate-pulse" /> 实时捕获中</span>
+                                 </div>
+                              </div>
                            ) : (
                               <div className="space-y-4 relative z-10 text-center">
-                                 {liveChat.length === 0 ? (<p className="text-slate-500 text-xs font-bold uppercase tracking-widest italic opacity-50">等待数据注入...</p>) : liveChat.map((chat, idx) => (
+                                 {liveChat.length === 0 ? (
+                                    <div className="flex flex-col items-center gap-3 animate-pulse opacity-50">
+                                       <Loader2 size={30} className="animate-spin text-cyan-500" />
+                                       <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">等待数据注入...</p>
+                                    </div>
+                                 ) : liveChat.map((chat, idx) => (
                                    <div key={idx} className="flex gap-2 text-[11px]"><span className="text-cyan-500 font-black uppercase">Data:</span><span className="text-white/90 bg-white/5 px-3 py-1.5 rounded-xl italic border border-white/5">"{chat.text}"</span></div>
                                  ))}
                               </div>
@@ -253,13 +287,39 @@ export default function TacticalCommand() {
                 </motion.div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-cyan-100 gap-8 p-10 text-center uppercase font-black italic">
-                  <div className="w-32 h-32 bg-cyan-50 rounded-full flex items-center justify-center"><Radar size={100} className="text-cyan-200 animate-pulse" /></div>
-                  <div className="space-y-2"><p className="text-xl tracking-widest text-cyan-600">等待选择监控目标</p><p className="text-[9px] font-bold text-cyan-400 tracking-[0.3em]">Smart-CS Pro Multi-Role Command Center</p></div>
+                  <div className="w-32 h-32 bg-cyan-50 rounded-full flex items-center justify-center shadow-inner"><Radar size={100} className="text-cyan-200 animate-pulse" /></div>
+                  <div className="space-y-2"><p className="text-xl tracking-widest text-cyan-600">等待选择监控目标</p><p className="text-[9px] font-bold text-cyan-400 tracking-[0.3em]">Smart-CS Pro Command Center</p></div>
                 </div>
               )}
            </AnimatePresence>
         </div>
       </main>
+
+      {/* V3.14: 桌面最大化遮罩层 */}
+      <AnimatePresence>
+         {isMaximized && screenShot && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] bg-black/95 flex flex-col p-4 backdrop-blur-xl">
+               <div className="flex justify-between items-center mb-4 px-4">
+                  <div className="flex items-center gap-4">
+                     <div className="w-10 h-10 bg-cyan-600 rounded-xl flex items-center justify-center shadow-lg"><MonitorPlay size={24} className="text-white" /></div>
+                     <div>
+                        <h4 className="text-white font-black text-lg uppercase leading-none">全屏桌面链路</h4>
+                        <p className="text-cyan-500 text-[10px] font-black uppercase tracking-widest mt-1">成员: {activeAgent.real_name} · 实时数据注入中</p>
+                     </div>
+                  </div>
+                  <button onClick={() => setIsMaximized(false)} className="p-3 bg-red-500/20 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-500/30">
+                     <X size={24} />
+                  </button>
+               </div>
+               <div className="flex-1 flex items-center justify-center overflow-hidden border border-white/10 rounded-2xl bg-black relative">
+                  <img src={screenShot} className="max-w-full max-h-full object-contain shadow-2xl" alt="Maximized Screen" />
+                  <div className="absolute top-4 right-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-[10px] font-black animate-pulse flex items-center gap-2 border border-white/20">
+                     <Activity size={12} /> LIVE
+                  </div>
+               </div>
+            </motion.div>
+         )}
+      </AnimatePresence>
     </div>
   )
 }
