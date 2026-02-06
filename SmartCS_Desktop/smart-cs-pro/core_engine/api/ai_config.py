@@ -59,7 +59,7 @@ async def save_sensitive_word(data: dict, request: Request, user: dict = Depends
 
     payload = {"word": data.get("word"), "category_id": data.get("category_id"), "risk_level": data.get("risk_level", 5)}
     async with in_transaction() as conn:
-        if word_id: await SensitiveWord.filter(id=word_id).update(**payload, using_db=conn)
+        if word_id: await SensitiveWord.filter(id=word_id).update(**payload).using_db(conn)
         else: await SensitiveWord.create(**payload, using_db=conn)
         
         redis = request.app.state.redis
@@ -107,20 +107,37 @@ async def delete_knowledge_item(data: dict, request: Request, user: dict = Depen
     return {"status": "ok"}
 
 @router.post("/knowledge-base")
+
 async def save_knowledge_item(data: dict, request: Request, user: dict = Depends(check_permission("admin:ai:create"))):
+
     item_id = data.get("id")
+
     if item_id and "admin:ai:update" not in user.get("permissions", []):
+
         from fastapi import HTTPException
+
         raise HTTPException(status_code=403, detail="权限熔断：缺失策略更新权限")
 
+
+
     payload = {"keyword": data.get("keyword"), "answer": data.get("answer"), "category_id": data.get("category_id")}
+
     async with in_transaction() as conn:
-        if item_id: await KnowledgeBase.filter(id=item_id).update(**payload, using_db=conn)
+
+        if item_id: await KnowledgeBase.filter(id=item_id).update(**payload).using_db(conn)
+
         else: await KnowledgeBase.create(**payload, using_db=conn)
 
+
+
         redis = request.app.state.redis
+
         if redis:
+
             kb_data = await KnowledgeBase.filter(is_active=1, is_deleted=0).values("keyword", "answer")
+
             await redis.set("cache:knowledge_base", json.dumps(kb_data))
+
         await record_audit(user["real_name"], "KB_SAVE", data.get("keyword"), "固化智能话术矩阵")
+
     return {"status": "ok"}

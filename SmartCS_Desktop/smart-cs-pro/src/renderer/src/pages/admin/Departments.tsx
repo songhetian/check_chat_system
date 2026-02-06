@@ -20,10 +20,10 @@ function PerformanceModal({ isOpen, onClose, title, children, isPending }: any) 
       {isOpen && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !isPending && onClose()} className="absolute inset-0 bg-slate-900/40" />
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="relative w-full max-w-lg rounded-[32px] shadow-xl z-10 bg-white p-8">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="relative w-full max-w-md rounded-xl shadow-xl z-10 bg-white p-6">
              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-black uppercase italic tracking-tight">{title}</h3>
-                <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400"><X size={20}/></button>
+                <h3 className="text-lg font-black uppercase italic tracking-tight">{title}</h3>
+                <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400"><X size={18}/></button>
              </div>
              {children}
           </motion.div>
@@ -87,7 +87,7 @@ export default function DepartmentsPage() {
       })
     },
     onSuccess: (res) => {
-      if (res.data.status === 'ok') {
+      if (res.status === 200 || res.data?.status === 'ok') {
         queryClient.invalidateQueries({ queryKey: ['departments'] })
         setModalType('NONE')
         toast.success(modalType === 'EDIT' ? '架构调整已生效' : '新战术单元已就绪')
@@ -106,7 +106,7 @@ export default function DepartmentsPage() {
       })
     },
     onSuccess: (res) => {
-      if (res.data.status === 'ok') {
+      if (res.status === 200 || res.data?.status === 'ok') {
         queryClient.invalidateQueries({ queryKey: ['departments'] })
         setModalType('NONE')
         toast.success('战术单元已物理注销')

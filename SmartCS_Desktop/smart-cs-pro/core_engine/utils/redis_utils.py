@@ -15,11 +15,17 @@ class RedisManager:
     async def connect(self):
         if not self.client:
             try:
+                raw_password = os.getenv("REDIS_PASSWORD", None)
+                # 转换空字符串或 "None" 字符串为真正的 None
+                password = None
+                if raw_password and raw_password.strip() and raw_password.lower() != "none":
+                    password = raw_password.strip()
+
                 self.client = redis.Redis(
                     host=os.getenv("REDIS_HOST", "127.0.0.1"),
                     port=int(os.getenv("REDIS_PORT", 6379)),
                     db=int(os.getenv("REDIS_DB", 0)),
-                    password=os.getenv("REDIS_PASSWORD", None),
+                    password=password,
                     decode_responses=True,
                     socket_keepalive=True,
                     health_check_interval=30,

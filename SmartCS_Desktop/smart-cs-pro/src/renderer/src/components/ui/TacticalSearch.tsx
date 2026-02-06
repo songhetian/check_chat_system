@@ -29,9 +29,9 @@ export const TacticalSearch = ({
         onKeyDown={(e) => e.key === 'Enter' && onSearch?.()}
         placeholder={placeholder}
         className={cn(
-          "w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-2.5 pl-11 pr-10 text-sm text-slate-900",
+          "w-full bg-slate-50/50 border border-slate-200 rounded-xl py-2 pl-10 pr-10 text-xs text-slate-900",
           "placeholder:text-slate-400 font-medium transition-all duration-300",
-          "focus:bg-white focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500/50 outline-none",
+          "focus:bg-white focus:ring-2 focus:ring-cyan-500/10 focus:border-cyan-500/50 outline-none",
           "hover:border-slate-300"
         )}
       />

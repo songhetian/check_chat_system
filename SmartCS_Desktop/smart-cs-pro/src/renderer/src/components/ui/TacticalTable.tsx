@@ -15,11 +15,11 @@ export const TacticalTable = ({ headers, children, className }: TacticalTablePro
         <thead>
           <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
             {headers.map((h, i) => (
-              <th key={i} className="px-8 py-4 text-center">{h}</th>
+              <th key={i} className="px-6 py-3 text-center">{h}</th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-50">
+        <tbody className="divide-y divide-slate-50 text-[11px] font-bold">
           {children}
         </tbody>
       </table>
@@ -59,21 +59,21 @@ export const TacticalPagination = ({ total, pageSize, currentPage, onPageChange 
       onClick={() => typeof page === 'number' && onPageChange(page)}
       disabled={disabled || page === '...'}
       className={cn(
-        "w-9 h-9 flex items-center justify-center rounded-xl text-xs font-bold transition-all",
+        "w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all",
         active 
-          ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/30" 
+          ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/30" 
           : "bg-white border border-slate-200 text-slate-600 hover:border-cyan-500 hover:text-cyan-600 disabled:opacity-30 shadow-sm"
       )}
     >
-      {Icon ? <Icon size={14} /> : page}
+      {Icon ? <Icon size={12} /> : page}
     </button>
   )
 
   return (
-    <div className="p-6 bg-slate-50/30 border-t border-slate-100 flex justify-between items-center shrink-0 font-sans">
+    <div className="p-3 bg-slate-50/30 border-t border-slate-100 flex justify-between items-center shrink-0 font-sans">
       <div className="flex flex-col">
-        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">战术数据分页</span>
-        <p className="text-[9px] text-slate-400 font-medium">总计 {total} 条记录 / 共 {totalPages} 页</p>
+        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">战术数据分页</span>
+        <p className="text-[8px] text-slate-400 font-medium">共 {total} 条 / {totalPages} 页</p>
       </div>
 
       <div className="flex items-center gap-1.5">

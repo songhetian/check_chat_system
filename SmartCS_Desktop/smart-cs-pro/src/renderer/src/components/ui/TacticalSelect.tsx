@@ -49,41 +49,41 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
       <div 
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={cn(
-          "w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-black flex items-center justify-between transition-all shadow-sm group",
+          "w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black flex items-center justify-between transition-all shadow-sm group",
           disabled ? "opacity-50 cursor-not-allowed bg-slate-50" : "cursor-pointer",
-          isOpen ? "ring-4 ring-cyan-500/10 border-cyan-500 shadow-lg" : (disabled ? "" : "hover:border-slate-300")
+          isOpen ? "ring-2 ring-cyan-500/10 border-cyan-500 shadow-md" : (disabled ? "" : "hover:border-slate-300")
         )}
       >
         <span className={cn(selectedOption ? "text-slate-900" : "text-slate-400")}>
           {selectedOption ? selectedOption.name : placeholder}
         </span>
-        <ChevronDown size={16} className={cn("text-slate-400 transition-transform duration-300", isOpen && "rotate-180 text-cyan-500")} />
+        <ChevronDown size={14} className={cn("text-slate-400 transition-transform duration-200", isOpen && "rotate-180 text-cyan-500")} />
       </div>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: 10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 8, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.98 }}
-            className="absolute z-[1100] w-full bg-white/95 backdrop-blur-xl rounded-[24px] shadow-2xl border border-slate-200 overflow-hidden flex flex-col p-2"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 4 }}
+            exit={{ opacity: 0, y: 4 }}
+            className="absolute z-[1100] w-full bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col p-1.5"
           >
             {showSearch && (
-              <div className="relative mb-2 p-1">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Search size={14} /></div>
+              <div className="relative mb-1.5 p-1">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Search size={12} /></div>
                 <input 
                   autoFocus
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="检索匹配项..."
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-900 focus:ring-0 shadow-inner"
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border-none rounded-lg text-[11px] font-bold text-slate-900 focus:ring-0 shadow-inner"
                 />
               </div>
             )}
 
-            <div className="max-h-60 overflow-y-auto custom-scrollbar">
+            <div className="max-h-48 overflow-y-auto custom-scrollbar">
               {filteredOptions.length === 0 ? (
-                <div className="p-6 text-center text-[10px] font-black text-slate-300 uppercase italic tracking-widest">中枢未发现匹配项</div>
+                <div className="p-4 text-center text-[10px] font-black text-slate-300 uppercase italic tracking-widest">无匹配项</div>
               ) : (
                 filteredOptions.map((opt) => (
                   <div 
@@ -93,12 +93,12 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
                       setIsOpen(false)
                     }}
                     className={cn(
-                      "px-4 py-3 rounded-xl text-xs font-black flex items-center justify-between cursor-pointer transition-all mb-1 last:mb-0",
-                      String(value) === String(opt.id) ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      "px-3 py-2 rounded-lg text-[11px] font-black flex items-center justify-between cursor-pointer transition-all mb-0.5 last:mb-0",
+                      String(value) === String(opt.id) ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/20" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     )}
                   >
                     <span>{opt.name}</span>
-                    {String(value) === String(opt.id) && <Check size={14} />}
+                    {String(value) === String(opt.id) && <Check size={12} />}
                   </div>
                 ))
               )}

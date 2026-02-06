@@ -53,10 +53,13 @@ export default function CategoriesPage() {
       })
     },
     onSuccess: (res) => {
-      if (res.data.status === 'ok') {
+      // 核心修正：bridge 返回 res.data.data.status 或 res.data.status
+      if (res.status === 200 || res.data?.status === 'ok') {
         queryClient.invalidateQueries({ queryKey: ['categories'] })
         setModalType('NONE')
         toast.success('指令已固化', { description: '分类架构已实时更新' })
+      } else {
+        toast.error('同步失败', { description: res.data?.message || '中枢通讯异常' })
       }
     }
   })
@@ -72,7 +75,7 @@ export default function CategoriesPage() {
       })
     },
     onSuccess: (res) => {
-      if (res.data.status === 'ok') {
+      if (res.status === 200 || res.data?.status === 'ok') {
         queryClient.invalidateQueries({ queryKey: ['categories'] })
         setModalType('NONE')
         toast.success('节点移除成功', { description: '物理规则已重载' })

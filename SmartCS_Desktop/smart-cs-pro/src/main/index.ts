@@ -1,23 +1,32 @@
 import { app, shell, BrowserWindow, ipcMain, dialog, desktopCapturer } from 'electron'
 import { join } from 'path'
-// ... 其他保持不变
-
-// 核心：战术截屏接口 (用于实时监控)
-ipcMain.handle('capture-screen', async () => {
-  try {
-    const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width: 800, height: 450 } })
-    if (sources.length > 0) {
-      return sources[0].thumbnail.toDataURL()
-    }
-    return null
-  } catch (e) {
-    console.error('Screen capture failed', e)
-    return null
-  }
-})
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
+
+// --- 1. 战术本地数据库初始化 (Better-SQLite3) ---
+// 使用 require 避免 Rollup 的动态 require 报错
+const Database = require('better-sqlite3')
+
+const dbPath = join(app.getPath('userData'), 'client_tactical_buffer.db')
+const db = new Database(dbPath)
+
+// 初始化本地缓存表
+db.exec(`
+  CREATE TABLE IF NOT EXISTS offline_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL,
+    method TEXT NOT NULL,
+    data TEXT,
+    headers TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS api_cache (
+    url TEXT PRIMARY KEY,
+    data TEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`)
 
 function createWindow(): void {
   // 核心：从 .env 加载并覆盖 server_config.json
@@ -72,43 +81,142 @@ function createWindow(): void {
   // 暴露配置给前端
   ipcMain.handle('get-server-config', () => serverConfig)
 
-  // 核心：战术 API 转发桥
+  // 暴露同步状态给前端
+  ipcMain.handle('get-sync-status', async () => {
+    const row = db.prepare('SELECT COUNT(*) as count FROM offline_queue').get() as { count: number }
+    return { pendingCount: row.count }
+  })
+
+  // 核心：离线暂存逻辑
+  const saveToOfflineQueue = (url: string, method: string, data: any, headers: any) => {
+    const stmt = db.prepare('INSERT INTO offline_queue (url, method, data, headers) VALUES (?, ?, ?, ?)')
+    stmt.run(url, method, JSON.stringify(data), JSON.stringify(headers))
+    console.log(`📦 [离线守卫] 数据已存入本地战术缓冲: ${url}`)
+  }
+
+  // 核心：战术同步引擎 (网络恢复后自动补发)
+  let isSyncing = false
+  const syncOfflineData = async () => {
+    if (isSyncing) return
+    const records = db.prepare('SELECT * FROM offline_queue ORDER BY id ASC LIMIT 10').all() as any[]
+    
+    if (records.length === 0) return
+    
+    isSyncing = true
+    console.log(`🔄 [同步引擎] 发现 ${records.length} 条离线数据，尝试同步...`)
+
+    for (const record of records) {
+      try {
+        const response = await fetch(record.url, {
+          method: record.method,
+          headers: JSON.parse(record.headers),
+          body: record.data,
+          signal: AbortSignal.timeout(5000)
+        })
+
+        if (response.ok) {
+          db.prepare('DELETE FROM offline_queue WHERE id = ?').run(record.id)
+          console.log(`✅ [同步成功] 记录 ID: ${record.id}`)
+        }
+      } catch (e) {
+        console.warn(`⚠️ [同步中断] 网络仍不稳定: ${record.url}`)
+        break // 退出循环，等待下一次尝试
+      }
+    }
+    isSyncing = false
+  }
+
+  // 定时检查心跳并同步 (每 30 秒)
+  setInterval(syncOfflineData, 30000)
+
+  // 核心：战术 API 转发桥 (增强版)
   ipcMain.handle('call-api', async (_, { url, method, data, headers }) => {
+    // 自动补全 URL：如果传入的是相对路径，则拼上中央服务器基地址
+    const finalUrl = url.startsWith('http') ? url : `${serverConfig.network.central_server_url}${url}`
+    
+    const finalHeaders: Record<string, string> = { 
+      'Content-Type': 'application/json',
+      ...(headers || {})
+    }
+
+    if (finalHeaders['Authorization'] && !finalHeaders['Authorization'].startsWith('Bearer ')) {
+      finalHeaders['Authorization'] = `Bearer ${finalHeaders['Authorization']}`
+    }
+
     try {
-      const finalHeaders: Record<string, string> = { 
-        'Content-Type': 'application/json',
-        ...(headers || {})
-      }
-
-      // 自动修复逻辑：如果提供了 token 但没加 Bearer 前缀，自动补全
-      if (finalHeaders['Authorization'] && !finalHeaders['Authorization'].startsWith('Bearer ')) {
-        finalHeaders['Authorization'] = `Bearer ${finalHeaders['Authorization']}`
-      }
-
-      console.log(`📡 [API 转发] ${method || 'GET'} -> ${url}`)
-      
-      const response = await fetch(url, {
+      console.log(`📡 [API 转发] ${method || 'GET'} -> ${finalUrl}`)
+      const response = await fetch(finalUrl, {
         method: method || 'GET',
         headers: finalHeaders,
         body: data ? JSON.stringify(data) : undefined,
         signal: AbortSignal.timeout(10000)
       })
       
-      const result = await response.json()
+      let result;
+      try {
+        result = await response.json()
+      } catch (e) {
+        result = { status: response.ok ? 'ok' : 'error' }
+      }
+      
+      // 战术增强：如果是 GET 请求成功，存入读缓存 (排除健康检查)
+      if ((method === 'GET' || !method) && response.ok && !url.includes('/health')) {
+        const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
+        const stmt = db.prepare('INSERT OR REPLACE INTO api_cache (url, data) VALUES (?, ?)')
+        stmt.run(cleanUrl, JSON.stringify(result))
+      }
+
+      // 成功后触发一次静默同步
+      syncOfflineData()
+      
       return { status: response.status, data: result }
     } catch (e: any) {
       console.error(`❌ [API 转发失败] URL: ${url} | Error: ${e.message}`)
       
-      // 区分错误类型
+      // 离线读缓存逻辑：如果是 GET 请求失败，尝试从缓存返回
+      if (method === 'GET' || !method) {
+        const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
+        const cached = db.prepare('SELECT data FROM api_cache WHERE url = ?').get(cleanUrl) as { data: string } | undefined
+        if (cached) {
+          console.log(`📦 [离线守卫] 从本地读缓存返回数据: ${url}`)
+          return { status: 200, data: JSON.parse(cached.data), _fromCache: true }
+        }
+      }
+
+      // 离线写队列逻辑：全量拦截策略
+      if (method !== 'GET' && method !== 'HEAD') {
+        saveToOfflineQueue(finalUrl, method || 'POST', data, finalHeaders)
+        
+        // 关键：返回符合前端预期的 "ok" 状态，确保 UI 能够正常闭环（如关闭弹窗）
+        return { 
+          status: 200, 
+          data: { 
+            status: 'ok', 
+            message: "数据已记录至离线缓冲，连接恢复后自动同步",
+            _isOffline: true 
+          }
+        }
+      }
+
       let errorMsg = "中枢通讯链路断开"
       if (e.name === 'TimeoutError') errorMsg = "战术响应超时"
       else if (e.message.includes('ECONNREFUSED')) errorMsg = "指挥中心处于脱机状态"
       
-      return { 
-        status: 500, 
-        error: errorMsg,
-        details: e.message 
+      return { status: 500, error: errorMsg }
+    }
+  })
+
+  // 核心：战术截屏接口 (用于实时监控)
+  ipcMain.handle('capture-screen', async () => {
+    try {
+      const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width: 800, height: 450 } })
+      if (sources.length > 0) {
+        return sources[0].thumbnail.toDataURL()
       }
+      return null
+    } catch (e) {
+      console.error('Screen capture failed', e)
+      return null
     }
   })
 

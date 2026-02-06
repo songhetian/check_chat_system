@@ -45,6 +45,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isFullScreen, setIsFullScreen] = useState(false)
   const [selectedMsg, setSelectedMsg] = useState<Notification | null>(null)
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const [pendingSyncCount, setPendingSyncCount] = useState(0)
+  const [isServerOnline, setIsServerOnline] = useState(true)
 
   const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
   const handleClose = () => window.electron.ipcRenderer.send('close-window')
@@ -71,6 +73,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     fetchRecentNotifs() 
     // 每 30 秒自动同步一次未读消息，实现无感更新
     const timer = setInterval(fetchRecentNotifs, 30000)
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    const checkSyncStatus = async () => {
+      if (window.api?.getSyncStatus) {
+        const { pendingCount } = await window.api.getSyncStatus()
+        setPendingSyncCount(pendingCount)
+      }
+      
+      // 增加心跳检测：检测 /health 接口
+      try {
+        const res = await window.api.callApi({ url: '/health', method: 'GET' })
+        setIsServerOnline(res.status === 200)
+      } catch {
+        setIsServerOnline(false)
+      }
+    }
+    checkSyncStatus()
+    const timer = setInterval(checkSyncStatus, 5000)
     return () => clearInterval(timer)
   }, [])
 
@@ -163,7 +185,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <main className="flex-1 flex flex-col overflow-hidden relative z-10">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
-          <div className="px-4 py-1.5 bg-slate-100 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest">指挥中心控制台</div>
+          <div className="flex items-center gap-4">
+            <div className="px-4 py-1.5 bg-slate-100 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest">指挥中心控制台</div>
+            
+            {!isServerOnline && (
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-100 rounded-lg shadow-sm">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-bold text-red-700 uppercase tracking-tighter">
+                  指挥中心脱机
+                </span>
+              </motion.div>
+            )}
+
+            {pendingSyncCount > 0 && (
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg shadow-sm">
+                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-tighter">
+                  离线缓存: {pendingSyncCount} 条待同步
+                </span>
+              </motion.div>
+            )}
+          </div>
           
           <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <div className="relative">
