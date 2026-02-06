@@ -156,29 +156,47 @@ export default function NotificationsPage() {
                   key={n.id} 
                   className={cn(
                     "group transition-all cursor-pointer", 
-                    n.is_read ? "opacity-50" : "bg-white hover:bg-slate-50"
+                    n.is_read ? "bg-slate-50/80" : "bg-white hover:bg-cyan-50/20"
                   )}
                   onClick={() => setSelectedMsg(n)}
                 >
                   <td className="px-8 py-3 text-left">
-                    <div className="flex items-center gap-3">
-                      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border shadow-inner", n.is_read ? "bg-slate-100 text-slate-400" : "bg-cyan-100 text-cyan-700 border-cyan-200")}>
-                        {n.is_read ? <MailOpen size={14} /> : <Bell size={14} className="animate-swing" />}
+                    <div className="flex items-center gap-4">
+                      {/* 仅保留彩色指示条，移除图标 */}
+                      <div className={cn(
+                        "w-1.5 h-10 rounded-full shrink-0 transition-all",
+                        n.is_read ? "bg-slate-300" : "bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.5)] animate-pulse"
+                      )} />
+                      <div className="flex flex-col min-w-0">
+                        <span className={cn(
+                          "text-xs truncate max-w-xs", 
+                          n.is_read ? "text-slate-500 font-medium" : "text-black font-black"
+                        )}>
+                          {n.title}
+                        </span>
+                        <span className={cn(
+                          "text-[10px] italic truncate max-w-md",
+                          n.is_read ? "text-slate-400" : "text-slate-600"
+                        )}>
+                          "{n.content}"
+                        </span>
                       </div>
-                      <span className="text-xs font-black text-black truncate max-w-xs">{n.title}</span>
                     </div>
                   </td>
                   <td className="px-6 py-3 text-center">
-                    <span className="text-[10px] font-black text-black tabular-nums">
+                    <span className={cn(
+                      "text-[10px] tabular-nums",
+                      n.is_read ? "text-slate-400 font-medium" : "text-black font-black"
+                    )}>
                       {new Date(n.created_at).toLocaleString()}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-center">
+                  <td className="px-6 py-3 text-center text-xs">
                     <div className="flex justify-center">
                       {n.is_read ? (
-                        <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-black rounded border border-slate-200 uppercase tracking-tighter">已归档</span>
+                        <span className="px-2 py-0.5 bg-slate-200 text-slate-600 text-[9px] font-black rounded uppercase tracking-tighter border border-slate-300">已存档</span>
                       ) : (
-                        <span className="px-2 py-0.5 bg-red-600 text-white text-[9px] font-black rounded shadow animate-pulse uppercase tracking-tighter">待阅知</span>
+                        <span className="px-2 py-0.5 bg-red-600 text-white text-[9px] font-black rounded shadow-md animate-pulse uppercase tracking-tighter">待处理</span>
                       )}
                     </div>
                   </td>
@@ -193,7 +211,7 @@ export default function NotificationsPage() {
                        {!n.is_read && (
                          <button 
                            onClick={(e) => { e.stopPropagation(); markRead(n.id); }} 
-                           className="p-2 bg-cyan-50 text-cyan-700 hover:bg-cyan-600 hover:text-white rounded-lg transition-all border border-cyan-100"
+                           className="p-2 bg-cyan-100 text-cyan-700 hover:bg-cyan-600 hover:text-white rounded-lg transition-all border border-cyan-200"
                          >
                            <CheckCircle2 size={14} />
                          </button>
