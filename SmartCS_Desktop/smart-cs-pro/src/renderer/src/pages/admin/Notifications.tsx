@@ -162,18 +162,20 @@ export default function NotificationsPage() {
                       <span className="text-xs font-black text-slate-900 truncate max-w-[180px]">{n.title}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-3 text-[10px] font-bold text-slate-500 whitespace-nowrap">{new Date(n.created_at).toLocaleString()}</td>
-                  <td className="px-6 py-3 text-[10px] font-medium text-slate-700 italic truncate max-w-md text-left">"{n.content}"</td>
-                  <td className="px-6 py-3">
-                    {n.is_read ? (
-                      <span className="text-[9px] font-black text-slate-400 uppercase">已归档</span>
-                    ) : (
-                      <span className="px-2 py-0.5 bg-red-100 text-red-600 text-[9px] font-black rounded-full border border-red-200">待阅知</span>
-                    )}
+                  <td className="px-6 py-3 text-center text-[10px] font-bold text-slate-900 whitespace-nowrap">{new Date(n.created_at).toLocaleString()}</td>
+                  <td className="px-6 py-3 text-center text-[10px] font-medium text-slate-800 italic truncate max-w-md">"{n.content}"</td>
+                  <td className="px-6 py-3 text-center">
+                    <div className="flex justify-center">
+                      {n.is_read ? (
+                        <span className="text-[9px] font-black text-slate-500 uppercase">已归档</span>
+                      ) : (
+                        <span className="px-2 py-0.5 bg-red-100 text-red-600 text-[9px] font-black rounded-full border border-red-200">待阅知</span>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-8 py-3">
+                  <td className="px-8 py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
-                       <button onClick={(e) => { e.stopPropagation(); setSelectedMsg(n); }} className="p-2 bg-slate-50 text-slate-600 hover:bg-slate-900 hover:text-white rounded-lg transition-all shadow-sm"><ArrowUpRight size={14} /></button>
+                       <button onClick={(e) => { e.stopPropagation(); setSelectedMsg(n); }} className="p-2 bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white rounded-lg transition-all shadow-sm"><ArrowUpRight size={14} /></button>
                        {!n.is_read && (
                          <button onClick={(e) => { e.stopPropagation(); markRead(n.id); }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-lg transition-all shadow-sm border border-cyan-100"><CheckCircle2 size={14} /></button>
                        )}

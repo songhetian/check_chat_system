@@ -15,6 +15,7 @@ import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalSearch } from '../../components/ui/TacticalSearch'
 import { TacticalSelect } from '../../components/ui/TacticalSelect'
+import { TacticalTable } from '../../components/ui/TacticalTable'
 import { toast } from 'sonner'
 
 const getAgentStatusTheme = (score: number, isOnline: boolean) => {
@@ -175,20 +176,46 @@ export default function TacticalCommand() {
               </div>
               <TacticalSearch value={search} onChange={setSearch} placeholder="搜索成员姓名..." />
            </div>
-           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-3 bg-slate-50/30">
-              {agents.map(a => {
-                const theme = getAgentStatusTheme(a.tactical_score, a.is_online);
-                const isActive = activeAgent?.username === a.username;
-                return (
-                  <div key={a.username} onClick={() => { setActiveAgent(a); setLiveChat([]); }} className={cn("p-4 rounded-xl border transition-all cursor-pointer flex items-center gap-4 group relative overflow-hidden", isActive ? "bg-slate-900 border-slate-900 shadow-2xl" : cn("bg-white border-slate-100 hover:border-cyan-200", theme.glow))}>
-                    <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center font-black text-lg italic shrink-0 transition-all", isActive ? "bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20" : "bg-slate-50 text-slate-400")}>{a.real_name[0]}</div>
-                    <div className="flex-1 min-w-0">
-                       <div className="flex items-center justify-between mb-1"><span className={cn("text-xs font-black truncate", isActive ? "text-white" : "text-slate-900")}>{a.real_name}</span><div className={cn("w-2 h-2 rounded-full", theme.dot)} /></div>
-                       <div className="flex items-center justify-between"><span className="text-[9px] font-mono text-slate-500 tracking-tighter">@{a.username}</span><span className={cn("text-[9px] font-black uppercase tracking-widest italic", a.tactical_score < 60 ? "text-red-500" : "text-cyan-500")}>{a.tactical_score} 分</span></div>
-                    </div>
-                  </div>
-                )
-              })}
+           <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
+              <TacticalTable headers={['成员', '状态', '分值', '详情']}>
+                {agents.map(a => {
+                  const theme = getAgentStatusTheme(a.tactical_score, a.is_online);
+                  const isActive = activeAgent?.username === a.username;
+                  return (
+                    <tr 
+                      key={a.username} 
+                      onClick={() => { setActiveAgent(a); setLiveChat([]); }} 
+                      className={cn("cursor-pointer transition-colors", isActive ? "bg-slate-900 text-white" : "hover:bg-slate-50 text-slate-900")}
+                    >
+                      <td className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-2">
+                          <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs italic shrink-0", isActive ? "bg-cyan-500 text-slate-950" : "bg-slate-100 text-slate-500")}>
+                            {a.real_name[0]}
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[11px] font-black truncate">{a.real_name}</span>
+                            <span className={cn("text-[8px] font-mono", isActive ? "text-slate-400" : "text-slate-400")}>@{a.username}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-2 py-3 text-center">
+                        <div className="flex justify-center items-center gap-1.5">
+                          <div className={cn("w-1.5 h-1.5 rounded-full", theme.dot)} />
+                          <span className={cn("text-[9px] font-black uppercase", isActive ? "text-slate-300" : "text-slate-500")}>{theme.label}</span>
+                        </div>
+                      </td>
+                      <td className="px-2 py-3 text-center">
+                        <span className={cn("text-[10px] font-black italic", a.tactical_score < 60 ? "text-red-500" : (isActive ? "text-cyan-400" : "text-cyan-600"))}>
+                          {a.tactical_score}
+                        </span>
+                      </td>
+                      <td className="px-2 py-3 text-center">
+                        <ArrowUpRight size={12} className={cn(isActive ? "text-cyan-400" : "text-slate-300")} />
+                      </td>
+                    </tr>
+                  )
+                })}
+              </TacticalTable>
            </div>
         </div>
 
