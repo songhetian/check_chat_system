@@ -77,7 +77,7 @@ export const TacticalIsland = () => {
   useEffect(() => {
     const screenWidth = window.screen.availWidth
     const screenHeight = window.screen.availHeight
-    let width = 740 // 宽度扩容至 740px，彻底解决按钮显示不全
+    let width = 820 // 增加到 820px 确保所有按钮及其间距完美容纳
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
@@ -88,7 +88,7 @@ export const TacticalIsland = () => {
     } else if (layoutMode === 'SIDE') {
       width = 440; height = screenHeight - 80; x = screenWidth - 460; y = 40
     } else {
-      x = screenWidth - 760; y = 30
+      x = screenWidth - 840; y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', !showBigScreenModal)
@@ -119,9 +119,7 @@ export const TacticalIsland = () => {
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent text-black">
-      <svg width="0" height="0" className="absolute"><defs><clipPath id="tactical-island-clip" clipPathUnits="objectBoundingBox"><rect x="0" y="0" width="1" height="1" rx="0.06" ry="0.06" /></clipPath></defs></svg>
-
+    <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent">
       <AnimatePresence>
         {showCriticalAlert && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1000] flex items-center justify-center pointer-events-none bg-red-600/20 backdrop-blur-2xl">
@@ -140,15 +138,15 @@ export const TacticalIsland = () => {
         layout
         initial={false}
         animate={{ 
-          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : 740),
+          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : 820),
           height: layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))
         }}
         className={cn(
           "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative",
-          isGlassMode ? "bg-slate-950/40 backdrop-blur-2xl" : "bg-slate-950",
-          (showBigScreenModal || layoutMode === 'SIDE') ? "rounded-none" : "rounded-2xl shadow-none"
+          isGlassMode ? "bg-slate-950/60 backdrop-blur-2xl shadow-none" : "bg-slate-950 shadow-none",
+          (showBigScreenModal || layoutMode === 'SIDE') ? "rounded-none" : "rounded-2xl"
         )}
-        style={{ backfaceVisibility: 'hidden' } as any}
+        style={{ backfaceVisibility: 'hidden', transform: 'translate3d(0,0,0)' } as any}
       >
         {layoutMode === 'FLOAT' && (
           <div className="flex items-center px-6 h-[72px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
@@ -166,7 +164,7 @@ export const TacticalIsland = () => {
             <div className="flex-1 flex items-center justify-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
               <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观" color="muted" />
               <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
-              <HubBtn icon={isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />} active={isMuted} onClick={() => setMuted(!isMuted)} title={isMuted ? "已静音" : "静音"} color={isMuted ? "red" : "muted"} />
+              <HubBtn icon={isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />} active={isMuted} onClick={() => setMuted(!isMuted)} title={isMuted ? "解禁" : "静音"} color={isMuted ? "red" : "muted"} />
               <div className="w-px h-5 bg-white/10 mx-1" />
               <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="资料" color="white" />
               <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
@@ -177,7 +175,7 @@ export const TacticalIsland = () => {
               <HubBtn icon={<LayoutGrid size={20} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="面板" color="muted" />
               <HubBtn icon={<LogOut size={20} />} active={false} onClick={() => { logout(); window.location.hash = '/login'; }} title="退出" color="red" />
             </div>
-            <div className="w-[110px] shrink-0" />
+            <div className="w-[140px] shrink-0" />
           </div>
         )}
 
@@ -188,10 +186,10 @@ export const TacticalIsland = () => {
                 <h4 className="text-lg font-black italic tracking-tighter uppercase">{activeSideTool === 'PRODUCTS' ? '商品资产' : (activeSideTool === 'KNOWLEDGE' ? '知识矩阵' : '客户洞察')}</h4>
              </div>
              {activeSideTool === 'CUSTOMERS' ? (
-               <div className="flex-1 overflow-y-auto p-6 space-y-6 text-black">
+               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                   <div className="p-6 rounded-xl bg-emerald-500 text-slate-950 shadow-xl relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-4 opacity-20"><Trophy size={60}/></div>
-                     <div className="flex items-center gap-4 mb-4"><div className="w-12 h-12 rounded-xl bg-black/20 flex items-center justify-center border border-black/10"><UserIcon size={24}/></div><div><h2 className="text-2xl font-black mb-1 text-black">{currentCustomer?.name}</h2><span className="text-[10px] font-black uppercase bg-black/10 px-2 py-0.5 rounded-xl">{currentCustomer?.level}</span></div></div>
+                     <div className="flex items-center gap-4 mb-4"><div className="w-12 h-12 rounded-xl bg-black/20 flex items-center justify-center border border-black/10"><UserIcon size={24}/></div><div><h2 className="text-2xl font-black mb-1">{currentCustomer?.name}</h2><span className="text-[10px] font-black uppercase bg-black/10 px-2 py-0.5 rounded-xl">{currentCustomer?.level}</span></div></div>
                      <div className="grid grid-cols-2 gap-3"><div className="bg-black/10 p-3 rounded-xl border border-black/5"><p className="text-[9px] font-black opacity-60 uppercase mb-1">历史价值</p><p className="text-xl font-black italic">¥{currentCustomer?.total_value}</p></div><div className="bg-black/10 p-3 rounded-xl border border-black/5"><p className="text-[9px] font-black opacity-60 uppercase mb-1">智脑态度</p><p className="text-xl font-black italic">{currentCustomer?.attitude}</p></div></div>
                   </div>
                   <div className="flex gap-2 p-1.5 bg-white/5 rounded-xl border border-white/5"><button onClick={() => { setCurrentCustomer(mockCustomers[0]); setShowCriticalAlert(false); }} className={cn("flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all", currentCustomer?.name === '李先生' ? "bg-emerald-500 text-black" : "bg-white/5 text-slate-500")}>模拟 VIP</button><button onClick={() => { setCurrentCustomer(mockCustomers[1]); setShowCriticalAlert(true); }} className={cn("flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all", currentCustomer?.name === '未知访客' ? "bg-red-500 text-white" : "bg-white/5 text-slate-500")}>模拟 恶劣客户</button></div>
@@ -204,7 +202,7 @@ export const TacticalIsland = () => {
                   </div>
                   <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-4">
                     {searchResults.map((item, i) => (
-                      <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-cyan-500/30 transition-all group relative overflow-hidden text-black">
+                      <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-cyan-500/30 transition-all group relative overflow-hidden">
                         <div className="text-[9px] font-black uppercase mb-2 tracking-widest flex justify-between items-center"><span className={activeSideTool === 'PRODUCTS' ? "text-emerald-500" : "text-cyan-500"}>{activeSideTool === 'PRODUCTS' ? 'ASSET' : 'MANUAL'}</span>{item.price && <span className="text-red-500 font-black text-sm">¥{item.price}</span>}</div>
                         <div className="text-base font-black text-white mb-2 italic">{item.name || item.keyword}</div>
                         <div className="p-3 bg-black/60 rounded-xl text-xs text-slate-200 border border-white/5 shadow-inner italic leading-relaxed">"{item.usp || item.solution}"</div>
@@ -227,7 +225,7 @@ export const TacticalIsland = () => {
               <div className="flex flex-col gap-3 flex-1 min-h-0">
                  <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
                     <textarea value={helpText} onChange={(e) => setHelpText(e.target.value)} placeholder="描述困境，智脑将自动匹配对策..." className="w-full h-24 bg-black/40 border border-white/5 rounded-xl p-3 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none font-bold" />
-                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-4 py-1.5 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all shadow-lg uppercase">提交</button>
+                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-4 py-1.5 bg-red-500 text-white text-[10px] font-black rounded-lg hover:bg-red-600 transition-all shadow-lg uppercase">提交</button>
                  </div>
               </div>
             </motion.div>
@@ -263,7 +261,7 @@ export const TacticalIsland = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1000] bg-slate-950 flex flex-col">
               <div className="flex justify-between items-center p-6 bg-black/60 border-b border-white/10 shrink-0" style={{ WebkitAppRegion: 'drag' } as any}>
                  <div className="flex items-center gap-4"><div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg animate-pulse"><Maximize2 size={20} className="text-white" /></div><div><h4 className="text-xl font-black text-white uppercase italic leading-none">全景指挥中枢</h4><p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-1">指挥中心 · 实时链路已激活</p></div></div>
-                 <button onClick={() => setShowBigScreenModal(false)} className="px-6 py-2.5 bg-red-500 text-white rounded-xl text-xs font-black uppercase transition-all shadow-xl">退出全景</button>
+                 <button onClick={() => setShowBigScreenModal(false)} className="px-6 py-2.5 bg-red-500 text-white rounded-lg text-xs font-black uppercase transition-all shadow-xl">退出全景</button>
               </div>
               <div className="flex-1 bg-black relative" style={{ WebkitAppRegion: 'no-drag' } as any}><iframe src="#/big-screen" className="w-full h-full border-none" title="Tactical Big Screen" /><div className="absolute inset-0 pointer-events-none border border-white/5 shadow-[inset_0_0_150px_rgba(0,0,0,0.9)]" /></div>
             </motion.div>
@@ -297,7 +295,7 @@ function TabBtn({ id, active, set, icon, label }: any) {
 
 function InsightCard({ title, desc, color, icon }: any) {
   const colors: any = { emerald: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", red: "bg-red-500/10 border-red-500/20 text-red-400", cyan: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" }
-  return (<div className={cn("p-4 rounded-xl border flex gap-3 transition-all hover:bg-white/5", colors[color])}><div className="shrink-0 mt-1 text-black">{icon}</div><div><p className="text-xs font-black mb-1 text-black">{title}</p><p className="text-[10px] font-medium leading-relaxed opacity-80 text-black">{desc}</p></div></div>)
+  return (<div className={cn("p-4 rounded-xl border flex gap-3 transition-all hover:bg-white/5", colors[color])}><div className="shrink-0 mt-1">{icon}</div><div><p className="text-xs font-black mb-1">{title}</p><p className="text-[10px] font-medium leading-relaxed opacity-80">{desc}</p></div></div>)
 }
 
 function ToolCard({ icon, title, desc, color, onClick }: any) {
