@@ -40,8 +40,8 @@ export const TacticalIsland = () => {
     const screenWidth = window.screen.availWidth
     const screenHeight = window.screen.availHeight
     
-    // 物理宽度：展开态压减至 660px，折叠态保持 80px
-    let width = isFolded ? 80 : 660 
+    // 物理宽度：安全宽度 720px
+    let width = isFolded ? 80 : 720 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
@@ -52,7 +52,7 @@ export const TacticalIsland = () => {
     } else if (layoutMode === 'SIDE') {
       width = 440; height = screenHeight - 80; x = screenWidth - 460; y = 40
     } else {
-      x = isFolded ? screenWidth - 100 : screenWidth - 680
+      x = isFolded ? screenWidth - 100 : screenWidth - 740
       y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
@@ -92,7 +92,7 @@ export const TacticalIsland = () => {
         layout
         initial={false}
         animate={{ 
-          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 660)),
+          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 720)),
           height: layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))
         }}
         className={cn(
@@ -103,8 +103,9 @@ export const TacticalIsland = () => {
         style={{ backfaceVisibility: 'hidden', transform: 'translate3d(0,0,0)' } as any}
       >
         {layoutMode === 'FLOAT' && (
-          <div className="flex items-center px-4 h-[72px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
+          <div className="flex items-center px-4 h-[72px] shrink-0 relative" style={{ WebkitAppRegion: 'drag' } as any}>
             
+            {/* 1. 左侧头像区 */}
             <AnimatePresence>
               {!isFolded && (
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-2 w-[110px] shrink-0">
@@ -120,10 +121,11 @@ export const TacticalIsland = () => {
               )}
             </AnimatePresence>
 
-            <div className="flex-1 flex items-center justify-end pr-2 gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            {/* 2. 中间按钮组 + 切换按钮：使用 flex-1 占据剩余空间并右对齐 */}
+            <div className="flex-1 flex items-center justify-end gap-2 pr-1" style={{ WebkitAppRegion: 'no-drag' } as any}>
               <AnimatePresence>
                 {!isFolded && (
-                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="flex items-center justify-center gap-2">
+                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="flex items-center gap-2">
                     <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观" color="muted" />
                     <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
                     <HubBtn icon={isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />} active={isMuted} onClick={() => setMuted(!isMuted)} title={isMuted ? "解禁" : "静音"} color={isMuted ? "red" : "muted"} />
@@ -193,7 +195,7 @@ export const TacticalIsland = () => {
 function HubBtn({ icon, active, onClick, title, color }: any) {
   const activeClassMap: any = { red: "bg-red-500 text-white", emerald: "bg-emerald-500 text-white", white: "bg-white text-black", muted: "bg-slate-800 text-white" }
   return (
-    <div className="relative group/btn">
+    <div className="relative group/btn shrink-0">
       <button onClick={onClick} className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90 overflow-hidden relative", active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white")}>
         <div className="transition-all duration-300 group-hover/btn:opacity-0 group-hover/btn:scale-50">
           {icon}
