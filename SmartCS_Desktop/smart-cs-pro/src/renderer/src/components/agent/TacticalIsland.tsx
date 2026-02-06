@@ -35,7 +35,6 @@ export const TacticalIsland = () => {
   const [helpText, setHelpText] = useState('')
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // --- 测试数据池 ---
   const mockCustomers = useMemo(() => [
     {
       name: "李先生",
@@ -58,7 +57,6 @@ export const TacticalIsland = () => {
     }
   ], []);
 
-  // 1. 画像监控逻辑
   useEffect(() => {
     if (isCustomerHudEnabled) {
       setCurrentCustomer(mockCustomers[0]);
@@ -73,11 +71,10 @@ export const TacticalIsland = () => {
     }
   }, [isCustomerHudEnabled])
 
-  // 2. 物理停靠逻辑
   useEffect(() => {
     const screenWidth = window.screen.availWidth
     const screenHeight = window.screen.availHeight
-    let width = 680 
+    let width = 740 // 进一步拓宽确保退出按钮空间
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
@@ -88,13 +85,12 @@ export const TacticalIsland = () => {
     } else if (layoutMode === 'SIDE') {
       width = 440; height = screenHeight - 80; x = screenWidth - 460; y = 40
     } else {
-      x = screenWidth - 700; y = 30
+      x = screenWidth - 760; y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', !showBigScreenModal)
   }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode])
 
-  // 3. 态度风险监控
   useEffect(() => {
     if (currentCustomer?.attitude?.includes('恶劣')) {
       setShowCriticalAlert(true);
@@ -120,8 +116,8 @@ export const TacticalIsland = () => {
 
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent">
-      <svg width="0" height="0" className="absolute"><defs><clipPath id="tactical-island-clip" clipPathUnits="objectBoundingBox"><rect x="0" y="0" width="1" height="1" rx="0.06" ry="0.06" /></clipPath></defs></svg>
-
+      {/* 彻底移除 clip-path 定义，避免双层渲染 Bug */}
+      
       <AnimatePresence>
         {showCriticalAlert && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1000] flex items-center justify-center pointer-events-none bg-red-600/20 backdrop-blur-2xl">
@@ -140,14 +136,15 @@ export const TacticalIsland = () => {
         layout
         initial={false}
         animate={{ 
-          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : 680),
+          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : 740),
           height: layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))
         }}
         className={cn(
           "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative",
-          isGlassMode ? "bg-slate-950/40 backdrop-blur-2xl shadow-none" : "bg-slate-950 shadow-2xl",
-          (showBigScreenModal || layoutMode === 'SIDE') ? "rounded-none" : "rounded-xl"
+          isGlassMode ? "bg-slate-950/60 backdrop-blur-2xl" : "bg-slate-950",
+          (showBigScreenModal || layoutMode === 'SIDE') ? "rounded-none" : "rounded-2xl shadow-2xl"
         )}
+        style={{ backfaceVisibility: 'hidden', transformStyle: 'flat' } as any}
       >
         {layoutMode === 'FLOAT' && (
           <div className="flex items-center px-6 h-[72px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
@@ -163,19 +160,19 @@ export const TacticalIsland = () => {
             </div>
 
             <div className="flex-1 flex items-center justify-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-              <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观模式" color="muted" />
+              <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="界面外观" color="muted" />
               <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训模式" color="emerald" />
               <div className="w-px h-5 bg-white/10 mx-1" />
               <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="商品资料" color="white" />
-              <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="知识手册" color="white" />
+              <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
               <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="画像监控" color={isCustomerHudEnabled ? "emerald" : "white"} />
               <div className="w-px h-5 bg-white/10 mx-1" />
               <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景视图" color="emerald" />
               <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="战术求援" color="red" />
               <HubBtn icon={<LayoutGrid size={20} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="功能看板" color="muted" />
-              <HubBtn icon={<LogOut size={20} />} active={false} onClick={() => { logout(); window.location.hash = '/login'; }} title="安全退出" color="red" />
+              <HubBtn icon={<LogOut size={20} />} active={false} onClick={() => { logout(); window.location.hash = '/login'; }} title="退出登录" color="red" />
             </div>
-            <div className="w-[140px] shrink-0" />
+            <div className="w-[110px] shrink-0" />
           </div>
         )}
 
@@ -279,10 +276,9 @@ function HubBtn({ icon, active, onClick, title, color }: any) {
       <button onClick={onClick} className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90", active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white")}>
         {icon}
       </button>
-      {/* 定制化 Tooltip: 强制极高 z-index 并确保不被遮挡 */}
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-2.5 py-1.5 bg-black text-white text-[10px] font-black rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[2000] shadow-2xl border border-white/10">
+      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 px-2.5 py-1.5 bg-black text-white text-[10px] font-black rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[2000] shadow-2xl border border-white/10">
         {title}
-        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black" />
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-black" />
       </div>
     </div>
   )
