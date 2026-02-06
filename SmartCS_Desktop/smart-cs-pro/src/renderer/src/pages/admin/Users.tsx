@@ -190,28 +190,28 @@ export default function UsersPage() {
               <span>数据拉取中...</span>
             </div>
           ) : (
-            <TacticalTable headers={['成员姓名', '管理角色', '所属部门', '快速权限重设', '管理操作']}>
+            <TacticalTable headers={['成员姓名', '用户角色', '所属部门', '角色快捷调整', '管理操作']}>
               {users.map((u: any) => (
-                <tr key={u.username} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center">
-                  <td className="px-8 py-3 text-left"><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center font-black text-xs border border-cyan-100 shadow-inner">{u.real_name?.[0] || '?'}</div><div className="flex flex-col"><span className="text-xs font-black text-slate-900">{u.real_name}</span><span className="text-[9px] text-slate-400 font-mono">@{u.username}</span></div></div></td>
-                  <td className="px-6 py-3">{u.is_manager ? <div className="px-2.5 py-0.5 bg-cyan-50 text-cyan-600 text-[10px] font-black rounded-full border border-cyan-100 inline-flex items-center gap-1 shadow-sm"><ShieldCheck size={10} /> 部门主管</div> : <span className="text-[10px] text-slate-300 italic font-medium">普通成员</span>}</td>
-                  <td className="px-6 py-3 font-bold text-slate-500 text-[10px] uppercase">{u.dept_name || '全域通用'}</td>
+                <tr key={u.username} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-900 text-center">
+                  <td className="px-8 py-3 text-left"><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center font-black text-xs border border-cyan-200 shadow-inner">{u.real_name?.[0] || '?'}</div><div className="flex flex-col"><span className="text-xs font-black text-slate-900">{u.real_name}</span><span className="text-[9px] text-slate-500 font-mono">@{u.username}</span></div></div></td>
+                  <td className="px-6 py-3">{u.is_manager ? <div className="px-2.5 py-0.5 bg-cyan-600 text-white text-[10px] font-black rounded-full inline-flex items-center gap-1 shadow-sm"><ShieldCheck size={10} /> 部门主管</div> : <span className="text-[10px] text-slate-600 font-bold">普通成员</span>}</td>
+                  <td className="px-6 py-3 font-bold text-slate-900 text-[10px] uppercase">{u.dept_name || '全域通用'}</td>
                   <td className="px-6 py-3 min-w-[160px]">
                     <TacticalSelect 
                       options={roles} 
                       value={u.role_id} 
                       onChange={(val) => handleRoleChangeRequest(u, val)} 
                       showSearch={false}
-                      className="!py-1 !px-2 !rounded-lg !text-[11px]"
+                      className="!py-1 !px-2 !rounded-lg !text-[11px] font-black"
                     />
                   </td>
                   <td className="px-8 py-3">
                     <div className="flex items-center justify-center gap-2">
                        {hasPermission('admin:user:update') && (
-                         <button onClick={() => { setTargetUser({...u, department_id: u.department_id || ''}); setModalType('EDIT'); }} className="p-2 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all shadow-sm"><Edit3 size={14} /></button>
+                         <button onClick={() => { setTargetUser({...u, department_id: u.department_id || ''}); setModalType('EDIT'); }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-lg transition-all shadow-sm border border-cyan-100"><Edit3 size={14} /></button>
                        )}
                        {hasPermission('admin:user:delete') && (
-                         <button onClick={() => { setTargetUser(u); setModalType('DELETE'); }} className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shadow-sm"><Trash2 size={14} /></button>
+                         <button onClick={() => { setTargetUser(u); setModalType('DELETE'); }} className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all shadow-sm border border-red-100"><Trash2 size={14} /></button>
                        )}
                     </div>
                   </td>

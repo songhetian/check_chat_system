@@ -162,17 +162,17 @@ export default function DepartmentsPage() {
             <TacticalTable headers={['部门名称', '人员数量', '部门负责人', '运行状态', '管理操作']}>
               {depts.map((d: any) => (
                 <tr key={d.id} className="hover:bg-slate-50/50 transition-colors group text-center">
-                  <td className="px-8 py-3 text-left"><div className="flex items-center gap-3"><div className={cn("w-8 h-8 rounded-lg flex items-center justify-center border shadow-inner", d.manager__real_name ? "bg-cyan-50 text-cyan-600 border-cyan-100" : "bg-slate-50 text-slate-400 border-slate-100")}><Building2 size={14} /></div><span className="text-xs font-black text-slate-900">{d.name}</span></div></td>
-                  <td className="px-6 py-3 font-bold text-slate-600"><div className="flex items-center justify-center gap-2"><Users2 size={12} className="text-slate-300" /><span className="text-xs">{d.member_count} <span className="text-[9px] opacity-40 italic">人</span></span></div></td>
-                  <td className="px-6 py-3">{d.manager__real_name ? <div className="flex items-center justify-center gap-2"><div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[8px] font-black shadow-sm">{d.manager__real_name[0]}</div><span className="text-xs font-black text-slate-700">{d.manager__real_name}</span></div> : <span className="text-[10px] text-slate-300 font-bold italic">未指派</span>}</td>
+                  <td className="px-8 py-3 text-left"><div className="flex items-center gap-3"><div className={cn("w-8 h-8 rounded-lg flex items-center justify-center border shadow-inner", d.manager__real_name ? "bg-cyan-100 text-cyan-700 border-cyan-200" : "bg-slate-100 text-slate-500 border-slate-200")}><Building2 size={14} /></div><span className="text-xs font-black text-slate-900">{d.name}</span></div></td>
+                  <td className="px-6 py-3 font-bold text-slate-900"><div className="flex items-center justify-center gap-2"><Users2 size={12} className="text-cyan-600" /><span className="text-xs">{d.member_count} <span className="text-[9px] opacity-60 italic font-black">人</span></span></div></td>
+                  <td className="px-6 py-3">{d.manager__real_name ? <div className="flex items-center justify-center gap-2"><div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[8px] font-black shadow-sm">{d.manager__real_name[0]}</div><span className="text-xs font-black text-slate-900">{d.manager__real_name}</span></div> : <span className="text-[10px] text-slate-400 font-bold italic">未指派</span>}</td>
                   <td className="px-6 py-3 font-black italic text-[10px] text-emerald-600 uppercase tracking-widest">正常运行</td>
                   <td className="px-8 py-3">
                     <div className="flex items-center justify-center gap-2">
                       {hasPermission('admin:dept:update') && (
-                        <button onClick={() => { setTargetItem(d); setInputName(d.name); setManagerId(d.manager_id || ''); setModalType('EDIT') }} className="p-2 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all shadow-sm"><Edit3 size={14} /></button>
+                        <button onClick={() => { setTargetItem(d); setInputName(d.name); setManagerId(d.manager_id || ''); setModalType('EDIT') }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-lg transition-all shadow-sm border border-cyan-100"><Edit3 size={14} /></button>
                       )}
                       {hasPermission('admin:dept:delete') && (
-                        <button onClick={() => { setTargetItem(d); setModalType('DELETE') }} className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shadow-sm"><Trash2 size={14} /></button>
+                        <button onClick={() => { setTargetItem(d); setModalType('DELETE') }} className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all shadow-sm border border-red-100"><Trash2 size={14} /></button>
                       )}
                     </div>
                   </td>

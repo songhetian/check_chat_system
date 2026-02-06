@@ -258,9 +258,11 @@ async def update_role_permissions(data: dict, request: Request, user: dict = Dep
     return {"status": "ok"}
 
 @router.get("/notifications")
-async def get_notifications(page: int = 1, size: int = 10, current_user: dict = Depends(get_current_user)):
+async def get_notifications(page: int = 1, size: int = 10, search: str = "", current_user: dict = Depends(get_current_user)):
     offset = (page - 1) * size
     query = Notification.filter(is_deleted=0)
+    if search:
+        query = query.filter(Q(title__icontains=search) | Q(content__icontains=search))
     total = await query.count()
     data = await query.order_by("-created_at").limit(size).offset(offset).values()
     return {"status": "ok", "data": data, "total": total}
