@@ -79,10 +79,9 @@ async def update_agent_info(data: dict, user: dict = Depends(check_permission("a
     final_dept_id = dept_id if dept_id and dept_id != "" else None
     
     async with in_transaction() as conn:
-        await User.filter(username=username).update(
+        await User.filter(username=username).using_db(conn).update(
             real_name=real_name, 
-            department_id=final_dept_id, 
-            using_db=conn
+            department_id=final_dept_id
         )
         await record_audit(
             user["real_name"], 
@@ -96,7 +95,7 @@ async def update_agent_info(data: dict, user: dict = Depends(check_permission("a
 async def delete_agent(data: dict, user: dict = Depends(check_permission("admin:user:delete"))):
     username = data.get("username")
     async with in_transaction() as conn:
-        await User.filter(username=username).update(is_deleted=1, using_db=conn)
+        await User.filter(username=username).using_db(conn).update(is_deleted=1)
         await record_audit(user["real_name"], "USER_DELETE", username, "物理注销操作员节点")
     return {"status": "ok"}
 
@@ -149,7 +148,7 @@ async def update_department(data: dict, request: Request, user: dict = Depends(c
     dept_id, name, manager_id = data.get("id"), data.get("name"), data.get("manager_id")
     redis = request.app.state.redis
     async with in_transaction() as conn:
-        await Department.filter(id=dept_id).update(name=name, manager_id=manager_id, using_db=conn)
+        await Department.filter(id=dept_id).using_db(conn).update(name=name, manager_id=manager_id)
         await record_audit(user["real_name"], "DEPT_UPDATE", name, f"调整组织架构, 主管ID: {manager_id}")
     if redis: await redis.delete("cache:static:depts_full")
     return {"status": "ok"}
@@ -160,7 +159,7 @@ async def delete_department(data: dict, request: Request, user: dict = Depends(c
     redis = request.app.state.redis
     async with in_transaction() as conn:
         dept = await Department.get(id=dept_id)
-        await Department.filter(id=dept_id).update(is_deleted=1, using_db=conn)
+        await Department.filter(id=dept_id).using_db(conn).update(is_deleted=1)
         await record_audit(user["real_name"], "DEPT_DELETE", dept.name, "物理注销战术单元")
     if redis: await redis.delete("cache:static:depts_full")
     return {"status": "ok"}
@@ -184,7 +183,7 @@ async def delete_product(data: dict, user: dict = Depends(check_permission("admi
     p_id = data.get("id")
     async with in_transaction() as conn:
         p = await Product.get(id=p_id)
-        await Product.filter(id=p_id).update(is_deleted=1, using_db=conn)
+        await Product.filter(id=p_id).using_db(conn).update(is_deleted=1)
         await record_audit(user["real_name"], "PROD_DELETE", p.name, "物理注销商品资产")
     return {"status": "ok"}
 
@@ -193,7 +192,7 @@ async def delete_platform(data: dict, user: dict = Depends(check_permission("adm
     p_id = data.get("id")
     async with in_transaction() as conn:
         p = await Platform.get(id=p_id)
-        await Platform.filter(id=p_id).update(is_deleted=1, using_db=conn)
+        await Platform.filter(id=p_id).using_db(conn).update(is_deleted=1)
         await record_audit(user["real_name"], "PLATFORM_DELETE", p.name, "注销监控目标软件")
     return {"status": "ok"}
 
