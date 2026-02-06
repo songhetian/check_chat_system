@@ -13,13 +13,13 @@ export const TacticalTable = ({ headers, children, className }: TacticalTablePro
     <div className={cn("w-full overflow-hidden flex flex-col", className)}>
       <table className="w-full text-center border-collapse">
         <thead>
-          <tr className="bg-slate-100/80 text-[11px] font-bold text-slate-900 uppercase tracking-tight border-b border-slate-200">
+          <tr className="bg-slate-100 text-[11px] font-bold text-black uppercase tracking-tight border-b border-slate-200">
             {headers.map((h, i) => (
-              <th key={i} className="px-6 py-3.5 text-center">{h}</th>
+              <th key={i} className="px-6 py-3 text-center">{h}</th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-50 text-[11px] font-medium text-slate-700">
+        <tbody className="divide-y divide-slate-50 text-[11px] font-bold text-black">
           {children}
         </tbody>
       </table>
