@@ -9,11 +9,10 @@ def check_env():
     print(f"🛠️  [Smart-CS Pro] 正在初始化 {platform.system()} 战术环境...")
     load_dotenv()
     
-    # 1. 核心依赖检测 (精简版，移除冲突的 pymysqlpool)
+    # 1. 核心依赖检测 (V3.10 精简版：仅保留 API 与数据库核心)
     dependencies = [
-        "fastapi", "uvicorn", "pynput", "paddleocr", "opencv-python", 
-        "httpx", "pandas", "openpyxl", "redis", "python-dotenv", 
-        "pymysql", "aiomysql", "aioredis"
+        "fastapi", "uvicorn", "redis", "python-dotenv", 
+        "pymysql", "aiomysql", "tortoise-orm", "pypinyin", "websockets"
     ]
     
     # 仅在 Windows 下安装 wmi
@@ -24,9 +23,8 @@ def check_env():
     for lib in dependencies:
         try:
             lib_mod = lib.replace("-", "_")
-            if lib == "opencv-python": __import__("cv2")
-            elif lib == "python-dotenv": __import__("dotenv")
-            elif lib == "aioredis": __import__("redis.asyncio") # aioredis 2.0+ 方式
+            if lib == "python-dotenv": __import__("dotenv")
+            elif lib == "tortoise-orm": __import__("tortoise")
             else: __import__(lib_mod)
             print(f"  ✅ {lib} 已就绪")
         except ImportError:
