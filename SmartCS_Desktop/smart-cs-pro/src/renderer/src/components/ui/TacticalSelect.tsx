@@ -49,7 +49,7 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
       <div 
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={cn(
-          "w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-black flex items-center justify-between transition-all shadow-sm group",
+          "w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black flex items-center justify-between transition-all shadow-sm group",
           disabled ? "opacity-50 cursor-not-allowed bg-slate-50" : "cursor-pointer",
           isOpen ? "ring-2 ring-cyan-500/10 border-cyan-500 shadow-md" : (disabled ? "" : "hover:border-slate-300")
         )}
@@ -66,7 +66,7 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 4 }}
             exit={{ opacity: 0, y: 4 }}
-            className="absolute z-[1100] w-full bg-white rounded-lg shadow-xl border border-slate-200 overflow-hidden flex flex-col p-1.5"
+            className="absolute z-[1100] w-full bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col p-1.5"
           >
             {showSearch && (
               <div className="relative mb-1.5 p-1">

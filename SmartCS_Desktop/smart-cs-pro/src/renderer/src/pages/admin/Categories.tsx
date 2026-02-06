@@ -102,28 +102,28 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
-      <header className="flex justify-between items-end bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
+    <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-black">
+      <header className="flex justify-between items-end bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0">
         <div className="flex items-center gap-4">
           <div>
-            <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">分类管理中枢</h2>
-            <p className="text-slate-500 text-sm mt-1 font-medium flex items-center gap-2">
-              管理系统风险词库与话术分类，精确控制业务逻辑
+            <h2 className="text-3xl font-black text-black uppercase italic text-tactical-glow leading-none">分类管理中枢</h2>
+            <p className="text-slate-500 text-sm mt-2 font-bold flex items-center gap-2">
+              管理风险词库与话术分类，精确控制业务逻辑
               {isFetching && <span className="flex items-center gap-1 text-cyan-600 animate-pulse"><RefreshCw size={12} className="animate-spin" /> 同步中</span>}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+          <button onClick={() => refetch()} className="p-3 bg-slate-50 text-black rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
             <RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} />
           </button>
           {hasPermission('admin:cat:create') && (
-            <button onClick={() => { setEditItem({ name: '', type: 'SENSITIVE', description: '' }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 录入新分类</button>
+            <button onClick={() => { setEditItem({ name: '', type: 'SENSITIVE', description: '' }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 录入新分类</button>
           )}
         </div>
       </header>
 
-      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {isLoading ? (
             <div className="h-64 flex items-center justify-center text-slate-400 gap-3 uppercase font-black italic opacity-50">
