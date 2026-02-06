@@ -108,12 +108,17 @@ export default function UsersPage() {
 
   // React Query: Info Update Mutation
   const updateMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (payload: any) => {
+      // 核心清洗：确保 ID 类型字段不传空字符串
+      const sanitizedData = {
+        ...payload,
+        department_id: payload.department_id === '' ? null : payload.department_id
+      }
       return window.api.callApi({
         url: `${CONFIG.API_BASE}/admin/agents/update-info`,
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
-        data
+        data: sanitizedData
       })
     },
     onSuccess: (res) => {

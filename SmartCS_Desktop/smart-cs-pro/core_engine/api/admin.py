@@ -71,10 +71,25 @@ async def get_agents(
 @router.post("/agents/update-info")
 async def update_agent_info(data: dict, user: dict = Depends(check_permission("admin:user:update"))):
     """[物理重校] 修改操作员基础信息并审计"""
-    username, real_name, dept_id = data.get("username"), data.get("real_name"), data.get("department_id")
+    username = data.get("username")
+    real_name = data.get("real_name")
+    dept_id = data.get("department_id")
+    
+    # 核心修正：防止前端传 '' 导致数据库 Int 转换崩溃
+    final_dept_id = dept_id if dept_id and dept_id != "" else None
+    
     async with in_transaction() as conn:
-        await User.filter(username=username).update(real_name=real_name, department_id=dept_id, using_db=conn)
-        await record_audit(user["real_name"], "USER_UPDATE", username, f"重校基础信息: 姓名->{real_name}, 部门ID->{dept_id}")
+        await User.filter(username=username).update(
+            real_name=real_name, 
+            department_id=final_dept_id, 
+            using_db=conn
+        )
+        await record_audit(
+            user["real_name"], 
+            "USER_UPDATE", 
+            username, 
+            f"重校基础信息: 姓名->{real_name}, 部门ID->{final_dept_id}"
+        )
     return {"status": "ok"}
 
 @router.post("/agents/delete")
