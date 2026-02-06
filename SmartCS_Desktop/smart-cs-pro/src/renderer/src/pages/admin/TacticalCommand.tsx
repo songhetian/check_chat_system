@@ -19,7 +19,7 @@ import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { TacticalTable } from '../../components/ui/TacticalTable'
 import { toast } from 'sonner'
 
-// 1. 状态样式标准 (V3.17: 极致性能与真全屏版)
+// 1. 状态样式标准 (V3.18: 极致全屏与交互加固版)
 const getAgentStatusTheme = (score: number, isOnline: boolean, roleId: number) => {
   if (!isOnline) return { border: 'border-slate-200', bg: 'bg-slate-100', text: 'text-slate-400', label: '离线', dot: 'bg-slate-300' }
   const isManagement = roleId === ROLE_ID.HQ || roleId === ROLE_ID.ADMIN;
@@ -123,7 +123,7 @@ export default function TacticalCommand() {
     const nextState = !isLinkEnabled;
     setIsLinkEnabled(nextState);
     if (!nextState) {
-      setScreenShot(null); // 彻底清理内存
+      setScreenShot(null); 
       setLastFrameTime(0);
     }
   }
@@ -228,7 +228,7 @@ export default function TacticalCommand() {
                         <div className="flex items-center justify-between">
                            <h5 className="text-[10px] font-black text-cyan-700 uppercase tracking-widest flex items-center gap-2"><MonitorStop size={14} /> 实时桌面链路 (只读)</h5>
                            <div className="flex items-center gap-2">
-                              {isLinkEnabled && screenShot && (
+                              {isLinkEnabled && lastFrameTime > 0 && (
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-lg text-[9px] font-bold text-slate-500 border border-slate-200">
                                    <Clock size={10} /> 延时: {Math.max(0, Date.now() - lastFrameTime)}ms
                                 </div>
@@ -236,7 +236,7 @@ export default function TacticalCommand() {
                               <button onClick={toggleLink} className={cn("px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1.5 transition-all shadow-sm border", isLinkEnabled ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-red-50 text-red-600 border-red-100")}>
                                  {isLinkEnabled ? <><MonitorPlay size={12}/> 链路已激活</> : <><MonitorX size={12}/> 链路已挂断</>}
                               </button>
-                              <button onClick={() => setIsMaximized(true)} disabled={!isLinkEnabled || !screenShot} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-cyan-50 hover:text-cyan-600 transition-all border border-slate-200 disabled:opacity-30"><Maximize2 size={14} /></button>
+                              <button onClick={() => setIsMaximized(true)} disabled={!isLinkEnabled || !screenShot} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-cyan-50 hover:text-cyan-600 transition-all border border-slate-200 disabled:opacity-30 cursor-pointer"><Maximize2 size={14} /></button>
                            </div>
                         </div>
                         <div className="bg-slate-950 rounded-2xl p-1.5 min-h-[300px] flex items-center justify-center relative overflow-hidden border border-slate-200 shadow-inner group">
@@ -270,31 +270,42 @@ export default function TacticalCommand() {
         </div>
       </main>
 
+      {/* V3.18: 真全屏遮罩层 - 强制最高 z-index 覆盖侧边栏 */}
       <AnimatePresence>
          {isMaximized && screenShot && (
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-              className="fixed inset-0 z-[2000] bg-black flex flex-col"
+              className="fixed inset-0 z-[9999] bg-[#020617] flex flex-col"
             >
-               {/* 顶部悬浮控制条 */}
-               <div className="absolute top-0 left-0 right-0 z-[2100] flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent p-6 pointer-events-none">
-                  <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 pointer-events-auto">
-                     <div className="w-8 h-8 bg-cyan-600 rounded-xl flex items-center justify-center"><MonitorPlay size={18} className="text-white" /></div>
-                     <div><h4 className="text-white font-black text-sm uppercase leading-none">全屏实战监听</h4><p className="text-cyan-500 text-[8px] font-black uppercase tracking-widest mt-1">成员: {activeAgent.real_name} · 1:1 采样</p></div>
+               {/* 顶部悬浮控制条 - 增加 z-index 与 pointer-events */}
+               <div className="absolute top-0 left-0 right-0 z-[10000] flex justify-between items-center p-8 pointer-events-none">
+                  <div className="flex items-center gap-4 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 pointer-events-auto shadow-2xl">
+                     <div className="w-10 h-10 bg-cyan-600 rounded-xl flex items-center justify-center shadow-lg"><MonitorPlay size={24} className="text-white" /></div>
+                     <div><h4 className="text-white font-black text-base uppercase leading-none">实战全屏监听链路</h4><p className="text-cyan-500 text-[10px] font-black uppercase tracking-widest mt-1">目标: {activeAgent.real_name} · 1:1 物理采样</p></div>
                   </div>
                   <div className="flex items-center gap-4 pointer-events-auto">
-                     <div className="bg-black/40 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 flex items-center gap-2 text-[10px] font-black text-emerald-500 animate-pulse uppercase"><Activity size={12} /> LIVE</div>
-                     <button onClick={() => setIsMaximized(false)} className="p-3 bg-red-500 text-white rounded-2xl hover:bg-red-600 transition-all shadow-xl active:scale-95"><X size={24} /></button>
+                     <div className="bg-emerald-500/20 px-4 py-3 rounded-2xl border border-emerald-500/30 flex items-center gap-2 text-[10px] font-black text-emerald-500 animate-pulse uppercase"><Activity size={14} /> LIVE</div>
+                     <button 
+                        onClick={() => setIsMaximized(false)} 
+                        className="p-4 bg-red-500 text-white rounded-2xl hover:bg-red-600 transition-all shadow-2xl active:scale-95 cursor-pointer flex items-center justify-center border border-red-400"
+                     >
+                        <X size={28} strokeWidth={3} />
+                     </button>
                   </div>
                </div>
                
-               {/* 真正拉满视口的画面区域 */}
-               <div className="flex-1 w-full h-full flex items-center justify-center bg-black overflow-hidden">
+               {/* 彻底拉满空间，移除一切边距干扰 */}
+               <div className="flex-1 w-full h-full flex items-center justify-center bg-black overflow-hidden relative">
                   <img 
                     src={screenShot} 
-                    className="w-full h-full object-contain pointer-events-none" 
+                    className="w-full h-full object-contain pointer-events-none select-none" 
+                    style={{ imageRendering: 'auto' } as any}
                     alt="Full View" 
                   />
+                  {/* 底层水印防止录屏 */}
+                  <div className="absolute inset-0 opacity-5 pointer-events-none flex flex-wrap gap-20 p-20 overflow-hidden text-white font-black text-2xl uppercase italic">
+                     {Array(20).fill(`SmartCS PRO - ${activeAgent.username}`).map((t, i) => <span key={i} className="rotate-[-25deg] whitespace-nowrap">{t}</span>)}
+                  </div>
                </div>
             </motion.div>
          )}
