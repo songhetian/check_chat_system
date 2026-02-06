@@ -22,7 +22,7 @@ function EvidenceModal({ isOpen, onClose, data }: any) {
       {isOpen && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-900/40" />
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="relative w-full max-w-4xl bg-white rounded-[32px] shadow-xl overflow-hidden flex flex-col max-h-[90vh] z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="relative w-full max-w-4xl bg-white rounded-xl z-10">
             <div className="p-6 border-b flex justify-between items-center bg-slate-50/50">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-600/20"><ShieldAlert size={20} /></div>
@@ -32,22 +32,22 @@ function EvidenceModal({ isOpen, onClose, data }: any) {
             </div>
             <div className="flex-1 overflow-y-auto p-6 grid grid-cols-12 gap-6 custom-scrollbar">
               <div className="col-span-12 lg:col-span-7 space-y-4">
-                <div className="aspect-video rounded-2xl bg-slate-900 flex items-center justify-center relative overflow-hidden border border-slate-100 shadow-inner">
+                <div className="aspect-video rounded-lg bg-slate-900 flex items-center justify-center relative overflow-hidden border border-slate-100 shadow-inner">
                   <div className="flex flex-col items-center gap-3 text-slate-600"><VideoOff size={48} strokeWidth={1} /><span className="text-[10px] font-black uppercase tracking-[0.2em]">无实时视频链路记录</span></div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col gap-1.5"><span className="text-[9px] font-black text-slate-400 uppercase">命中关键词</span><span className="text-base font-black text-red-600 italic">#{data.keyword}</span></div>
-                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col gap-1.5"><span className="text-[9px] font-black text-slate-400 uppercase">风险权重</span><span className="text-base font-black text-slate-900 italic">LV.{data.risk_score}</span></div>
+                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 flex flex-col gap-1.5"><span className="text-[9px] font-black text-slate-400 uppercase">命中关键词</span><span className="text-base font-black text-red-600 italic">#{data.keyword}</span></div>
+                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 flex flex-col gap-1.5"><span className="text-[9px] font-black text-slate-400 uppercase">风险权重</span><span className="text-base font-black text-slate-900 italic">LV.{data.risk_score}</span></div>
                 </div>
               </div>
               <div className="col-span-12 lg:col-span-5 space-y-4">
-                <div className="p-5 rounded-2xl bg-cyan-50 border border-cyan-100 relative overflow-hidden group">
+                <div className="p-5 rounded-lg bg-cyan-50 border border-cyan-100 relative overflow-hidden group">
                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform"><BrainCircuit size={60}/></div>
                    <h4 className="text-[10px] font-black text-cyan-700 uppercase mb-3 flex items-center gap-2"><BrainCircuit size={12}/> 智脑战术综述</h4>
                    <p className="text-xs font-medium text-cyan-900 leading-relaxed italic">"该行为表现出明显的违规倾向，建议立即按照 SOP 执行指令干预。"</p>
                 </div>
                 <div className="space-y-4">
-                   <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100"><span className="text-[10px] font-black text-slate-400 uppercase block mb-2">违规对话原文</span><div className="text-xs font-medium text-slate-700 bg-white p-3.5 rounded-xl border border-slate-100 leading-relaxed">"{data.context}"</div></div>
+                   <div className="p-5 rounded-lg bg-slate-50 border border-slate-100"><span className="text-[10px] font-black text-slate-400 uppercase block mb-2">违规对话原文</span><div className="text-xs font-medium text-slate-700 bg-white p-3.5 rounded-xl border border-slate-100 leading-relaxed">"{data.context}"</div></div>
                 </div>
               </div>
             </div>
@@ -111,7 +111,7 @@ export default function ViolationsPage() {
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0 gap-6">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-xl border border-slate-200 shadow-sm shrink-0 gap-6">
         <div>
           <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">违规记录审计</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium flex items-center gap-2">
@@ -153,7 +153,7 @@ export default function ViolationsPage() {
         </button>
       </div>
 
-      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {violationsQuery.isLoading ? (
             <div className="h-64 flex items-center justify-center text-slate-400 gap-3 italic font-bold uppercase tracking-widest">

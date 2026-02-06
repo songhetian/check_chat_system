@@ -23,7 +23,7 @@ function TacticalModal({ isOpen, onClose, title, children }: any) {
           />
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-            className="relative w-full max-w-5xl max-h-[85vh] bg-slate-900 border border-white/10 rounded-[40px] shadow-2xl overflow-hidden flex flex-col"
+            className="relative w-full max-w-5xl max-h-[85vh] bg-slate-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col"
           >
             <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
               <h3 className="text-2xl font-black uppercase italic tracking-tighter text-white flex items-center gap-3">
@@ -131,7 +131,7 @@ export default function BigScreen() {
         <header className="flex justify-between items-center">
           <div className="flex items-center gap-8">
             <div className={cn(
-              "w-20 h-20 rounded-[28px] flex items-center justify-center shadow-2xl transition-all duration-500 animate-float",
+              "w-20 h-20 rounded-xl flex items-center justify-center shadow-2xl transition-all duration-500 animate-float",
               isSystemSafe ? "bg-cyan-500 shadow-cyan-500/40" : "bg-red-500 shadow-red-500/40"
             )}>
               <Shield size={40} className="text-slate-950" />
@@ -147,7 +147,7 @@ export default function BigScreen() {
             </div>
           </div>
 
-          <div className="flex items-center gap-8 bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[32px] border border-white/5 shadow-2xl">
+          <div className="flex items-center gap-8 bg-slate-900/60 backdrop-blur-2xl p-6 rounded-xl border border-white/5 shadow-2xl">
             <div className="flex flex-col items-end border-r border-white/10 pr-8">
               <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.3em]">Network Time</span>
               <span className="text-3xl font-black text-white font-mono italic tracking-tighter">
@@ -171,14 +171,14 @@ export default function BigScreen() {
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-10">
             {/* KPI 行 */}
             <div className="grid grid-cols-2 gap-6">
-              <div className="bg-slate-900/40 border border-white/5 p-8 rounded-[40px] backdrop-blur-xl group hover:border-red-500/30 transition-all">
+              <div className="bg-slate-900/40 border border-white/5 p-8 rounded-xl backdrop-blur-xl group hover:border-red-500/30 transition-all">
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-4">今日风险事件</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-6xl font-black italic tracking-tighter text-red-500 text-tactical-glow">{violations.length}</span>
                   <span className="text-xs font-black text-slate-600 uppercase italic">Events</span>
                 </div>
               </div>
-              <div className="bg-slate-900/40 border border-white/5 p-8 rounded-[40px] backdrop-blur-xl">
+              <div className="bg-slate-900/40 border border-white/5 p-8 rounded-xl backdrop-blur-xl">
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-4">当前在线节点</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-6xl font-black italic tracking-tighter text-cyan-400 text-tactical-glow">{agents.length}</span>
@@ -188,7 +188,7 @@ export default function BigScreen() {
             </div>
 
             {/* 坐席列表 */}
-            <div className="bg-slate-900/40 border border-white/5 rounded-[48px] p-10 backdrop-blur-xl flex-1 min-h-[500px] flex flex-col">
+            <div className="bg-slate-900/40 border border-white/5 rounded-xl flex flex-col">
               <div className="flex justify-between items-center mb-8 shrink-0">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-3">
                   <Users size={16} className="text-cyan-500" /> 实时节点健康矩阵
@@ -196,7 +196,7 @@ export default function BigScreen() {
               </div>
               <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar-dark grid grid-cols-2 gap-4">
                 {agents.map((a) => (
-                  <div key={a.username} className="bg-white/[0.03] border border-white/5 p-5 rounded-[32px] group hover:bg-white/[0.08] transition-all">
+                  <div key={a.username} className="bg-white/[0.03] border border-white/5 p-5 rounded-xl transition-all">
                     <div className="flex items-center gap-4 mb-4">
                       <div className={cn(
                         "w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs border transition-all",
@@ -221,7 +221,7 @@ export default function BigScreen() {
           <div className="col-span-12 lg:col-span-8 grid grid-cols-2 gap-10">
             
             {/* 1. 实时求助响应流 */}
-            <div className="bg-slate-900/40 border border-white/5 rounded-[48px] p-8 backdrop-blur-xl h-[650px] flex flex-col">
+            <div className="bg-slate-900/40 border border-white/5 rounded-xl flex flex-col">
               <div className="flex justify-between items-center mb-6 shrink-0">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-red-400 flex items-center gap-3">
                   <Hand size={16} className="animate-bounce" /> 紧急战术求援流
@@ -229,13 +229,13 @@ export default function BigScreen() {
               </div>
               <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar-dark space-y-4">
                 {emergencies.map((e, idx) => (
-                  <div key={idx} className="p-5 rounded-[28px] bg-red-500/10 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                  <div key={idx} className="p-5 rounded-xl">
                      <div className="flex justify-between items-center mb-3">
                         <span className="text-xs font-black text-white">{e.username}</span>
                         <span className="text-[8px] font-black bg-red-500 text-white px-2 py-0.5 rounded">SOS ACTIVE</span>
                      </div>
                      <p className="text-xs text-slate-200 italic mb-4 leading-relaxed font-medium">"{e.content || '请求画面协助...'}"</p>
-                     {e.image && <img src={e.image} className="w-full rounded-2xl border border-white/10" />}
+                     {e.image && <img src={e.image} className="w-full rounded-lg border border-white/10" />}
                   </div>
                 ))}
                 {emergencies.length === 0 && (
@@ -248,7 +248,7 @@ export default function BigScreen() {
             </div>
 
             {/* 2. 战术解决库归档 */}
-            <div className="bg-slate-900/40 border border-white/5 rounded-[48px] p-8 backdrop-blur-xl h-[650px] flex flex-col">
+            <div className="bg-slate-900/40 border border-white/5 rounded-xl flex flex-col">
               <div className="flex justify-between items-center mb-6 shrink-0">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400 flex items-center gap-3">
                   <CheckCircle2 size={16} /> 战术解决库归档
@@ -256,7 +256,7 @@ export default function BigScreen() {
               </div>
               <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar-dark space-y-4">
                 {resolved.map((r) => (
-                  <div key={r.id} className="p-6 rounded-[32px] bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 transition-all group">
+                  <div key={r.id} className="p-6 rounded-xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 transition-all group">
                      <div className="flex justify-between items-center mb-2">
                         <span className="text-[10px] font-black text-emerald-500 uppercase">Resolved CASE</span>
                         <span className="text-[9px] font-mono text-slate-500 italic">{new Date(r.timestamp).toLocaleDateString()}</span>

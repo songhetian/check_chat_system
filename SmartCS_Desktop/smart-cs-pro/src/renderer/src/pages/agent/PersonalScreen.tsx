@@ -75,7 +75,7 @@ export default function PersonalScreen() {
           </div>
           <div className="text-right">
              <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] mb-2 font-mono">{time.toLocaleTimeString()}</div>
-             <div className="flex items-center gap-4 bg-white/5 p-4 rounded-[24px] border border-white/10 backdrop-blur-md">
+             <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-md">
                 <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 font-black italic border border-cyan-500/20">{user?.real_name?.[0]}</div>
                 <div className="flex flex-col items-start pr-4">
                    <span className="text-sm font-black text-white">{user?.real_name}</span>
@@ -89,7 +89,7 @@ export default function PersonalScreen() {
         <main className="grid grid-cols-12 gap-10">
            {/* 左侧：核心指标 */}
            <div className="col-span-12 lg:col-span-4 flex flex-col gap-8">
-              <div className="p-8 bg-slate-900/60 rounded-[40px] border border-white/5 backdrop-blur-2xl shadow-2xl relative overflow-hidden group">
+              <div className="p-8 bg-slate-900/60 rounded-xl border border-white/5 backdrop-blur-2xl shadow-2xl relative overflow-hidden group">
                  <div className="absolute -right-6 -top-6 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-1000 rotate-12">
                     <Target size={180} />
                  </div>
@@ -107,19 +107,19 @@ export default function PersonalScreen() {
                        <span className="text-[8px] font-black text-slate-600 uppercase">战术衔级</span>
                        <span className="text-xs font-black text-white italic tracking-widest">ELITE SQUAD</span>
                     </div>
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                    <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center border border-white/10">
                        <Trophy size={20} className="text-amber-400" />
                     </div>
                  </div>
               </div>
 
-              <div className="flex-1 p-8 bg-slate-900/60 rounded-[40px] border border-white/5 backdrop-blur-2xl flex flex-col gap-6">
+              <div className="flex-1 p-8 bg-slate-900/60 rounded-xl border border-white/5 backdrop-blur-2xl flex flex-col gap-6">
                  <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-2">
                     <Star size={16} className="text-amber-400" /> 近期实战荣誉
                  </h4>
                  <div className="space-y-4 overflow-y-auto custom-scrollbar pr-2">
                     {[1,2,3].map(i => (
-                      <div key={i} className="p-5 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-4 hover:bg-white/10 transition-all">
+                      <div key={i} className="p-5 rounded-xl bg-white/5 border border-white/5 flex items-center gap-4 hover:bg-white/10 transition-all">
                          <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center text-amber-400"><Zap size={18} /></div>
                          <div>
                             <p className="text-xs font-black text-white mb-1">高效拦截达人</p>
@@ -132,13 +132,13 @@ export default function PersonalScreen() {
            </div>
 
            {/* 中间：拦截流 */}
-           <div className="col-span-12 lg:col-span-4 bg-slate-900/40 rounded-[48px] p-8 border border-white/5 backdrop-blur-xl flex flex-col h-[700px]">
+           <div className="col-span-12 lg:col-span-4 bg-slate-900/40 rounded-xl">
               <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-2">
                  <History size={16} className="text-red-500 animate-pulse" /> 实时拦截回溯
               </h4>
               <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-4">
                  {violations.map((v, i) => (
-                   <div key={i} className="p-6 rounded-[32px] bg-red-500/5 border border-red-500/10 flex flex-col gap-3 group hover:bg-red-500/10 transition-all">
+                   <div key={i} className="p-6 rounded-xl bg-red-500/5 border border-red-500/10 flex flex-col gap-3 group hover:bg-red-500/10 transition-all">
                       <div className="flex justify-between items-center">
                          <span className="text-[10px] font-black text-red-500 uppercase bg-red-500/10 px-2 py-0.5 rounded italic">Intercepted</span>
                          <span className="text-[9px] font-mono text-slate-500">{new Date(v.timestamp).toLocaleTimeString()}</span>
@@ -160,19 +160,19 @@ export default function PersonalScreen() {
            </div>
 
            {/* 右侧：解决库 */}
-           <div className="col-span-12 lg:col-span-4 bg-slate-900/40 rounded-[48px] p-8 border border-white/5 backdrop-blur-xl flex flex-col h-[700px]">
+           <div className="col-span-12 lg:col-span-4 bg-slate-900/40 rounded-xl">
               <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-2">
                  <CheckCircle2 size={16} className="text-emerald-500" /> 个人战术解决库
               </h4>
               <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-4">
                  {resolved.map((r, i) => (
-                   <div key={i} className="p-6 rounded-[32px] bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 transition-all">
+                   <div key={i} className="p-6 rounded-xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 transition-all">
                       <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-2 italic">Case Resolved</div>
                       <div className="text-sm font-black text-white mb-2 leading-tight">关键词: {r.keyword}</div>
-                      <div className="p-3 bg-black/40 rounded-2xl border border-white/5 text-[10px] text-slate-400 italic mb-3 leading-relaxed">
+                      <div className="p-3 bg-black/40 rounded-lg border border-white/5 text-[10px] text-slate-400 italic mb-3 leading-relaxed">
                         场景: "{r.context}"
                       </div>
-                      <div className="text-[11px] font-bold text-emerald-400 leading-relaxed bg-emerald-500/10 p-3 rounded-2xl border border-emerald-500/20">
+                      <div className="text-[11px] font-bold text-emerald-400 leading-relaxed bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20">
                          处置: {r.solution}
                       </div>
                    </div>

@@ -42,7 +42,7 @@ import { TacticalSelect } from './components/ui/TacticalSelect'
 import { Toaster } from './components/ui/sonner'
 import { toast } from 'sonner'
 
-// 1. 管理首页：高对比度 V3.5
+// 1. 管理首页：V3.7 工业版
 const AdminHome = () => {
   const { user, token } = useAuthStore() 
   const [page, setPage] = useState(1)
@@ -82,11 +82,11 @@ const AdminHome = () => {
   const agents = agentsQuery.data?.data || []
   const total = agentsQuery.data?.total || 0
   const isFetching = agentsQuery.isFetching
-  const errorMsg = agentsQuery.isError ? "物理链路握手失败，请确认后端引擎是否活跃" : null
+  const errorMsg = agentsQuery.isError ? "通讯链路异常，请确认后端活跃状态" : null
 
   return (
     <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6 text-black">
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0 flex justify-between items-center">
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-black uppercase italic leading-none">全域态势概览</h2>
           <p className="text-slate-500 text-sm mt-2 font-bold flex items-center gap-2">
@@ -112,15 +112,15 @@ const AdminHome = () => {
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0 relative">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0 relative">
         <div className="overflow-y-auto flex-1 custom-scrollbar">
           {errorMsg ? (
             <div className="h-full flex flex-col items-center justify-center p-10 text-center">
-               <div className="w-20 h-20 rounded-3xl bg-red-50 text-red-500 flex items-center justify-center mb-6 border border-red-100 shadow-inner">
+               <div className="w-20 h-20 rounded-xl bg-red-50 text-red-500 flex items-center justify-center mb-6 border border-red-100 shadow-inner">
                   <ShieldAlert size={40} className="animate-pulse" />
                </div>
                <h3 className="text-xl font-black text-black mb-2 italic uppercase">链路连接异常</h3>
-               <button onClick={() => agentsQuery.refetch()} className="px-8 py-3 bg-slate-100 text-black rounded-xl text-xs font-black shadow-sm border border-slate-200 hover:bg-slate-200 active:scale-95 transition-all flex items-center gap-3 uppercase">
+               <button onClick={() => agentsQuery.refetch()} className="px-8 py-3 bg-slate-100 text-black rounded-lg text-xs font-black shadow-sm border border-slate-200 hover:bg-slate-200 active:scale-95 transition-all flex items-center gap-3 uppercase">
                   <RefreshCw size={16} /> 重新建立连接
                </button>
             </div>
@@ -130,12 +130,12 @@ const AdminHome = () => {
                 <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors text-sm font-bold text-black text-center">
                   <td className="px-8 py-3 text-left"><div className="flex items-center justify-center gap-3"><div className={cn("w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs", agent.is_online ? "bg-cyan-600 text-white shadow-md" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div><div className="flex flex-col text-left"><span className="text-xs font-black text-black">{agent.real_name}</span><span className="text-[9px] text-slate-500 font-mono">@{agent.username}</span></div></div></td>
                   <td className="px-6 py-3 text-center font-bold text-black text-[10px] uppercase">{agent.dept_name || '全域通用'}</td>
-                  <td className="px-6 py-3 text-center"><div className="flex justify-center gap-1">{agent.reward_count > 0 ? <div className="px-2 py-0.5 bg-amber-50 text-amber-600 rounded-lg border border-amber-100 flex items-center gap-1"><Award size={10}/> <span className="text-[10px] font-black">{agent.reward_count}</span></div> : <span className="opacity-20 text-slate-300">-</span>}</div></td>
-                  <td className="px-6 py-3 text-center"><div className="flex flex-col items-center gap-1"><div className="w-16 h-1 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-cyan-500" style={{ width: `${agent.training_progress || 0}%` }} /></div><span className="text-[8px] font-black text-slate-500">{agent.training_progress || 0}%</span></div></td>
+                  <td className="px-6 py-3 text-center"><div className="flex justify-center gap-1">{agent.reward_count > 0 ? <div className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-100 flex items-center gap-1"><Award size={10}/> <span className="text-[10px] font-black">{agent.reward_count}</span></div> : <span className="opacity-20 text-slate-300">-</span>}</div></td>
+                  <td className="px-6 py-3 text-center"><div className="flex flex-col items-center gap-1"><div className="w-16 h-1 bg-slate-100 rounded-lg overflow-hidden"><div className="h-full bg-cyan-500" style={{ width: `${agent.training_progress || 0}%` }} /></div><span className="text-[8px] font-black text-slate-500">{agent.training_progress || 0}%</span></div></td>
                   <td className="px-6 py-3 text-center">
                     <div className="flex flex-col items-center gap-1">
                        <div className="flex items-center gap-1 text-black italic font-black text-[11px]"><Activity size={12} className="text-cyan-600" /> {agent.tactical_score}</div>
-                       {agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-md border border-red-100 uppercase tracking-tighter">拦截: {agent.last_violation_type}</span>}
+                       {agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-lg border border-red-100 uppercase tracking-tighter">拦截: {agent.last_violation_type}</span>}
                     </div>
                   </td>
                   <td className="px-8 py-3 text-center"><button className="p-2 bg-black text-white rounded-lg hover:bg-cyan-600 transition-all shadow-md active:scale-90"><ShieldCheck size={14} /></button></td>
@@ -173,11 +173,11 @@ const AgentView = () => {
         const audioPath = e.detail.audio_path || (e.detail.risk_score >= 8 ? '/assets/audio/red_alert.mp3' : '/assets/audio/warn.wav')
         const audio = new Audio(audioPath); audio.play().catch(() => console.warn('音频拦截: 路径脱机'))
       }
-      toast.error('战术拦截', {
-        description: `检测到违规行为：[${e.detail.keyword}]`,
+      toast.error('违规拦截', {
+        description: `检测到行为：[${e.detail.keyword}]`,
         duration: 10000,
         action: {
-          label: '查看详情',
+          label: '详情',
           onClick: () => { window.location.hash = `/alerts?id=${e.detail.id}` }
         }
       })

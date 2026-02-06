@@ -14,7 +14,7 @@ function PerformanceModal({ isOpen, onClose, title, children, isPending }: any) 
       {isOpen && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !isPending && onClose()} className="absolute inset-0 bg-slate-900/40" />
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="relative w-full max-w-md rounded-[32px] shadow-xl z-10 bg-white p-8 text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="relative w-full max-w-md rounded-xl shadow-xl z-10 bg-white p-8 text-center">
              <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-black uppercase italic tracking-tight">{title}</h3>
                 <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400"><X size={20}/></button>
@@ -95,7 +95,7 @@ export default function PlatformsPage() {
 
   return (
     <div className="space-y-6 h-full flex flex-col">
-      <div className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
+      <div className="flex justify-between items-end bg-white p-8 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic text-tactical-glow">战术目标管理</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium flex items-center gap-2">
@@ -104,11 +104,11 @@ export default function PlatformsPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+          <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
             <RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} />
           </button>
           {hasPermission('admin:platform:create') && (
-            <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800">
+            <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg text-xs font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800">
               <Plus size={16} /> 增加监控目标
             </button>
           )}
@@ -126,11 +126,11 @@ export default function PlatformsPage() {
                 layout
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm group hover:border-cyan-500/30 transition-all flex flex-col"
+                className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm group hover:border-cyan-500/30 transition-all flex flex-col"
               >
                 <div className="flex justify-between items-start mb-6">
                   <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-all border",
+                    "w-12 h-12 rounded-lg flex items-center justify-center transition-all border",
                     p.is_active ? "bg-cyan-50 text-cyan-600 border-cyan-100 shadow-inner" : "bg-slate-50 text-slate-400 border-slate-100"
                   )}>
                     <Monitor size={24} />

@@ -26,7 +26,7 @@ export default function ToolsPage() {
 
   return (
     <div className="space-y-6 font-sans">
-      <div className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
+      <div className="flex justify-between items-end bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic">
             全域提效工具箱 <span className="text-cyan-500">UTILITIES</span>
@@ -36,8 +36,8 @@ export default function ToolsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-         <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm group hover:border-cyan-500/30 transition-all">
-            <div className="w-14 h-14 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+         <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm group hover:border-cyan-500/30 transition-all">
+            <div className="w-14 h-14 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                <ShieldCheck size={28} />
             </div>
             <h3 className="text-lg font-black text-slate-900 mb-2">安全图片加固</h3>
@@ -47,7 +47,7 @@ export default function ToolsPage() {
             <button 
               onClick={handleGenerateSecureImg}
               disabled={loading}
-              className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl active:scale-95 hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              className="w-full py-4 bg-slate-900 text-white rounded-lg text-xs font-black uppercase tracking-widest shadow-xl active:scale-95 hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {loading ? <RefreshCw size={16} className="animate-spin" /> : <Download size={16} />} 
               {loading ? '正在生成...' : '立即生成安全载荷'}

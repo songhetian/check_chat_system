@@ -36,14 +36,14 @@ export default function AiPerformancePage() {
 
   return (
     <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
-      <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
+      <header className="flex justify-between items-end bg-white p-8 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic text-tactical-glow">
             AI <span className="text-cyan-500">EFFICIENCY</span> 效能审计
           </h2>
           <p className="text-slate-500 text-sm mt-1 font-medium">监控智能纠偏对人力成本的节省贡献与全域覆盖深度</p>
         </div>
-        <button onClick={() => fetchData(false)} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+        <button onClick={() => fetchData(false)} className="p-3 bg-slate-50 text-slate-600 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
           <RefreshCw size={18} className={cn(loading && "animate-spin")} />
         </button>
       </header>
@@ -67,8 +67,8 @@ export default function AiPerformancePage() {
 
 function StatsCard({ icon: Icon, label, value, color, bg, border }: any) {
   return (
-    <div className={cn("bg-white p-10 rounded-[40px] border shadow-sm group hover:shadow-2xl transition-all", border)}>
-       <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-8 shadow-inner", bg, color)}>
+    <div className={cn("bg-white p-10 rounded-xl border shadow-sm group hover:shadow-2xl transition-all", border)}>
+       <div className={cn("w-16 h-16 rounded-lg flex items-center justify-center mb-8 shadow-inner", bg, color)}>
           <Icon size={32} />
        </div>
        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">{label}</p>

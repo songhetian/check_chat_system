@@ -8,14 +8,14 @@ export const CustomerHUD = ({ data, onDismiss }: { data: any, onDismiss: () => v
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 50 }}
-      className="fixed right-6 top-1/2 -translate-y-1/2 w-72 bg-white/95 backdrop-blur-xl rounded-[32px] border border-cyan-500/30 shadow-2xl z-50 overflow-hidden"
+      className="fixed right-6 top-1/2 -translate-y-1/2 w-72 bg-white/95 backdrop-blur-xl rounded-xl border border-cyan-500/30 shadow-2xl z-50 overflow-hidden"
     >
       {/* 顶部状态条 */}
       <div className={cn(
         "p-4 flex items-center gap-3 text-white",
         data.level === 'VIP' ? "bg-gradient-to-r from-amber-500 to-orange-600" : "bg-slate-900"
       )}>
-        <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30">
+        <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center border border-white/30">
           <UserCheck size={24} />
         </div>
         <div>
@@ -28,12 +28,12 @@ export const CustomerHUD = ({ data, onDismiss }: { data: any, onDismiss: () => v
         {/* 标签云 */}
         <div className="flex flex-wrap gap-1.5">
           {data.tags.map((tag: string) => (
-            <span key={tag} className="px-2 py-1 bg-cyan-50 text-cyan-700 text-[9px] font-black rounded-md border border-cyan-100 uppercase">
+            <span key={tag} className="px-2 py-1 bg-cyan-50 text-cyan-700 text-[9px] font-black rounded-lg border border-cyan-100 uppercase">
               {tag}
             </span>
           ))}
           {data.isRisk && (
-            <span className="px-2 py-1 bg-red-50 text-red-600 text-[9px] font-black rounded-md border border-red-100 flex items-center gap-1">
+            <span className="px-2 py-1 bg-red-50 text-red-600 text-[9px] font-black rounded-lg border border-red-100 flex items-center gap-1">
               <AlertTriangle size={8} /> 曾有投诉记录
             </span>
           )}
@@ -41,13 +41,13 @@ export const CustomerHUD = ({ data, onDismiss }: { data: any, onDismiss: () => v
 
         {/* 核心指标 */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
             <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase mb-1">
               <TrendingUp size={10} /> 终身价值
             </div>
             <div className="text-sm font-black text-slate-900">¥{data.ltv}</div>
           </div>
-          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
             <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase mb-1">
               <History size={10} /> 沟通频次
             </div>

@@ -10,7 +10,7 @@ export const SuggestionPopup = ({ products, onDismiss }: { products: any[], onDi
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.8, y: 20 }}
-      className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[380px] bg-white rounded-[24px] shadow-2xl border-2 border-cyan-500 overflow-hidden z-[60]"
+      className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[380px] bg-white rounded-xl"
     >
       <div className="bg-cyan-500 p-3 flex justify-between items-center">
         <div className="flex items-center gap-2 text-white font-black text-xs uppercase tracking-widest">

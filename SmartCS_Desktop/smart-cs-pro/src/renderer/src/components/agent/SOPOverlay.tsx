@@ -7,7 +7,7 @@ export const SOPOverlay = ({ steps, onDismiss }: { steps: string[], onDismiss: (
       initial={{ x: 300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 300, opacity: 0 }}
-      className="fixed right-6 top-24 w-64 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl p-5 z-[60] backdrop-blur-xl"
+      className="fixed right-6 top-24 w-64 bg-slate-900 border border-white/10 rounded-lg shadow-2xl p-5 z-[60] backdrop-blur-xl"
     >
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2 text-cyan-400 font-black text-xs uppercase">

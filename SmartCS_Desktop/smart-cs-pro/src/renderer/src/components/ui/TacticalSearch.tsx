@@ -46,7 +46,7 @@ export const TacticalSearch = ({
             <X size={14} />
           </button>
         ) : (
-          <div className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 bg-white border border-slate-200 rounded-md text-[9px] font-black text-slate-400 uppercase tracking-tighter opacity-60">
+          <div className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-tighter opacity-60">
             <Command size={8} /> K
           </div>
         )}

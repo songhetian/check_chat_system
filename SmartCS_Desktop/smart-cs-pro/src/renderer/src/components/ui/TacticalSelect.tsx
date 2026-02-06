@@ -76,7 +76,7 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="检索匹配项..."
-                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border-none rounded-md text-[11px] font-bold text-slate-900 focus:ring-0 shadow-inner"
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border-none rounded-lg text-[11px] font-bold text-slate-900 focus:ring-0 shadow-inner"
                 />
               </div>
             )}
@@ -93,7 +93,7 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
                       setIsOpen(false)
                     }}
                     className={cn(
-                      "px-3 py-2 rounded-md text-[11px] font-black flex items-center justify-between cursor-pointer transition-all mb-0.5 last:mb-0",
+                      "px-3 py-2 rounded-lg text-[11px] font-black flex items-center justify-between cursor-pointer transition-all mb-0.5 last:mb-0",
                       String(value) === String(opt.id) ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/20" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     )}
                   >
