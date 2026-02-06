@@ -7,7 +7,7 @@ import {
   X, RefreshCw, AlertTriangle, TrendingDown, BellRing,
   Search, Filter, ChevronDown, MonitorStop, Globe, ShieldCheck,
   Power, PowerOff, Cpu, Radar, Shield, Maximize2, MonitorPlay, MonitorX,
-  Wifi, WifiOff
+  Wifi, WifiOff, Clock
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
@@ -19,20 +19,12 @@ import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { TacticalTable } from '../../components/ui/TacticalTable'
 import { toast } from 'sonner'
 
-// 1. 状态样式标准 (V3.15: 统一使用“在线”)
+// 1. 状态样式标准 (V3.16: 增强链路持久化)
 const getAgentStatusTheme = (score: number, isOnline: boolean, roleId: number) => {
   if (!isOnline) return { border: 'border-slate-200', bg: 'bg-slate-100', text: 'text-slate-400', label: '离线', dot: 'bg-slate-300' }
-  
   const isManagement = roleId === ROLE_ID.HQ || roleId === ROLE_ID.ADMIN;
   if (!isManagement && score < 60) return { border: 'border-red-500', bg: 'bg-red-50/50', text: 'text-red-600', label: '风险', dot: 'bg-red-500 animate-ping' }
-  
-  return { 
-    border: 'border-emerald-500', 
-    bg: 'bg-emerald-500/10', 
-    text: 'text-emerald-600', 
-    label: '在线', 
-    dot: 'bg-emerald-500 shadow-[0_0_8px_#10b981]' 
-  }
+  return { border: 'border-emerald-500', bg: 'bg-emerald-500/10', text: 'text-emerald-600', label: '在线', dot: 'bg-emerald-500 shadow-[0_0_8px_#10b981]' }
 }
 
 const RoleBadge = ({ roleId, roleName }: { roleId: number, roleName: string }) => {
@@ -61,21 +53,17 @@ export default function TacticalCommand() {
   const [screenShot, setScreenShot] = useState<string | null>(null)
   const [processing, setProcessing] = useState<string | null>(null)
   
-  // 链路状态增强
+  // 链路控制
   const [isLinkEnabled, setIsLinkEnabled] = useState(true)
   const [isMaximized, setIsMaximized] = useState(false)
-  const [isWaitingForData, setIsWaitingForData] = useState(false)
+  const [lastFrameTime, setLastFrameTime] = useState<number>(0)
   
   const isHQ = user?.role_id === ROLE_ID.HQ || user?.role_code === 'HQ'
 
   const fetchDepts = async () => {
     if (!isHQ || !token) return
     try {
-      const res = await window.api.callApi({
-        url: `${CONFIG.API_BASE}/admin/departments?size=100`,
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments?size=100`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
       if (res.status === 200) setDepts(res.data.data)
     } catch (e) { console.error(e) }
   }
@@ -84,11 +72,7 @@ export default function TacticalCommand() {
     if (!token) return
     if (!silent) setLoading(true)
     try {
-      const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/admin/agents?search=${search}&dept_id=${deptId}&_t=${Date.now()}`, 
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/agents?search=${search}&dept_id=${deptId}&_t=${Date.now()}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
       if (res.status === 200) {
         const sorted = [...res.data.data].sort((a, b) => {
           if (a.is_online !== b.is_online) return a.is_online ? -1 : 1
@@ -120,9 +104,10 @@ export default function TacticalCommand() {
     const onScreenSync = (e: any) => {
       if (!isLinkEnabled) return;
       const data = e.detail;
-      if (activeAgent && data.username === activeAgent.username) {
+      // V3.16 持久化核心：仅当 username 匹配且 payload 有效时更新
+      if (activeAgent && data.username === activeAgent.username && data.payload) {
         setScreenShot(data.payload)
-        setIsWaitingForData(false) // 收到首帧数据，结束等待
+        setLastFrameTime(Date.now())
       }
     }
     window.addEventListener('ws-live-chat', onLiveChat)
@@ -149,9 +134,7 @@ export default function TacticalCommand() {
         if (type === 'LOCK') setIsInputLocked(!isInputLocked)
         toast.success('指令已送达', { description: `对 ${activeAgent.real_name} 的 [${description}] 已生效` })
       }
-    } finally {
-      setProcessing(null)
-    }
+    } finally { setProcessing(null) }
   }
 
   const onlineCount = agents.filter(a => a.is_online).length
@@ -200,30 +183,12 @@ export default function TacticalCommand() {
                   const theme = getAgentStatusTheme(a.tactical_score, a.is_online, a.role_id);
                   const isActive = activeAgent?.username === a.username;
                   return (
-                    <tr key={a.username} onClick={() => { 
-                      setActiveAgent(a); 
-                      setLiveChat([]); 
-                      setScreenShot(null); 
-                      setIsWaitingForData(a.is_online); // 仅在线时切换才显示加载中
-                    }} className={cn("cursor-pointer transition-all duration-300", isActive ? "bg-cyan-600/10 text-cyan-900" : "hover:bg-cyan-50/50 text-black")}>
-                      <td className="px-4 py-3 text-left">
-                        <div className="flex items-center gap-2">
-                          <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-all", a.is_online ? "bg-emerald-500/10 text-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.1)]" : "bg-slate-100 text-slate-400")}>{a.real_name[0]}</div>
-                          <span className="text-[11px] font-black truncate">{a.real_name}</span>
-                        </div>
-                      </td>
-                      <td className="px-2 py-3 text-center">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">{a.dept_name || '未分配'}</span>
-                      </td>
-                      <td className="px-2 py-3 text-center">
-                        <div className="flex justify-center items-center gap-1.5"><div className={cn("w-1.5 h-1.5 rounded-full transition-all", theme.dot)} /><span className={cn("text-[9px] font-black uppercase", isActive ? "text-cyan-700" : "text-slate-500")}>{theme.label}</span></div>
-                      </td>
-                      <td className="px-2 py-3 text-center">
-                        <span className={cn("text-[10px] font-black", a.tactical_score < 60 && a.role_id === ROLE_ID.AGENT ? "text-red-500" : (isActive ? "text-cyan-700" : "text-cyan-600"))}>{a.role_id === ROLE_ID.AGENT ? a.tactical_score : '-'}</span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <RoleBadge roleId={a.role_id} roleName={a.role_name} />
-                      </td>
+                    <tr key={a.username} onClick={() => { setActiveAgent(a); setLiveChat([]); setScreenShot(null); setLastFrameTime(0); }} className={cn("cursor-pointer transition-all duration-300", isActive ? "bg-cyan-600/10 text-cyan-900" : "hover:bg-cyan-50/50 text-black")}>
+                      <td className="px-4 py-3 text-left"><div className="flex items-center gap-2"><div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-all", a.is_online ? "bg-emerald-500/10 text-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.1)]" : "bg-slate-100 text-slate-400")}>{a.real_name[0]}</div><span className="text-[11px] font-black truncate">{a.real_name}</span></div></td>
+                      <td className="px-2 py-3 text-center"><span className="text-[10px] font-bold text-slate-500 uppercase">{a.dept_name || '未分配'}</span></td>
+                      <td className="px-2 py-3 text-center"><div className="flex justify-center items-center gap-1.5"><div className={cn("w-1.5 h-1.5 rounded-full transition-all", theme.dot)} /><span className={cn("text-[9px] font-black uppercase", isActive ? "text-cyan-700" : "text-slate-500")}>{theme.label}</span></div></td>
+                      <td className="px-2 py-3 text-center"><span className={cn("text-[10px] font-black", a.tactical_score < 60 && a.role_id === ROLE_ID.AGENT ? "text-red-500" : (isActive ? "text-cyan-700" : "text-cyan-600"))}>{a.role_id === ROLE_ID.AGENT ? a.tactical_score : '-'}</span></td>
+                      <td className="px-4 py-3 text-center"><RoleBadge roleId={a.role_id} roleName={a.role_name} /></td>
                     </tr>
                   )
                 })}
@@ -240,7 +205,7 @@ export default function TacticalCommand() {
                         <h5 className="text-[10px] font-black text-cyan-800 uppercase tracking-widest flex items-center gap-2"><Cpu size={14}/> 实时干预矩阵</h5>
                         <div className="flex items-center gap-2">
                            <RoleBadge roleId={activeAgent.role_id} roleName={activeAgent.role_name} />
-                           <span className="text-[9px] font-bold text-cyan-600 italic font-mono uppercase">Target: {activeAgent.real_name}</span>
+                           <span className="text-[9px] font-bold text-cyan-600 italic font-mono uppercase">Node: {activeAgent.real_name}</span>
                         </div>
                      </div>
                      <div className="grid grid-cols-4 gap-4">
@@ -255,47 +220,36 @@ export default function TacticalCommand() {
                         <div className="flex items-center justify-between">
                            <h5 className="text-[10px] font-black text-cyan-700 uppercase tracking-widest flex items-center gap-2"><MonitorStop size={14} /> 实时桌面链路 (只读)</h5>
                            <div className="flex items-center gap-2">
+                              {screenShot && (
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-lg text-[9px] font-bold text-slate-500 border border-slate-200">
+                                   <Clock size={10} /> 延时: {Math.max(0, Date.now() - lastFrameTime)}ms
+                                </div>
+                              )}
                               <button onClick={() => setIsLinkEnabled(!isLinkEnabled)} className={cn("px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1.5 transition-all shadow-sm border", isLinkEnabled ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-red-50 text-red-600 border-red-100")}>
                                  {isLinkEnabled ? <><MonitorPlay size={12}/> 链路已激活</> : <><MonitorX size={12}/> 链路已挂断</>}
                               </button>
-                              <button onClick={() => setIsMaximized(true)} disabled={!isLinkEnabled || !screenShot} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-cyan-50 hover:text-cyan-600 transition-all border border-slate-200 disabled:opacity-30">
-                                 <Maximize2 size={14} />
-                              </button>
+                              <button onClick={() => setIsMaximized(true)} disabled={!isLinkEnabled || !screenShot} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-cyan-50 hover:text-cyan-600 transition-all border border-slate-200 disabled:opacity-30"><Maximize2 size={14} /></button>
                            </div>
                         </div>
                         <div className="bg-slate-900 rounded-2xl p-1.5 min-h-[300px] flex items-center justify-center relative overflow-hidden border border-slate-200 shadow-inner group">
                            {!isLinkEnabled ? (
-                              <div className="flex flex-col items-center gap-3 opacity-40">
-                                 <MonitorX size={40} className="text-slate-500" />
-                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">链路已手动断开</p>
-                              </div>
+                              <div className="flex flex-col items-center gap-3 opacity-40"><MonitorX size={40} className="text-slate-500" /><p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">链路已手动断开</p></div>
                            ) : activeAgent.is_online === 0 ? (
-                              <div className="flex flex-col items-center gap-3 opacity-40">
-                                 <WifiOff size={40} className="text-slate-500" />
-                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">成员离线，无法建立桌面链路</p>
-                              </div>
-                           ) : isWaitingForData || !screenShot ? (
-                              <div className="flex flex-col items-center gap-4">
-                                 <div className="relative">
-                                    <div className="w-12 h-12 rounded-full border-2 border-cyan-500/20 border-t-cyan-500 animate-spin" />
-                                    <Wifi size={20} className="absolute inset-0 m-auto text-cyan-500 animate-pulse" />
-                                 </div>
-                                 <div className="text-center space-y-1">
-                                    <p className="text-cyan-500 text-xs font-black uppercase tracking-widest">物理链路正在建立</p>
-                                    <p className="text-slate-500 text-[9px] font-bold uppercase">正在等待远程节点推送数据流...</p>
-                                 </div>
-                              </div>
-                           ) : (
+                              <div className="flex flex-col items-center gap-3 opacity-40"><WifiOff size={40} className="text-slate-500" /><p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">成员离线，无法建立桌面链路</p></div>
+                           ) : screenShot ? (
                               <div className="relative w-full h-full flex items-center justify-center">
                                  <img src={screenShot} className="max-w-full max-h-full rounded-xl object-contain relative z-10" alt="Screen" />
-                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 pointer-events-none">
-                                    <span className="bg-black/60 text-white px-4 py-2 rounded-full text-xs font-black backdrop-blur-md border border-white/10 uppercase tracking-widest flex items-center gap-2"><Globe size={12} className="animate-pulse" /> 实时捕获中</span>
-                                 </div>
+                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 pointer-events-none"><span className="bg-black/60 text-white px-4 py-2 rounded-full text-xs font-black backdrop-blur-md border border-white/10 uppercase tracking-widest flex items-center gap-2"><Globe size={12} className="animate-pulse" /> 实时注入中</span></div>
+                              </div>
+                           ) : (
+                              <div className="flex flex-col items-center gap-4">
+                                 <div className="relative"><div className="w-12 h-12 rounded-full border-2 border-cyan-500/20 border-t-cyan-500 animate-spin" /><Wifi size={20} className="absolute inset-0 m-auto text-cyan-500 animate-pulse" /></div>
+                                 <div className="text-center space-y-1"><p className="text-cyan-500 text-xs font-black uppercase tracking-widest text-black">物理链路正在建立</p><p className="text-slate-500 text-[9px] font-bold uppercase">正在等待远程节点推送数据流...</p></div>
                               </div>
                            )}
                         </div>
                      </section>
-                     <section className="p-6 bg-cyan-600 text-white rounded-2xl relative overflow-hidden shadow-lg shadow-cyan-600/20"><div className="absolute top-0 right-0 p-4 opacity-20"><BrainCircuit size={60} /></div><h5 className="text-[9px] font-black text-cyan-100 uppercase tracking-widest mb-3">智脑辅助决策系统</h5><p className="text-xs font-bold text-white leading-relaxed italic relative z-10">"系统正在实时评估对话逻辑。若检测到情绪波动，干预矩阵将自动提供最优话术。"</p></section>
+                     <section className="p-6 bg-cyan-600 text-white rounded-2xl relative overflow-hidden shadow-lg shadow-cyan-600/20"><div className="absolute top-0 right-0 p-4 opacity-20"><BrainCircuit size={60} /></div><h5 className="text-[9px] font-black text-cyan-100 uppercase tracking-widest mb-3">智脑辅助决策系统</h5><p className="text-xs font-bold text-white leading-relaxed italic relative z-10">"系统正在实时评估对话逻辑。该链路已锚定，数据流表现正常。"</p></section>
                   </div>
                 </motion.div>
               ) : (
@@ -310,24 +264,20 @@ export default function TacticalCommand() {
 
       <AnimatePresence>
          {isMaximized && screenShot && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] bg-black/95 flex flex-col p-4 backdrop-blur-xl">
-               <div className="flex justify-between items-center mb-4 px-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] bg-black flex flex-col backdrop-blur-3xl">
+               <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[2100] flex items-center gap-6 bg-black/40 backdrop-blur-xl border border-white/10 px-8 py-3 rounded-2xl shadow-2xl transition-opacity hover:opacity-100 opacity-40">
+                  <div className="flex items-center gap-4 border-r border-white/10 pr-6 mr-2">
+                     <div className="w-8 h-8 bg-cyan-600 rounded-xl flex items-center justify-center"><MonitorPlay size={18} className="text-white" /></div>
+                     <div><h4 className="text-white font-black text-sm uppercase leading-none">全屏实战监听</h4><p className="text-cyan-500 text-[8px] font-black uppercase tracking-widest mt-1">成员: {activeAgent.real_name} · 1:1 物理采样</p></div>
+                  </div>
                   <div className="flex items-center gap-4">
-                     <div className="w-10 h-10 bg-cyan-600 rounded-xl flex items-center justify-center shadow-lg"><MonitorPlay size={24} className="text-white" /></div>
-                     <div>
-                        <h4 className="text-white font-black text-lg uppercase leading-none">全屏桌面链路</h4>
-                        <p className="text-cyan-500 text-[10px] font-black uppercase tracking-widest mt-1">节点: {activeAgent.real_name} · 实时数据流已锚定</p>
-                     </div>
+                     <div className="flex items-center gap-1 text-[10px] font-black text-emerald-500 animate-pulse uppercase"><Activity size={12} /> LIVE FEED</div>
+                     <button onClick={() => setIsMaximized(false)} className="p-2 bg-red-500/20 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-500/30"><X size={18} /></button>
                   </div>
-                  <button onClick={() => setIsMaximized(false)} className="p-3 bg-red-500/20 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-500/30">
-                     <X size={24} />
-                  </button>
                </div>
-               <div className="flex-1 flex items-center justify-center overflow-hidden border border-white/10 rounded-2xl bg-black relative">
-                  <img src={screenShot} className="max-w-full max-h-full object-contain shadow-2xl" alt="Maximized Screen" />
-                  <div className="absolute top-4 right-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-[10px] font-black animate-pulse flex items-center gap-2 border border-white/20">
-                     <Activity size={12} /> LIVE FEED
-                  </div>
+               {/* 彻底拉满显示空间：flex-1 + object-contain 确保图像占据整个视口 */}
+               <div className="flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-slate-950 p-2">
+                  <img src={screenShot} className="max-w-full max-h-full w-auto h-auto object-contain shadow-[0_0_100px_rgba(0,0,0,0.5)] cursor-crosshair" alt="Full Screen" />
                </div>
             </motion.div>
          )}
