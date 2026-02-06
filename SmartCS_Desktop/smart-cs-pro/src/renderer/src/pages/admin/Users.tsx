@@ -163,7 +163,7 @@ export default function UsersPage() {
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
-      <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
+      <header className="flex justify-between items-end bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">成员角色矩阵</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium flex items-center gap-2">
@@ -171,18 +171,18 @@ export default function UsersPage() {
             {isAnyFetching && <span className="flex items-center gap-1 text-cyan-600 animate-pulse"><RefreshCw size={12} className="animate-spin" /> 同步中</span>}
           </p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-xl active:scale-95 transition-all"><Download size={16} /> 导出全量清单</button>
+        <button className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg text-xs font-black shadow-xl active:scale-95 transition-all"><Download size={16} /> 导出全量清单</button>
       </header>
 
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-4 shrink-0">
-        <div className="flex-1 min-w-[240px]"><TacticalSearch value={search} onChange={setSearch} placeholder="检索姓名、账号..." /></div>
+        <div className="flex-1 min-w-[240px]"><TacticalSearch value={search} onChange={setSearch} placeholder="检索姓名..." /></div>
         <div className="w-56"><TacticalSelect options={[{id: '', name: '所有部门'}, ...depts]} value={deptId} onChange={(val) => { setDeptId(val); setPage(1); }} /></div>
-        <button onClick={() => usersQuery.refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+        <button onClick={() => usersQuery.refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
           <RefreshCw size={18} className={cn(isAnyFetching && "animate-spin")} />
         </button>
       </div>
 
-      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {isAnyLoading ? (
             <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black italic opacity-50">

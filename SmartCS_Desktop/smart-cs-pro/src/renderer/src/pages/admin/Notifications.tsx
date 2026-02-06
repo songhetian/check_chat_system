@@ -120,7 +120,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6 text-black">
-      <div className="flex justify-between items-end bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0">
+      <div className="flex justify-between items-end bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black text-black uppercase italic leading-none">消息通知中枢</h2>
           <p className="text-slate-500 text-sm mt-2 font-bold flex items-center gap-2">
@@ -138,11 +138,11 @@ export default function NotificationsPage() {
         </div>
       </div>
 
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 shrink-0">
+      <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex items-center gap-4 shrink-0">
         <div className="flex-1 max-w-md"><TacticalSearch value={search} onChange={setSearch} placeholder="按标题或关键词过滤..." /></div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {isLoading ? (
             <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black italic opacity-50">

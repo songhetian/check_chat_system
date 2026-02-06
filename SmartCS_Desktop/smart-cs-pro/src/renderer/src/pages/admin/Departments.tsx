@@ -132,7 +132,7 @@ export default function DepartmentsPage() {
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
-      <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
+      <header className="flex justify-between items-end bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">部门架构管理</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium flex items-center gap-2">
@@ -141,18 +141,18 @@ export default function DepartmentsPage() {
           </p>
         </div>
         {hasPermission('admin:dept:create') && (
-          <button onClick={() => { setInputName(''); setManagerId(''); setModalType('ADD') }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800"><Plus size={16} /> 录入新部门</button>
+          <button onClick={() => { setInputName(''); setManagerId(''); setModalType('ADD') }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg text-xs font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800"><Plus size={16} /> 录入新部门</button>
         )}
       </header>
 
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-4 shrink-0">
         <div className="flex-1 min-w-[240px]"><TacticalSearch value={search} onChange={setSearch} placeholder="检索部门名称..." /></div>
-        <button onClick={() => deptsQuery.refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+        <button onClick={() => deptsQuery.refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
           <RefreshCw size={18} className={cn(deptsQuery.isFetching && "animate-spin")} />
         </button>
       </div>
 
-      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {deptsQuery.isLoading ? (
             <div className="h-64 flex items-center justify-center text-slate-400 gap-3 font-bold uppercase italic tracking-widest">

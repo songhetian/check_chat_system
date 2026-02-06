@@ -29,21 +29,21 @@ export default function AuditStreamPage() {
   const total = logsData?.total || 0
 
   return (
-    <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
-      <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
+    <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-black">
+      <header className="flex justify-between items-end bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">系统操作审计</h2>
+          <h2 className="text-3xl font-black text-black uppercase italic text-tactical-glow">系统操作审计</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium flex items-center gap-2">
             记录所有高级管理操作与系统配置变动，确保全流程透明可追溯
             {isFetching && <span className="flex items-center gap-1 text-cyan-600 animate-pulse"><RefreshCw size={12} className="animate-spin" /> 同步中</span>}
           </p>
         </div>
-        <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+        <button onClick={() => refetch()} className="p-3 bg-slate-50 text-black rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
           <RefreshCw size={18} className={cn(isFetching && "animate-spin")} />
         </button>
       </header>
 
-      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {isLoading ? (
             <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black italic opacity-50">
