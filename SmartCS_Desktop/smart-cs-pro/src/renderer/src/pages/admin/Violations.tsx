@@ -113,21 +113,21 @@ export default function ViolationsPage() {
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0 gap-6">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">风险拦截审计</h2>
+          <h2 className="text-3xl font-black text-slate-900 uppercase italic text-tactical-glow">违规记录审计</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium flex items-center gap-2">
-            全域违规捕获、多媒体证据链固化与物理审计系统
+            全域违规行为捕获、多媒体证据链固化与人工审计系统
             {violationsQuery.isFetching && <span className="flex items-center gap-1 text-cyan-600 animate-pulse"><RefreshCw size={12} className="animate-spin" /> 对齐中</span>}
           </p>
         </div>
-        <div className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 border rounded-2xl flex items-center gap-3"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" /><span className="text-sm font-black text-slate-700 uppercase tracking-widest">实时链路已激活</span></div>
+        <div className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 border rounded-xl flex items-center gap-3"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" /><span className="text-xs font-black text-slate-700 uppercase tracking-widest">实时链路已激活</span></div>
       </header>
 
-      <div className="bg-white p-4 rounded-[24px] border border-slate-200 shadow-sm shrink-0 flex items-center gap-4">
-        <TacticalSearch value={search} onChange={setSearch} placeholder="搜索坐席拼音、账号..." className="flex-1" />
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm shrink-0 flex items-center gap-4">
+        <TacticalSearch value={search} onChange={setSearch} placeholder="搜索成员姓名、账号..." className="flex-1" />
         
         <div className="w-56">
           <TacticalSelect 
-            options={[{id: '', name: '全域战术单元'}, ...depts]} 
+            options={[{id: '', name: '所有部门'}, ...depts]} 
             value={deptId} 
             onChange={(val) => { setDeptId(val); setPage(1); }} 
             placeholder="部门过滤" 
@@ -148,7 +148,7 @@ export default function ViolationsPage() {
           />
         </div>
 
-        <button onClick={() => violationsQuery.refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+        <button onClick={() => violationsQuery.refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
           <RefreshCw size={18} className={cn(violationsQuery.isFetching && "animate-spin")} />
         </button>
       </div>
@@ -158,18 +158,18 @@ export default function ViolationsPage() {
           {violationsQuery.isLoading ? (
             <div className="h-64 flex items-center justify-center text-slate-400 gap-3 italic font-bold uppercase tracking-widest">
               <Loader2 className="animate-spin" size={40} />
-              <span>调取中枢审计库...</span>
+              <span>调取审计库...</span>
             </div>
           ) : (
-            <TacticalTable headers={['发生时间', '坐席信息', '所属部门', '命中内容', '风险权重', '战术审计']}>
+            <TacticalTable headers={['捕获时间', '成员姓名', '所属部门', '违规关键词', '风险等级', '证据审计']}>
               {data.map((item: any) => (
                 <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group cursor-pointer" onClick={() => openEvidence(item)}>
-                  <td className="px-8 py-5 text-center text-[10px] font-black text-slate-400 whitespace-nowrap">{new Date(item.timestamp).toLocaleString()}</td>
-                  <td className="px-6 py-5"><div className="flex items-center justify-center gap-3"><div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-xs text-slate-600 shrink-0">{item.user__real_name?.[0] || '?'}</div><div className="flex flex-col text-left"><span className="text-sm font-black text-slate-900 truncate">{item.user__real_name}</span><span className="text-[9px] text-slate-400 font-mono italic truncate">@{item.user__username}</span></div></div></td>
-                  <td className="px-6 py-5 text-center"><span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full uppercase tracking-tighter">{item.user__department__name || '未归类'}</span></td>
-                  <td className="px-6 py-5 text-center"><span className="text-xs font-black text-red-600 bg-red-500/5 px-3 py-1 rounded-lg border border-red-500/10 italic">{item.keyword}</span></td>
-                  <td className="px-6 py-5 text-center"><span className={cn("text-[10px] font-black px-2 py-0.5 rounded italic", item.risk_score >= 8 ? "bg-red-600 text-white" : "bg-slate-900 text-white")}>LV.{item.risk_score}</span></td>
-                  <td className="px-8 py-5 text-center"><button onClick={(e) => { e.stopPropagation(); openEvidence(item); }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shrink-0"><ArrowUpRight size={16} /></button></td>
+                  <td className="px-8 py-3 text-center text-[10px] font-bold text-slate-400 whitespace-nowrap">{new Date(item.timestamp).toLocaleString()}</td>
+                  <td className="px-6 py-3"><div className="flex items-center justify-center gap-3"><div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center font-black text-xs text-slate-600 shrink-0">{item.user__real_name?.[0] || '?'}</div><div className="flex flex-col text-left"><span className="text-xs font-black text-slate-900 truncate">{item.user__real_name}</span><span className="text-[9px] text-slate-400 font-mono italic truncate">@{item.user__username}</span></div></div></td>
+                  <td className="px-6 py-3 text-center"><span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full uppercase tracking-tighter">{item.user__department__name || '未归类'}</span></td>
+                  <td className="px-6 py-3 text-center"><span className="text-[11px] font-black text-red-600 bg-red-500/5 px-3 py-0.5 rounded-lg border border-red-500/10 italic">{item.keyword}</span></td>
+                  <td className="px-6 py-3 text-center"><span className={cn("text-[10px] font-black px-2 py-0.5 rounded italic", item.risk_score >= 8 ? "bg-red-600 text-white" : "bg-slate-900 text-white")}>LV.{item.risk_score}</span></td>
+                  <td className="px-8 py-3 text-center"><button onClick={(e) => { e.stopPropagation(); openEvidence(item); }} className="p-2 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all shrink-0"><ArrowUpRight size={14} /></button></td>
                 </tr>
               ))}
             </TacticalTable>
