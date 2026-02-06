@@ -76,11 +76,28 @@ export default function ProductsPage() {
       })
     },
     onSuccess: (res) => {
-      if (res.data.status === 'ok') {
+      if (res.status === 200 || res.data?.status === 'ok') {
         queryClient.invalidateQueries({ queryKey: ['products'] })
         setModalType('NONE')
         toast.success('战术资产已移除')
       }
+    }
+  })
+
+  // 预留：新增/修改加固逻辑 (如果后续添加新增功能)
+  const saveMutation = useMutation({
+    mutationFn: async (item: any) => {
+      const sanitizedData = {
+        ...item,
+        price: Number(item.price),
+        stock: Number(item.stock)
+      }
+      return window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/products`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: sanitizedData
+      })
     }
   })
 

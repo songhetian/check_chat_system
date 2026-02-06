@@ -45,11 +45,16 @@ export default function CategoriesPage() {
   // React Query: Save (Create/Update)
   const saveMutation = useMutation({
     mutationFn: async (item: any) => {
+      // 核心清洗：确保 ID 和 属性不传递空字符串
+      const sanitizedData = {
+        ...item,
+        id: item.id || undefined, // 如果是新增，不传 ID
+      }
       return window.api.callApi({
         url: `${CONFIG.API_BASE}/ai/categories`,
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
-        data: item
+        data: sanitizedData
       })
     },
     onSuccess: (res) => {

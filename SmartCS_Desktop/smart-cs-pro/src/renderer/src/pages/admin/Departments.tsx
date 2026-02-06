@@ -76,14 +76,25 @@ export default function DepartmentsPage() {
 
   // React Query: Save Mutation
   const saveMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async () => {
       const isEdit = modalType === 'EDIT'
       const endpoint = isEdit ? '/departments/update' : '/departments'
+      
+      // 核心清洗：manager_id 必须是数字或 null
+      const sanitizedData: any = { 
+        name: inputName 
+      }
+      
+      if (isEdit) {
+        sanitizedData.id = targetItem.id
+        sanitizedData.manager_id = (managerId === '' || managerId === null) ? null : Number(managerId)
+      }
+
       return window.api.callApi({
         url: `${CONFIG.API_BASE}/admin${endpoint}`,
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
-        data: isEdit ? { id: targetItem.id, name: inputName, manager_id: managerId || null } : { name: inputName }
+        data: sanitizedData
       })
     },
     onSuccess: (res) => {
@@ -191,7 +202,7 @@ export default function DepartmentsPage() {
               </div>
             </div>
           )}
-          <button disabled={saveMutation.isPending} onClick={() => saveMutation.mutate({})} className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-xs uppercase shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+          <button disabled={saveMutation.isPending} onClick={() => saveMutation.mutate()} className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-xs uppercase shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
             {saveMutation.isPending ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 确认并固化架构
           </button>
         </div>
