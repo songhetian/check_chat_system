@@ -77,8 +77,8 @@ export const TacticalIsland = () => {
   useEffect(() => {
     const screenWidth = window.screen.availWidth
     const screenHeight = window.screen.availHeight
-    let width = 580 
-    let height = showHelpModal ? 480 : (isExpanded ? 564 : 64)
+    let width = 640 
+    let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
     let center = false
@@ -88,7 +88,7 @@ export const TacticalIsland = () => {
     } else if (layoutMode === 'SIDE') {
       width = 440; height = screenHeight - 80; x = screenWidth - 460; y = 40
     } else {
-      width = 580; x = screenWidth - 600; y = 30
+      width = 640; x = screenWidth - 660; y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', !showBigScreenModal)
@@ -140,8 +140,8 @@ export const TacticalIsland = () => {
         layout
         initial={false}
         animate={{ 
-          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : 580),
-          height: layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (showHelpModal ? 480 : (isExpanded ? 564 : 64)))
+          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : 640),
+          height: layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))
         }}
         className={cn(
           "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 shadow-2xl relative",
@@ -150,32 +150,32 @@ export const TacticalIsland = () => {
         )}
       >
         {layoutMode === 'FLOAT' && (
-          <div className="flex items-center px-4 h-[64px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
-            <div className="flex items-center gap-2 w-[110px] shrink-0">
+          <div className="flex items-center px-6 h-[72px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
+            <div className="flex items-center gap-3 w-[130px] shrink-0">
               <div className="relative">
-                <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm", isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5")}>{user?.real_name ? user.real_name[0] : <UserIcon size={16} />}</div>
-                <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-[2px] border-slate-950", isOnline ? "bg-emerald-500" : "bg-red-500 animate-pulse")} />
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg", isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5")}>{user?.real_name ? user.real_name[0] : <UserIcon size={20} />}</div>
+                <div className={cn("absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[2px] border-slate-950", isOnline ? "bg-emerald-500" : "bg-red-500 animate-pulse")} />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[12px] font-black text-white truncate leading-none mb-0.5">{user?.real_name || '成员'}</span>
-                <span className={cn("text-[8px] font-bold uppercase tracking-widest truncate", isOnline ? "text-emerald-500" : "text-red-500")}>{isOnline ? '在线' : '离线'}</span>
+                <span className="text-[13px] font-black text-white truncate leading-none mb-1">{user?.real_name || '成员'}</span>
+                <span className={cn("text-[9px] font-bold uppercase tracking-widest truncate", isOnline ? "text-emerald-500" : "text-red-500")}>{isOnline ? '在线' : '离线'}</span>
               </div>
             </div>
 
-            <div className="flex-1 flex items-center justify-center gap-1.5" style={{ WebkitAppRegion: 'no-drag' } as any}>
-              <HubBtn icon={<Ghost size={16} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观" color="muted" />
-              <HubBtn icon={<GraduationCap size={16} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
-              <div className="w-px h-4 bg-white/10 mx-0.5" />
-              <HubBtn icon={<Package size={16} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="商品资产" color="white" />
-              <HubBtn icon={<BookOpen size={16} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="战术知识" color="white" />
-              <HubBtn icon={<Tags size={16} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="画像监控" color={isCustomerHudEnabled ? "emerald" : "white"} />
-              <div className="w-px h-4 bg-white/10 mx-0.5" />
-              <HubBtn icon={<Globe size={16} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景视图" color="emerald" />
-              <HubBtn icon={<Hand size={16} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="战术求助" color="red" />
-              <HubBtn icon={<LayoutGrid size={16} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="功能面板" color="muted" />
-              <HubBtn icon={<LogOut size={16} />} active={false} onClick={() => { logout(); window.location.hash = '/login'; }} title="注销" color="red" />
+            <div className="flex-1 flex items-center justify-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
+              <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观" color="muted" />
+              <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
+              <div className="w-px h-5 bg-white/10 mx-1" />
+              <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="商品资产" color="white" />
+              <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
+              <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="画像监控" color={isCustomerHudEnabled ? "emerald" : "white"} />
+              <div className="w-px h-5 bg-white/10 mx-1" />
+              <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景视图" color="emerald" />
+              <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="求助" color="red" />
+              <HubBtn icon={<LayoutGrid size={20} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="功能面板" color="muted" />
+              <HubBtn icon={<LogOut size={20} />} active={false} onClick={() => { logout(); window.location.hash = '/login'; }} title="注销" color="red" />
             </div>
-            <div className="w-[110px] shrink-0" />
+            <div className="w-[130px] shrink-0" />
           </div>
         )}
 
@@ -225,7 +225,7 @@ export const TacticalIsland = () => {
               <div className="flex flex-col gap-3 flex-1 min-h-0">
                  <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
                     <textarea value={helpText} onChange={(e) => setHelpText(e.target.value)} placeholder="描述困境，智脑将自动匹配对策..." className="w-full h-24 bg-black/40 border border-white/5 rounded-xl p-3 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none font-bold" />
-                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-4 py-1.5 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all shadow-lg uppercase">提交</button>
+                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-4 py-1.5 bg-red-500 text-white text-[10px] font-black rounded-lg hover:bg-red-600 transition-all shadow-lg uppercase">提交</button>
                  </div>
               </div>
             </motion.div>
@@ -274,12 +274,12 @@ export const TacticalIsland = () => {
 
 function HubBtn({ icon, active, onClick, title, color }: any) {
   const activeClassMap: any = { red: "bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]", emerald: "bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]", white: "bg-white text-black shadow-lg", muted: "bg-slate-800 text-white border-white/20" }
-  return (<button onClick={onClick} title={title} className={cn("w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90", active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white")}>{icon}</button>)
+  return (<button onClick={onClick} title={title} className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90", active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white")}>{icon}</button>)
 }
 
 function TabBtn({ id, active, set, icon, label }: any) {
   const isSelected = active === id
-  return (<button onClick={(e) => { e.stopPropagation(); set(id); }} className={cn("flex-1 py-2.5 rounded-xl flex flex-col items-center justify-center gap-1 transition-all relative", isSelected ? "bg-white/10 text-cyan-400" : "text-slate-500 hover:text-slate-300")}>{icon}<span className="text-[9px] font-black uppercase">{label}</span>{isSelected && (<motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500 shadow-[0_0_8px_#06b6d4]" />)}</button>)
+  return (<button onClick={(e) => { e.stopPropagation(); set(id); }} className={cn("flex-1 py-2.5 rounded-lg flex flex-col items-center justify-center gap-1 transition-all relative", isSelected ? "bg-white/10 text-cyan-400" : "text-slate-500 hover:text-slate-300")}>{icon}<span className="text-[9px] font-black uppercase">{label}</span>{isSelected && (<motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500 shadow-[0_0_8px_#06b6d4]" />)}</button>)
 }
 
 function InsightCard({ title, desc, color, icon }: any) {
@@ -289,5 +289,5 @@ function InsightCard({ title, desc, color, icon }: any) {
 
 function ToolCard({ icon, title, desc, color, onClick }: any) {
   const colors: any = { cyan: "text-cyan-400 bg-cyan-400/5 border-cyan-400/15", amber: "text-amber-400 bg-amber-400/5 border-amber-400/15", red: "text-red-400 bg-red-400/5 border-red-400/15", slate: "text-slate-400 bg-white/5 border-white/10" }
-  return (<button onClick={onClick} className={cn("p-4 rounded-xl border flex flex-col gap-2 transition-all hover:scale-[1.02] text-left", colors[color])}><div className="w-8 h-8 rounded-xl flex items-center justify-center bg-black/30 shadow-inner">{icon}</div><div><div className="text-xs font-black uppercase mb-0.5">{title}</div><div className="text-[9px] opacity-60 leading-tight">{desc}</div></div></button>)
+  return (<button onClick={onClick} className={cn("p-4 rounded-xl border flex flex-col gap-2 transition-all hover:scale-[1.02] text-left", colors[color])}><div className="w-8 h-8 rounded-lg flex items-center justify-center bg-black/30 shadow-inner">{icon}</div><div><div className="text-xs font-black uppercase mb-0.5">{title}</div><div className="text-[9px] opacity-60 leading-tight">{desc}</div></div></button>)
 }
