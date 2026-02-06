@@ -178,12 +178,12 @@ export default function Login() {
 
       <motion.div
         animate={error ? { x: [-10, 10, -10, 10, 0] } : {}}
-        className="w-full max-w-[420px] bg-slate-900/40 border-2 border-white/5 p-10 rounded-[40px] backdrop-blur-3xl relative z-10 shadow-2xl"
+        className="w-full max-w-[420px] bg-slate-900/40 border-2 border-white/5 p-10 rounded-xl backdrop-blur-3xl relative z-10 shadow-2xl"
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
 
         <div className="flex flex-col items-center mb-8" style={{ WebkitAppRegion: 'drag' } as any}>
-          <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mb-6 border border-cyan-500/30">
+          <div className="w-20 h-20 bg-cyan-500/10 rounded-xl flex items-center justify-center mb-6 border border-cyan-500/30">
             <span className="text-2xl font-black text-cyan-400">{CONFIG.BRANDING.logoText}</span>
           </div>
           <h1 className="text-3xl font-black text-white tracking-tighter italic text-tactical-glow uppercase">
@@ -198,7 +198,7 @@ export default function Login() {
         </div>
 
         {error && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 text-red-500">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-500">
              <AlertTriangle size={18} />
              <span className="text-[10px] font-black uppercase tracking-widest">{error}</span>
           </motion.div>
@@ -211,7 +211,7 @@ export default function Login() {
                           value={formData.username}
                           onChange={(e) => setFormData({...formData, username: e.target.value})}
                           placeholder="请输入账号" 
-                          className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 px-6 text-sm !text-white focus:border-cyan-500/50 focus:bg-black transition-all outline-none placeholder:text-slate-400 !font-black" 
+                          className="w-full bg-black/80 border border-white/10 rounded-lg py-4 px-6 text-sm !text-white focus:border-cyan-500/50 focus:bg-black transition-all outline-none placeholder:text-slate-400 !font-black" 
                         />
                       </div>
             
@@ -222,13 +222,13 @@ export default function Login() {
                           value={formData.password}
                           onChange={(e) => setFormData({...formData, password: e.target.value})}
                           placeholder="请输入密码" 
-                          className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 px-6 text-sm !text-white focus:border-cyan-500/50 focus:bg-black transition-all outline-none placeholder:text-slate-400 font-mono tracking-widest !font-black" 
+                          className="w-full bg-black/80 border border-white/10 rounded-lg py-4 px-6 text-sm !text-white focus:border-cyan-500/50 focus:bg-black transition-all outline-none placeholder:text-slate-400 font-mono tracking-widest !font-black" 
                         />          </div>
 
           <button
             type="submit"
             disabled={progress > 0}
-            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-black py-5 rounded-2xl shadow-xl transition-all active:scale-95 flex flex-col items-center gap-1 uppercase tracking-[0.2em] text-[10px] mt-4 disabled:opacity-50"
+            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-black py-5 rounded-lg shadow-xl transition-all active:scale-95 flex flex-col items-center gap-1 uppercase tracking-[0.2em] text-[10px] mt-4 disabled:opacity-50"
           >
             {progress > 0 ? (
               <div className="w-full px-10 space-y-2">

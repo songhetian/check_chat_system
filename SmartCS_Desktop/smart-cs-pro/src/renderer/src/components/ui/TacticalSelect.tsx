@@ -49,7 +49,7 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
       <div 
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={cn(
-          "w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black flex items-center justify-between transition-all shadow-sm group",
+          "w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-black flex items-center justify-between transition-all shadow-sm group",
           disabled ? "opacity-50 cursor-not-allowed bg-slate-50" : "cursor-pointer",
           isOpen ? "ring-2 ring-cyan-500/10 border-cyan-500 shadow-md" : (disabled ? "" : "hover:border-slate-300")
         )}
@@ -66,7 +66,7 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 4 }}
             exit={{ opacity: 0, y: 4 }}
-            className="absolute z-[1100] w-full bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col p-1.5"
+            className="absolute z-[1100] w-full bg-white rounded-lg shadow-xl border border-slate-200 overflow-hidden flex flex-col p-1.5"
           >
             {showSearch && (
               <div className="relative mb-1.5 p-1">
@@ -76,7 +76,7 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="检索匹配项..."
-                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border-none rounded-lg text-[11px] font-bold text-slate-900 focus:ring-0 shadow-inner"
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border-none rounded-md text-[11px] font-bold text-slate-900 focus:ring-0 shadow-inner"
                 />
               </div>
             )}
@@ -93,7 +93,7 @@ export function TacticalSelect({ options, value, onChange, placeholder = "请选
                       setIsOpen(false)
                     }}
                     className={cn(
-                      "px-3 py-2 rounded-lg text-[11px] font-black flex items-center justify-between cursor-pointer transition-all mb-0.5 last:mb-0",
+                      "px-3 py-2 rounded-md text-[11px] font-black flex items-center justify-between cursor-pointer transition-all mb-0.5 last:mb-0",
                       String(value) === String(opt.id) ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/20" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     )}
                   >
