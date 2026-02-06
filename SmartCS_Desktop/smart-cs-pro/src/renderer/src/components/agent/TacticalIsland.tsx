@@ -40,8 +40,8 @@ export const TacticalIsland = () => {
     const screenWidth = window.screen.availWidth
     const screenHeight = window.screen.availHeight
     
-    // 物理宽度：展开态压缩至 760px，折叠态保持 80px
-    let width = isFolded ? 80 : 760 
+    // 物理宽度：展开态压减至 660px，折叠态保持 80px
+    let width = isFolded ? 80 : 660 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
@@ -52,7 +52,7 @@ export const TacticalIsland = () => {
     } else if (layoutMode === 'SIDE') {
       width = 440; height = screenHeight - 80; x = screenWidth - 460; y = 40
     } else {
-      x = isFolded ? screenWidth - 100 : screenWidth - 780
+      x = isFolded ? screenWidth - 100 : screenWidth - 680
       y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
@@ -92,7 +92,7 @@ export const TacticalIsland = () => {
         layout
         initial={false}
         animate={{ 
-          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 760)),
+          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 660)),
           height: layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))
         }}
         className={cn(
@@ -105,7 +105,6 @@ export const TacticalIsland = () => {
         {layoutMode === 'FLOAT' && (
           <div className="flex items-center px-4 h-[72px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
             
-            {/* 1. 左侧头像与状态：精准锁定 110px */}
             <AnimatePresence>
               {!isFolded && (
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-2 w-[110px] shrink-0">
@@ -121,29 +120,27 @@ export const TacticalIsland = () => {
               )}
             </AnimatePresence>
 
-            {/* 2. 中间按钮组：间距压缩至 gap-2 */}
-            <div className="flex-1 flex items-center justify-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            <div className="flex-1 flex items-center justify-end pr-2 gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
               <AnimatePresence>
                 {!isFolded && (
                   <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="flex items-center justify-center gap-2">
                     <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观" color="muted" />
                     <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
                     <HubBtn icon={isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />} active={isMuted} onClick={() => setMuted(!isMuted)} title={isMuted ? "解禁" : "静音"} color={isMuted ? "red" : "muted"} />
-                    <div className="w-px h-4 bg-white/10 mx-0.5" />
+                    <div className="w-px h-5 bg-white/10 mx-0.5" />
                     <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="资料" color="white" />
                     <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
                     <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="画像" color={isCustomerHudEnabled ? "emerald" : "white"} />
-                    <div className="w-px h-4 bg-white/10 mx-0.5" />
+                    <div className="w-px h-5 bg-white/10 mx-0.5" />
                     <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景" color="emerald" />
                     <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="求助" color="red" />
                     <HubBtn icon={<LayoutGrid size={20} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="面板" color="muted" />
                     <HubBtn icon={<LogOut size={20} />} active={false} onClick={() => { logout(); window.location.hash = '/login'; }} title="退出" color="red" />
-                    <div className="w-px h-4 bg-white/10 mx-0.5" />
+                    <div className="w-px h-5 bg-white/10 mx-0.5" />
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* 3. 切换按钮 */}
               <HubBtn 
                 icon={isFolded ? <ChevronsLeft size={20} /> : <ChevronsRight size={20} />} 
                 active={isFolded} 
@@ -152,13 +149,9 @@ export const TacticalIsland = () => {
                 color="muted" 
               />
             </div>
-            
-            {/* 右侧占位：对齐左侧 110px */}
-            {!isFolded && <div className="w-[110px] shrink-0" />}
           </div>
         )}
 
-        {/* 侧边栏逻辑 */}
         {layoutMode === 'SIDE' && (
           <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as any}>
              <div className="p-6 bg-cyan-600 text-white flex justify-between items-center shrink-0">
@@ -166,10 +159,10 @@ export const TacticalIsland = () => {
                 <h4 className="text-lg font-black italic tracking-tighter uppercase">{activeSideTool === 'PRODUCTS' ? '商品资产' : (activeSideTool === 'KNOWLEDGE' ? '知识矩阵' : '客户洞察')}</h4>
              </div>
              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                <div className="space-y-4">
+                <div className="space-y-4 text-white">
                    {searchResults.map((item, i) => (
                      <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                       <div className="text-base font-black text-white mb-2 italic">{item.name || item.keyword}</div>
+                       <div className="text-base font-black mb-2 italic">{item.name || item.keyword}</div>
                        <div className="p-3 bg-black/60 rounded-xl text-xs text-slate-200 border border-white/5 leading-relaxed">"{item.usp || item.solution}"</div>
                      </div>
                    ))}
