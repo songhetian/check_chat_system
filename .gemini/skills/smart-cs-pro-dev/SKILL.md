@@ -9,18 +9,27 @@ description: Smart-CS Pro (数智化运营治理平台) 专用开发与维护 Sk
 
 ## 1. 核心开发工作流
 
+### 战术数据生命周期 (Data Life Cycle)
+本项目采用 **React Query + WebSocket** 双驱动架构：
+1.  **静态/慢动数据**: 必须使用 `useQuery` 获取。配置合适的 `staleTime` 以减少重复请求。
+2.  **动态/实时事件**: 必须通过 `useRiskSocket.ts` 监听 Python 引擎推送到 WebSocket 的事件。严禁使用 `setInterval` 轮询。
+3.  **数据变更**: 所有修改操作必须封装在 `useMutation` 中，执行成功后立即调用 `invalidateQueries` 确保全站数据一致性。
+
 ### 新增一个战术指令 (Action Loop)
 当你需要新增一个触发式功能（如：检测到客户骂人自动禁言）时，请遵循以下路径：
 1. **Python 引擎层**: 在 `core_engine/engine.py` 的 `RiskEngine` 或 `SmartScanner` 中添加识别逻辑。
-2. **通信层**: 通过 `broadcast_event({"type": "NEW_TYPE", ...})` 将信号推送到 WebSocket。
+2. **通信层**: 通过 `broadcast_event({"type": "NEW_TYPE", ...})` 将信号通过 **WebSocket** 实时推送，不再使用传统的短轮询。
 3. **前端监听层**: 在 `src/renderer/src/hooks/useRiskSocket.ts` 中解析新事件，并使用 `window.dispatchEvent` 发出自定义事件。
-4. **UI 响应层**: 在 `App.tsx` 中监听该自定义事件，并挂载对应的 React 组件。
+4. **UI 响应层**: 
+   - 监听自定义事件，配合 `framer-motion` 展示即时反馈。
+   - 若事件涉及数据库状态变更，使用 `queryClient.invalidateQueries` 触发数据重载。
 5. **验证与提交 (Safety First)**: 
    - 运行 `npm run typecheck` 确保代码无误。
-   - **必须执行 Git 提交**: 使用 `git add .` 和 `git commit -m "[模块] 描述"` 记录本次变更，以便随时回溯。
+   - **必须执行 Git 提交**: 使用 `git add .` 和 `git commit -m "[模块] 描述"` 记录本次变更。
 
 ### UI 组件开发规范
 - **必须** 使用 Tailwind CSS。
+- **状态管理**: 涉及 API 的状态必须由 React Query 接管，避免臃肿的 `useState` + `useEffect` 组合。
 - **圆角**: 容器类一律使用 `rounded-[32px]`，按钮使用 `rounded-xl`。
 - **配色**: 优先使用 `cyan` (科技蓝) 和 `slate` (深邃黑)。
 - **动效**: 弹窗必须包裹在 `framer-motion` 的 `AnimatePresence` 中，实现优雅的进出场效果。
