@@ -53,10 +53,10 @@ export default function AuditStreamPage() {
           ) : (
             <TacticalTable headers={['操作时间', '操作员', '动作类型', '操作目标', '详细审计载荷']}>
               {logs.map((log: any) => (
-                <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
+                <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group text-center">
                   <td className="px-8 py-3 text-center">
-                    <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-slate-500 whitespace-nowrap">
-                      <Clock size={10} /> {new Date(log.created_at).toLocaleString()}
+                    <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-slate-900 whitespace-nowrap">
+                      <Clock size={10} className="text-slate-400" /> {new Date(log.created_at).toLocaleString()}
                     </div>
                   </td>
                   <td className="px-6 py-3 text-center">
@@ -74,8 +74,14 @@ export default function AuditStreamPage() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-3 text-[10px] font-black text-slate-900 text-center uppercase tracking-tighter">{log.target || '-'}</td>
-                  <td className="px-8 py-3 text-[10px] text-slate-600 italic text-center max-w-md truncate font-medium">"{log.details}"</td>
+                  <td className="px-6 py-3 text-center">
+                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-tighter">{log.target || '-'}</span>
+                  </td>
+                  <td className="px-8 py-3 text-center">
+                    <div className="flex justify-center">
+                      <p className="text-[10px] text-slate-700 italic max-w-md truncate font-medium">"{log.details}"</p>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </TacticalTable>
