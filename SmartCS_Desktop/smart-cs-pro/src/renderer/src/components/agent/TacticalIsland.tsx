@@ -40,8 +40,8 @@ export const TacticalIsland = () => {
     const screenWidth = window.screen.availWidth
     const screenHeight = window.screen.availHeight
     
-    // 物理宽度：展开态提升至 900px 确保万无一失
-    let width = isFolded ? 80 : 900 
+    // 物理宽度：展开态压缩至 760px，折叠态保持 80px
+    let width = isFolded ? 80 : 760 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
@@ -52,7 +52,7 @@ export const TacticalIsland = () => {
     } else if (layoutMode === 'SIDE') {
       width = 440; height = screenHeight - 80; x = screenWidth - 460; y = 40
     } else {
-      x = isFolded ? screenWidth - 100 : screenWidth - 920
+      x = isFolded ? screenWidth - 100 : screenWidth - 780
       y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
@@ -92,7 +92,7 @@ export const TacticalIsland = () => {
         layout
         initial={false}
         animate={{ 
-          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 900)),
+          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 760)),
           height: layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))
         }}
         className={cn(
@@ -103,42 +103,42 @@ export const TacticalIsland = () => {
         style={{ backfaceVisibility: 'hidden', transform: 'translate3d(0,0,0)' } as any}
       >
         {layoutMode === 'FLOAT' && (
-          <div className="flex items-center px-6 h-[72px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
+          <div className="flex items-center px-4 h-[72px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
             
-            {/* 1. 左侧头像与状态：压缩至 130px */}
+            {/* 1. 左侧头像与状态：精准锁定 110px */}
             <AnimatePresence>
               {!isFolded && (
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-3 w-[130px] shrink-0">
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-2 w-[110px] shrink-0">
                   <div className="relative">
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg text-white", isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5")}>{user?.real_name ? user.real_name[0] : <UserIcon size={20} />}</div>
-                    <div className={cn("absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[2px] border-slate-950", isOnline ? "bg-emerald-500" : "bg-red-500 animate-pulse")} />
+                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center font-black text-base text-white", isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5")}>{user?.real_name ? user.real_name[0] : <UserIcon size={18} />}</div>
+                    <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-[2px] border-slate-950", isOnline ? "bg-emerald-500" : "bg-red-500 animate-pulse")} />
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-[13px] font-black text-white truncate leading-none mb-1">{user?.real_name || '成员'}</span>
-                    <span className={cn("text-[9px] font-bold uppercase tracking-widest truncate", isOnline ? "text-emerald-500" : "text-red-500")}>{isOnline ? '在线' : '离线'}</span>
+                    <span className="text-[11px] font-black text-white truncate leading-none mb-0.5">{user?.real_name || '成员'}</span>
+                    <span className={cn("text-[8px] font-bold uppercase tracking-widest truncate", isOnline ? "text-emerald-500" : "text-red-500")}>{isOnline ? '在线' : '离线'}</span>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* 2. 中间按钮组：间距压缩至 gap-2.5 */}
-            <div className="flex-1 flex items-center justify-center gap-2.5" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            {/* 2. 中间按钮组：间距压缩至 gap-2 */}
+            <div className="flex-1 flex items-center justify-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
               <AnimatePresence>
                 {!isFolded && (
-                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="flex items-center justify-center gap-2.5">
+                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="flex items-center justify-center gap-2">
                     <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观" color="muted" />
                     <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
                     <HubBtn icon={isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />} active={isMuted} onClick={() => setMuted(!isMuted)} title={isMuted ? "解禁" : "静音"} color={isMuted ? "red" : "muted"} />
-                    <div className="w-px h-5 bg-white/10 mx-0.5" />
+                    <div className="w-px h-4 bg-white/10 mx-0.5" />
                     <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="资料" color="white" />
                     <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
                     <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="画像" color={isCustomerHudEnabled ? "emerald" : "white"} />
-                    <div className="w-px h-5 bg-white/10 mx-0.5" />
+                    <div className="w-px h-4 bg-white/10 mx-0.5" />
                     <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景" color="emerald" />
                     <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="求助" color="red" />
                     <HubBtn icon={<LayoutGrid size={20} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="面板" color="muted" />
                     <HubBtn icon={<LogOut size={20} />} active={false} onClick={() => { logout(); window.location.hash = '/login'; }} title="退出" color="red" />
-                    <div className="w-px h-5 bg-white/10 mx-0.5" />
+                    <div className="w-px h-4 bg-white/10 mx-0.5" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -153,12 +153,12 @@ export const TacticalIsland = () => {
               />
             </div>
             
-            {/* 右侧占位均衡：确保整体居中，宽度对齐左侧头像区 */}
-            {!isFolded && <div className="w-[130px] shrink-0" />}
+            {/* 右侧占位：对齐左侧 110px */}
+            {!isFolded && <div className="w-[110px] shrink-0" />}
           </div>
         )}
 
-        {/* 侧边栏与展开面板逻辑保持一致 */}
+        {/* 侧边栏逻辑 */}
         {layoutMode === 'SIDE' && (
           <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as any}>
              <div className="p-6 bg-cyan-600 text-white flex justify-between items-center shrink-0">
