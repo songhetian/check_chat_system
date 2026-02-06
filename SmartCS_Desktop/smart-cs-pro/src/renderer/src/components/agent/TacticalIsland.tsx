@@ -77,7 +77,7 @@ export const TacticalIsland = () => {
   useEffect(() => {
     const screenWidth = window.screen.availWidth
     const screenHeight = window.screen.availHeight
-    let width = 640 
+    let width = 680 // 增加宽度确保不被切割
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
@@ -88,7 +88,7 @@ export const TacticalIsland = () => {
     } else if (layoutMode === 'SIDE') {
       width = 440; height = screenHeight - 80; x = screenWidth - 460; y = 40
     } else {
-      width = 640; x = screenWidth - 660; y = 30
+      x = screenWidth - 700; y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', !showBigScreenModal)
@@ -140,18 +140,18 @@ export const TacticalIsland = () => {
         layout
         initial={false}
         animate={{ 
-          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : 640),
+          width: layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : 680),
           height: layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))
         }}
         className={cn(
-          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 shadow-2xl relative",
+          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative",
           isGlassMode ? "bg-slate-950/30 backdrop-blur-3xl" : "bg-slate-950",
           (showBigScreenModal || layoutMode === 'SIDE') ? "rounded-none" : "rounded-xl"
         )}
       >
         {layoutMode === 'FLOAT' && (
           <div className="flex items-center px-6 h-[72px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
-            <div className="flex items-center gap-3 w-[130px] shrink-0">
+            <div className="flex items-center gap-3 w-[140px] shrink-0">
               <div className="relative">
                 <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg", isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5")}>{user?.real_name ? user.real_name[0] : <UserIcon size={20} />}</div>
                 <div className={cn("absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[2px] border-slate-950", isOnline ? "bg-emerald-500" : "bg-red-500 animate-pulse")} />
@@ -162,20 +162,20 @@ export const TacticalIsland = () => {
               </div>
             </div>
 
-            <div className="flex-1 flex items-center justify-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
-              <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="切换外观模式" color="muted" />
-              <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="新兵培训模式" color="emerald" />
+            <div className="flex-1 flex items-center justify-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
+              <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观模式" color="muted" />
+              <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训模式" color="emerald" />
               <div className="w-px h-5 bg-white/10 mx-1" />
-              <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="查看商品资料" color="white" />
-              <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="查看知识手册" color="white" />
-              <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="开启画像监控" color={isCustomerHudEnabled ? "emerald" : "white"} />
+              <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="商品资产" color="white" />
+              <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
+              <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="画像监控" color={isCustomerHudEnabled ? "emerald" : "white"} />
               <div className="w-px h-5 bg-white/10 mx-1" />
-              <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="进入全景视图" color="emerald" />
-              <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="发起战术求助" color="red" />
-              <HubBtn icon={<LayoutGrid size={20} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="展开功能面板" color="muted" />
-              <HubBtn icon={<LogOut size={20} />} active={false} onClick={() => { logout(); window.location.hash = '/login'; }} title="退出登录" color="red" />
+              <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景视图" color="emerald" />
+              <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="战术求助" color="red" />
+              <HubBtn icon={<LayoutGrid size={20} />} active={isExpanded} onClick={() => setIsExpanded(!isExpanded)} title="功能面板" color="muted" />
+              <HubBtn icon={<LogOut size={20} />} active={false} onClick={() => { logout(); window.location.hash = '/login'; }} title="安全退出" color="red" />
             </div>
-            <div className="w-[130px] shrink-0" />
+            <div className="w-[110px] shrink-0" />
           </div>
         )}
 
@@ -274,7 +274,7 @@ export const TacticalIsland = () => {
 
 function HubBtn({ icon, active, onClick, title, color }: any) {
   const activeClassMap: any = { red: "bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]", emerald: "bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]", white: "bg-white text-black shadow-lg", muted: "bg-slate-800 text-white border-white/20" }
-  return (<button onClick={onClick} title={title} className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90", active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white")}>{icon}</button>)
+  return (<button onClick={onClick} title={title} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90", active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white")}>{icon}</button>)
 }
 
 function TabBtn({ id, active, set, icon, label }: any) {
