@@ -42,7 +42,7 @@ import { TacticalSelect } from './components/ui/TacticalSelect'
 import { Toaster } from './components/ui/sonner'
 import { toast } from 'sonner'
 
-// 1. 管理首页：V3.7 工业版
+// 1. 系统首页：V3.9 专业版
 const AdminHome = () => {
   const { user, token } = useAuthStore() 
   const [page, setPage] = useState(1)
@@ -82,16 +82,16 @@ const AdminHome = () => {
   const agents = agentsQuery.data?.data || []
   const total = agentsQuery.data?.total || 0
   const isFetching = agentsQuery.isFetching
-  const errorMsg = agentsQuery.isError ? "通讯链路异常，请确认后端活跃状态" : null
+  const errorMsg = agentsQuery.isError ? "服务器连接异常，请检查后端运行状态" : null
 
   return (
     <div className="space-y-6 h-full flex flex-col font-sans bg-slate-50/50 p-4 lg:p-6 text-black">
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0 flex justify-between items-center">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0 flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-black text-black uppercase italic leading-none">全域态势概览</h2>
+          <h2 className="text-3xl font-black text-black uppercase italic leading-none">系统运行概览</h2>
           <p className="text-slate-500 text-sm mt-2 font-bold flex items-center gap-2">
-            实时监听成员实战状态，包括综合评分、违规拦截及结业进度
-            {isFetching && <span className="flex items-center gap-1 text-cyan-600 animate-pulse"><RefreshCw size={12} className="animate-spin" /> 同步中</span>}
+            实时查看成员在线状态、业务评分及工作进度
+            {isFetching && <span className="flex items-center gap-1 text-cyan-600 animate-pulse"><RefreshCw size={12} className="animate-spin" /> 数据同步中</span>}
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -105,37 +105,37 @@ const AdminHome = () => {
                />
              </div>
            )}
-           <button onClick={() => agentsQuery.refetch()} className="p-2.5 bg-slate-50 text-black rounded-lg hover:bg-slate-100 transition-all shadow-sm border border-slate-200 group">
+           <button onClick={() => agentsQuery.refetch()} className="p-2.5 bg-slate-50 text-black rounded-xl hover:bg-slate-100 transition-all shadow-sm border border-slate-200 group">
              <RefreshCw size={18} className={cn(isFetching && "animate-spin")} />
            </button>
-           <button onClick={() => window.open('#/big-screen', '_blank')} className="px-6 py-2.5 bg-black text-white rounded-lg text-xs font-black shadow-lg active:scale-95 flex items-center gap-3 hover:bg-slate-800 transition-all uppercase tracking-widest"><Globe size={18} /> 激活态势投影</button>
+           <button onClick={() => window.open('#/big-screen', '_blank')} className="px-6 py-2.5 bg-black text-white rounded-xl text-xs font-black shadow-lg active:scale-95 flex items-center gap-3 hover:bg-slate-800 transition-all uppercase tracking-widest"><Globe size={18} /> 可视化看板</button>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0 relative">
+      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0 relative">
         <div className="overflow-y-auto flex-1 custom-scrollbar">
           {errorMsg ? (
             <div className="h-full flex flex-col items-center justify-center p-10 text-center">
                <div className="w-20 h-20 rounded-xl bg-red-50 text-red-500 flex items-center justify-center mb-6 border border-red-100 shadow-inner">
                   <ShieldAlert size={40} className="animate-pulse" />
                </div>
-               <h3 className="text-xl font-black text-black mb-2 italic uppercase">链路连接异常</h3>
-               <button onClick={() => agentsQuery.refetch()} className="px-8 py-3 bg-slate-100 text-black rounded-lg text-xs font-black shadow-sm border border-slate-200 hover:bg-slate-200 active:scale-95 transition-all flex items-center gap-3 uppercase">
-                  <RefreshCw size={16} /> 重新建立连接
+               <h3 className="text-xl font-black text-black mb-2 italic uppercase">服务连接异常</h3>
+               <button onClick={() => agentsQuery.refetch()} className="px-8 py-3 bg-slate-100 text-black rounded-xl text-xs font-black shadow-sm border border-slate-200 hover:bg-slate-200 active:scale-95 transition-all flex items-center gap-3 uppercase">
+                  <RefreshCw size={16} /> 尝试重新连接
                </button>
             </div>
           ) : (
-            <TacticalTable headers={['成员姓名', '所属部门', '奖励/荣誉', '实战进度', '综合评分', '管理操作']}>
+            <TacticalTable headers={['成员姓名', '所属部门', '获得奖项', '工作进度', '综合评分', '管理操作']}>
               {agents.map((agent: any) => (
                 <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors text-sm font-bold text-black text-center">
                   <td className="px-8 py-3 text-left"><div className="flex items-center justify-center gap-3"><div className={cn("w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs", agent.is_online ? "bg-cyan-600 text-white shadow-md" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div><div className="flex flex-col text-left"><span className="text-xs font-black text-black">{agent.real_name}</span><span className="text-[9px] text-slate-500 font-mono">@{agent.username}</span></div></div></td>
-                  <td className="px-6 py-3 text-center font-bold text-black text-[10px] uppercase">{agent.dept_name || '全域通用'}</td>
+                  <td className="px-6 py-3 text-center font-bold text-black text-[10px] uppercase">{agent.dept_name || '未归类'}</td>
                   <td className="px-6 py-3 text-center"><div className="flex justify-center gap-1">{agent.reward_count > 0 ? <div className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-100 flex items-center gap-1"><Award size={10}/> <span className="text-[10px] font-black">{agent.reward_count}</span></div> : <span className="opacity-20 text-slate-300">-</span>}</div></td>
-                  <td className="px-6 py-3 text-center"><div className="flex flex-col items-center gap-1"><div className="w-16 h-1 bg-slate-100 rounded-lg overflow-hidden"><div className="h-full bg-cyan-500" style={{ width: `${agent.training_progress || 0}%` }} /></div><span className="text-[8px] font-black text-slate-500">{agent.training_progress || 0}%</span></div></td>
+                  <td className="px-6 py-3 text-center"><div className="flex flex-col items-center gap-1"><div className="w-16 h-1 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-cyan-500" style={{ width: `${agent.training_progress || 0}%` }} /></div><span className="text-[8px] font-black text-slate-500">{agent.training_progress || 0}%</span></div></td>
                   <td className="px-6 py-3 text-center">
                     <div className="flex flex-col items-center gap-1">
                        <div className="flex items-center gap-1 text-black italic font-black text-[11px]"><Activity size={12} className="text-cyan-600" /> {agent.tactical_score}</div>
-                       {agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-lg border border-red-100 uppercase tracking-tighter">拦截: {agent.last_violation_type}</span>}
+                       {agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-md border border-red-100 uppercase tracking-tighter">违规: {agent.last_violation_type}</span>}
                     </div>
                   </td>
                   <td className="px-8 py-3 text-center"><button className="p-2 bg-black text-white rounded-lg hover:bg-cyan-600 transition-all shadow-md active:scale-90"><ShieldCheck size={14} /></button></td>
@@ -143,7 +143,7 @@ const AdminHome = () => {
               ))}
             </TacticalTable>
           )}
-          {agents.length === 0 && !agentsQuery.isLoading && !errorMsg && <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black tracking-widest italic opacity-30"><Users size={64} strokeWidth={1} /><p>未发现活跃节点</p></div>}
+          {agents.length === 0 && !agentsQuery.isLoading && !errorMsg && <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black tracking-widest italic opacity-30"><Users size={64} strokeWidth={1} /><p>暂无活跃成员</p></div>}
         </div>
         {total > 10 && !errorMsg && <div className="shrink-0 border-t border-slate-100 p-2"><TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} /></div>}
       </div>
@@ -160,7 +160,7 @@ const AgentView = () => {
     const onToast = (e: any) => { 
       const { title, message, type, details, action } = e.detail
       if (type === 'error') {
-        toast.error(title, { description: message || details, action: action ? { label: '立即取证', onClick: action } : undefined })
+        toast.error(title, { description: message || details, action: action ? { label: '查看', onClick: action } : undefined })
       } else if (type === 'success') {
         toast.success(title, { description: message || details })
       } else {
@@ -171,13 +171,13 @@ const AgentView = () => {
     const onViolation = (e: any) => {
       if (!isMuted) {
         const audioPath = e.detail.audio_path || (e.detail.risk_score >= 8 ? '/assets/audio/red_alert.mp3' : '/assets/audio/warn.wav')
-        const audio = new Audio(audioPath); audio.play().catch(() => console.warn('音频拦截: 路径脱机'))
+        const audio = new Audio(audioPath); audio.play().catch(() => console.warn('音频播放失败'))
       }
-      toast.error('违规拦截', {
-        description: `检测到行为：[${e.detail.keyword}]`,
+      toast.error('违规提示', {
+        description: `检测到关键词：[${e.detail.keyword}]`,
         duration: 10000,
         action: {
-          label: '详情',
+          label: '查看',
           onClick: () => { window.location.hash = `/alerts?id=${e.detail.id}` }
         }
       })

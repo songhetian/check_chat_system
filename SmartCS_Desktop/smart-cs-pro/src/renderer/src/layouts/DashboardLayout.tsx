@@ -20,18 +20,18 @@ interface Notification {
 }
 
 const menu = [
-  { path: '/', icon: LayoutDashboard, label: '指挥中心概览' },
-  { path: '/command', icon: Zap, label: '实时监控指挥' },
-  { path: '/alerts', icon: ShieldAlert, label: '违规拦截审计' },
-  { path: '/notifications', icon: Bell, label: '通知消息中枢' },
-  { path: '/rbac', icon: Shield, label: '角色权责定义' },
-  { path: '/categories', icon: Layers, label: '分类管理中枢' },
+  { path: '/', icon: LayoutDashboard, label: '系统运行首页' },
+  { path: '/command', icon: Zap, label: '成员实时监控' },
+  { path: '/alerts', icon: ShieldAlert, label: '违规行为审计' },
+  { path: '/notifications', icon: Bell, label: '系统消息中心' },
+  { path: '/rbac', icon: Shield, label: '角色权限定义' },
+  { path: '/categories', icon: Layers, label: '业务分类管理' },
   { path: '/departments', icon: Building2, label: '部门架构管理' },
-  { path: '/users', icon: UserCog, label: '成员角色矩阵' },
-  { path: '/customers', icon: Contact2, label: '客户画像分析' },
-  { path: '/products', icon: Package, label: '商品话术资产' },
-  { path: '/tools', icon: Wrench, label: '全域提效工具' },
-  { path: '/global-policy', icon: Settings, label: '全局 AI 策略' },
+  { path: '/users', icon: UserCog, label: '成员账号管理' },
+  { path: '/customers', icon: Contact2, label: '客户档案管理' },
+  { path: '/products', icon: Package, label: '商品资料管理' },
+  { path: '/tools', icon: Wrench, label: '常用辅助工具' },
+  { path: '/global-policy', icon: Settings, label: '全局策略配置' },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
