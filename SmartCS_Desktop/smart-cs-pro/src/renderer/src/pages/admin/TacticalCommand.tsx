@@ -19,7 +19,7 @@ import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { TacticalTable } from '../../components/ui/TacticalTable'
 import { toast } from 'sonner'
 
-// 1. 状态样式标准 (V3.16: 增强链路持久化)
+// 1. 状态样式标准 (V3.17: 极致性能与真全屏版)
 const getAgentStatusTheme = (score: number, isOnline: boolean, roleId: number) => {
   if (!isOnline) return { border: 'border-slate-200', bg: 'bg-slate-100', text: 'text-slate-400', label: '离线', dot: 'bg-slate-300' }
   const isManagement = roleId === ROLE_ID.HQ || roleId === ROLE_ID.ADMIN;
@@ -104,7 +104,6 @@ export default function TacticalCommand() {
     const onScreenSync = (e: any) => {
       if (!isLinkEnabled) return;
       const data = e.detail;
-      // V3.16 持久化核心：仅当 username 匹配且 payload 有效时更新
       if (activeAgent && data.username === activeAgent.username && data.payload) {
         setScreenShot(data.payload)
         setLastFrameTime(Date.now())
@@ -119,6 +118,15 @@ export default function TacticalCommand() {
       window.removeEventListener('ws-screen-sync', onScreenSync)
     }
   }, [activeAgent, isLinkEnabled])
+
+  const toggleLink = () => {
+    const nextState = !isLinkEnabled;
+    setIsLinkEnabled(nextState);
+    if (!nextState) {
+      setScreenShot(null); // 彻底清理内存
+      setLastFrameTime(0);
+    }
+  }
 
   const executeIntervention = async (type: string, description: string, payload: any = {}) => {
     if (!activeAgent || !token || processing) return
@@ -220,18 +228,18 @@ export default function TacticalCommand() {
                         <div className="flex items-center justify-between">
                            <h5 className="text-[10px] font-black text-cyan-700 uppercase tracking-widest flex items-center gap-2"><MonitorStop size={14} /> 实时桌面链路 (只读)</h5>
                            <div className="flex items-center gap-2">
-                              {screenShot && (
+                              {isLinkEnabled && screenShot && (
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-lg text-[9px] font-bold text-slate-500 border border-slate-200">
                                    <Clock size={10} /> 延时: {Math.max(0, Date.now() - lastFrameTime)}ms
                                 </div>
                               )}
-                              <button onClick={() => setIsLinkEnabled(!isLinkEnabled)} className={cn("px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1.5 transition-all shadow-sm border", isLinkEnabled ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-red-50 text-red-600 border-red-100")}>
+                              <button onClick={toggleLink} className={cn("px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1.5 transition-all shadow-sm border", isLinkEnabled ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-red-50 text-red-600 border-red-100")}>
                                  {isLinkEnabled ? <><MonitorPlay size={12}/> 链路已激活</> : <><MonitorX size={12}/> 链路已挂断</>}
                               </button>
                               <button onClick={() => setIsMaximized(true)} disabled={!isLinkEnabled || !screenShot} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-cyan-50 hover:text-cyan-600 transition-all border border-slate-200 disabled:opacity-30"><Maximize2 size={14} /></button>
                            </div>
                         </div>
-                        <div className="bg-slate-900 rounded-2xl p-1.5 min-h-[300px] flex items-center justify-center relative overflow-hidden border border-slate-200 shadow-inner group">
+                        <div className="bg-slate-950 rounded-2xl p-1.5 min-h-[300px] flex items-center justify-center relative overflow-hidden border border-slate-200 shadow-inner group">
                            {!isLinkEnabled ? (
                               <div className="flex flex-col items-center gap-3 opacity-40"><MonitorX size={40} className="text-slate-500" /><p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">链路已手动断开</p></div>
                            ) : activeAgent.is_online === 0 ? (
@@ -239,12 +247,12 @@ export default function TacticalCommand() {
                            ) : screenShot ? (
                               <div className="relative w-full h-full flex items-center justify-center">
                                  <img src={screenShot} className="max-w-full max-h-full rounded-xl object-contain relative z-10" alt="Screen" />
-                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 pointer-events-none"><span className="bg-black/60 text-white px-4 py-2 rounded-full text-xs font-black backdrop-blur-md border border-white/10 uppercase tracking-widest flex items-center gap-2"><Globe size={12} className="animate-pulse" /> 实时注入中</span></div>
+                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 pointer-events-none"><span className="bg-black/60 text-white px-4 py-2 rounded-full text-xs font-black border border-white/10 uppercase tracking-widest flex items-center gap-2"><Globe size={12} className="animate-pulse" /> 实时注入中</span></div>
                               </div>
                            ) : (
                               <div className="flex flex-col items-center gap-4">
                                  <div className="relative"><div className="w-12 h-12 rounded-full border-2 border-cyan-500/20 border-t-cyan-500 animate-spin" /><Wifi size={20} className="absolute inset-0 m-auto text-cyan-500 animate-pulse" /></div>
-                                 <div className="text-center space-y-1"><p className="text-cyan-500 text-xs font-black uppercase tracking-widest text-black">物理链路正在建立</p><p className="text-slate-500 text-[9px] font-bold uppercase">正在等待远程节点推送数据流...</p></div>
+                                 <div className="text-center space-y-1"><p className="text-cyan-500 text-xs font-black uppercase tracking-widest">物理链路正在建立</p><p className="text-slate-500 text-[9px] font-bold uppercase">正在等待远程节点推送数据流...</p></div>
                               </div>
                            )}
                         </div>
@@ -264,20 +272,29 @@ export default function TacticalCommand() {
 
       <AnimatePresence>
          {isMaximized && screenShot && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] bg-black flex flex-col backdrop-blur-3xl">
-               <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[2100] flex items-center gap-6 bg-black/40 backdrop-blur-xl border border-white/10 px-8 py-3 rounded-2xl shadow-2xl transition-opacity hover:opacity-100 opacity-40">
-                  <div className="flex items-center gap-4 border-r border-white/10 pr-6 mr-2">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+              className="fixed inset-0 z-[2000] bg-black flex flex-col"
+            >
+               {/* 顶部悬浮控制条 */}
+               <div className="absolute top-0 left-0 right-0 z-[2100] flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent p-6 pointer-events-none">
+                  <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 pointer-events-auto">
                      <div className="w-8 h-8 bg-cyan-600 rounded-xl flex items-center justify-center"><MonitorPlay size={18} className="text-white" /></div>
-                     <div><h4 className="text-white font-black text-sm uppercase leading-none">全屏实战监听</h4><p className="text-cyan-500 text-[8px] font-black uppercase tracking-widest mt-1">成员: {activeAgent.real_name} · 1:1 物理采样</p></div>
+                     <div><h4 className="text-white font-black text-sm uppercase leading-none">全屏实战监听</h4><p className="text-cyan-500 text-[8px] font-black uppercase tracking-widest mt-1">成员: {activeAgent.real_name} · 1:1 采样</p></div>
                   </div>
-                  <div className="flex items-center gap-4">
-                     <div className="flex items-center gap-1 text-[10px] font-black text-emerald-500 animate-pulse uppercase"><Activity size={12} /> LIVE FEED</div>
-                     <button onClick={() => setIsMaximized(false)} className="p-2 bg-red-500/20 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-500/30"><X size={18} /></button>
+                  <div className="flex items-center gap-4 pointer-events-auto">
+                     <div className="bg-black/40 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 flex items-center gap-2 text-[10px] font-black text-emerald-500 animate-pulse uppercase"><Activity size={12} /> LIVE</div>
+                     <button onClick={() => setIsMaximized(false)} className="p-3 bg-red-500 text-white rounded-2xl hover:bg-red-600 transition-all shadow-xl active:scale-95"><X size={24} /></button>
                   </div>
                </div>
-               {/* 彻底拉满显示空间：flex-1 + object-contain 确保图像占据整个视口 */}
-               <div className="flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-slate-950 p-2">
-                  <img src={screenShot} className="max-w-full max-h-full w-auto h-auto object-contain shadow-[0_0_100px_rgba(0,0,0,0.5)] cursor-crosshair" alt="Full Screen" />
+               
+               {/* 真正拉满视口的画面区域 */}
+               <div className="flex-1 w-full h-full flex items-center justify-center bg-black overflow-hidden">
+                  <img 
+                    src={screenShot} 
+                    className="w-full h-full object-contain pointer-events-none" 
+                    alt="Full View" 
+                  />
                </div>
             </motion.div>
          )}
