@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import {
   LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog, Shield, Layers
 } from 'lucide-react'
@@ -216,21 +217,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               <AnimatePresence>
                 {showNotif && (
-                  <motion.div ref={notifRef} initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} className="absolute right-0 mt-4 w-80 bg-white border border-slate-200 shadow-2xl rounded-3xl overflow-hidden z-[500]">
-                    <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                       <span className="text-xs font-black text-slate-900">最近战术通知</span>
-                       <Link to="/notifications" onClick={() => setShowNotif(false)} className="text-[10px] text-cyan-600 font-bold hover:underline">全部</Link>
+                  <motion.div ref={notifRef} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute right-0 mt-4 w-80 bg-white border border-slate-200 shadow-2xl rounded-xl overflow-hidden z-[500]">
+                    <div className="p-4 bg-slate-100/80 border-b border-slate-200 flex justify-between items-center">
+                       <span className="text-xs font-black text-slate-900 uppercase">最近消息通知</span>
+                       <Link to="/notifications" onClick={() => setShowNotif(false)} className="text-[10px] text-cyan-600 font-black hover:underline uppercase">查看全部</Link>
                     </div>
-                    <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-                       {notifications.map(n => (
+                    <div className="max-h-[320px] overflow-y-auto custom-scrollbar bg-white">
+                       {notifications.length === 0 ? (
+                         <div className="p-10 text-center text-[10px] font-black text-slate-300 italic">暂无新消息</div>
+                       ) : notifications.map(n => (
                          <div key={n.id} onClick={() => handleItemClick(n)} className={cn("p-4 border-b border-slate-50 cursor-pointer group transition-all", n.is_read === 1 ? "opacity-40" : "hover:bg-slate-50")}>
                             <div className="flex items-start gap-3">
-                               <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", n.is_read === 1 ? "bg-slate-100" : "bg-cyan-100 text-cyan-600")}>
-                                  {n.is_read === 1 ? <MailOpen size={14}/> : <Bell size={14}/>}
+                               <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border shadow-inner", n.is_read === 1 ? "bg-slate-50 text-slate-400" : "bg-cyan-50 text-cyan-600 border-cyan-100")}>
+                                  {n.is_read === 1 ? <MailOpen size={14}/> : <Bell size={14} className="animate-swing"/>}
                                </div>
                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-bold text-slate-900 truncate">{n.title}</p>
-                                  <p className="text-[10px] text-slate-500 truncate">{n.content}</p>
+                                  <p className="text-xs font-black text-slate-900 truncate">{n.title}</p>
+                                  <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">"{n.content}"</p>
                                </div>
                             </div>
                          </div>

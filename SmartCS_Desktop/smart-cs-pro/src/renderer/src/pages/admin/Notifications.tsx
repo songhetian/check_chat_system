@@ -108,7 +108,8 @@ export default function NotificationsPage() {
     onSuccess: (res) => {
       if (res.status === 200 || res.data?.status === 'ok') {
         queryClient.invalidateQueries({ queryKey: ['notifications'] })
-        if (selectedMsg) setSelectedMsg(prev => prev ? { ...prev, is_read: 1 } : null)
+        if (selectedMsg && selectedMsg.id !== 'ALL') setSelectedMsg(prev => prev ? { ...prev, is_read: 1 } : null)
+        else setSelectedMsg(null)
         toast.success('消息状态已更新')
       }
     }
