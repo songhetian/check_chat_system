@@ -103,18 +103,18 @@ export default function GlobalPolicyPage() {
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-xl border border-slate-200 shadow-sm shrink-0 gap-6">
         <div><h2 className="text-3xl font-black text-slate-900 uppercase italic">全域 AI 决策中心</h2><p className="text-slate-500 text-sm mt-1 font-medium">配置全局对话拦截权重与智能纠偏话术矩阵</p></div>
         <div className="flex flex-wrap gap-3">
-           <button onClick={() => fetchData(false)} className="p-3 bg-slate-50 text-slate-600 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+           <button onClick={() => fetchData(false)} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
              <RefreshCw size={18} className={cn(loading && "animate-spin")} />
            </button>
-           <button className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-lg text-[10px] font-black shadow-lg hover:bg-emerald-700 transition-all"><Download size={14} /> 模板</button>
+           <button className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black shadow-lg hover:bg-emerald-700 transition-all"><Download size={14} /> 模板</button>
            {/* 增：admin:ai:create */}
            {hasPermission('admin:ai:create') && (
-             <button onClick={() => { setEditItem(activeTab === 'WORDS' ? { word: '', category_id: cats[0]?.id || '', risk_level: 5, is_active: 1 } : { keyword: '', answer: '', category_id: cats[0]?.id || '', is_active: 1 }); setModalType('EDIT'); }} className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-lg text-[10px] font-black shadow-xl active:scale-95"><Plus size={14} /> 录入新策略</button>
+             <button onClick={() => { setEditItem(activeTab === 'WORDS' ? { word: '', category_id: cats[0]?.id || '', risk_level: 5, is_active: 1 } : { keyword: '', answer: '', category_id: cats[0]?.id || '', is_active: 1 }); setModalType('EDIT'); }} className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black shadow-xl active:scale-95"><Plus size={14} /> 录入新策略</button>
            )}
         </div>
       </header>
 
-      <div className="flex gap-4 p-2 bg-white/50 backdrop-blur-sm rounded-lg border border-slate-200/50 self-start">
+      <div className="flex gap-4 p-2 bg-white/50 backdrop-blur-sm rounded-xl border border-slate-200/50 self-start">
          <TabButton active={activeTab === 'WORDS'} icon={Sliders} label="风险敏感词库" onClick={() => setActiveTab('WORDS')} />
          <TabButton active={activeTab === 'KNOWLEDGE'} icon={Brain} label="智能话术矩阵" onClick={() => setActiveTab('KNOWLEDGE')} />
       </div>
@@ -127,7 +127,7 @@ export default function GlobalPolicyPage() {
                   {words.map(w => (
                     <tr key={w.id} className="hover:bg-slate-50/50 transition-colors group text-center text-sm font-bold text-slate-600">
                       <td className="px-8 py-5 font-black text-slate-900">{w.word}</td>
-                      <td className="px-6 py-5 text-center"><span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black inline-flex items-center gap-1.5 border border-slate-200"><Tag size={10}/>{w.category__name}</span></td>
+                      <td className="px-6 py-5 text-center"><span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-xl text-[10px] font-black inline-flex items-center gap-1.5 border border-slate-200"><Tag size={10}/>{w.category__name}</span></td>
                       <td className="px-6 py-5"><div className="flex justify-center items-center gap-2"><div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner"><div className={cn("h-full transition-all", w.risk_level >= 8 ? "bg-red-500" : w.risk_level >= 5 ? "bg-amber-500" : "bg-cyan-500")} style={{ width: `${w.risk_level * 10}%` }} /></div><span className="text-xs font-black italic">LV.{w.risk_level}</span></div></td>
                       <td className="px-6 py-5 text-center">{w.is_active ? <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">激活</span> : <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">挂起</span>}</td>
                       <td className="px-8 py-5 text-center">
@@ -152,7 +152,7 @@ export default function GlobalPolicyPage() {
                     <tr key={k.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center">
                       <td className="px-8 py-5 font-black text-slate-900">{k.keyword}</td>
                       <td className="px-6 py-5 max-w-md"><p className="text-xs font-medium text-slate-600 line-clamp-2 italic">"{k.answer}"</p></td>
-                      <td className="px-6 py-5 text-center"><span className="px-3 py-1 bg-cyan-50 text-cyan-600 rounded-lg text-[10px] font-black inline-flex items-center gap-1.5 border border-cyan-100"><Tag size={10}/>{k.category__name}</span></td>
+                      <td className="px-6 py-5 text-center"><span className="px-3 py-1 bg-cyan-50 text-cyan-600 rounded-xl text-[10px] font-black inline-flex items-center gap-1.5 border border-cyan-100"><Tag size={10}/>{k.category__name}</span></td>
                       <td className="px-6 py-5 text-center">{k.is_active ? <span className="text-[10px] font-black text-emerald-600 uppercase">已挂载</span> : <span className="text-[10px] font-black text-slate-300 uppercase">脱机</span>}</td>
                       <td className="px-8 py-5 text-center">
                         <div className="flex justify-center gap-2">
@@ -182,17 +182,17 @@ export default function GlobalPolicyPage() {
                <div className="space-y-8">
                   {activeTab === 'WORDS' ? (
                     <>
-                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">敏感词内容</label><input value={editItem?.word} onChange={(e)=>setEditItem({...editItem, word: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-lg text-sm font-bold text-slate-900 shadow-inner" /></div>
+                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">敏感词内容</label><input value={editItem?.word} onChange={(e)=>setEditItem({...editItem, word: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-900 shadow-inner" /></div>
                       <div className="grid grid-cols-2 gap-6">
-                        <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">风险权重</label><input type="number" value={editItem?.risk_level} onChange={(e)=>setEditItem({...editItem, risk_level: parseInt(e.target.value)})} className="w-full px-6 py-4 bg-slate-50 rounded-lg text-sm font-black text-slate-900 shadow-inner" /></div>
+                        <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">风险权重</label><input type="number" value={editItem?.risk_level} onChange={(e)=>setEditItem({...editItem, risk_level: parseInt(e.target.value)})} className="w-full px-6 py-4 bg-slate-50 rounded-xl text-sm font-black text-slate-900 shadow-inner" /></div>
                         <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">业务分类</label><TacticalSelect options={cats} value={editItem?.category_id} onChange={(val) => setEditItem({...editItem, category_id: val})} placeholder="指派词库分类" /></div>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">触发关键词</label><input value={editItem?.keyword} onChange={(e)=>setEditItem({...editItem, keyword: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-lg text-sm font-bold text-slate-900 shadow-inner" /></div>
+                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">触发关键词</label><input value={editItem?.keyword} onChange={(e)=>setEditItem({...editItem, keyword: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-900 shadow-inner" /></div>
                       <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">策略分类</label><TacticalSelect options={cats} value={editItem?.category_id} onChange={(val) => setEditItem({...editItem, category_id: val})} placeholder="指派话术分类" /></div>
-                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">纠偏建议内容</label><textarea value={editItem?.answer} onChange={(e)=>setEditItem({...editItem, answer: e.target.value})} rows={4} className="w-full px-6 py-4 bg-slate-50 rounded-lg text-sm font-medium text-slate-900 shadow-inner resize-none leading-relaxed" /></div>
+                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">纠偏建议内容</label><textarea value={editItem?.answer} onChange={(e)=>setEditItem({...editItem, answer: e.target.value})} rows={4} className="w-full px-6 py-4 bg-slate-50 rounded-xl text-sm font-medium text-slate-900 shadow-inner resize-none leading-relaxed" /></div>
                     </>
                   )}
                   <button disabled={processing} onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
@@ -213,8 +213,8 @@ export default function GlobalPolicyPage() {
                <h3 className="text-xl font-black text-slate-900 mb-2 italic">注销该策略节点？</h3>
                <p className="text-xs text-slate-400 font-medium mb-8 leading-relaxed px-4">注销策略 <span className="text-red-600 font-black">[{editItem?.word || editItem?.keyword}]</span> 将导致 AI 引擎失去对应的实战识别能力。此操作受到动作级权限 <span className="text-slate-900 font-black">[admin:ai:delete]</span> 的严密监管。</p>
                <div className="grid grid-cols-2 gap-4">
-                  <button disabled={processing} onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-lg font-black text-xs uppercase hover:bg-slate-200 transition-all disabled:opacity-50">放弃动作</button>
-                  <button disabled={processing} onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-lg font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                  <button disabled={processing} onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-xl font-black text-xs uppercase hover:bg-slate-200 transition-all disabled:opacity-50">放弃动作</button>
+                  <button disabled={processing} onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                     {processing && <Loader2 className="animate-spin" size={16} />} 确认物理清除
                   </button>
                </div>

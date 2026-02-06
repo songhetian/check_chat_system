@@ -107,7 +107,7 @@ export default function PersonalScreen() {
                        <span className="text-[8px] font-black text-slate-600 uppercase">战术衔级</span>
                        <span className="text-xs font-black text-white italic tracking-widest">ELITE SQUAD</span>
                     </div>
-                    <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center border border-white/10">
+                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
                        <Trophy size={20} className="text-amber-400" />
                     </div>
                  </div>
@@ -169,10 +169,10 @@ export default function PersonalScreen() {
                    <div key={i} className="p-6 rounded-xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 transition-all">
                       <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-2 italic">Case Resolved</div>
                       <div className="text-sm font-black text-white mb-2 leading-tight">关键词: {r.keyword}</div>
-                      <div className="p-3 bg-black/40 rounded-lg border border-white/5 text-[10px] text-slate-400 italic mb-3 leading-relaxed">
+                      <div className="p-3 bg-black/40 rounded-xl border border-white/5 text-[10px] text-slate-400 italic mb-3 leading-relaxed">
                         场景: "{r.context}"
                       </div>
-                      <div className="text-[11px] font-bold text-emerald-400 leading-relaxed bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20">
+                      <div className="text-[11px] font-bold text-emerald-400 leading-relaxed bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
                          处置: {r.solution}
                       </div>
                    </div>

@@ -30,7 +30,7 @@ export default function AuditStreamPage() {
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-black">
-      <header className="flex justify-between items-end bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0">
+      <header className="flex justify-between items-end bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black text-black uppercase italic text-tactical-glow leading-none">系统操作审计</h2>
           <p className="text-slate-500 text-sm mt-2 font-bold flex items-center gap-2">
@@ -43,7 +43,7 @@ export default function AuditStreamPage() {
         </button>
       </header>
 
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {isLoading ? (
             <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black italic opacity-50">
@@ -61,7 +61,7 @@ export default function AuditStreamPage() {
                   </td>
                   <td className="px-6 py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center font-black text-[10px] border border-cyan-200 shadow-inner">
+                      <div className="w-7 h-7 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center font-black text-[10px] border border-cyan-200 shadow-inner">
                         {log.operator?.[0] || '?'}
                       </div>
                       <span className="text-xs font-black text-slate-900">{log.operator}</span>

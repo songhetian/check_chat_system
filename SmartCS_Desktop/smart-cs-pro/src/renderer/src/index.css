@@ -53,7 +53,11 @@ body {
 
 /* 4. 工业级输入框规范 */
 input, textarea, select {
-  @apply font-medium;
+  @apply font-medium rounded-xl;
+}
+
+button {
+  @apply rounded-xl !important;
 }
 
 input::placeholder, textarea::placeholder {

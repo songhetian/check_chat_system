@@ -33,7 +33,7 @@ function MessageModal({ isOpen, onClose, data, onMarkRead, isPending }: any) {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="relative w-full max-w-md rounded-xl shadow-xl overflow-hidden bg-white z-10 p-6">
              <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-3 text-left">
-                  <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shadow-sm", data.is_read ? "bg-slate-100 text-slate-400" : "bg-cyan-600 text-white")}>
+                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shadow-sm", data.is_read ? "bg-slate-100 text-slate-400" : "bg-cyan-600 text-white")}>
                     {data.is_read ? <MailOpen size={20} /> : <MessageSquare size={20} />}
                   </div>
                   <div>
@@ -41,28 +41,28 @@ function MessageModal({ isOpen, onClose, data, onMarkRead, isPending }: any) {
                     <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase">{new Date(data.created_at).toLocaleString()}</p>
                   </div>
                 </div>
-                <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition-all text-slate-400"><X size={18}/></button>
+                <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-xl transition-all text-slate-400"><X size={18}/></button>
              </div>
              
-             <div className="p-5 bg-slate-50 rounded-lg border border-slate-100 mb-6 text-left">
+             <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 mb-6 text-left">
                 <p className="text-black text-sm font-bold leading-relaxed italic">"{data.content}"</p>
              </div>
 
              <div className="flex gap-3">
                 {data.is_read ? (
-                  <div className="flex-1 py-2 bg-emerald-50 text-emerald-700 rounded-lg font-black text-[10px] uppercase flex items-center justify-center gap-2 border border-emerald-100">
+                  <div className="flex-1 py-2 bg-emerald-50 text-emerald-700 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-2 border border-emerald-100">
                     <CheckCircle2 size={14} /> 指令已存档
                   </div>
                 ) : (
                   <button 
                     disabled={isPending}
                     onClick={() => onMarkRead(data.id)} 
-                    className="flex-1 py-2 bg-black text-white rounded-lg font-black text-[10px] uppercase shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex-1 py-2 bg-black text-white rounded-xl font-black text-[10px] uppercase shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {isPending ? <Loader2 size={14} className="animate-spin" /> : <ShieldAlert size={14} className="text-cyan-400" />} 确认阅知
                   </button>
                 )}
-                <button onClick={onClose} className="px-6 py-2 bg-slate-100 text-black rounded-lg font-black text-[10px] uppercase hover:bg-slate-200 transition-all border border-slate-200">关闭</button>
+                <button onClick={onClose} className="px-6 py-2 bg-slate-100 text-black rounded-xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all border border-slate-200">关闭</button>
              </div>
           </motion.div>
         </div>
@@ -129,16 +129,16 @@ export default function NotificationsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-           <button onClick={() => refetch()} className="p-2.5 bg-slate-50 text-black rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+           <button onClick={() => refetch()} className="p-2.5 bg-slate-50 text-black rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
              <RefreshCw size={18} className={cn(isFetching && "animate-spin")} />
            </button>
-           <button onClick={() => markRead('ALL')} className="px-6 py-2.5 bg-black text-white rounded-lg text-xs font-black active:scale-95 transition-all flex items-center gap-2 shadow-lg">
+           <button onClick={() => markRead('ALL')} className="px-6 py-2.5 bg-black text-white rounded-xl text-xs font-black active:scale-95 transition-all flex items-center gap-2 shadow-lg">
              <CheckCheck size={16} /> 全部已读
            </button>
         </div>
       </div>
 
-      <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex items-center gap-4 shrink-0">
+      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 shrink-0">
         <div className="flex-1 max-w-md"><TacticalSearch value={search} onChange={setSearch} placeholder="按标题或关键词过滤..." /></div>
       </div>
 
@@ -204,14 +204,14 @@ export default function NotificationsPage() {
                     <div className="flex items-center justify-center gap-2">
                        <button 
                          onClick={(e) => { e.stopPropagation(); setSelectedMsg(n); }} 
-                         className="p-2 bg-slate-100 text-black hover:bg-black hover:text-white rounded-lg transition-all border border-slate-200"
+                         className="p-2 bg-slate-100 text-black hover:bg-black hover:text-white rounded-xl transition-all border border-slate-200"
                        >
                          <ArrowUpRight size={14} />
                        </button>
                        {!n.is_read && (
                          <button 
                            onClick={(e) => { e.stopPropagation(); markRead(n.id); }} 
-                           className="p-2 bg-cyan-100 text-cyan-700 hover:bg-cyan-600 hover:text-white rounded-lg transition-all border border-cyan-200"
+                           className="p-2 bg-cyan-100 text-cyan-700 hover:bg-cyan-600 hover:text-white rounded-xl transition-all border border-cyan-200"
                          >
                            <CheckCircle2 size={14} />
                          </button>

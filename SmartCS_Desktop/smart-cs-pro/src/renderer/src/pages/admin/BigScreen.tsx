@@ -235,7 +235,7 @@ export default function BigScreen() {
                         <span className="text-[8px] font-black bg-red-500 text-white px-2 py-0.5 rounded">SOS ACTIVE</span>
                      </div>
                      <p className="text-xs text-slate-200 italic mb-4 leading-relaxed font-medium">"{e.content || '请求画面协助...'}"</p>
-                     {e.image && <img src={e.image} className="w-full rounded-lg border border-white/10" />}
+                     {e.image && <img src={e.image} className="w-full rounded-xl border border-white/10" />}
                   </div>
                 ))}
                 {emergencies.length === 0 && (

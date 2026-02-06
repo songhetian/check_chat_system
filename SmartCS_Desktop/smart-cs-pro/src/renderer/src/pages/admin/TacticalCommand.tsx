@@ -119,7 +119,7 @@ export default function TacticalCommand() {
     <div className="flex flex-col h-full font-sans bg-slate-50/50 p-4 lg:p-6 gap-6 overflow-hidden text-black">
       <header className="flex justify-between items-center bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div className="flex items-center gap-6">
-          <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center shadow-lg"><Radar size={20} className="text-cyan-400" /></div>
+          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-lg"><Radar size={20} className="text-cyan-400" /></div>
           <div><h2 className="text-2xl font-black text-black italic tracking-tighter uppercase leading-none">实时监控指挥中心</h2><div className="flex items-center gap-2 mt-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><span className="flex items-center gap-1 text-emerald-600 font-black"><Globe size={10}/> 实时链路已激活</span></div></div>
         </div>
         <div className="flex items-center gap-4">
@@ -128,7 +128,7 @@ export default function TacticalCommand() {
                <TacticalSelect options={[{id: '', name: '所有部门'}, ...depts]} value={deptId} onChange={(val: string | number) => setDeptId(String(val))} placeholder="选择部门" />
              </div>
            )}
-           <div className="bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 flex flex-col items-center min-w-[80px]">
+           <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 flex flex-col items-center min-w-[80px]">
               <span className="text-[9px] font-black text-slate-400 uppercase">在线成员</span>
               <span className="text-lg font-black text-black">{agents.filter(a => a.is_online).length}</span>
            </div>
@@ -140,7 +140,7 @@ export default function TacticalCommand() {
            <div className="p-4 border-b border-slate-100 space-y-3">
               <div className="flex items-center justify-between">
                  <h3 className="text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-2"><Radio size={12} className="text-cyan-600" /> 成员实时列表</h3>
-                 <button onClick={() => fetchData()} className="p-2 bg-slate-50 text-black rounded-lg hover:bg-slate-100 transition-all border border-slate-200 group">
+                 <button onClick={() => fetchData()} className="p-2 bg-slate-50 text-black rounded-xl hover:bg-slate-100 transition-all border border-slate-200 group">
                     <RefreshCw size={14} className={cn(loading && "animate-spin")} />
                  </button>
               </div>
@@ -155,7 +155,7 @@ export default function TacticalCommand() {
                     <tr key={a.username} onClick={() => { setActiveAgent(a); setLiveChat([]); }} className={cn("cursor-pointer transition-colors", isActive ? "bg-black text-white" : "hover:bg-slate-50 text-black")}>
                       <td className="px-4 py-3 text-left">
                         <div className="flex items-center gap-2">
-                          <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0", isActive ? "bg-cyan-500 text-black" : "bg-slate-100 text-slate-500")}>{a.real_name[0]}</div>
+                          <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs shrink-0", isActive ? "bg-cyan-500 text-black" : "bg-slate-100 text-slate-500")}>{a.real_name[0]}</div>
                           <span className="text-[11px] font-black truncate">{a.real_name}</span>
                         </div>
                       </td>
@@ -191,13 +191,13 @@ export default function TacticalCommand() {
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
                      <section className="space-y-3">
                         <h5 className="text-[10px] font-black text-cyan-700 uppercase tracking-widest flex items-center gap-2"><MonitorStop size={14} /> 实时屏幕监听 (只读)</h5>
-                        <div className="bg-black rounded-lg p-1.5 min-h-[300px] flex items-center justify-center relative overflow-hidden">
+                        <div className="bg-black rounded-xl p-1.5 min-h-[300px] flex items-center justify-center relative overflow-hidden">
                            {screenShot ? (
-                              <img src={screenShot} className="max-w-full max-h-full rounded-md object-contain relative z-10" alt="Screen" />
+                              <img src={screenShot} className="max-w-full max-h-full rounded-xl object-contain relative z-10" alt="Screen" />
                            ) : (
                               <div className="space-y-4 relative z-10 text-center">
                                  {liveChat.length === 0 ? (<p className="text-slate-700 text-xs font-bold">等待数据流同步...</p>) : liveChat.map((chat, idx) => (
-                                   <div key={idx} className="flex gap-2 text-[11px]"><span className="text-slate-500 font-black">RAW:</span><span className="text-white/90 bg-white/5 px-3 py-1.5 rounded-lg italic">"{chat.text}"</span></div>
+                                   <div key={idx} className="flex gap-2 text-[11px]"><span className="text-slate-500 font-black">RAW:</span><span className="text-white/90 bg-white/5 px-3 py-1.5 rounded-xl italic">"{chat.text}"</span></div>
                                  ))}
                               </div>
                            )}
@@ -221,7 +221,7 @@ export default function TacticalCommand() {
 
 function CommandBtn({ onClick, icon: Icon, label, color, active, loading }: any) {
   return (
-    <button onClick={onClick} disabled={loading} className={cn("flex flex-col items-center justify-center gap-2 p-4 rounded-lg transition-all shadow active:scale-95 disabled:opacity-30 group", color)}>
+    <button onClick={onClick} disabled={loading} className={cn("flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all shadow active:scale-95 disabled:opacity-30 group", color)}>
        {loading ? <Loader2 size={20} className="animate-spin" /> : <Icon size={20} className={cn("group-hover:scale-110 transition-transform", active && "animate-bounce")} />}
        <span className="text-[10px] font-black uppercase tracking-tight">{label}</span>
     </button>

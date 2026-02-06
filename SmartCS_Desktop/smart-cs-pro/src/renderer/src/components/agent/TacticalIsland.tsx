@@ -153,7 +153,7 @@ export const TacticalIsland = () => {
           <div className="flex items-center px-4 h-[64px] shrink-0 cursor-move relative" style={{ WebkitAppRegion: 'drag' } as any}>
             <div className="flex items-center gap-2 w-[110px] shrink-0">
               <div className="relative">
-                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm", isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5")}>{user?.real_name ? user.real_name[0] : <UserIcon size={16} />}</div>
+                <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm", isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5")}>{user?.real_name ? user.real_name[0] : <UserIcon size={16} />}</div>
                 <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-[2px] border-slate-950", isOnline ? "bg-emerald-500" : "bg-red-500 animate-pulse")} />
               </div>
               <div className="flex flex-col min-w-0">
@@ -182,30 +182,30 @@ export const TacticalIsland = () => {
         {layoutMode === 'SIDE' && (
           <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as any}>
              <div className="p-6 bg-cyan-600 text-white flex justify-between items-center shrink-0">
-                <button onClick={() => { setLayoutMode('FLOAT'); setActiveSideTool(null); setIsExpanded(false); }} className="px-4 py-2 bg-black/20 hover:bg-black/40 rounded-lg flex items-center gap-2 font-black text-xs transition-all shadow-inner"><Undo2 size={16}/> 返回</button>
+                <button onClick={() => { setLayoutMode('FLOAT'); setActiveSideTool(null); setIsExpanded(false); }} className="px-4 py-2 bg-black/20 hover:bg-black/40 rounded-xl flex items-center gap-2 font-black text-xs transition-all shadow-inner"><Undo2 size={16}/> 返回</button>
                 <h4 className="text-lg font-black italic tracking-tighter uppercase">{activeSideTool === 'PRODUCTS' ? '商品资产' : (activeSideTool === 'KNOWLEDGE' ? '知识矩阵' : '客户洞察')}</h4>
              </div>
              {activeSideTool === 'CUSTOMERS' ? (
                <div className="flex-1 overflow-y-auto p-6 space-y-6">
                   <div className="p-6 rounded-xl bg-emerald-500 text-slate-950 shadow-xl relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-4 opacity-20"><Trophy size={60}/></div>
-                     <div className="flex items-center gap-4 mb-4"><div className="w-12 h-12 rounded-lg bg-black/20 flex items-center justify-center border border-black/10"><UserIcon size={24}/></div><div><h2 className="text-2xl font-black mb-1">{currentCustomer?.name}</h2><span className="text-[10px] font-black uppercase bg-black/10 px-2 py-0.5 rounded-md">{currentCustomer?.level}</span></div></div>
-                     <div className="grid grid-cols-2 gap-3"><div className="bg-black/10 p-3 rounded-lg border border-black/5"><p className="text-[9px] font-black opacity-60 uppercase mb-1">历史价值</p><p className="text-xl font-black italic">¥{currentCustomer?.total_value}</p></div><div className="bg-black/10 p-3 rounded-lg border border-black/5"><p className="text-[9px] font-black opacity-60 uppercase mb-1">智脑态度</p><p className="text-xl font-black italic">{currentCustomer?.attitude}</p></div></div>
+                     <div className="flex items-center gap-4 mb-4"><div className="w-12 h-12 rounded-xl bg-black/20 flex items-center justify-center border border-black/10"><UserIcon size={24}/></div><div><h2 className="text-2xl font-black mb-1">{currentCustomer?.name}</h2><span className="text-[10px] font-black uppercase bg-black/10 px-2 py-0.5 rounded-xl">{currentCustomer?.level}</span></div></div>
+                     <div className="grid grid-cols-2 gap-3"><div className="bg-black/10 p-3 rounded-xl border border-black/5"><p className="text-[9px] font-black opacity-60 uppercase mb-1">历史价值</p><p className="text-xl font-black italic">¥{currentCustomer?.total_value}</p></div><div className="bg-black/10 p-3 rounded-xl border border-black/5"><p className="text-[9px] font-black opacity-60 uppercase mb-1">智脑态度</p><p className="text-xl font-black italic">{currentCustomer?.attitude}</p></div></div>
                   </div>
-                  <div className="flex gap-2 p-1.5 bg-white/5 rounded-lg border border-white/5"><button onClick={() => { setCurrentCustomer(mockCustomers[0]); setShowCriticalAlert(false); }} className={cn("flex-1 py-2 rounded-lg text-[10px] font-black uppercase transition-all", currentCustomer?.name === '李先生' ? "bg-emerald-500 text-black" : "bg-white/5 text-slate-500")}>模拟 VIP</button><button onClick={() => { setCurrentCustomer(mockCustomers[1]); setShowCriticalAlert(true); }} className={cn("flex-1 py-2 rounded-lg text-[10px] font-black uppercase transition-all", currentCustomer?.name === '未知访客' ? "bg-red-500 text-white" : "bg-white/5 text-slate-500")}>模拟 恶劣客户</button></div>
+                  <div className="flex gap-2 p-1.5 bg-white/5 rounded-xl border border-white/5"><button onClick={() => { setCurrentCustomer(mockCustomers[0]); setShowCriticalAlert(false); }} className={cn("flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all", currentCustomer?.name === '李先生' ? "bg-emerald-500 text-black" : "bg-white/5 text-slate-500")}>模拟 VIP</button><button onClick={() => { setCurrentCustomer(mockCustomers[1]); setShowCriticalAlert(true); }} className={cn("flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all", currentCustomer?.name === '未知访客' ? "bg-red-500 text-white" : "bg-white/5 text-slate-500")}>模拟 恶劣客户</button></div>
                   <div className="space-y-3">{currentCustomer?.insights.map((ins: any, idx: number) => (<InsightCard key={idx} title={ins.title} desc={ins.desc} color={ins.color} icon={ins.icon} />))}</div>
                </div>
              ) : (
                <div className="flex-1 flex flex-col">
                   <div className="p-6 bg-black/40 space-y-4 border-b border-white/10">
-                    <div className="relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-500/50" size={16} /><input value={searchQuery} onChange={(e) => setSearchText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && executeSearch()} placeholder={`搜索...`} className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:border-cyan-500 outline-none transition-all font-bold" /></div>
+                    <div className="relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-500/50" size={16} /><input value={searchQuery} onChange={(e) => setSearchText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && executeSearch()} placeholder={`搜索...`} className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:border-cyan-500 outline-none transition-all font-bold" /></div>
                   </div>
                   <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-4">
                     {searchResults.map((item, i) => (
                       <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-cyan-500/30 transition-all group relative overflow-hidden">
                         <div className="text-[9px] font-black uppercase mb-2 tracking-widest flex justify-between items-center"><span className={activeSideTool === 'PRODUCTS' ? "text-emerald-500" : "text-cyan-500"}>{activeSideTool === 'PRODUCTS' ? 'ASSET' : 'MANUAL'}</span>{item.price && <span className="text-red-500 font-black text-sm">¥{item.price}</span>}</div>
                         <div className="text-base font-black text-white mb-2 italic">{item.name || item.keyword}</div>
-                        <div className="p-3 bg-black/60 rounded-lg text-xs text-slate-200 border border-white/5 shadow-inner italic leading-relaxed">"{item.usp || item.solution}"</div>
+                        <div className="p-3 bg-black/60 rounded-xl text-xs text-slate-200 border border-white/5 shadow-inner italic leading-relaxed">"{item.usp || item.solution}"</div>
                       </div>
                     ))}
                   </div>
@@ -219,13 +219,13 @@ export const TacticalIsland = () => {
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 416, opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-6 border-t border-white/10 bg-slate-900 flex flex-col gap-4 rounded-b-xl">
               <div className="flex items-center gap-3 mb-1"><div className="w-1 h-4 bg-red-500 rounded-full" /><h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">发起紧急战术支援</h4></div>
               <div className="grid grid-cols-2 gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
-                 <button onClick={() => handleHelp('IMAGE')} className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-red-500/10 transition-all group"><div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-red-500"><ImageIcon size={16} /></div><div className="text-left"><p className="text-xs font-black text-white leading-none">截图求助</p><p className="text-[8px] text-slate-500 mt-1 uppercase">物理载荷</p></div></button>
-                 <button onClick={() => {}} className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-cyan-500/10 transition-all group"><div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-cyan-500"><MessageSquareText size={16} /></div><div className="text-left"><p className="text-xs font-black text-white leading-none">文字说明</p><p className="text-[8px] text-slate-500 mt-1 uppercase">详情描述</p></div></button>
+                 <button onClick={() => handleHelp('IMAGE')} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/10 transition-all group"><div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-red-500"><ImageIcon size={16} /></div><div className="text-left"><p className="text-xs font-black text-white leading-none">截图求助</p><p className="text-[8px] text-slate-500 mt-1 uppercase">物理载荷</p></div></button>
+                 <button onClick={() => {}} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-cyan-500/10 transition-all group"><div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-cyan-500"><MessageSquareText size={16} /></div><div className="text-left"><p className="text-xs font-black text-white leading-none">文字说明</p><p className="text-[8px] text-slate-500 mt-1 uppercase">详情描述</p></div></button>
               </div>
               <div className="flex flex-col gap-3 flex-1 min-h-0">
                  <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as any}>
-                    <textarea value={helpText} onChange={(e) => setHelpText(e.target.value)} placeholder="描述困境，智脑将自动匹配对策..." className="w-full h-24 bg-black/40 border border-white/5 rounded-lg p-3 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none font-bold" />
-                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-4 py-1.5 bg-red-500 text-white text-[10px] font-black rounded-lg hover:bg-red-600 transition-all shadow-lg uppercase">提交</button>
+                    <textarea value={helpText} onChange={(e) => setHelpText(e.target.value)} placeholder="描述困境，智脑将自动匹配对策..." className="w-full h-24 bg-black/40 border border-white/5 rounded-xl p-3 text-xs text-slate-300 focus:border-red-500/50 transition-all resize-none outline-none font-bold" />
+                    <button onClick={() => handleHelp('TEXT')} className="absolute bottom-3 right-3 px-4 py-1.5 bg-red-500 text-white text-[10px] font-black rounded-xl hover:bg-red-600 transition-all shadow-lg uppercase">提交</button>
                  </div>
               </div>
             </motion.div>
@@ -242,7 +242,7 @@ export const TacticalIsland = () => {
               </div>
               <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
                  {activeTab === 'AI' && (<div className="p-10 text-center opacity-20 italic text-white text-xs">智脑对策逻辑已集成</div>)}
-                 {activeTab === 'RADAR' && (<div className="space-y-2">{violations.slice(0, 5).map((v, i) => (<div key={i} className="p-3 rounded-lg bg-white/[0.03] border border-white/5"><div className="flex justify-between items-center mb-1"><span className="text-[9px] font-black text-red-500 uppercase">Intercepted</span><span className="text-[8px] font-mono text-slate-500">{new Date(v.timestamp).toLocaleTimeString()}</span></div><p className="text-[10px] text-slate-200 truncate">"{v.context}"</p></div>))}</div>)}
+                 {activeTab === 'RADAR' && (<div className="space-y-2">{violations.slice(0, 5).map((v, i) => (<div key={i} className="p-3 rounded-xl bg-white/[0.03] border border-white/5"><div className="flex justify-between items-center mb-1"><span className="text-[9px] font-black text-red-500 uppercase">Intercepted</span><span className="text-[8px] font-mono text-slate-500">{new Date(v.timestamp).toLocaleTimeString()}</span></div><p className="text-[10px] text-slate-200 truncate">"{v.context}"</p></div>))}</div>)}
                  {activeTab === 'TOOLS' && (
                    <div className="grid grid-cols-2 gap-3">
                       <ToolCard icon={<Package size={20}/>} title="商品资产" desc="战术库" color="cyan" onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} />
@@ -260,8 +260,8 @@ export const TacticalIsland = () => {
           {showBigScreenModal && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[500] bg-slate-950 flex flex-col">
               <div className="flex justify-between items-center p-6 bg-black/60 border-b border-white/10 shrink-0" style={{ WebkitAppRegion: 'drag' } as any}>
-                 <div className="flex items-center gap-4"><div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg animate-pulse"><Maximize2 size={20} className="text-white" /></div><div><h4 className="text-xl font-black text-white uppercase italic leading-none">全景指挥中枢</h4><p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-1">指挥中心 · 实时链路已激活</p></div></div>
-                 <button onClick={() => setShowBigScreenModal(false)} className="px-6 py-2.5 bg-red-500 text-white rounded-lg text-xs font-black uppercase transition-all shadow-xl">退出全景</button>
+                 <div className="flex items-center gap-4"><div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg animate-pulse"><Maximize2 size={20} className="text-white" /></div><div><h4 className="text-xl font-black text-white uppercase italic leading-none">全景指挥中枢</h4><p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-1">指挥中心 · 实时链路已激活</p></div></div>
+                 <button onClick={() => setShowBigScreenModal(false)} className="px-6 py-2.5 bg-red-500 text-white rounded-xl text-xs font-black uppercase transition-all shadow-xl">退出全景</button>
               </div>
               <div className="flex-1 bg-black relative" style={{ WebkitAppRegion: 'no-drag' } as any}><iframe src="#/big-screen" className="w-full h-full border-none" title="Tactical Big Screen" /><div className="absolute inset-0 pointer-events-none border border-white/5 shadow-[inset_0_0_150px_rgba(0,0,0,0.9)]" /></div>
             </motion.div>
@@ -274,12 +274,12 @@ export const TacticalIsland = () => {
 
 function HubBtn({ icon, active, onClick, title, color }: any) {
   const activeClassMap: any = { red: "bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]", emerald: "bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]", white: "bg-white text-black shadow-lg", muted: "bg-slate-800 text-white border-white/20" }
-  return (<button onClick={onClick} title={title} className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 active:scale-90", active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white")}>{icon}</button>)
+  return (<button onClick={onClick} title={title} className={cn("w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90", active ? activeClassMap[color] : "text-slate-500 hover:bg-white/10 hover:text-white")}>{icon}</button>)
 }
 
 function TabBtn({ id, active, set, icon, label }: any) {
   const isSelected = active === id
-  return (<button onClick={(e) => { e.stopPropagation(); set(id); }} className={cn("flex-1 py-2.5 rounded-lg flex flex-col items-center justify-center gap-1 transition-all relative", isSelected ? "bg-white/10 text-cyan-400" : "text-slate-500 hover:text-slate-300")}>{icon}<span className="text-[9px] font-black uppercase">{label}</span>{isSelected && (<motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500 shadow-[0_0_8px_#06b6d4]" />)}</button>)
+  return (<button onClick={(e) => { e.stopPropagation(); set(id); }} className={cn("flex-1 py-2.5 rounded-xl flex flex-col items-center justify-center gap-1 transition-all relative", isSelected ? "bg-white/10 text-cyan-400" : "text-slate-500 hover:text-slate-300")}>{icon}<span className="text-[9px] font-black uppercase">{label}</span>{isSelected && (<motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500 shadow-[0_0_8px_#06b6d4]" />)}</button>)
 }
 
 function InsightCard({ title, desc, color, icon }: any) {
@@ -289,5 +289,5 @@ function InsightCard({ title, desc, color, icon }: any) {
 
 function ToolCard({ icon, title, desc, color, onClick }: any) {
   const colors: any = { cyan: "text-cyan-400 bg-cyan-400/5 border-cyan-400/15", amber: "text-amber-400 bg-amber-400/5 border-amber-400/15", red: "text-red-400 bg-red-400/5 border-red-400/15", slate: "text-slate-400 bg-white/5 border-white/10" }
-  return (<button onClick={onClick} className={cn("p-4 rounded-xl border flex flex-col gap-2 transition-all hover:scale-[1.02] text-left", colors[color])}><div className="w-8 h-8 rounded-lg flex items-center justify-center bg-black/30 shadow-inner">{icon}</div><div><div className="text-xs font-black uppercase mb-0.5">{title}</div><div className="text-[9px] opacity-60 leading-tight">{desc}</div></div></button>)
+  return (<button onClick={onClick} className={cn("p-4 rounded-xl border flex flex-col gap-2 transition-all hover:scale-[1.02] text-left", colors[color])}><div className="w-8 h-8 rounded-xl flex items-center justify-center bg-black/30 shadow-inner">{icon}</div><div><div className="text-xs font-black uppercase mb-0.5">{title}</div><div className="text-[9px] opacity-60 leading-tight">{desc}</div></div></button>)
 }

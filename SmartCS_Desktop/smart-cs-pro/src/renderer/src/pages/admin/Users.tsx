@@ -163,7 +163,7 @@ export default function UsersPage() {
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-black">
-      <header className="flex justify-between items-end bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0">
+      <header className="flex justify-between items-end bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black text-black uppercase italic text-tactical-glow leading-none">成员角色矩阵</h2>
           <p className="text-slate-500 text-sm mt-2 font-bold flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function UsersPage() {
         </button>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {isAnyLoading ? (
             <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black italic opacity-50">
@@ -193,7 +193,7 @@ export default function UsersPage() {
             <TacticalTable headers={['成员姓名', '用户角色', '所属部门', '快速角色切换', '管理操作']}>
               {users.map((u: any) => (
                 <tr key={u.username} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-900 text-center">
-                  <td className="px-8 py-3 text-left"><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center font-black text-xs border border-cyan-200 shadow-inner">{u.real_name?.[0] || '?'}</div><div className="flex flex-col"><span className="text-xs font-black text-slate-900">{u.real_name}</span><span className="text-[9px] text-slate-500 font-mono">@{u.username}</span></div></div></td>
+                  <td className="px-8 py-3 text-left"><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center font-black text-xs border border-cyan-200 shadow-inner">{u.real_name?.[0] || '?'}</div><div className="flex flex-col"><span className="text-xs font-black text-slate-900">{u.real_name}</span><span className="text-[9px] text-slate-500 font-mono">@{u.username}</span></div></div></td>
                   <td className="px-6 py-3 text-center"><div className="flex justify-center">{u.is_manager ? <div className="px-2.5 py-0.5 bg-cyan-600 text-white text-[10px] font-black rounded-full inline-flex items-center gap-1 shadow-sm"><ShieldCheck size={10} /> 部门主管</div> : <span className="text-[10px] text-slate-600 font-bold">普通成员</span>}</div></td>
                   <td className="px-6 py-3 text-center font-bold text-slate-900 text-[10px] uppercase">{u.dept_name || '全域通用'}</td>
                   <td className="px-6 py-3 text-center"><div className="flex justify-center"><div className="w-36">
@@ -202,16 +202,16 @@ export default function UsersPage() {
                       value={u.role_id} 
                       onChange={(val) => handleRoleChangeRequest(u, val)} 
                       showSearch={false}
-                      className="!py-1 !px-2 !rounded-lg !text-[11px] font-black"
+                      className="!py-1 !px-2 !rounded-xl !text-[11px] font-black"
                     />
                   </div></div></td>
                   <td className="px-8 py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
                        {hasPermission('admin:user:update') && (
-                         <button onClick={() => { setTargetUser({...u, department_id: u.department_id || ''}); setModalType('EDIT'); }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-lg transition-all shadow-sm border border-cyan-100"><Edit3 size={14} /></button>
+                         <button onClick={() => { setTargetUser({...u, department_id: u.department_id || ''}); setModalType('EDIT'); }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-xl transition-all shadow-sm border border-cyan-100"><Edit3 size={14} /></button>
                        )}
                        {hasPermission('admin:user:delete') && (
-                         <button onClick={() => { setTargetUser(u); setModalType('DELETE'); }} className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all shadow-sm border border-red-100"><Trash2 size={14} /></button>
+                         <button onClick={() => { setTargetUser(u); setModalType('DELETE'); }} className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm border border-red-100"><Trash2 size={14} /></button>
                        )}
                     </div>
                   </td>

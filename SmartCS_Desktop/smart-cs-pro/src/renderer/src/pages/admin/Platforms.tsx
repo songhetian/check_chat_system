@@ -104,11 +104,11 @@ export default function PlatformsPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+          <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
             <RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} />
           </button>
           {hasPermission('admin:platform:create') && (
-            <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg text-xs font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800">
+            <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black shadow-xl active:scale-95 transition-all hover:bg-slate-800">
               <Plus size={16} /> 增加监控目标
             </button>
           )}
@@ -130,7 +130,7 @@ export default function PlatformsPage() {
               >
                 <div className="flex justify-between items-start mb-6">
                   <div className={cn(
-                    "w-12 h-12 rounded-lg flex items-center justify-center transition-all border",
+                    "w-12 h-12 rounded-xl flex items-center justify-center transition-all border",
                     p.is_active ? "bg-cyan-50 text-cyan-600 border-cyan-100 shadow-inner" : "bg-slate-50 text-slate-400 border-slate-100"
                   )}>
                     <Monitor size={24} />

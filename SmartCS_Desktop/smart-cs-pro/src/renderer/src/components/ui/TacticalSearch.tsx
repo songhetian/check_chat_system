@@ -29,7 +29,7 @@ export const TacticalSearch = ({
         onKeyDown={(e) => e.key === 'Enter' && onSearch?.()}
         placeholder={placeholder}
         className={cn(
-          "w-full bg-slate-50/50 border border-slate-200 rounded-lg py-2 pl-10 pr-10 text-xs text-slate-900",
+          "w-full bg-slate-50/50 border border-slate-200 rounded-xl py-2 pl-10 pr-10 text-xs text-slate-900",
           "placeholder:text-slate-400 font-medium transition-all duration-300",
           "focus:bg-white focus:ring-2 focus:ring-cyan-500/10 focus:border-cyan-500/50 outline-none",
           "hover:border-slate-300"
@@ -41,12 +41,12 @@ export const TacticalSearch = ({
         {value ? (
           <button 
             onClick={() => onChange('')}
-            className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all"
+            className="p-1 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-600 transition-all"
           >
             <X size={14} />
           </button>
         ) : (
-          <div className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-tighter opacity-60">
+          <div className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 bg-white border border-slate-200 rounded-xl text-[9px] font-black text-slate-400 uppercase tracking-tighter opacity-60">
             <Command size={8} /> K
           </div>
         )}

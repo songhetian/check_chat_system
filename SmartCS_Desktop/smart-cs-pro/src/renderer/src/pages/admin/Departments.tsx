@@ -132,7 +132,7 @@ export default function DepartmentsPage() {
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-black">
-      <header className="flex justify-between items-end bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0">
+      <header className="flex justify-between items-end bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black text-black uppercase italic text-tactical-glow leading-none">部门架构管理</h2>
           <p className="text-slate-500 text-sm mt-2 font-bold flex items-center gap-2">
@@ -152,7 +152,7 @@ export default function DepartmentsPage() {
         </button>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {deptsQuery.isLoading ? (
             <div className="h-64 flex items-center justify-center text-slate-400 gap-3 font-bold uppercase italic tracking-widest">
@@ -162,17 +162,17 @@ export default function DepartmentsPage() {
             <TacticalTable headers={['部门名称', '人员数量', '部门负责人', '运行状态', '管理操作']}>
               {depts.map((d: any) => (
                 <tr key={d.id} className="hover:bg-slate-50/50 transition-colors group text-center">
-                  <td className="px-8 py-3 text-left"><div className="flex items-center gap-3"><div className={cn("w-8 h-8 rounded-lg flex items-center justify-center border shadow-inner", d.manager__real_name ? "bg-cyan-100 text-cyan-700 border-cyan-200" : "bg-slate-100 text-slate-500 border-slate-200")}><Building2 size={14} /></div><span className="text-xs font-black text-slate-900">{d.name}</span></div></td>
+                  <td className="px-8 py-3 text-left"><div className="flex items-center gap-3"><div className={cn("w-8 h-8 rounded-xl flex items-center justify-center border shadow-inner", d.manager__real_name ? "bg-cyan-100 text-cyan-700 border-cyan-200" : "bg-slate-100 text-slate-500 border-slate-200")}><Building2 size={14} /></div><span className="text-xs font-black text-slate-900">{d.name}</span></div></td>
                   <td className="px-6 py-3 font-bold text-slate-900"><div className="flex items-center justify-center gap-2"><Users2 size={12} className="text-cyan-600" /><span className="text-xs">{d.member_count} <span className="text-[9px] opacity-60 italic font-black">人</span></span></div></td>
                   <td className="px-6 py-3">{d.manager__real_name ? <div className="flex items-center justify-center gap-2"><div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[8px] font-black shadow-sm">{d.manager__real_name[0]}</div><span className="text-xs font-black text-slate-900">{d.manager__real_name}</span></div> : <span className="text-[10px] text-slate-400 font-bold italic">未指派</span>}</td>
                   <td className="px-6 py-3 font-black italic text-[10px] text-emerald-600 uppercase tracking-widest">正常运行</td>
                   <td className="px-8 py-3">
                     <div className="flex items-center justify-center gap-2">
                       {hasPermission('admin:dept:update') && (
-                        <button onClick={() => { setTargetItem(d); setInputName(d.name); setManagerId(d.manager_id || ''); setModalType('EDIT') }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-lg transition-all shadow-sm border border-cyan-100"><Edit3 size={14} /></button>
+                        <button onClick={() => { setTargetItem(d); setInputName(d.name); setManagerId(d.manager_id || ''); setModalType('EDIT') }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-xl transition-all shadow-sm border border-cyan-100"><Edit3 size={14} /></button>
                       )}
                       {hasPermission('admin:dept:delete') && (
-                        <button onClick={() => { setTargetItem(d); setModalType('DELETE') }} className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all shadow-sm border border-red-100"><Trash2 size={14} /></button>
+                        <button onClick={() => { setTargetItem(d); setModalType('DELETE') }} className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm border border-red-100"><Trash2 size={14} /></button>
                       )}
                     </div>
                   </td>
@@ -193,7 +193,7 @@ export default function DepartmentsPage() {
               <div className="relative group"><div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-cyan-500 transition-colors"><Search size={12} /></div><input disabled={saveMutation.isPending} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="检索负责人姓名..." className="w-full pl-9 pr-4 py-2 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-900 shadow-inner disabled:opacity-50" /></div>
               <div className="max-h-36 overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl p-1.5 bg-slate-50/30">
                  {deptUsers.map((u: any) => (
-                   <div key={u.id} onClick={() => !saveMutation.isPending && setManagerId(u.id)} className={cn("p-2 rounded-lg cursor-pointer flex justify-between items-center transition-all mb-1 last:mb-0", managerId == u.id ? "bg-cyan-500 text-white shadow-md" : "hover:bg-white text-slate-600", saveMutation.isPending && "opacity-50 cursor-not-allowed")}>
+                   <div key={u.id} onClick={() => !saveMutation.isPending && setManagerId(u.id)} className={cn("p-2 rounded-xl cursor-pointer flex justify-between items-center transition-all mb-1 last:mb-0", managerId == u.id ? "bg-cyan-500 text-white shadow-md" : "hover:bg-white text-slate-600", saveMutation.isPending && "opacity-50 cursor-not-allowed")}>
                       <span className="text-[11px] font-black">{u.real_name} <span className={cn("text-[9px] opacity-50 ml-1 font-mono", managerId == u.id ? "text-white" : "text-slate-400")}>@{u.username}</span></span>
                       {managerId == u.id && <CheckCircle2 size={12} />}
                    </div>

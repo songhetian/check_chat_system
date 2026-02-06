@@ -26,12 +26,12 @@ export const SuggestionPopup = ({ products, onDismiss }: { products: any[], onDi
             {products.map((p, idx) => (
               <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-cyan-300 hover:bg-white transition-all cursor-pointer group">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400 group-hover:text-cyan-500 shadow-sm font-bold text-[10px]">
+                  <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:text-cyan-500 shadow-sm font-bold text-[10px]">
                     {p.pid[0]}
                   </div>
                   <span className="text-xs font-black text-slate-700">{p.pid}</span>
                 </div>
-                <button className="p-2 bg-slate-900 text-white rounded-lg active:scale-90 transition-transform">
+                <button className="p-2 bg-slate-900 text-white rounded-xl active:scale-90 transition-transform">
                    <ShoppingCart size={12} />
                 </button>
               </div>
@@ -45,7 +45,7 @@ export const SuggestionPopup = ({ products, onDismiss }: { products: any[], onDi
             <div className="flex-1">
               <div className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">匹配关键词: {products[0].keyword}</div>
               <h4 className="font-black text-slate-900 text-sm mb-2">型号: {products[0].pid}</h4>
-              <button className="flex items-center gap-2 w-full py-2 bg-slate-900 text-white rounded-lg text-[10px] font-bold justify-center active:scale-95 transition-all">
+              <button className="flex items-center gap-2 w-full py-2 bg-slate-900 text-white rounded-xl text-[10px] font-bold justify-center active:scale-95 transition-all">
                 <ShoppingCart size={12} /> 一键调取战术物料
               </button>
             </div>

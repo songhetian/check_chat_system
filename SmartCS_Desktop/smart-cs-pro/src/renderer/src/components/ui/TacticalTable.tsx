@@ -59,7 +59,7 @@ export const TacticalPagination = ({ total, pageSize, currentPage, onPageChange 
       onClick={() => typeof page === 'number' && onPageChange(page)}
       disabled={disabled || page === '...'}
       className={cn(
-        "w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all",
+        "w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold transition-all",
         active 
           ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/30" 
           : "bg-white border border-slate-200 text-slate-600 hover:border-cyan-500 hover:text-cyan-600 disabled:opacity-30 shadow-sm"

@@ -103,7 +103,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-black">
-      <header className="flex justify-between items-end bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0">
+      <header className="flex justify-between items-end bg-white p-6 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <div className="flex items-center gap-4">
           <div>
             <h2 className="text-3xl font-black text-black uppercase italic text-tactical-glow leading-none">分类管理中枢</h2>
@@ -123,7 +123,7 @@ export default function CategoriesPage() {
         </div>
       </header>
 
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {isLoading ? (
             <div className="h-64 flex items-center justify-center text-slate-400 gap-3 uppercase font-black italic opacity-50">
@@ -133,17 +133,17 @@ export default function CategoriesPage() {
             <TacticalTable headers={['分类名称', '分类类型', '描述说明', '创建日期', '管理操作']}>
               {cats.map((c: any) => (
                 <tr key={c.id} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="px-8 py-3"><div className="flex items-center justify-center gap-3"><div className={cn("w-8 h-8 rounded-lg flex items-center justify-center border shadow-inner", c.type === 'SENSITIVE' ? "bg-red-100 text-red-700 border-red-200" : "bg-cyan-100 text-cyan-700 border-cyan-200")}><Tag size={14} /></div><span className="text-xs font-black text-slate-900">{c.name}</span></div></td>
+                  <td className="px-8 py-3"><div className="flex items-center justify-center gap-3"><div className={cn("w-8 h-8 rounded-xl flex items-center justify-center border shadow-inner", c.type === 'SENSITIVE' ? "bg-red-100 text-red-700 border-red-200" : "bg-cyan-100 text-cyan-700 border-cyan-200")}><Tag size={14} /></div><span className="text-xs font-black text-slate-900">{c.name}</span></div></td>
                   <td className="px-6 py-3 text-center"><span className={cn("px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase italic border shadow-sm", c.type === 'SENSITIVE' ? "bg-red-600 text-white border-red-500" : "bg-slate-900 text-white border-slate-800")}>{c.type === 'SENSITIVE' ? '风险词库' : '智能话术'}</span></td>
                   <td className="px-6 py-3 text-center text-[10px] font-bold text-slate-800 italic truncate max-w-xs">"{c.description || '无备注'}"</td>
                   <td className="px-6 py-3 text-center font-black text-[10px] text-slate-900">{new Date(c.created_at).toLocaleDateString()}</td>
                   <td className="px-8 py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {hasPermission('admin:cat:update') && (
-                        <button onClick={() => { setEditItem(c); setModalType('EDIT') }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-lg transition-all shadow-sm border border-cyan-100"><Edit3 size={14} /></button>
+                        <button onClick={() => { setEditItem(c); setModalType('EDIT') }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-xl transition-all shadow-sm border border-cyan-100"><Edit3 size={14} /></button>
                       )}
                       {hasPermission('admin:cat:delete') && (
-                        <button onClick={() => { setEditItem(c); setModalType('DELETE') }} className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all shadow-sm border border-red-100"><Trash2 size={14} /></button>
+                        <button onClick={() => { setEditItem(c); setModalType('DELETE') }} className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm border border-red-100"><Trash2 size={14} /></button>
                       )}
                     </div>
                   </td>
