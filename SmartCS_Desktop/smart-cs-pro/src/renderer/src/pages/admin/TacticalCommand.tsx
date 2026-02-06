@@ -6,7 +6,7 @@ import {
   Loader2, CheckCircle2, Lock, Unlock, Send,
   X, RefreshCw, AlertTriangle, TrendingDown, BellRing,
   Search, Filter, ChevronDown, MonitorStop, Globe, ShieldCheck,
-  Power, PowerOff, Cpu, Radar
+  Power, PowerOff, Cpu, Radar, Shield
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
@@ -18,9 +18,9 @@ import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { TacticalTable } from '../../components/ui/TacticalTable'
 import { toast } from 'sonner'
 
-// 1. 状态样式标准 (V3.12 品牌标识版)
+// 1. 状态与身份样式标准 (V3.13)
 const getAgentStatusTheme = (score: number, isOnline: boolean) => {
-  if (!isOnline) return { border: 'border-slate-200', bg: 'bg-slate-50', text: 'text-slate-400', label: '离线', dot: 'bg-slate-300' }
+  if (!isOnline) return { border: 'border-slate-200', bg: 'bg-slate-100', text: 'text-slate-400', label: '离线', dot: 'bg-slate-300' }
   if (score < 60) return { border: 'border-red-500', bg: 'bg-red-50/50', text: 'text-red-600', label: '异常', dot: 'bg-red-500 animate-ping' }
   return { 
     border: 'border-emerald-500', 
@@ -29,6 +29,19 @@ const getAgentStatusTheme = (score: number, isOnline: boolean) => {
     label: '在线', 
     dot: 'bg-emerald-500 shadow-[0_0_8px_#10b981]' 
   }
+}
+
+const RoleBadge = ({ roleId, roleName }: { roleId: number, roleName: string }) => {
+  const themes: Record<number, string> = {
+    [ROLE_ID.HQ]: "bg-amber-500/10 text-amber-600 border-amber-200/50",
+    [ROLE_ID.ADMIN]: "bg-cyan-600/10 text-cyan-700 border-cyan-200/50",
+    [ROLE_ID.AGENT]: "bg-slate-100 text-slate-600 border-slate-200"
+  }
+  return (
+    <span className={cn("px-2 py-0.5 rounded-lg text-[9px] font-black border uppercase tracking-tighter", themes[roleId] || themes[ROLE_ID.AGENT])}>
+      {roleName || (roleId === ROLE_ID.HQ ? '总部' : (roleId === ROLE_ID.ADMIN ? '主管' : '坐席'))}
+    </span>
+  )
 }
 
 export default function TacticalCommand() {
@@ -62,15 +75,18 @@ export default function TacticalCommand() {
     if (!token) return
     if (!silent) setLoading(true)
     try {
+      // V3.13: 移除 role_only=AGENT，改为获取所有可监控成员
       const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/admin/agents?role_only=AGENT&search=${search}&dept_id=${deptId}&_t=${Date.now()}`, 
+        url: `${CONFIG.API_BASE}/admin/agents?search=${search}&dept_id=${deptId}&_t=${Date.now()}`, 
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
       if (res.status === 200) {
+        // 2. 增强排序逻辑：在线优先 > 身份等级优先 (HQ > ADMIN > AGENT)
         const sorted = [...res.data.data].sort((a, b) => {
-          if (a.is_online === b.is_online) return 0
-          return a.is_online ? -1 : 1
+          if (a.is_online !== b.is_online) return a.is_online ? -1 : 1
+          if (a.role_id !== b.role_id) return b.role_id - a.role_id // ID 越大等级越高
+          return 0
         })
         setAgents(sorted)
         if (activeAgent) {
@@ -134,7 +150,7 @@ export default function TacticalCommand() {
       <header className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0">
         <div className="flex items-center gap-6">
           <div className="w-10 h-10 bg-cyan-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-600/20"><Radar size={20} className="text-white" /></div>
-          <div><h2 className="text-2xl font-black text-black italic tracking-tighter uppercase leading-none">成员实时监控</h2><div className="flex items-center gap-2 mt-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><span className="flex items-center gap-1 text-emerald-600 font-black"><Globe size={10}/> 链路节点已锚定</span></div></div>
+          <div><h2 className="text-2xl font-black text-black italic tracking-tighter uppercase leading-none">成员实时监控</h2><div className="flex items-center gap-2 mt-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><span className="flex items-center gap-1 text-emerald-600 font-black"><Globe size={10}/> 实时链路已挂载</span></div></div>
         </div>
         <div className="flex items-center gap-4">
            {isHQ && (
@@ -148,7 +164,7 @@ export default function TacticalCommand() {
                  <span className="text-lg font-black text-emerald-700">{onlineCount}</span>
               </div>
               <div className="bg-cyan-50 px-4 py-2 rounded-xl border border-cyan-100 flex flex-col items-center min-w-[80px]">
-                 <span className="text-[9px] font-black text-cyan-600 uppercase">离线人数</span>
+                 <span className="text-[9px] font-black text-cyan-600 uppercase">脱机人数</span>
                  <span className="text-lg font-black text-cyan-700">{offlineCount}</span>
               </div>
            </div>
@@ -156,18 +172,18 @@ export default function TacticalCommand() {
       </header>
 
       <main className="flex-1 flex gap-6 min-h-0">
-        <div className="w-full lg:w-[320px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden shrink-0">
-           <div className="p-4 border-b border-slate-100 space-y-3 text-black">
+        <div className="w-full lg:w-[420px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden shrink-0">
+           <div className="p-4 border-b border-slate-100 space-y-3">
               <div className="flex items-center justify-between">
-                 <h3 className="text-[10px] font-black text-cyan-700 uppercase tracking-widest flex items-center gap-2"><Radio size={12} className="text-cyan-600 animate-pulse" /> 成员实时列表</h3>
+                 <h3 className="text-[10px] font-black text-cyan-700 uppercase tracking-widest flex items-center gap-2"><Radio size={12} className="text-cyan-600 animate-pulse" /> 成员监控矩阵</h3>
                  <button onClick={() => fetchData()} className="p-2 bg-cyan-50 text-cyan-600 rounded-xl hover:bg-cyan-100 transition-all border border-cyan-100 group">
                     <RefreshCw size={14} className={cn(loading && "animate-spin")} />
                  </button>
               </div>
-              <TacticalSearch value={search} onChange={setSearch} placeholder="搜索姓名..." />
+              <TacticalSearch value={search} onChange={setSearch} placeholder="搜索成员姓名..." />
            </div>
            <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
-              <TacticalTable headers={['成员', '状态', '评分', '详情']}>
+              <TacticalTable headers={['成员', '部门', '状态', '评分', '身份']}>
                 {agents.map(a => {
                   const theme = getAgentStatusTheme(a.tactical_score, a.is_online);
                   const isActive = activeAgent?.username === a.username;
@@ -175,9 +191,12 @@ export default function TacticalCommand() {
                     <tr key={a.username} onClick={() => { setActiveAgent(a); setLiveChat([]); }} className={cn("cursor-pointer transition-all duration-300", isActive ? "bg-cyan-600/10 text-cyan-900" : "hover:bg-cyan-50/50 text-black")}>
                       <td className="px-4 py-3 text-left">
                         <div className="flex items-center gap-2">
-                          <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-colors", a.is_online ? "bg-emerald-500/10 text-emerald-600" : "bg-slate-100 text-slate-400")}>{a.real_name[0]}</div>
+                          <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-all", a.is_online ? "bg-emerald-500/10 text-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.1)]" : "bg-slate-100 text-slate-400")}>{a.real_name[0]}</div>
                           <span className="text-[11px] font-black truncate">{a.real_name}</span>
                         </div>
+                      </td>
+                      <td className="px-2 py-3 text-center">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase">{a.dept_name || '未分配'}</span>
                       </td>
                       <td className="px-2 py-3 text-center">
                         <div className="flex justify-center items-center gap-1.5"><div className={cn("w-1.5 h-1.5 rounded-full transition-all", theme.dot)} /><span className={cn("text-[9px] font-black uppercase", isActive ? "text-cyan-700" : "text-slate-500")}>{theme.label}</span></div>
@@ -185,8 +204,8 @@ export default function TacticalCommand() {
                       <td className="px-2 py-3 text-center">
                         <span className={cn("text-[10px] font-black", a.tactical_score < 60 ? "text-red-500" : (isActive ? "text-cyan-700" : "text-cyan-600"))}>{a.tactical_score}</span>
                       </td>
-                      <td className="px-2 py-3 text-center">
-                        <ArrowUpRight size={12} className={cn(isActive ? "text-cyan-600" : "text-slate-300")} />
+                      <td className="px-4 py-3 text-center">
+                        <RoleBadge roleId={a.role_id} roleName={a.role_name} />
                       </td>
                     </tr>
                   )
@@ -198,9 +217,15 @@ export default function TacticalCommand() {
         <div className="flex-1 flex flex-col min-w-0 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
            <AnimatePresence mode='wait'>
               {activeAgent ? (
-                <motion.div key={activeAgent.username} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col h-full text-black">
+                <motion.div key={activeAgent.username} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col h-full">
                   <section className="p-6 border-b border-slate-100 bg-cyan-50/20 shrink-0">
-                     <div className="flex items-center justify-between mb-4"><h5 className="text-[10px] font-black text-cyan-800 uppercase tracking-widest flex items-center gap-2"><Cpu size={14}/> 实时干预矩阵</h5><span className="text-[9px] font-bold text-cyan-600 italic">目标节点: {activeAgent.real_name}</span></div>
+                     <div className="flex items-center justify-between mb-4">
+                        <h5 className="text-[10px] font-black text-cyan-800 uppercase tracking-widest flex items-center gap-2"><Cpu size={14}/> 实时干预矩阵</h5>
+                        <div className="flex items-center gap-2">
+                           <RoleBadge roleId={activeAgent.role_id} roleName={activeAgent.role_name} />
+                           <span className="text-[9px] font-bold text-cyan-600 italic">节点: {activeAgent.real_name}</span>
+                        </div>
+                     </div>
                      <div className="grid grid-cols-4 gap-4">
                         <CommandBtn active={isInputLocked} loading={processing === 'LOCK'} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定')} icon={isInputLocked ? Unlock : Lock} label={isInputLocked ? '解除锁定' : '强制锁定'} color={isInputLocked ? 'bg-red-600/90 text-white' : 'bg-cyan-700/90 text-white'} />
                         <CommandBtn loading={processing === 'PUSH'} onClick={() => executeIntervention('PUSH', '话术提示')} icon={Send} label="话术提示" color="bg-emerald-600/10 text-emerald-700 border border-emerald-100" />
@@ -223,13 +248,13 @@ export default function TacticalCommand() {
                            )}
                         </div>
                      </section>
-                     <section className="p-6 bg-cyan-600 text-white rounded-2xl relative overflow-hidden shadow-lg shadow-cyan-600/20"><div className="absolute top-0 right-0 p-4 opacity-20"><BrainCircuit size={60} /></div><h5 className="text-[9px] font-black text-cyan-100 uppercase tracking-widest mb-3">智脑辅助决策系统</h5><p className="text-xs font-bold text-white leading-relaxed italic relative z-10">"目前节点对话逻辑清晰，风险评分处于安全阈值。建议维持观察。"</p></section>
+                     <section className="p-6 bg-cyan-600 text-white rounded-2xl relative overflow-hidden shadow-lg shadow-cyan-600/20"><div className="absolute top-0 right-0 p-4 opacity-20"><BrainCircuit size={60} /></div><h5 className="text-[9px] font-black text-cyan-100 uppercase tracking-widest mb-3">智脑辅助决策系统</h5><p className="text-xs font-bold text-white leading-relaxed italic relative z-10">"该节点目前表现稳定。若检测到风险波动，干预矩阵将自动激活高亮。"</p></section>
                   </div>
                 </motion.div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-cyan-100 gap-8 p-10 text-center uppercase font-black italic">
                   <div className="w-32 h-32 bg-cyan-50 rounded-full flex items-center justify-center"><Radar size={100} className="text-cyan-200 animate-pulse" /></div>
-                  <div className="space-y-2"><p className="text-xl tracking-widest text-cyan-600">等待选择监控目标</p><p className="text-[9px] font-bold text-cyan-400 tracking-[0.3em]">Smart-CS Pro Command Center</p></div>
+                  <div className="space-y-2"><p className="text-xl tracking-widest text-cyan-600">等待选择监控目标</p><p className="text-[9px] font-bold text-cyan-400 tracking-[0.3em]">Smart-CS Pro Multi-Role Command Center</p></div>
                 </div>
               )}
            </AnimatePresence>
