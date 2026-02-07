@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, Request, Query, HTTPException
-from core.models import SensitiveWord, KnowledgeBase, PolicyCategory, AuditLog, CustomerSentiment, DeptSensitiveWord, DeptComplianceLog
+from core.models import SensitiveWord, KnowledgeBase, PolicyCategory, AuditLog, CustomerSentiment, DeptSensitiveWord, DeptComplianceLog, VoiceAlert, BusinessSOP
 from api.auth import get_current_user, check_permission
 from tortoise.transactions import in_transaction
 from tortoise.expressions import Q
@@ -9,6 +8,44 @@ router = APIRouter(prefix="/api/ai", tags=["AI Policy"])
 
 async def record_audit(operator: str, action: str, target: str, details: str):
     await AuditLog.create(operator=operator, action=action, target=target, details=details)
+
+@router.get("/voice-alerts")
+async def get_voice_alerts(page: int = 1, size: int = 50, search: str = "", current_user: dict = Depends(get_current_user)):
+    query = VoiceAlert.filter(is_deleted=0)
+    role_id = current_user.get("role_id")
+    dept_id = current_user.get("dept_id")
+    if role_id != 3:
+        query = query.filter(Q(department_id__isnull=True) | Q(department_id=dept_id))
+    if search:
+        query = query.filter(content__icontains=search)
+    total = await query.count()
+    data = await query.offset((page - 1) * size).limit(size).order_by("-id").values("id", "content", "department_id")
+    return {"status": "ok", "data": data, "total": total}
+
+@router.post("/voice-alerts")
+async def save_voice_alert(data: dict, user: dict = Depends(get_current_user)):
+    content = data.get("content")
+    dept_id = user.get("dept_id") if user.get("role_id") != 3 else data.get("department_id")
+    if dept_id == 'GLOBAL': dept_id = None
+    async with in_transaction() as conn:
+        exists = await VoiceAlert.filter(content=content, department_id=dept_id, is_deleted=0).exists()
+        if not exists:
+            await VoiceAlert.create(content=content, department_id=dept_id)
+            return {"status": "ok", "message": "已自动入库"}
+    return {"status": "ok"}
+
+@router.get("/sops")
+async def get_sops(page: int = 1, size: int = 50, search: str = "", current_user: dict = Depends(get_current_user)):
+    query = BusinessSOP.filter(is_deleted=0)
+    role_id = current_user.get("role_id")
+    dept_id = current_user.get("dept_id")
+    if role_id != 3:
+        query = query.filter(Q(department_id__isnull=True) | Q(department_id=dept_id))
+    if search:
+        query = query.filter(title__icontains=search)
+    total = await query.count()
+    data = await query.offset((page - 1) * size).limit(size).order_by("-id").values("id", "title", "content", "sop_type", "department_id")
+    return {"status": "ok", "data": data, "total": total}
 
 @router.get("/sentiments")
 async def get_sentiments(current_user: dict = Depends(get_current_user)):

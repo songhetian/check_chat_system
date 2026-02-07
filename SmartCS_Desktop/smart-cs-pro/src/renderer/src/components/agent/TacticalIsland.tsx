@@ -7,9 +7,9 @@ import {
   Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X, Maximize2,
   Package, BookOpen, Tags, SearchCheck, Filter, ChevronLeft, AlertOctagon, Wallet, Heart, Ban, Undo2,
   UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain, PenTool, Send,
-  AlertTriangle, ChevronDown, Check, RefreshCw
+  AlertTriangle, ChevronDown, Check, RefreshCw, FileText, Download, ExternalLink
 } from 'lucide-react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { cn } from '../../lib/utils'
@@ -25,24 +25,28 @@ export const TacticalIsland = () => {
   } = useRiskStore()
   
   const { user, logout, token } = useAuthStore()
-  const queryClient = useQueryClient()
   
   const [isExpanded, setIsExpanded] = useState(false)
   const [isFolded, setIsFolded] = useState(false) 
+  const [activeTab, setActiveTab] = useState<'AI' | 'RADAR' | 'TOOLS'>('AI')
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [showBigScreenModal, setShowBigScreenModal] = useState(false)
 
+  // 核心：战术实战状态 (V3.70: 全能战术版)
   const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
+  const [isEvasionMode, setIsEvasionMode] = useState(false)
+  const [isSopMode, setIsSopMode] = useState(false) // V3.70: SOP 模式
+  
+  const [evasionInfo, setEvasionInfo] = useState<any>(null)
+  const [sopInfo, setSopInfo] = useState<any>(null)
   const [selectedSentiment, setSelectedSentiment] = useState<any>(null)
   const [optimizing, setOptimizing] = useState(false)
   const [hasOptimized, setHasOptimized] = useState(false)
   const [sentimentSearch, setSentimentSearch] = useState('')
   const [showSentimentDropdown, setShowSentimentDropdown] = useState(false)
-
-  const [isEvasionMode, setIsEvasionMode] = useState(false)
-  const [evasionInfo, setEvasionInfo] = useState<any>(null)
+  const [voicePulse, setVoicePulse] = useState(false) // 语音视觉脉冲
 
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -59,8 +63,7 @@ export const TacticalIsland = () => {
       }
       return []
     },
-    enabled: !!token,
-    staleTime: 300000
+    enabled: !!token
   })
 
   useEffect(() => { if (token) refetch(); }, [token])
@@ -73,100 +76,75 @@ export const TacticalIsland = () => {
   }, [sentiments, selectedSentiment])
 
   const resetSpecialModes = () => {
-    setIsPushMode(false); setIsScratchpad(false); setIsEvasionMode(false);
-    setEvasionInfo(null); setHasOptimized(false); setOptimizing(false);
+    setIsPushMode(false); setIsScratchpad(false); setIsEvasionMode(false); setIsSopMode(false);
+    setEvasionInfo(null); setSopInfo(null); setHasOptimized(false); setOptimizing(false); setVoicePulse(false);
   }
 
+  // V3.70: 指令处理中心升级
   useEffect(() => {
     const onCommand = (e: any) => {
       const data = e.detail;
+      
       if (data.type === 'TACTICAL_PUSH') {
         setContent(data.payload.content || '')
-        setIsPushMode(true); setIsScratchpad(false); setIsEvasionMode(false); setHasOptimized(false);
-        window.electron.ipcRenderer.send('set-always-on-top', true)
+        setIsPushMode(true); setIsScratchpad(false); setIsEvasionMode(false); setIsSopMode(false);
       }
+      
       if (data.type === 'TACTICAL_DEPT_VIOLATION') {
         setEvasionInfo(data)
-        setIsEvasionMode(true); setIsPushMode(false); setIsScratchpad(false);
+        setIsEvasionMode(true); setIsPushMode(false); setIsScratchpad(false); setIsSopMode(false);
         window.api.callApi({ url: `http://localhost:8000/api/system/clear-input`, method: 'POST' })
       }
+
+      if (data.type === 'TACTICAL_VOICE') {
+        setVoicePulse(true)
+        setTimeout(() => setVoicePulse(false), 5000)
+        // TTS 逻辑已经在 useRiskSocket 处理，这里仅做 UI 反馈
+      }
+
+      if (data.type === 'TACTICAL_SOP') {
+        setSopInfo(data.payload)
+        setIsSopMode(true); setIsPushMode(false); setIsScratchpad(false); setIsEvasionMode(false);
+      }
+      
+      window.electron.ipcRenderer.send('set-always-on-top', true)
     }
     window.addEventListener('ws-tactical-command', onCommand)
     return () => window.removeEventListener('ws-tactical-command', onCommand)
   }, [])
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) setShowSentimentDropdown(false)
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  const filteredSentiments = useMemo(() => sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase())), [sentiments, sentimentSearch])
 
-  const filteredSentiments = useMemo(() => {
-    return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
-  }, [sentiments, sentimentSearch])
-
-  // V3.62: 核心流式优化引擎 (支持 /api/chat 与 /api/generate)
   const optimizeScript = async () => {
     if (!content || !selectedSentiment || optimizing) return
     setOptimizing(true); setHasOptimized(false);
     const originalText = content;
-    
     try {
       const serverConfig = await window.api.getServerConfig()
-      const url = serverConfig.ai_engine.url
-      const isChatApi = url.endsWith('/chat')
-      
-      // 结构化指令
-      const systemMsg = `你是一个专业的客服。请重写这段话术，使其语气更加${selectedSentiment.name}。规则：只输出重写后的一句话,不要有任何多余文字,无引号.`
-      
-      const payload = isChatApi 
-        ? { model: serverConfig.ai_engine.model, messages: [{ role: 'user', content: `${systemMsg}\n原文：${originalText}` }], stream: true, options: { temperature: 0.1, num_predict: 128 } }
-        : { model: serverConfig.ai_engine.model, prompt: `${systemMsg}\n原文：${originalText}\n优化回复：`, stream: true, options: { temperature: 0.1, num_predict: 128 } };
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
+      const prompt = `请直接重写这段话术，使其语气更加${selectedSentiment.name}。规则：只输出重写后的一句话,不要有任何多余的解释。原文：${originalText}`;
+      const response = await fetch(serverConfig.ai_engine.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: serverConfig.ai_engine.model, prompt, stream: true, options: { temperature: 0.1, num_predict: 128 } }) })
       if (!response.body) throw new Error('Stream missing')
       const reader = response.body.getReader(); const decoder = new TextDecoder();
-      let fullText = ''; setContent(''); // 开始流式前清空内容
-
+      let fullText = ''; setContent(''); 
       while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        
+        const { done, value } = await reader.read(); if (done) break
         const chunk = decoder.decode(value, { stream: true })
         const lines = chunk.split('\n').filter(l => l.trim())
-        
         for (const line of lines) {
           try {
-            const json = JSON.parse(line)
-            const token = isChatApi ? json.message?.content : json.response
+            const json = JSON.parse(line); const token = json.response || json.message?.content
             if (token) {
               fullText += token
-              // 实时同步并清洗
               setContent(fullText.replace(/^(好的|收到|明白了|理解了|优化后|回复如下|对话建议)[:：\s]*/g, '').replace(/^["'“](.*)["'”]$/g, '$1').trim())
             }
           } catch (e) {}
         }
       }
       setHasOptimized(true)
-    } catch (e) { 
-      console.error(e)
-      setContent(originalText); 
-      toast.error('AI 链路故障') 
-    } finally { setOptimizing(false) }
+    } catch (e) { setContent(originalText); toast.error('AI 链路故障') } finally { setOptimizing(false) }
   }
 
-  const copyAndClose = () => {
-    if (!content || optimizing) return
-    navigator.clipboard.writeText(content)
-    resetSpecialModes()
-  }
+  const copyAndClose = () => { if (!content || optimizing) return; navigator.clipboard.writeText(content); resetSpecialModes(); }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -177,7 +155,7 @@ export const TacticalIsland = () => {
   }
 
   useEffect(() => {
-    const active = isPushMode || isScratchpad
+    const active = isPushMode || isScratchpad || isEvasionMode || isSopMode
     if (!active) return
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (optimizing) { if (e.key === 'Enter') e.preventDefault(); return; }
@@ -194,39 +172,39 @@ export const TacticalIsland = () => {
   useEffect(() => {
     const screenWidth = window.screen.width
     const screenHeight = window.screen.height
-    const active = isPushMode || isScratchpad || isEvasionMode
-    let width = isFolded ? 80 : 760 
+    const active = isPushMode || isScratchpad || isEvasionMode || isSopMode
+    let width = isFolded ? 80 : 800 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined, y: number | undefined, center = false
 
     if (isLocked) { width = screenWidth; height = screenHeight; x = 0; y = 0; } 
-    else if (active) { width = 760; height = 320; x = screenWidth - 780; y = 30; } 
-    else { x = isFolded ? screenWidth - 100 : screenWidth - 780; y = 30 }
+    else if (active) { width = 800; height = 350; x = screenWidth - 820; y = 30; } 
+    else { x = isFolded ? screenWidth - 100 : screenWidth - 820; y = 30 }
     
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', isLocked || active || !showBigScreenModal)
     if (isScratchpad && inputRef.current) setTimeout(() => inputRef.current?.focus(), 300)
-  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad, isEvasionMode])
-
-  const isInSpecialMode = isPushMode || isScratchpad
+  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad, isEvasionMode, isSopMode])
 
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent text-black">
       <motion.div 
         layout
         animate={{ 
-          width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 760))),
-          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isPushMode || isScratchpad || isEvasionMode ? 320 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
+          width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 800))),
+          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isPushMode || isScratchpad || isEvasionMode || isSopMode ? 350 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
-        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl shadow-none" : "bg-slate-950 shadow-none", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
+        className={cn(
+          "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative shadow-2xl", 
+          isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl" : "bg-slate-950", 
+          (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl",
+          voicePulse && "ring-4 ring-red-500 ring-offset-4 ring-offset-slate-900 animate-pulse"
+        )}
       >
         {isEvasionMode ? (
           <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-amber-950/60">
              <div className="flex justify-between items-start shrink-0">
-                <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center shadow-2xl animate-bounce"><AlertTriangle size={16} className="text-black"/></div>
-                   <h4 className="text-base font-black italic tracking-tighter uppercase text-amber-400">战术规避拦截</h4>
-                </div>
+                <div className="flex items-center gap-3"><div className="w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center shadow-2xl animate-bounce"><AlertTriangle size={16} className="text-black"/></div><h4 className="text-base font-black italic tracking-tighter uppercase text-amber-400">战术规避拦截</h4></div>
                 <button onClick={resetSpecialModes} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg flex items-center gap-2 font-black text-[10px] border border-white/10 text-amber-200"><Undo2 size={12}/> 关闭</button>
              </div>
              <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
@@ -237,77 +215,43 @@ export const TacticalIsland = () => {
                 </div>
              </div>
           </div>
-        ) : isInSpecialMode ? (
-          <div className="flex-1 flex flex-col p-5 text-white overflow-hidden">
-             <div className="flex justify-between items-start mb-3 shrink-0">
-                <div className="flex items-center gap-3">
-                   <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-2xl", isPushMode ? "bg-cyan-600 shadow-cyan-500/30 shadow-lg" : "bg-emerald-600 shadow-emerald-500/30 shadow-lg", optimizing && "animate-pulse")}>
-                      {isPushMode ? <Sparkles size={20}/> : <PenTool size={20}/>}
-                   </div>
-                   <h4 className="text-lg font-black italic tracking-tighter uppercase">{isPushMode ? '指挥部支援' : '战术草稿箱'}</h4>
+        ) : isSopMode ? (
+          <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-emerald-950/60">
+             <div className="flex justify-between items-start mb-4 shrink-0">
+                <div className="flex items-center gap-3"><div className="w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg"><FileText size={16} className="text-black"/></div><h4 className="text-base font-black italic tracking-tighter uppercase text-emerald-400">业务规范指引</h4></div>
+                <button onClick={resetSpecialModes} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg flex items-center gap-2 font-black text-[10px] border border-white/10 text-emerald-200"><Undo2 size={12}/> 关闭</button>
+             </div>
+             <div className="flex-1 flex flex-col gap-4 min-h-0">
+                <div className="bg-black/40 p-5 rounded-2xl border border-emerald-500/20 flex-1 overflow-y-auto custom-scrollbar">
+                   <h5 className="text-lg font-black text-emerald-50 mb-3">{sopInfo?.title}</h5>
+                   {sopInfo?.sop_type === 'IMAGE' ? <img src={sopInfo.content} className="max-w-full rounded-lg shadow-2xl" /> : <p className="text-sm font-medium leading-relaxed opacity-80 whitespace-pre-wrap">{sopInfo?.content}</p>}
                 </div>
+                {(sopInfo?.sop_type === 'FILE' || sopInfo?.sop_type === 'IMAGE') && (
+                  <button onClick={() => window.open(sopInfo.content)} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-xs uppercase transition-all flex items-center justify-center gap-2 shadow-lg"><Download size={14}/> 下载/查看原件</button>
+                )}
+             </div>
+          </div>
+        ) : (isPushMode || isScratchpad) ? (
+          <div className="flex-1 flex flex-col p-5 text-white overflow-hidden bg-slate-950/40">
+             <div className="flex justify-between items-start mb-3 shrink-0">
+                <div className="flex items-center gap-3"><div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-2xl", isPushMode ? "bg-cyan-600" : "bg-emerald-600", optimizing && "animate-pulse")}>{isPushMode ? <Sparkles size={20}/> : <PenTool size={20}/>}</div><h4 className="text-lg font-black italic tracking-tighter uppercase">{isPushMode ? '指挥部支援' : '战术草稿箱'}</h4></div>
                 <button onClick={resetSpecialModes} className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-[10px] border border-white/10 text-slate-300"><Undo2 size={14}/> 退出</button>
              </div>
-
              <div className="flex-1 flex flex-col gap-3 min-h-0">
                 <div className="flex-1 bg-black rounded-2xl border border-white/10 relative group shadow-inner transition-all overflow-hidden">
-                   <AnimatePresence>
-                     {optimizing && (
-                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center gap-2">
-                          <Loader2 className="animate-spin text-cyan-500" size={24} />
-                          <span className="text-[8px] font-black text-cyan-500 uppercase tracking-widest">AI 注入中...</span>
-                       </motion.div>
-                     )}
-                   </AnimatePresence>
-                   <textarea
-                     ref={inputRef}
-                     value={content}
-                     onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }}
-                     onKeyDown={handleKeyDown}
-                     placeholder="输入内容并回车优化..."
-                     className="w-full h-full bg-transparent px-5 py-5 text-sm font-bold leading-relaxed text-white resize-none outline-none custom-scrollbar"
-                   />
+                   <AnimatePresence>{optimizing && ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center gap-2"><Loader2 className="animate-spin text-cyan-500" size={24} /><span className="text-[8px] font-black text-cyan-500 uppercase tracking-widest">AI 注入中...</span></motion.div> )}</AnimatePresence>
+                   <textarea ref={inputRef} value={content} onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }} onKeyDown={handleKeyDown} placeholder="输入内容并回车优化..." className="w-full h-full bg-transparent px-5 py-5 text-sm font-bold leading-relaxed text-white resize-none outline-none custom-scrollbar" />
                 </div>
-
                 <div className="flex items-center gap-2 h-14 shrink-0">
                    <div className="relative flex-1 h-full" ref={dropdownRef}>
-                      <button onClick={() => setShowSentimentDropdown(!showSentimentDropdown)} className="w-full h-full px-4 flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all">
-                         <div className="flex items-center gap-2">
-                            <Brain size={14} className={cn(selectedSentiment ? `text-${selectedSentiment.color}-400 shadow-[0_0_8px_rgba(0,0,0,0.5)]` : "text-slate-400")} />
-                            <span className="text-[10px] font-black text-white truncate">{selectedSentiment?.name || '情绪加载中...'}</span>
-                         </div>
-                         <div className="flex items-center gap-2">
-                            <ChevronDown size={12} className="text-slate-500" />
-                            {sentiments.length === 0 && <button onClick={(e)=>{e.stopPropagation(); refetch();}} className="p-1 text-cyan-500 hover:rotate-180 transition-all"><RefreshCw size={10}/></button>}
-                         </div>
+                      <button onClick={() => setShowSentimentDropdown(!showSentimentDropdown)} className="w-full h-full px-4 flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group">
+                         <div className="flex items-center gap-2"><Brain size={14} className={cn(selectedSentiment ? `text-${selectedSentiment.color}-400 shadow-[0_0_8px_rgba(0,0,0,0.5)]` : "text-slate-400")} /><span className="text-[10px] font-black text-white truncate">{selectedSentiment?.name || '情绪加载中...'}</span></div>
+                         <div className="flex items-center gap-2"><ChevronDown size={12} className="text-slate-500 transition-transform" /><button onClick={(e)=>{e.stopPropagation(); refetch();}} className="p-1 text-cyan-500 hover:rotate-180 transition-all"><RefreshCw size={10}/></button></div>
                       </button>
-                      <AnimatePresence>
-                        {showSentimentDropdown && (
-                          <motion.div initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }} className="absolute bottom-full left-0 right-0 mb-3 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100]">
-                             <div className="p-2.5 bg-white/5 border-b border-white/5 flex gap-2">
-                                <Search size={10} className="mt-2.5 text-slate-500" />
-                                <input autoFocus value={sentimentSearch} onChange={(e) => setSentimentSearch(e.target.value)} placeholder="极速检索维度..." className="flex-1 bg-transparent border-none py-1.5 text-[10px] font-bold text-white outline-none" />
-                             </div>
-                             <div className="max-h-48 overflow-y-auto custom-scrollbar p-1.5 space-y-1">
-                                {filteredSentiments.map((s: any) => {
-                                  const isSelected = selectedSentiment?.id === s.id;
-                                  return (
-                                    <button key={s.id} onClick={() => { setSelectedSentiment(s); setHasOptimized(false); setShowSentimentDropdown(false); }} className={cn("w-full px-3 py-2.5 rounded-xl flex items-center justify-between text-[10px] font-black transition-all text-left", isSelected ? `bg-${s.color}-500/20 text-${s.color}-400 border border-${s.color}-500/30 shadow-[0_0_15px_rgba(0,0,0,0.2)]` : "text-slate-500 hover:bg-white/5 hover:text-slate-200")}>
-                                       <div className="flex items-center gap-2"><div className={cn("w-1.5 h-1.5 rounded-full shadow-sm", `bg-${s.color}-500`, isSelected && "animate-pulse")} />{s.name}</div>
-                                       {isSelected && <Check size={12} className="animate-in zoom-in duration-300" />}
-                                    </button>
-                                  )
-                                })}
-                             </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      <AnimatePresence>{showSentimentDropdown && ( <motion.div initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }} className="absolute bottom-full left-0 right-0 mb-3 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100]"><div className="p-2.5 bg-white/5 border-b border-white/5 flex gap-2"><Search size={10} className="mt-2.5 text-slate-500" /><input autoFocus value={sentimentSearch} onChange={(e) => setSentimentSearch(e.target.value)} placeholder="极速检索维度..." className="flex-1 bg-transparent border-none py-1.5 text-[10px] font-bold text-white outline-none" /></div><div className="max-h-48 overflow-y-auto custom-scrollbar p-1.5 space-y-1">{filteredSentiments.map((s: any) => { const isSelected = selectedSentiment?.id === s.id; return ( <button key={s.id} onClick={() => { setSelectedSentiment(s); setHasOptimized(false); setShowSentimentDropdown(false); }} className={cn( "w-full px-3 py-2.5 rounded-xl flex items-center justify-between text-[10px] font-black transition-all text-left", isSelected ? `bg-${s.color}-500/20 text-${s.color}-400 border border-${s.color}-500/30 shadow-[0_0_15px_rgba(0,0,0,0.2)]` : "text-slate-500 hover:bg-white/5 hover:text-slate-200" )} > <div className="flex items-center gap-2"><div className={cn("w-1.5 h-1.5 rounded-full shadow-sm", `bg-${s.color}-500`, isSelected && "animate-pulse")} />{s.name}</div> {isSelected && <Check size={12} className="animate-in zoom-in duration-300" />} </button> ) })}</div></motion.div> )}</AnimatePresence>
                    </div>
                    <button onClick={copyAndClose} className="px-5 h-full flex items-center gap-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black border border-white/10 text-slate-300">复制</button>
-                   <button id="main-action-btn" onClick={optimizeScript} disabled={optimizing || !selectedSentiment || !content} className={cn("px-8 h-full rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white shadow-emerald-500/30" : "bg-cyan-600 text-white shadow-cyan-500/30")}>
-                      {optimizing ? <Loader2 className="animate-spin" size={14}/> : (hasOptimized ? <CheckCircle2 size={14}/> : <Sparkles size={14}/>)}
-                      {hasOptimized ? '再次回车复制' : 'AI 优化'}
-                   </button>
+                   <button id="main-action-btn" onClick={optimizeScript} disabled={optimizing || !selectedSentiment || !content} className={cn("px-8 h-full rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white shadow-emerald-500/30" : "bg-cyan-600 text-white shadow-cyan-500/30")}>{optimizing ? <Loader2 className="animate-spin" size={14}/> : (hasOptimized ? <CheckCircle2 size={14}/> : <Sparkles size={14}/>)}{hasOptimized ? '再次回车复制' : 'AI 优化'}</button>
                 </div>
              </div>
           </div>
@@ -315,14 +259,8 @@ export const TacticalIsland = () => {
           <div className="flex items-center px-4 h-[72px] shrink-0 relative" style={{ WebkitAppRegion: 'drag' } as any}>
             {!isFolded && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-2 w-[110px] shrink-0">
-                <div className="relative">
-                  <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center font-black text-base text-white", isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5")}>{user?.real_name ? user.real_name[0] : <UserIcon size={18} />}</div>
-                  <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-[2px] border-slate-950", isOnline ? "bg-emerald-500" : "bg-red-500 animate-pulse")} />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[11px] font-black text-white truncate leading-none mb-0.5">{user?.real_name || '成员'}</span>
-                  <span className={cn("text-[8px] font-bold uppercase tracking-widest truncate", isOnline ? "text-emerald-500" : "text-red-500")}>{isOnline ? '在线' : '离线'}</span>
-                </div>
+                <div className="relative"><div className={cn("w-9 h-9 rounded-xl flex items-center justify-center font-black text-base text-white", isOnline ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-900 text-slate-600 border border-white/5")}>{user?.real_name ? user.real_name[0] : <UserIcon size={18} />}</div><div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-[2px] border-slate-950", isOnline ? "bg-emerald-500" : "bg-red-500 animate-pulse")} /></div>
+                <div className="flex flex-col min-w-0"><span className="text-[11px] font-black text-white truncate leading-none mb-0.5">{user?.real_name || '成员'}</span><span className={cn("text-[8px] font-bold uppercase tracking-widest truncate", isOnline ? "text-emerald-500" : "text-red-500")}>{isOnline ? '在线' : '离线'}</span></div>
               </motion.div>
             )}
             <div className="flex-1 flex items-center justify-end gap-2 pr-1" style={{ WebkitAppRegion: 'no-drag' } as any}>

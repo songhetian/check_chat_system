@@ -217,3 +217,25 @@ class DeptComplianceLog(BaseModel):
 
     class Meta:
         table = "dept_compliance_logs"
+
+class VoiceAlert(BaseModel):
+    id = fields.IntField(pk=True)
+    content = fields.CharField(max_length=200)
+    department = fields.ForeignKeyField('models.Department', related_name='voice_alerts', null=True)
+    is_deleted = fields.IntField(default=0)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "voice_alerts"
+
+class BusinessSOP(BaseModel):
+    id = fields.IntField(pk=True)
+    title = fields.CharField(max_length=100)
+    content = fields.TextField() # 文本、MD内容 或 文件路径/URL
+    sop_type = fields.CharField(max_length=20) # TEXT, MD, IMAGE, FILE
+    department = fields.ForeignKeyField('models.Department', related_name='sops', null=True)
+    is_deleted = fields.IntField(default=0)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "business_sops"
