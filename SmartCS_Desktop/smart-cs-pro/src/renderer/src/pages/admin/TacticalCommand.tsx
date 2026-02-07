@@ -58,6 +58,7 @@ export default function TacticalCommand() {
   // 话术推送增强 (V3.28)
   const [showScriptModal, setShowScriptModal] = useState(false)
   const [scriptSearch, setScriptSearch] = useState('')
+  const [customMsg, setCustomMsg] = useState('') // V3.39: 自定义话术状态
   const [kbList, setKbList] = useState<any[]>([])
   const [kbLoading, setKbListLoading] = useState(false)
 
@@ -84,6 +85,7 @@ export default function TacticalCommand() {
   const sendScript = async (answer: string) => {
     await executeIntervention('PUSH', '战术话术推送', { content: answer })
     setShowScriptModal(false)
+    setCustomMsg('')
   }
   
   // 截图取证逻辑
@@ -424,14 +426,31 @@ export default function TacticalCommand() {
                      <button onClick={() => setShowScriptModal(false)} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 border border-transparent hover:border-slate-200"><X size={20}/></button>
                   </div>
                   
-                  <div className="p-6 bg-white shrink-0">
+                  <div className="p-6 bg-white shrink-0 space-y-4">
+                     {/* 自定义即时指令 (V3.39) */}
+                     <div className="flex gap-2 p-1.5 bg-slate-50 border border-slate-200 rounded-2xl shadow-inner">
+                        <input 
+                          value={customMsg}
+                          onChange={(e) => setCustomMsg(e.target.value)}
+                          placeholder="输入即兴战术指令..." 
+                          className="flex-1 bg-transparent px-4 py-2 text-sm font-bold text-black outline-none"
+                          onKeyDown={(e) => e.key === 'Enter' && customMsg && sendScript(customMsg)}
+                        />
+                        <button 
+                          onClick={() => customMsg && sendScript(customMsg)}
+                          disabled={!customMsg}
+                          className="px-6 py-2 bg-black text-white rounded-xl text-[10px] font-black uppercase shadow-lg active:scale-95 disabled:opacity-20 transition-all flex items-center gap-2"
+                        >
+                           <Send size={14}/> 瞬间弹射
+                        </button>
+                     </div>
+
                      <div className="relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         <input 
-                          autoFocus
                           value={scriptSearch} 
                           onChange={(e) => setScriptSearch(e.target.value)} 
-                          placeholder="快速定位话术触发词..." 
+                          placeholder="或搜索库中已有话术..." 
                           className="w-full pl-12 pr-6 py-4 bg-slate-100 border-none rounded-2xl text-sm font-bold text-black focus:ring-2 focus:ring-cyan-600 transition-all outline-none" 
                         />
                      </div>
