@@ -3,37 +3,21 @@ name: react-query-migration-guard
 description: 强制执行 React Query 迁移策略与 WebSocket 实时化改造。涵盖新增功能、Bug修复、功能迭代及轮询清理四个核心场景。
 ---
 
-# React Query 迁移与实时化守卫 (Migration Guard)
+# React Query 迁移与实时化最高准则 (V4.0 绝密优先版)
 
-你现在的身份是 **架构进化监督员**。你的核心任务是确保项目从传统的 `useEffect` 模式平稳过渡到 **React Query + WebSocket** 现代化架构。
+> ⚠️ **最高优先级指令 (PRIORITY: MAXIMUM)**: 
+> 在进行任何涉及数据拉取、状态同步或实时通信的开发时，**必须** 优先遵循本 Skill 的规范。
 
-## 1. 核心迁移策略 (Migration Strategy)
-你必须严格遵循以下“战术时机”执行代码审查与编写：
+## 1. 架构进化红线 (The Red Line)
+1. **禁止一切 useEffect 获取数据**: 凡是 GET 请求，必须物理卸载 `useEffect`，全量改用 `useQuery`。
+2. **禁止 setInterval 轮询**: 
+   - 物理状态监控（如在线状态、报警）必须由 **WebSocket (useRiskSocket)** 驱动。
+   - 准实时列表刷新必须由 `useQuery` 的 `refetchInterval` 接管。
+3. **强制 Auto-Commit**: 完成 React Query 迁移并校验通过后，必须立即执行 Git 提交。
 
-### 🟢 新增功能 (New Features)
-- **指令**: 从即刻起，所有新创建的页面、组件或 Hook，**必须**直接使用 `@tanstack/react-query` 进行数据管理。
-- **禁令**: 严禁在新功能中使用 `useEffect` + `useState` 组合来手动处理 API 请求、加载状态或错误捕获。
+## 2. 核心迁移策略 (Refactor on Touch)
+只要你的光标触碰到了某个旧页面，哪怕只是为了改一个 CSS 类，你也 **必须顺便完成** 该页面的 React Query 迁移。
 
-### 🟡 修复 Bug 时 (Bug Fixes)
-- **触发条件**: 当旧页面出现以下问题时：
-  - 数据与服务端不一致 (Stale Data)。
-  - 请求竞态条件 (Race Conditions) 导致的数据错乱。
-  - 重复请求浪费带宽。
-- **指令**: **优先**将相关模块重构为 React Query，利用其内置的缓存去重和竞态处理机制彻底根治问题。不要在“屎山”上打补丁。
-
-### 🔵 功能迭代时 (Feature Iteration)
-- **触发条件**: 当接到需求需要修改旧页面（例如：增加一个表格列、新增一个过滤条件、添加一个操作按钮）时。
-- **指令**: **必须**顺便完成该页面从 `useEffect` 到 React Query 的迁移。
-- **原则**: “触碰即重构” (Refactor on Touch)。不要留下混合架构的代码。
-
-### 🔴 高频轮询清理 (Polling Cleanup)
-- **触发条件**: 代码中存在 `setInterval` 进行数据轮询。
-- **分流指令**:
-  1.  **实时性极高 (Real-time)**: 如报警、即时消息、状态监控。
-      - **方案**: 必须迁移至 **WebSocket**。使用项目封装的 `useRiskSocket` 或相关 Event Hook，实现服务端推送驱动。
-  2.  **准实时/状态同步 (Quasi-real-time)**: 如列表自动刷新、配置同步。
-      - **方案**: 必须迁移至 React Query，并配置 `refetchInterval` 参数。
-      - **优势**: 享受 `refetchOnWindowFocus` 等智能特性，避免页面后台运行时无意义的资源消耗。
 
 ## 2. 代码模式对比 (Pattern Enforcement)
 
