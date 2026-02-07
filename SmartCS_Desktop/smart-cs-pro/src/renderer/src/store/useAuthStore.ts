@@ -10,6 +10,7 @@ interface User {
   role_code: string
   real_name: string
   department: string
+  department_id: number | null
   permissions: string[] // 细粒度权限集
   rank?: string
   tactical_score?: number

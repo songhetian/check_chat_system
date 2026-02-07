@@ -15,62 +15,94 @@ import { useAuthStore } from '../../store/useAuthStore'
 import { toast } from 'sonner'
 
 export default function GlobalPolicyPage() {
-  const { token, hasPermission } = useAuthStore()
+  const { token, hasPermission, user } = useAuthStore()
   const [activeTab, setActiveTab] = useState<'WORDS' | 'KNOWLEDGE'>('WORDS')
   const [words, setWords] = useState<any[]>([])
   const [kb, setKb] = useState<any[]>([])
   const [cats, setCats] = useState<any[]>([])
+  const [depts, setDepts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [search, setSearch] = useState('')
   
   const [modalType, setModalType] = useState<'NONE' | 'EDIT' | 'DELETE'>('NONE')
   const [editItem, setEditItem] = useState<any>(null)
   const [processing, setProcessing] = useState(false)
+
+  const isHQ = user?.role_id === 3 || user?.role_code === 'HQ'
 
   const fetchData = async (silent = false) => {
     if (!token) return
     if (!silent) setLoading(true)
     try {
       const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
-      const [resData, resCats] = await Promise.all([
-        window.api.callApi({ url: `${CONFIG.API_BASE}/${endpoint}?page=${page}&size=10`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }),
-        window.api.callApi({ url: `${CONFIG.API_BASE}/ai/categories?type=${activeTab}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
+      // 战术增强：加入 search 参数实现服务端过滤
+      const [resData, resCats, resDepts] = await Promise.all([
+        window.api.callApi({ url: `${CONFIG.API_BASE}/${endpoint}?page=${page}&size=10&search=${encodeURIComponent(search)}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }),
+        window.api.callApi({ url: `${CONFIG.API_BASE}/ai/categories?type=${activeTab}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }),
+        isHQ ? window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments?size=100`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }) : Promise.resolve({status: 200, data: {data: []}})
       ])
+      
       if (resData.status === 200) {
         if (activeTab === 'WORDS') setWords(resData.data.data)
         else setKb(resData.data.data)
         setTotal(resData.data.total)
-        if (silent) toast.success('策略已同步')
       }
       if (resCats.status === 200) setCats(resCats.data.data)
+      if (resDepts.status === 200) setDepts(resDepts.data.data)
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
   }
 
-  useEffect(() => { setPage(1) }, [activeTab])
+  // 战术搜索防抖
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchData() }, 300);
+    return () => clearTimeout(timer);
+  }, [search])
+
+  useEffect(() => { setPage(1); setSearch('') }, [activeTab])
   useEffect(() => { fetchData() }, [activeTab, page, token])
+
+  const handleEdit = (item: any) => {
+    setEditItem({ ...item });
+    setModalType('EDIT');
+  }
+
+  const handleDeletePrompt = (item: any) => {
+    setEditItem({ ...item });
+    setModalType('DELETE');
+  }
 
   const handleSave = async () => {
     if (!token || !editItem || processing) return
     const isEdit = !!editItem.id
-    // 增/改原子熔断
     const perm = isEdit ? 'admin:ai:update' : 'admin:ai:create'
-    if (!hasPermission(perm)) return
+    if (!hasPermission(perm)) {
+      toast.error('权限拦截', { description: '您没有执行该操作的权限' });
+      return;
+    }
 
     setProcessing(true)
     try {
       const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
+      
+      // 修正部门选择：如果是 HQ 选择了 'GLOBAL'，设为 null
+      const payload = { ...editItem };
+      if (payload.department_id === 'GLOBAL') payload.department_id = null;
+
       const res = await window.api.callApi({ 
         url: `${CONFIG.API_BASE}/${endpoint}`, 
         method: 'POST', 
         headers: { 'Authorization': `Bearer ${token}` },
-        data: editItem 
+        data: payload 
       })
       if (res.data.status === 'ok') { 
         setModalType('NONE'); 
-        fetchData(false); // Visible refresh
-        toast.success(isEdit ? '策略已优化' : '新策略已就绪', { description: '战术规则矩阵已同步至全域' })
+        fetchData(true); 
+        toast.success(isEdit ? '策略已优化' : '新策略已就绪');
+      } else {
+        toast.error('保存失败', { description: res.data.message });
       }
     } finally {
       setProcessing(false)
@@ -90,8 +122,10 @@ export default function GlobalPolicyPage() {
       })
       if (res.data.status === 'ok') {
         setModalType('NONE'); 
-        fetchData(false); // Visible refresh
-        toast.success('策略节点已清除', { description: '战术规则已实时重载' })
+        fetchData(true);
+        toast.success('策略节点已清除');
+      } else {
+        toast.error('注销失败', { description: res.data.message });
       }
     } finally {
       setProcessing(false)
@@ -103,13 +137,15 @@ export default function GlobalPolicyPage() {
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-xl border border-slate-200 shadow-sm shrink-0 gap-6">
         <div><h2 className="text-3xl font-black text-slate-900 uppercase italic">全域 AI 决策中心</h2><p className="text-slate-500 text-sm mt-1 font-medium">配置全局对话拦截权重与智能纠偏话术矩阵</p></div>
         <div className="flex flex-wrap gap-3">
-           <button onClick={() => fetchData(false)} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
+           <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="快速过滤关键词..." className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold w-64 focus:ring-2 focus:ring-slate-900 transition-all outline-none" />
+           </div>
+           <button onClick={() => fetchData()} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
              <RefreshCw size={18} className={cn(loading && "animate-spin")} />
            </button>
-           <button className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black shadow-lg hover:bg-emerald-700 transition-all"><Download size={14} /> 模板</button>
-           {/* 增：admin:ai:create */}
            {hasPermission('admin:ai:create') && (
-             <button onClick={() => { setEditItem(activeTab === 'WORDS' ? { word: '', category_id: cats[0]?.id || '', risk_level: 5, is_active: 1 } : { keyword: '', answer: '', category_id: cats[0]?.id || '', is_active: 1 }); setModalType('EDIT'); }} className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black shadow-xl active:scale-95"><Plus size={14} /> 录入新策略</button>
+             <button onClick={() => { setEditItem(activeTab === 'WORDS' ? { word: '', category_id: cats[0]?.id || '', risk_level: 5, is_active: 1 } : { keyword: '', answer: '', category_id: cats[0]?.id || '', is_active: 1, department_id: isHQ ? 'GLOBAL' : user?.department_id }); setModalType('EDIT'); }} className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black shadow-xl active:scale-95 transition-all"><Plus size={14} /> 录入新策略</button>
            )}
         </div>
       </header>
@@ -132,32 +168,36 @@ export default function GlobalPolicyPage() {
                       <td className="px-6 py-5 text-center">{w.is_active ? <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">激活</span> : <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">挂起</span>}</td>
                       <td className="px-8 py-5 text-center">
                         <div className="flex justify-center gap-2">
-                          {/* 改：admin:ai:update */}
                           {hasPermission('admin:ai:update') && (
-                            <button onClick={() => { setEditItem(w); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>
+                            <button onClick={() => handleEdit(w)} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>
                           )}
-                          {/* 删：admin:ai:delete */}
                           {hasPermission('admin:ai:delete') && (
-                            <button onClick={() => { setEditItem(w); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>
+                            <button onClick={() => handleDeletePrompt(w)} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>
                           )}
-                          {!hasPermission('admin:ai:update') && !hasPermission('admin:ai:delete') && <span className="text-[10px] text-slate-300 italic uppercase">Locked</span>}
                         </div>
                       </td>
                     </tr>
                   ))}
                 </TacticalTable>
               ) : (
-                <TacticalTable headers={['触发关键词', '建议内容', '业务分类', '状态', '战术调整']}>
+                <TacticalTable headers={['触发关键词', '建议内容', '业务分类', '作用域', '状态', '战术调整']}>
                   {kb.map(k => (
                     <tr key={k.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center">
                       <td className="px-8 py-5 font-black text-slate-900">{k.keyword}</td>
                       <td className="px-6 py-5 max-w-md"><p className="text-xs font-medium text-slate-600 line-clamp-2 italic">"{k.answer}"</p></td>
                       <td className="px-6 py-5 text-center"><span className="px-3 py-1 bg-cyan-50 text-cyan-600 rounded-xl text-[10px] font-black inline-flex items-center gap-1.5 border border-cyan-100"><Tag size={10}/>{k.category__name}</span></td>
+                      <td className="px-6 py-5 text-center">
+                        {!k.department_id ? (
+                          <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-xl text-[9px] font-black border border-amber-100 uppercase tracking-tighter">公共全域</span>
+                        ) : (
+                          <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-xl text-[9px] font-black border border-slate-200 uppercase tracking-tighter">{k.department__name}</span>
+                        )}
+                      </td>
                       <td className="px-6 py-5 text-center">{k.is_active ? <span className="text-[10px] font-black text-emerald-600 uppercase">已挂载</span> : <span className="text-[10px] font-black text-slate-300 uppercase">脱机</span>}</td>
                       <td className="px-8 py-5 text-center">
                         <div className="flex justify-center gap-2">
-                          {hasPermission('admin:ai:update') && (<button onClick={() => { setEditItem(k); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>)}
-                          {hasPermission('admin:ai:delete') && (<button onClick={() => { setEditItem(k); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>)}
+                          {(isHQ || k.department_id === user?.department_id) && hasPermission('admin:ai:update') && (<button onClick={() => handleEdit(k)} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-all shadow-sm"><Edit3 size={16} /></button>)}
+                          {(isHQ || k.department_id === user?.department_id) && hasPermission('admin:ai:delete') && (<button onClick={() => handleDeletePrompt(k)} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 size={16} /></button>)}
                         </div>
                       </td>
                     </tr>
@@ -182,17 +222,31 @@ export default function GlobalPolicyPage() {
                <div className="space-y-8">
                   {activeTab === 'WORDS' ? (
                     <>
-                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">敏感词内容</label><input value={editItem?.word} onChange={(e)=>setEditItem({...editItem, word: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-900 shadow-inner" /></div>
+                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">敏感词内容</label><input value={editItem?.word || ''} onChange={(e)=>setEditItem({...editItem, word: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-900 shadow-inner outline-none" /></div>
                       <div className="grid grid-cols-2 gap-6">
-                        <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">风险权重</label><input type="number" value={editItem?.risk_level} onChange={(e)=>setEditItem({...editItem, risk_level: parseInt(e.target.value)})} className="w-full px-6 py-4 bg-slate-50 rounded-xl text-sm font-black text-slate-900 shadow-inner" /></div>
+                        <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">风险权重</label><input type="number" value={editItem?.risk_level || 5} onChange={(e)=>setEditItem({...editItem, risk_level: parseInt(e.target.value)})} className="w-full px-6 py-4 bg-slate-50 rounded-xl text-sm font-black text-slate-900 shadow-inner outline-none" /></div>
                         <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">业务分类</label><TacticalSelect options={cats} value={editItem?.category_id} onChange={(val) => setEditItem({...editItem, category_id: val})} placeholder="指派词库分类" /></div>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">触发关键词</label><input value={editItem?.keyword} onChange={(e)=>setEditItem({...editItem, keyword: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-900 shadow-inner" /></div>
-                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">策略分类</label><TacticalSelect options={cats} value={editItem?.category_id} onChange={(val) => setEditItem({...editItem, category_id: val})} placeholder="指派话术分类" /></div>
-                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">纠偏建议内容</label><textarea value={editItem?.answer} onChange={(e)=>setEditItem({...editItem, answer: e.target.value})} rows={4} className="w-full px-6 py-4 bg-slate-50 rounded-xl text-sm font-medium text-slate-900 shadow-inner resize-none leading-relaxed" /></div>
+                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">触发关键词</label><input value={editItem?.keyword || ''} onChange={(e)=>setEditItem({...editItem, keyword: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-900 shadow-inner outline-none" /></div>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">策略分类</label><TacticalSelect options={cats} value={editItem?.category_id} onChange={(val) => setEditItem({...editItem, category_id: val})} placeholder="指派话术分类" /></div>
+                        <div>
+                          <label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">作用域 (所属部门)</label>
+                          {isHQ ? (
+                            <TacticalSelect 
+                              options={[{id: 'GLOBAL', name: '全域公共话术'}, ...depts]} 
+                              value={editItem?.department_id || 'GLOBAL'} 
+                              onChange={(val) => setEditItem({...editItem, department_id: val})} 
+                            />
+                          ) : (
+                            <div className="px-6 py-4 bg-slate-100 rounded-xl text-xs font-black text-slate-500 border border-slate-200 italic uppercase">限定本部门</div>
+                          )}
+                        </div>
+                      </div>
+                      <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">纠偏建议内容</label><textarea value={editItem?.answer || ''} onChange={(e)=>setEditItem({...editItem, answer: e.target.value})} rows={4} className="w-full px-6 py-4 bg-slate-50 rounded-xl text-sm font-medium text-slate-900 shadow-inner resize-none leading-relaxed outline-none" /></div>
                     </>
                   )}
                   <button disabled={processing} onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">

@@ -97,10 +97,13 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
     keyword VARCHAR(100) NOT NULL,
     answer TEXT NOT NULL,
     category_id INT NOT NULL,
+    department_id INT, -- NULL 表示全局话术
     is_active TINYINT DEFAULT 1,
     is_deleted TINYINT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES policy_categories(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES policy_categories(id),
+    FOREIGN KEY (department_id) REFERENCES departments(id)
 ) ENGINE=InnoDB;
 
 -- 10. 商品战术资产表

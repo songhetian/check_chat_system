@@ -129,6 +129,7 @@ export default function Login() {
           role_code: user.role_code, 
           permissions: user.permissions,
           department: user.dept_name,
+          department_id: user.department_id,
           tactical_score: user.tactical_score
         }, token)
         

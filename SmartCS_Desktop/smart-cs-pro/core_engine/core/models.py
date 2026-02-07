@@ -89,7 +89,10 @@ class KnowledgeBase(BaseModel):
     keyword = fields.CharField(max_length=100)
     answer = fields.TextField()
     category = fields.ForeignKeyField('models.PolicyCategory', related_name='knowledge_items')
+    department = fields.ForeignKeyField('models.Department', related_name='knowledge_items', null=True) # NULL 表示全局话术
     is_active = fields.IntField(default=1)
+    created_at = fields.DatetimeField(auto_now_add=True)
+    updated_at = fields.DatetimeField(auto_now=True)
 
     class Meta:
         table = "knowledge_base"

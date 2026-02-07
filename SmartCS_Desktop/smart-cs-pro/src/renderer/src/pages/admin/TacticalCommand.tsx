@@ -7,7 +7,7 @@ import {
   X, RefreshCw, AlertTriangle, TrendingDown, BellRing,
   Search, Filter, ChevronDown, MonitorStop, Globe, ShieldCheck,
   Power, PowerOff, Cpu, Radar, Shield, Maximize2, MonitorPlay, MonitorX,
-  Wifi, WifiOff, Clock, Camera, Download, Trash2
+  Wifi, WifiOff, Clock, Camera, Download, Trash2, Tag
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
@@ -54,6 +54,37 @@ export default function TacticalCommand() {
   const [screenShot, setScreenShot] = useState<string | null>(null)
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [processing, setProcessing] = useState<string | null>(null)
+  
+  // 话术推送增强 (V3.28)
+  const [showScriptModal, setShowScriptModal] = useState(false)
+  const [scriptSearch, setScriptSearch] = useState('')
+  const [kbList, setKbList] = useState<any[]>([])
+  const [kbLoading, setKbListLoading] = useState(false)
+
+  const fetchKb = async () => {
+    if (!token) return
+    setKbListLoading(true)
+    try {
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/ai/knowledge-base?size=100&search=${encodeURIComponent(scriptSearch)}`, 
+        method: 'GET', 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      })
+      if (res.status === 200) setKbList(res.data.data)
+    } finally { setKbListLoading(false) }
+  }
+
+  useEffect(() => {
+    if (showScriptModal) {
+      const timer = setTimeout(() => fetchKb(), 300)
+      return () => clearTimeout(timer)
+    }
+  }, [scriptSearch, showScriptModal])
+
+  const sendScript = async (answer: string) => {
+    await executeIntervention('PUSH', '战术话术推送', { content: answer })
+    setShowScriptModal(false)
+  }
   
   // 截图取证逻辑
   const handleCapture = () => {
@@ -285,7 +316,7 @@ export default function TacticalCommand() {
                            label={isInputLocked ? '锁定中' : '强制锁定'} 
                            color={isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200'} 
                         />
-                        <CommandBtn loading={processing === 'PUSH'} onClick={() => executeIntervention('PUSH', '话术提示')} icon={Send} label="话术提示" color="bg-emerald-600/10 text-emerald-700 border border-emerald-100" />
+                        <CommandBtn loading={processing === 'PUSH'} onClick={() => setShowScriptModal(true)} icon={Send} label="话术提示" color="bg-emerald-600/10 text-emerald-700 border border-emerald-100" />
                         <CommandBtn loading={processing === 'VOICE'} onClick={() => executeIntervention('VOICE', '语音警报')} icon={Mic} label="语音警报" color="bg-red-50/80 text-red-600 border border-red-100" />
                         <CommandBtn loading={processing === 'SOP'} onClick={() => executeIntervention('SOP', '推送规范')} icon={FileText} label="业务规范" color="bg-white text-cyan-700 border border-cyan-100" />
                      </div>
@@ -373,6 +404,67 @@ export default function TacticalCommand() {
                   />
                </div>
             </motion.div>
+         )}
+      </AnimatePresence>
+
+      {/* 话术弹射选择模态框 (V3.28) */}
+      <AnimatePresence>
+         {showScriptModal && (
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 text-black">
+               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowScriptModal(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+               <motion.div 
+                 initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }}
+                 className="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl relative z-10 overflow-hidden flex flex-col max-h-[80vh]"
+               >
+                  <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                     <div>
+                        <h4 className="text-xl font-black text-black uppercase italic tracking-tighter">战术话术弹射</h4>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">选择对应策略并推射至：{activeAgent?.real_name}</p>
+                     </div>
+                     <button onClick={() => setShowScriptModal(false)} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 border border-transparent hover:border-slate-200"><X size={20}/></button>
+                  </div>
+                  
+                  <div className="p-6 bg-white shrink-0">
+                     <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input 
+                          autoFocus
+                          value={scriptSearch} 
+                          onChange={(e) => setScriptSearch(e.target.value)} 
+                          placeholder="快速定位话术触发词..." 
+                          className="w-full pl-12 pr-6 py-4 bg-slate-100 border-none rounded-2xl text-sm font-bold text-black focus:ring-2 focus:ring-cyan-600 transition-all outline-none" 
+                        />
+                     </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-3 bg-white">
+                     {kbLoading ? (
+                        <div className="flex flex-col items-center justify-center py-20 opacity-20"><Loader2 className="animate-spin mb-4" size={40} /><span className="text-xs font-black uppercase">同步话术矩阵中...</span></div>
+                     ) : kbList.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 opacity-20"><Zap size={40} className="mb-4" /><span className="text-xs font-black uppercase">未发现匹配的战术策略</span></div>
+                     ) : (
+                        kbList.map(item => (
+                           <div 
+                             key={item.id} 
+                             onClick={() => sendScript(item.answer)}
+                             className="p-5 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-cyan-50 hover:border-cyan-200 cursor-pointer transition-all group relative overflow-hidden"
+                           >
+                              <div className="flex justify-between items-start mb-2">
+                                 <span className="text-xs font-black text-black group-hover:text-cyan-700 transition-colors flex items-center gap-2"><Tag size={12}/> {item.keyword}</span>
+                                 <span className="px-2 py-0.5 bg-white text-[9px] font-black rounded-lg border border-slate-200 text-slate-400 group-hover:border-cyan-200 group-hover:text-cyan-600 uppercase">{item.category__name}</span>
+                              </div>
+                              <p className="text-xs font-medium text-slate-500 group-hover:text-cyan-800 line-clamp-2 italic leading-relaxed">"{item.answer}"</p>
+                              <div className="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0"><ArrowUpRight className="text-cyan-600" size={20}/></div>
+                           </div>
+                        ))
+                     )}
+                  </div>
+                  
+                  <div className="p-4 bg-slate-50 border-t border-slate-100 text-center">
+                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Smart-CS Pro 实时指挥系统 · 指令快速分发</p>
+                  </div>
+               </motion.div>
+            </div>
          )}
       </AnimatePresence>
 
