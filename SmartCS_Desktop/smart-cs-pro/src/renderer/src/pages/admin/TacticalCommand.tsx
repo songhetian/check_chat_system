@@ -248,7 +248,7 @@ export default function TacticalCommand() {
                               <div className="flex flex-col items-center gap-3 opacity-40"><WifiOff size={40} className="text-slate-500" /><p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">成员离线，无法建立桌面链路</p></div>
                            ) : screenShot ? (
                               <div className="relative w-full h-full flex items-center justify-center">
-                                 <img src={screenShot} className="max-w-full max-h-full rounded-xl object-contain relative z-10" style={{ imageRendering: '-webkit-optimize-contrast' } as any} alt="Screen" />
+                                 <img src={screenShot} className="max-w-full max-h-full rounded-xl object-contain relative z-10" style={{ imageRendering: 'pixelated' } as any} alt="Screen" />
                                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 pointer-events-none"><span className="bg-black/60 text-white px-4 py-2 rounded-full text-xs font-black border border-white/10 uppercase tracking-widest flex items-center gap-2"><Globe size={12} className="animate-pulse" /> 实时注入中</span></div>
                               </div>
                            ) : (
@@ -300,7 +300,7 @@ export default function TacticalCommand() {
                   <img 
                     src={screenShot} 
                     className="max-w-none w-screen h-screen object-contain pointer-events-none select-none" 
-                    style={{ imageRendering: '-webkit-optimize-contrast' } as any}
+                    style={{ imageRendering: 'pixelated' } as any}
                     alt="Full View" 
                   />
                </div>

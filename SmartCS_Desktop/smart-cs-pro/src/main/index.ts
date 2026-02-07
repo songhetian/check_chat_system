@@ -206,26 +206,26 @@ function createWindow(): void {
     }
   })
 
-  // 核心：战术截屏接口 (V3.20 高清重构)
+  // 核心：战术截屏接口 (V3.21 极致清晰版)
   ipcMain.handle('capture-screen', async () => {
     try {
       const { screen } = require('electron')
       const primaryDisplay = screen.getPrimaryDisplay()
-      const { width, height } = primaryDisplay.size
+      const { width, height } = primaryDisplay.bounds // 使用 bounds 获取更准确的逻辑尺寸
       const scaleFactor = primaryDisplay.scaleFactor || 1
       
       const sources = await desktopCapturer.getSources({ 
         types: ['screen'], 
         thumbnailSize: { 
-          width: Math.floor(width * scaleFactor), 
-          height: Math.floor(height * scaleFactor) 
+          width: Math.round(width * scaleFactor), 
+          height: Math.round(height * scaleFactor) 
         } // 物理 1:1 采样 (考虑 DPI)
       })
       
       if (sources.length > 0) {
-        // 使用 90% 质量 JPEG 确保文字不模糊，且体积平衡
-        const image = sources[0].thumbnail.toJPEG(90)
-        return `data:image/jpeg;base64,${image.toString('base64')}`
+        // 关键：切换至 PNG 无损格式，彻底解决 Windows 1080p 在 Mac 上的文字模糊问题
+        const image = sources[0].thumbnail.toPNG()
+        return `data:image/png;base64,${image.toString('base64')}`
       }
       return null
     } catch (e) {
