@@ -77,7 +77,6 @@ export const TacticalIsland = () => {
       setIsPushMode(false)
       setIsScratchpad(false)
       
-      // 物理干预：瞬间清空
       window.api.callApi({
         url: `http://localhost:8000/api/system/clear-input`,
         method: 'POST'
@@ -94,7 +93,6 @@ export const TacticalIsland = () => {
     }
   }, [])
 
-  // 核心：AI 优化逻辑 (Ollama)
   const optimizeScript = async () => {
     if (!content || !selectedSentiment) return
     setOptimizing(true)
@@ -127,7 +125,6 @@ export const TacticalIsland = () => {
   const copyAndClose = () => {
     navigator.clipboard.writeText(content)
     toast.success('复制成功', { description: '话术已存入剪贴板，正在收起...' })
-    // 延迟收起，给用户一点反馈感
     setTimeout(() => {
       setIsPushMode(false)
       setIsScratchpad(false)
@@ -135,15 +132,12 @@ export const TacticalIsland = () => {
     }, 200)
   }
 
-  // 核心：双击回车闭环逻辑
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       if (!hasOptimized) {
-        // 第一次回车：优化
         optimizeScript()
       } else {
-        // 第二次回车：复制并关闭
         copyAndClose()
       }
     }
@@ -154,7 +148,8 @@ export const TacticalIsland = () => {
     const screenHeight = window.screen.height
     const active = isPushMode || isScratchpad || isEvasionMode
     
-    let width = isFolded ? 80 : 720 
+    // 物理宽度计算 (V3.31: 扩宽至 800px 解决裁剪问题)
+    let width = isFolded ? 80 : 800 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
@@ -163,24 +158,23 @@ export const TacticalIsland = () => {
     if (isLocked) {
       width = screenWidth; height = screenHeight; x = 0; y = 0;
     } else if (active) {
-      width = 720; height = 450;
-      x = screenWidth - 740; y = 30;
+      width = 800; height = 450;
+      x = screenWidth - 820; y = 30;
     } else if (showBigScreenModal) {
       width = 1280; height = 850; center = true
     } else if (layoutMode === 'SIDE') {
       width = 440; height = screenHeight - 80; x = screenWidth - 460; y = 40
     } else {
-      x = isFolded ? screenWidth - 100 : screenWidth - 740
+      x = isFolded ? screenWidth - 100 : screenWidth - 820
       y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', isLocked || active || !showBigScreenModal)
     
-    // 激活草稿箱时自动聚焦
     if (isScratchpad && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 300)
     }
-  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad])
+  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad, isEvasionMode])
 
   const isInSpecialMode = isPushMode || isScratchpad
 
@@ -204,13 +198,13 @@ export const TacticalIsland = () => {
         layout
         initial={false}
         animate={{ 
-          width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 720))),
-          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isInSpecialMode ? 450 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
+          width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 800))),
+          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isInSpecialMode || isEvasionMode ? 450 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
         className={cn(
           "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative",
           isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl shadow-none" : "bg-slate-950 shadow-none",
-          (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-[40px]"
+          (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl"
         )}
         style={{ backfaceVisibility: 'hidden', transform: 'translate3d(0,0,0)' } as any}
       >
