@@ -150,11 +150,12 @@ export const useRiskSocket = () => {
       socket.onclose = () => {
         useRiskStore.getState().setOnline(false)
         if ((socket as any)._screenTimer) clearInterval((socket as any)._screenTimer);
-        if (retryCount < maxRetries) {
-          const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
-          reconnectTimeout = setTimeout(connect, delay);
-          retryCount++;
-        }
+        
+        // V3.26: 战术级无限重连逻辑
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+        console.warn(`🔌 [WS链路] 物理连接断开，${delay/1000}s 后进行第 ${retryCount + 1} 次尝试...`);
+        reconnectTimeout = setTimeout(connect, delay);
+        retryCount++;
       }
 
       socket.onerror = () => {

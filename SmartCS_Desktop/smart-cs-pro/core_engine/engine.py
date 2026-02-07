@@ -130,6 +130,11 @@ async def lifespan(app: FastAPI):
     if client:
         app.state.redis = client
         logger.info("✅ Redis 战术缓存已激活")
+        
+        # V3.26: 启动自愈 - 强制清空在线状态集
+        await client.delete("online_agents_set")
+        logger.info("🧹 [系统启动] 已物理清空旧节点状态，等待新链路注入")
+        
         asyncio.create_task(online_status_cleaner())
     
     app.state.ws_manager = manager
