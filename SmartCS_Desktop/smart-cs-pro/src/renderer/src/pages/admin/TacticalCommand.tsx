@@ -332,7 +332,7 @@ export default function TacticalCommand() {
          {isScreenMaximized && screenShot && (
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-              className="fixed inset-0 z-[9999] bg-black flex flex-col overflow-hidden"
+              className="fixed inset-0 z-[9999] bg-slate-950/40 backdrop-blur-2xl flex flex-col overflow-hidden"
             >
                {/* 顶部悬浮条 - 确保 pointer-events 正确 */}
                <div className="absolute top-0 left-0 right-0 z-[10000] flex justify-between items-center p-8 pointer-events-none">
