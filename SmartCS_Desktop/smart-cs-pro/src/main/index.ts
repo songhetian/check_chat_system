@@ -10,13 +10,22 @@ let pythonProcess: ChildProcess | null = null
 
 function startPythonEngine(): void {
   const engineName = process.platform === 'win32' ? 'SmartCS_Engine.exe' : 'SmartCS_Engine'
-  // 开发环境下指向 core_engine/engine.py (假设已安装 python)
-  // 生产环境下指向 resources/SmartCS_Engine.exe
   const enginePath = is.dev 
     ? join(app.getAppPath(), 'core_engine', 'engine.py')
     : join(process.resourcesPath, engineName)
 
   console.log(`🚀 [引擎拉起] 正在尝试激活物理核心: ${enginePath}`)
+
+  // V3.55: 跨平台端口强制排空 (解决 Errno 48 / 10048)
+  try {
+    const port = 8000
+    if (process.platform === 'win32') {
+      spawn('cmd', ['/c', `for /f "tokens=5" %a in ('netstat -aon ^| findstr :${port}') do taskkill /f /pid %a`], { shell: true })
+    } else {
+      // Mac/Linux: 使用 lsof 查找并杀掉进程
+      spawn('sh', ['-c', `lsof -ti:${port} | xargs kill -9`], { shell: true })
+    }
+  } catch (e) { console.warn('⚠️ 端口清理跳过') }
 
   try {
     if (is.dev) {
