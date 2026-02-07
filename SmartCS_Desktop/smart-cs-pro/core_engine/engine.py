@@ -199,15 +199,6 @@ app.include_router(growth_router)
 app.include_router(rbac_router)
 app.include_router(ai_router)
 
-# --- 物理资产托管：Web 态势舱支持 ---
-# 自动检测并托管前端静态资源
-dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist", "renderer")
-if os.path.exists(dist_path):
-    app.mount("/", StaticFiles(directory=dist_path, html=True), name="static")
-    logger.info(f"🌐 [Web链路] 已激活前端托管: {dist_path}")
-else:
-    logger.warning(f"⚠️ [Web链路] 未发现 dist 目录，请先执行 npm run build")
-
 # --- 4. WebSocket 战术链路 ---
 @app.websocket("/api/ws/risk")
 async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), username: str = Query(...)):
@@ -314,6 +305,16 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
         from utils.redis_utils import redis_mgr
         await redis_mgr.mark_offline(username)
         await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
+
+# --- 物理资产托管：Web 态势舱支持 ---
+# 自动检测并托管前端静态资源
+dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist", "renderer")
+if os.path.exists(dist_path):
+    app.mount("/", StaticFiles(directory=dist_path, html=True), name="static")
+    logger.info(f"🌐 [Web链路] 已激活前端托管: {dist_path}")
+else:
+    logger.warning(f"⚠️ [Web链路] 未发现 dist 目录，请先执行 npm run build")
+
 
 # --- 5. 物理引擎挂载已移至 lifespan ---
 
