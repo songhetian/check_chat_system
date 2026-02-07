@@ -20,7 +20,11 @@ function startPythonEngine(): void {
 
   try {
     if (is.dev) {
-      pythonProcess = spawn('python3', [enginePath])
+      // 关键修复：Windows 通常使用 'python' 而非 'python3'
+      const cmd = process.platform === 'win32' ? 'python' : 'python3'
+      pythonProcess = spawn(cmd, [enginePath], {
+        shell: process.platform === 'win32' // Windows 下启用 shell 以正确解析环境变量
+      })
     } else if (fs.existsSync(enginePath)) {
       pythonProcess = spawn(enginePath)
     }
