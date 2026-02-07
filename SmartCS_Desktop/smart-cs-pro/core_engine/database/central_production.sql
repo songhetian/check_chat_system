@@ -191,6 +191,7 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 ('admin:customer:view', '客户画像查看', '风险拦截'),
 ('admin:customer:export', '全量画像导出', '风险拦截'),
 ('command:input:lock', '物理输入锁定', '实时指挥'),
+('command:system:lock', '物理系统锁定', '实时指挥'),
 ('command:push:script', '战术话术弹射', '实时指挥'),
 ('audit:log:view', '合规审计流查看', '风险拦截'),
 ('admin:violation:resolve', '违规风险处置', '风险拦截'),
