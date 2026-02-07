@@ -184,6 +184,20 @@ export const TacticalIsland = () => {
   }, [isPushMode, isScratchpad, hasOptimized, optimizing, content, selectedSentiment])
 
   useEffect(() => {
+    if (!isOnline && token) {
+      // V3.73: 物理链路中断瞬间触发语音警报 (仅播报一次)
+      if (!isMuted) {
+        try {
+          const utterance = new SpeechSynthesisUtterance("警告：物理链路已中断，系统进入脱机模式");
+          utterance.lang = 'zh-CN';
+          window.speechSynthesis.speak(utterance);
+        } catch (e) {}
+      }
+      toast.error('链路中断', { description: '与指挥中心失去物理连接' });
+    }
+  }, [isOnline])
+
+  useEffect(() => {
     const screenWidth = window.screen.width
     const screenHeight = window.screen.height
     const active = isPushMode || isScratchpad || isEvasionMode || isSopMode
@@ -271,6 +285,14 @@ export const TacticalIsland = () => {
           </div>
         ) : (
           <div className="flex items-center px-4 h-[72px] shrink-0 relative" style={{ WebkitAppRegion: 'drag' } as any}>
+            {/* V3.73: 物理链路中断覆盖层 */}
+            {!isOnline && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-50 bg-red-600/10 backdrop-blur-[2px] pointer-events-none flex items-center justify-center">
+                <div className="flex items-center gap-2 px-3 py-1 bg-red-600 text-white rounded-full text-[9px] font-black uppercase tracking-tighter shadow-lg animate-pulse">
+                   <Zap size={10} className="fill-current"/> 链路已挂断 · 脱机模式
+                </div>
+              </motion.div>
+            )}
             {!isFolded && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-2 w-[110px] shrink-0">
                                 <div className="relative">
