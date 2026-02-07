@@ -277,7 +277,14 @@ export default function TacticalCommand() {
                         </div>
                      </div>
                      <div className="grid grid-cols-4 gap-4">
-                        <CommandBtn active={isInputLocked} loading={processing === 'LOCK'} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定')} icon={isInputLocked ? Unlock : Lock} label={isInputLocked ? '解除锁定' : '强制锁定'} color={isInputLocked ? 'bg-red-600/90 text-white' : 'bg-cyan-700/90 text-white'} />
+                        <CommandBtn 
+                           active={isInputLocked} 
+                           loading={processing === 'LOCK'} 
+                           onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定')} 
+                           icon={isInputLocked ? Lock : Unlock} 
+                           label={isInputLocked ? '锁定中' : '强制锁定'} 
+                           color={isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200'} 
+                        />
                         <CommandBtn loading={processing === 'PUSH'} onClick={() => executeIntervention('PUSH', '话术提示')} icon={Send} label="话术提示" color="bg-emerald-600/10 text-emerald-700 border border-emerald-100" />
                         <CommandBtn loading={processing === 'VOICE'} onClick={() => executeIntervention('VOICE', '语音警报')} icon={Mic} label="语音警报" color="bg-red-50/80 text-red-600 border border-red-100" />
                         <CommandBtn loading={processing === 'SOP'} onClick={() => executeIntervention('SOP', '推送规范')} icon={FileText} label="业务规范" color="bg-white text-cyan-700 border border-cyan-100" />
