@@ -177,8 +177,17 @@ const AgentView = () => {
     
     const onViolation = (e: any) => {
       if (!isMuted) {
-        const audioPath = e.detail.audio_path || (e.detail.risk_score >= 8 ? '/assets/audio/red_alert.mp3' : '/assets/audio/warn.wav')
-        const audio = new Audio(audioPath); audio.play().catch(() => console.warn('音频播放失败'))
+        // V3.72: 放弃对物理文件的依赖，改用 TTS 播报增强实战感知
+        try {
+          window.speechSynthesis.cancel();
+          const text = `警告：检测到违规项，关键词为：${e.detail.keyword}`;
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'zh-CN';
+          utterance.rate = 1.1; // 略微加快语速提升紧迫感
+          window.speechSynthesis.speak(utterance);
+        } catch (err) {
+          console.warn('TTS 播报失败', err);
+        }
       }
       toast.error('违规提示', {
         description: `检测到关键词：[${e.detail.keyword}]`,

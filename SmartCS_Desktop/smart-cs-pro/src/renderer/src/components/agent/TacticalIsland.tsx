@@ -99,7 +99,21 @@ export const TacticalIsland = () => {
       if (data.type === 'TACTICAL_VOICE') {
         setVoicePulse(true)
         setTimeout(() => setVoicePulse(false), 5000)
-        // TTS 逻辑已经在 useRiskSocket 处理，这里仅做 UI 反馈
+        
+        // V3.71: 补全语音合成播放逻辑 (Web Speech API)
+        if (!isMuted && data.payload?.content) {
+          try {
+            // 立即停止之前的播放，确保新指令优先
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(data.payload.content);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+          } catch (e) {
+            console.error('语音播报失败:', e);
+          }
+        }
       }
 
       if (data.type === 'TACTICAL_SOP') {
