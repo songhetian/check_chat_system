@@ -212,10 +212,14 @@ function createWindow(): void {
       const { screen } = require('electron')
       const primaryDisplay = screen.getPrimaryDisplay()
       const { width, height } = primaryDisplay.size
+      const scaleFactor = primaryDisplay.scaleFactor || 1
       
       const sources = await desktopCapturer.getSources({ 
         types: ['screen'], 
-        thumbnailSize: { width: width, height: height } // 物理 1:1 采样
+        thumbnailSize: { 
+          width: Math.floor(width * scaleFactor), 
+          height: Math.floor(height * scaleFactor) 
+        } // 物理 1:1 采样 (考虑 DPI)
       })
       
       if (sources.length > 0) {
