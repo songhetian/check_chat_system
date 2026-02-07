@@ -1,4 +1,8 @@
 @echo off
+:: 强制设置终端编码为 UTF-8
+chcp 65001 > nul
+set PYTHONIOENCODING=utf-8
+
 title Smart-CS Pro Tactical Launcher
 echo 🚀 [Smart-CS Pro] Starting Tactical Systems...
 
