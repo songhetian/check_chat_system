@@ -14,6 +14,7 @@ import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { cn, tacticalRequest } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
+import { toast } from 'sonner'
 
 export const TacticalIsland = () => {
   const { 
@@ -34,7 +35,7 @@ export const TacticalIsland = () => {
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 核心状态 (V3.35)
+  // 核心状态 (V3.36: 极速回车版)
   const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
@@ -44,14 +45,13 @@ export const TacticalIsland = () => {
   const [sentimentSearch, setSentimentSearch] = useState('')
   const [showSentimentDropdown, setShowSentimentDropdown] = useState(false)
 
-  // 战术规避模式
   const [isEvasionMode, setIsEvasionMode] = useState(false)
   const [evasionInfo, setEvasionInfo] = useState<any>(null)
 
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // 1. 数据采集：由 useQuery 接管
+  // 1. 获取情绪标签
   const { data: sentiments = [] } = useQuery({
     queryKey: ['ai_sentiments_island'],
     queryFn: async () => {
@@ -71,7 +71,7 @@ export const TacticalIsland = () => {
     staleTime: 300000
   })
 
-  // 2. 指令监听
+  // 2. 指令监听中心
   useEffect(() => {
     const onCommand = (e: any) => {
       const data = e.detail;
@@ -92,7 +92,6 @@ export const TacticalIsland = () => {
         window.api.callApi({ url: `http://localhost:8000/api/system/clear-input`, method: 'POST' })
       }
     }
-    
     window.addEventListener('ws-tactical-command', onCommand)
     return () => window.removeEventListener('ws-tactical-command', onCommand)
   }, [])
@@ -111,9 +110,9 @@ export const TacticalIsland = () => {
     return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
   }, [sentiments, sentimentSearch])
 
-  // 核心：修正 AI 优化逻辑
+  // 核心：自适应 Ollama 协议 (Chat vs Generate)
   const optimizeScript = async () => {
-    if (!content || !selectedSentiment) return
+    if (!content || !selectedSentiment || optimizing) return
     setOptimizing(true)
     try {
       const prompt = `你是一个专业的客服教练。请根据以下[原话术]和[当前客户态度]，优化出一句最合适的回话。只返回优化后的内容，不要有任何其他文字。
@@ -122,39 +121,49 @@ export const TacticalIsland = () => {
       优化后的回话：`
 
       const serverConfig = await window.api.getServerConfig()
-      const res = await fetch(serverConfig.ai_engine.url, {
+      const url = serverConfig.ai_engine.url
+      const isChatApi = url.endsWith('/chat')
+
+      const payload = isChatApi 
+        ? { model: serverConfig.ai_engine.model, messages: [{ role: 'user', content: prompt }], stream: false }
+        : { model: serverConfig.ai_engine.model, prompt: prompt, stream: false };
+
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          model: serverConfig.ai_engine.model, 
-          prompt: prompt, 
-          stream: false 
-        })
+        body: JSON.stringify(payload)
       })
       const data = await res.json()
-      if (data.response) {
-        setContent(data.response.trim())
+      
+      const responseText = isChatApi ? data.message?.content : data.response
+      if (responseText) {
+        setContent(responseText.trim())
         setHasOptimized(true)
       }
     } catch (e) {
       console.error('AI Optimize failed', e)
+      toast.error('AI 引擎响应异常')
     } finally { setOptimizing(false) }
   }
 
   const copyAndClose = () => {
     if (!content) return
     navigator.clipboard.writeText(content)
-    // 移除 toast 提示，直接静默关闭
     setIsPushMode(false)
     setIsScratchpad(false)
     setHasOptimized(false)
+    toast.success('已存入剪贴板')
   }
 
+  // 核心：加固后的回车逻辑
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (!hasOptimized) optimizeScript()
-      else copyAndClose()
+      if (!hasOptimized && !optimizing) {
+        optimizeScript()
+      } else if (hasOptimized) {
+        copyAndClose()
+      }
     }
   }
 
@@ -172,7 +181,6 @@ export const TacticalIsland = () => {
     if (isLocked) {
       width = screenWidth; height = screenHeight; x = 0; y = 0;
     } else if (active) {
-      // V3.35: 压缩高度，减少输入框占用面积
       width = 800; height = 420;
       x = screenWidth - 820; y = 30;
     } else if (showBigScreenModal) {
@@ -254,12 +262,18 @@ export const TacticalIsland = () => {
 
              <div className="flex-1 flex flex-col gap-4 min-h-0">
                 <div className="flex-1 bg-black/40 rounded-[24px] border border-white/5 relative group shadow-inner focus-within:border-cyan-500/50 transition-all overflow-hidden">
+                   {optimizing && (
+                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="animate-spin text-cyan-500" size={32} />
+                        <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.3em]">AI 战术纠偏中...</span>
+                     </div>
+                   )}
                    <textarea
                      ref={inputRef}
                      value={content}
                      onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }}
                      onKeyDown={handleKeyDown}
-                     placeholder="输入草稿内容..."
+                     placeholder="输入内容并回车优化..."
                      className="w-full h-full bg-transparent px-6 py-6 rounded-[24px] text-lg font-medium leading-relaxed italic text-white resize-none outline-none custom-scrollbar"
                    />
                 </div>
@@ -288,7 +302,7 @@ export const TacticalIsland = () => {
                                   autoFocus
                                   value={sentimentSearch}
                                   onChange={(e) => setSentimentSearch(e.target.value)}
-                                  placeholder="快速检索..."
+                                  placeholder="搜索情绪..."
                                   className="w-full bg-black/40 border-none rounded-lg px-3 py-1.5 text-[10px] font-bold text-white outline-none"
                                 />
                              </div>
@@ -316,7 +330,7 @@ export const TacticalIsland = () => {
                    </div>
 
                    <button onClick={copyAndClose} className="px-4 h-full flex items-center gap-2 bg-white/5 hover:bg-white/10 rounded-xl text-[11px] font-black border border-white/10 text-slate-300">
-                      <ImageIcon size={16}/> 仅复制
+                      <ImageIcon size={16}/> 复制
                    </button>
 
                    <button 
@@ -324,11 +338,11 @@ export const TacticalIsland = () => {
                      onClick={optimizeScript}
                      className={cn(
                        "flex-1 h-full rounded-xl font-black text-xs uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-30",
-                       hasOptimized ? "bg-emerald-600 text-white shadow-lg" : "bg-cyan-600 text-white shadow-lg"
+                       hasOptimized ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/40" : "bg-cyan-600 text-white shadow-lg shadow-cyan-900/40"
                      )}
                    >
                       {optimizing ? <Loader2 className="animate-spin" size={16}/> : (hasOptimized ? <CheckCircle2 size={16}/> : <Sparkles size={16}/>)}
-                      {hasOptimized ? '再次回车复制' : 'AI 调优 (Enter)'}
+                      {hasOptimized ? '再次回车复制' : 'AI 优化 (Enter)'}
                    </button>
                 </div>
              </div>
