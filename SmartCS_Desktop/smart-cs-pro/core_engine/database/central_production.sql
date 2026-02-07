@@ -154,6 +154,65 @@ CREATE TABLE IF NOT EXISTS violation_records (
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
+-- 14. 语音战术库
+CREATE TABLE IF NOT EXISTS voice_alerts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    content VARCHAR(200) NOT NULL,
+    department_id INT,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (department_id) REFERENCES departments(id)
+) ENGINE=InnoDB;
+
+-- 15. 业务 SOP 指南库
+CREATE TABLE IF NOT EXISTS business_sops (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    sop_type VARCHAR(20) NOT NULL,
+    department_id INT,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (department_id) REFERENCES departments(id)
+) ENGINE=InnoDB;
+
+-- 16. 客户情绪动态配置表
+CREATE TABLE IF NOT EXISTS customer_sentiments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    prompt_segment VARCHAR(200) NOT NULL,
+    color VARCHAR(20) DEFAULT 'red',
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 17. 部门合规规避日志
+CREATE TABLE IF NOT EXISTS dept_compliance_logs (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id INT NOT NULL,
+    word VARCHAR(100) NOT NULL,
+    context TEXT,
+    department_id INT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (department_id) REFERENCES departments(id)
+) ENGINE=InnoDB;
+
+-- 18. 部门规避敏感词库 (修正版)
+CREATE TABLE IF NOT EXISTS dept_sensitive_words (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    word VARCHAR(100) NOT NULL,
+    suggestion VARCHAR(200),
+    category_id INT NOT NULL,
+    department_id INT,
+    is_active TINYINT DEFAULT 1,
+    is_deleted TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES policy_categories(id),
+    FOREIGN KEY (department_id) REFERENCES departments(id)
+) ENGINE=InnoDB;
+
 -- ==========================================
 -- 初始数据填充
 -- ==========================================
@@ -164,6 +223,18 @@ INSERT IGNORE INTO roles (id, name, code) VALUES (1, '坐席', 'AGENT'), (2, '�
 -- 超级管理员 (Password: admin123)
 INSERT IGNORE INTO users (username, password_hash, salt, real_name, role_id) 
 VALUES ('admin', 'eeea7af566eaa1ec19871a5074808e5bd4df3e28644fab20e81ebfc69ca6bb8a', 'salt123', '超级管理员', 3);
+
+-- 初始化默认情绪
+INSERT IGNORE INTO customer_sentiments (id, name, prompt_segment, color) VALUES 
+(1, '极度愤怒/投诉', '客户情绪极度愤怒，正处于投诉边缘', 'red'),
+(2, '普通/平静', '客户情绪平稳，属于常规业务咨询', 'slate'),
+(3, '认可/赞美', '客户对产品或服务表示认可，态度友好', 'emerald'),
+(4, '无/中性 (默认)', '客户态度中立，无需特殊情感偏向', 'slate');
+
+-- 初始化规避词
+INSERT IGNORE INTO dept_sensitive_words (word, suggestion, category_id, department_id) VALUES 
+('嗯嗯', '建议使用：好的 / 收到 / 明白', 3, NULL),
+('没货了', '建议使用：该宝贝目前非常火爆，我们正在全力补货中', 3, NULL);
 
 -- 原子权限注册
 INSERT IGNORE INTO permissions (code, name, module) VALUES 
@@ -184,6 +255,14 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 ('admin:dept_word:update', '编辑规避词', '合规中心'),
 ('admin:dept_word:delete', '移除规避词', '合规中心'),
 ('audit:dept:log:view', '部门合规审计查看', '合规中心'),
+('admin:voice:view', '语音库查看', '战术资源'),
+('admin:voice:create', '语音项录入', '战术资源'),
+('admin:voice:update', '语音内容重校', '战术资源'),
+('admin:voice:delete', '语音节点清除', '战术资源'),
+('admin:sop:view', 'SOP库查看', '战术资源'),
+('admin:sop:create', 'SOP文档上传', '战术资源'),
+('admin:sop:update', 'SOP版本迭代', '战术资源'),
+('admin:sop:delete', 'SOP规范废弃', '战术资源'),
 ('admin:cat:view', '策略分类查看', 'AI 决策中心'),
 ('admin:cat:create', '新分类定义', 'AI 决策中心'),
 ('admin:cat:update', '分类参数重校', 'AI 决策中心'),
