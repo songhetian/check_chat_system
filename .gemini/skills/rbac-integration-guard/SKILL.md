@@ -28,9 +28,18 @@ description: RBAC 权限集成与 SQL 自动化守卫。当新增功能、API �
 *   **热更新**：完成 SQL 编写后，优先尝试使用 `run_shell_command` 通过 `mysql` 命令行直接执行该 SQL 片段。
 *   **重置策略**：如果架构变更过于复杂导致执行失败，在征得用户同意或为了保持环境一致性的情况下，可以执行 `DROP DATABASE` 并重新运行全量 `central_production.sql`。
 
-## 4. 物理环境配置 (Credential Reference)
-*   **本地 MySQL**: `mysql -u root -p123456 -h 127.0.0.1`
-*   **默认数据库**: `smart_cs`
+## 5. 角色权责指派准则 (Role Assignment Matrix)
+
+### 🟢 坐席端 (AGENT) - 被动与个人
+*   **个人态势**: `agent:*` (如：同步、荣誉、HUD查看)。
+*   **实战支撑 (仅查看)**: `admin:sentiment:view`, `admin:ai:view` (用于话术优化加载)。
+*   **被动接收**: `agent:command:receive` (用于接收锁定、弹射指令)。
+*   **严禁**: 禁止分配任何 `create`, `update`, `delete` 权限。
+
+### 🔴 管理端 (ADMIN/HQ) - 主动与管控
+*   **管控权限**: `admin:dept:*`, `admin:user:*` (组织架构与成员)。
+*   **审计权限**: `audit:*`, `compliance:*` (查看全员记录)。
+*   **主动指令**: `command:*:lock`, `command:*:push` (物理下发)。
 
 ## 操作指南
 
