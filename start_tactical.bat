@@ -3,9 +3,9 @@
 chcp 65001 > nul
 set PYTHONIOENCODING=utf-8
 
-title Smart-CS Pro Tactical Launcher
-echo 🚀 [启动中心] 正在初始化战术系统...
-echo 📍 当前路径: %~dp0
+:: 0. 自动清理旧的引擎进程 (防止端口占用)
+echo 🧹 Cleaning up zombie processes...
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8000') do taskkill /f /pid %%a >nul 2>&1
 
 :: 1. 进入核心目录
 cd /d "%~dp0SmartCS_Desktop\smart-cs-pro"

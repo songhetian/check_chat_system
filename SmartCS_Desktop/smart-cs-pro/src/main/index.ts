@@ -30,10 +30,11 @@ function startPythonEngine(): void {
     }
 
     pythonProcess?.stdout?.on('data', (data) => {
-      process.stdout.write(`[Engine]: ${data.toString('utf8')}`)
+      // 关键修复：直接输出原始 Buffer，不经过 toString() 转换，由终端自行解码
+      process.stdout.write(Buffer.concat([Buffer.from('[Engine]: '), data]))
     })
     pythonProcess?.stderr?.on('data', (data) => {
-      process.stderr.write(`[Engine Error]: ${data.toString('utf8')}`)
+      process.stderr.write(Buffer.concat([Buffer.from('[Engine Error]: '), data]))
     })
     
     pythonProcess?.on('close', (code) => {
