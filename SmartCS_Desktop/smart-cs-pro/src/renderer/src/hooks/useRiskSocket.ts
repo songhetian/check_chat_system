@@ -101,10 +101,17 @@ export const useRiskSocket = () => {
            const nextState = !isCurrentlyLocked;
            useRiskStore.getState().setIsLocked(nextState);
            
+           // V3.23: 物理系统级锁定指令下发 (通知本地 Python 引擎)
+           window.api.callApi({
+             url: '/system/lock',
+             method: 'POST',
+             data: { lock: nextState }
+           }).catch(e => console.error('Physical lock failed', e));
+
            window.dispatchEvent(new CustomEvent('trigger-toast', { 
              detail: { 
                title: nextState ? '系统已锁定' : '系统已解锁', 
-               message: nextState ? '已执行指挥官下发的[输入锁定]动作，请等待进一步指令' : '指挥官已解除系统锁定状态', 
+               message: nextState ? '已执行指挥官下发的[系统物理锁定]动作，键盘鼠标已禁用' : '指挥官已解除系统锁定状态', 
                type: nextState ? 'error' : 'success' 
              } 
            }))

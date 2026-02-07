@@ -1,5 +1,22 @@
-import json, time, asyncio, re, hashlib, secrets, os, logging, subprocess, shutil, platform, sys
+import json, time, asyncio, re, hashlib, secrets, os, logging, subprocess, shutil, platform, sys, ctypes
 from contextlib import asynccontextmanager
+
+# --- 系统锁定状态 (V3.22) ---
+SYSTEM_LOCKED = False
+
+def toggle_physical_lock(lock: bool):
+    """
+    物理锁定 Windows 系统输入 (键盘、鼠标)
+    需要管理员权限
+    """
+    if sys.platform == "win32":
+        try:
+            res = ctypes.windll.user32.BlockInput(lock)
+            return res != 0
+        except Exception as e:
+            logger.error(f"❌ [物理锁定失败] {e}")
+            return False
+    return True # 非 Windows 平台暂不处理
 
 # 强制设置标准输出编码为 UTF-8，解决 Windows 环境乱码
 if sys.platform == "win32":
@@ -124,6 +141,16 @@ async def health(request: Request):
         "engine": "SmartCS-Pro-V2",
         "nodes": len(manager.active_connections)
     }
+
+@app.post("/api/system/lock")
+async def system_lock_api(request: Request):
+    """物理锁定/解锁接口"""
+    data = await request.json()
+    lock = data.get("lock", False)
+    global SYSTEM_LOCKED
+    success = toggle_physical_lock(lock)
+    SYSTEM_LOCKED = lock if success else SYSTEM_LOCKED
+    return {"status": "ok" if success else "error", "locked": SYSTEM_LOCKED}
 
 # 挂载业务路由 (所有路由均已带 /api 前缀)
 app.include_router(auth_router)
