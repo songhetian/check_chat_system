@@ -9,6 +9,7 @@ import { useAuthStore } from '../store/useAuthStore'
 import { useRiskStore } from '../store/useRiskStore' 
 import { cn } from '../lib/utils'
 import { CONFIG } from '../lib/config'
+import { toast } from 'sonner'
 
 interface Notification {
   id: string
@@ -127,6 +128,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pendingSyncCount = sysStatus?.pendingSyncCount ?? 0
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 
+  // V3.72: 脱机态势实时感知
+  useEffect(() => {
+    if (!isServerOnline) {
+      toast.error('物理链路中断', {
+        description: '系统已进入脱机工作模式，部分实时功能将暂不可用',
+        duration: Infinity, // 物理挂起直到恢复
+        id: 'system-offline-toast'
+      });
+    } else {
+      toast.dismiss('system-offline-toast');
+    }
+  }, [isServerOnline]);
+
   // V3.71: 401 自动熔断自愈逻辑
   useEffect(() => {
     const handleGlobalError = (event: any) => {
@@ -150,7 +164,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 280, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="bg-slate-900 flex flex-col border-r border-slate-800 shrink-0 relative z-[100] overflow-hidden"
+            className={cn(
+              "bg-slate-900 flex flex-col border-r shrink-0 relative z-[100] overflow-hidden transition-all duration-1000",
+              !isServerOnline ? "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]" : "border-slate-800"
+            )}
           >
             {/* Logo 区 */}
             <div className="p-6 shrink-0">
