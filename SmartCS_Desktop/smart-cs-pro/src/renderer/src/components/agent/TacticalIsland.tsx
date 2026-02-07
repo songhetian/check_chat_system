@@ -34,7 +34,7 @@ export const TacticalIsland = () => {
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 核心状态 (V3.45: 流式打字机版)
+  // 核心状态 (V3.51: 情绪锚定修正版)
   const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
@@ -54,15 +54,17 @@ export const TacticalIsland = () => {
     queryKey: ['ai_sentiments_island'],
     queryFn: async () => {
       const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sentiments`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
-      const data = res.data.data
-      if (!selectedSentiment && data.length > 0) {
-        const neutral = data.find((s: any) => s.name.includes('中性') || s.id === 0) || data[0]
-        setSelectedSentiment(neutral)
-      }
-      return data
+      return res.data.data
     },
     enabled: !!token
   })
+
+  useEffect(() => {
+    if (sentiments.length > 0 && !selectedSentiment) {
+      const neutral = sentiments.find((s: any) => s.name.includes('中性') || s.id === 0) || sentiments[0]
+      setSelectedSentiment(neutral)
+    }
+  }, [sentiments, selectedSentiment])
 
   const resetSpecialModes = () => {
     setIsPushMode(false); setIsScratchpad(false); setIsEvasionMode(false);
@@ -73,7 +75,7 @@ export const TacticalIsland = () => {
     const onCommand = (e: any) => {
       const data = e.detail;
       if (data.type === 'TACTICAL_PUSH') {
-        setContent(data.payload.content || '')
+        setContent(data.payload.content)
         setIsPushMode(true); setIsScratchpad(false); setIsEvasionMode(false); setHasOptimized(false);
         window.electron.ipcRenderer.send('set-always-on-top', true)
       }
@@ -87,75 +89,62 @@ export const TacticalIsland = () => {
     return () => window.removeEventListener('ws-tactical-command', onCommand)
   }, [])
 
-  // V3.45: 流式渲染核心逻辑 (Streaming reader)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowSentimentDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const filteredSentiments = useMemo(() => {
+    return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
+  }, [sentiments, sentimentSearch])
+
   const optimizeScript = async () => {
     if (!content || !selectedSentiment || optimizing) return
-    
     setOptimizing(true)
     setHasOptimized(false)
-    
     const originalText = content;
-    // 预清空内容以准备流式注入
     setContent('') 
 
     try {
-      const systemPrompt = `你是一个专业的金牌客服。
-[任务]：对用户的原始回复进行重写优化。
-[背景]：客户当前处于[${selectedSentiment.name}]状态，引导建议是：${selectedSentiment.prompt_segment}。
-[规则]：
-1. 严禁输出任何引言（如"好的"、"收到"、"建议如下"）。
-2. 严禁输出任何解释、标点说明或引号。
-3. 仅输出优化后的那一句话。`
-
+      const systemPrompt = `你是一个专业的客服教练。指令：根据[客户情绪:${selectedSentiment.name}]重写话术。规则：仅输出最终重写后的单句话,无任何引言,无引号.`
       const serverConfig = await window.api.getServerConfig()
       const url = serverConfig.ai_engine.url
       const isChatApi = url.endsWith('/chat')
-      
       const payload = isChatApi 
-        ? { model: serverConfig.ai_engine.model, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `原始话术：${originalText}\n\n直接输出优化结果：` }], stream: true, options: { temperature: 0.1 } }
-        : { model: serverConfig.ai_engine.model, prompt: `${systemPrompt}\n\n原始话术：${originalText}\n\n优化后的单句回复：`, stream: true, options: { temperature: 0.1 } };
+        ? { model: serverConfig.ai_engine.model, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `原话:${originalText}` }], stream: true, options: { temperature: 0.1 } }
+        : { model: serverConfig.ai_engine.model, prompt: `${systemPrompt}\n\n原话:${originalText}\n\n结果:`, stream: true, options: { temperature: 0.1 } };
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      if (!response.body) throw new Error('ReadableStream not supported')
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      if (!response.body) throw new Error('Body missing')
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
-      
       let fullText = ''
-      
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
-        
         const chunk = decoder.decode(value, { stream: true })
-        // Ollama 每一行都是一个 JSON 对象
         const lines = chunk.split('\n').filter(l => l.trim())
-        
         for (const line of lines) {
           try {
             const json = JSON.parse(line)
             const token = isChatApi ? json.message?.content : json.response
             if (token) {
               fullText += token
-              // 实时更新编辑器内容 (带清洗)
               setContent(fullText.replace(/^(好的|收到|明白了|理解了|优化后|回复如下|对话建议)[:：\s]*/g, '').replace(/^["'“](.*)["'”]$/g, '$1').trim())
             }
-          } catch (e) { /* 忽略不完整的 JSON 块 */ }
+          } catch (e) {}
         }
       }
-      
       setHasOptimized(true)
     } catch (e) { 
-      console.error(e)
-      setContent(originalText) // 失败回滚
-      toast.error('AI 链路中断')
-    } finally { 
-      setOptimizing(false) 
-    }
+      setContent(originalText)
+      toast.error('AI 链路故障')
+    } finally { setOptimizing(false) }
   }
 
   const copyAndClose = () => {
@@ -171,6 +160,21 @@ export const TacticalIsland = () => {
       else if (hasOptimized) copyAndClose()
     }
   }
+
+  useEffect(() => {
+    const active = isPushMode || isScratchpad
+    if (!active) return
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (optimizing) { if (e.key === 'Enter') e.preventDefault(); return; }
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault()
+        if (!hasOptimized) optimizeScript()
+        else copyAndClose()
+      }
+    }
+    window.addEventListener('keydown', handleGlobalKeyDown)
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown)
+  }, [isPushMode, isScratchpad, hasOptimized, optimizing, content, selectedSentiment])
 
   useEffect(() => {
     const screenWidth = window.screen.width
@@ -191,10 +195,6 @@ export const TacticalIsland = () => {
     if (isScratchpad && inputRef.current) setTimeout(() => inputRef.current?.focus(), 300)
   }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad, isEvasionMode])
 
-  const filteredSentiments = useMemo(() => {
-    return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
-  }, [sentiments, sentimentSearch])
-
   const isInSpecialMode = isPushMode || isScratchpad
 
   return (
@@ -205,7 +205,7 @@ export const TacticalIsland = () => {
           width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 800))),
           height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isPushMode || isScratchpad || isEvasionMode ? 320 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
-        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl" : "bg-slate-950", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
+        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl shadow-none" : "bg-slate-950 shadow-none", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
       >
         {isEvasionMode ? (
           <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-amber-950/60">
@@ -238,36 +238,73 @@ export const TacticalIsland = () => {
 
              <div className="flex-1 flex flex-col gap-3 min-h-0">
                 <div className="flex-1 bg-black/40 rounded-2xl border border-white/5 relative group shadow-inner focus-within:border-cyan-500/50 transition-all overflow-hidden">
+                   <AnimatePresence>
+                     {optimizing && (
+                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center gap-2">
+                          <Loader2 className="animate-spin text-cyan-500" size={24} />
+                          <span className="text-[8px] font-black text-cyan-500 uppercase tracking-[0.3em]">AI 调优中...</span>
+                       </motion.div>
+                     )}
+                   </AnimatePresence>
                    <textarea
                      ref={inputRef}
                      value={content}
                      onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }}
                      onKeyDown={handleKeyDown}
-                     placeholder={optimizing ? "AI 正在思考并注入内容..." : "输入内容并回车优化..."}
+                     placeholder="输入内容并回车优化..."
                      className="w-full h-full bg-transparent px-5 py-5 text-sm font-medium leading-relaxed italic text-white resize-none outline-none custom-scrollbar"
                    />
                 </div>
 
                 <div className="flex items-center gap-2 h-14 shrink-0 bg-white/5 p-1 rounded-2xl border border-white/5">
                    <div className="relative w-48 h-full" ref={dropdownRef}>
-                      <button onClick={() => setShowSentimentDropdown(!showSentimentDropdown)} className="w-full h-full px-4 flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group">
+                      <button 
+                        onClick={() => setShowSentimentDropdown(!showSentimentDropdown)} 
+                        className={cn(
+                          "w-full h-full px-4 flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group",
+                          selectedSentiment && `hover:border-${selectedSentiment.color}-500/50`
+                        )}
+                      >
                          <div className="flex items-center gap-2">
-                            <Brain size={14} className={cn(selectedSentiment ? `text-${selectedSentiment.color}-400` : "text-slate-400")} />
+                            <Brain size={14} className={cn(selectedSentiment ? `text-${selectedSentiment.color}-400 shadow-[0_0_8px_rgba(0,0,0,0.5)]` : "text-slate-400")} />
                             <span className="text-[10px] font-black text-white truncate">{selectedSentiment?.name || '情绪维度'}</span>
                          </div>
-                         <ChevronDown size={12} className="text-slate-500" />
+                         <ChevronDown size={12} className={cn("text-slate-500 transition-transform", showSentimentDropdown && "rotate-180")} />
                       </button>
                       <AnimatePresence>
                         {showSentimentDropdown && (
-                          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute bottom-full left-0 right-0 mb-2 bg-slate-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[100]">
-                             <div className="p-2 bg-white/5 border-b border-white/5"><input autoFocus value={sentimentSearch} onChange={(e) => setSentimentSearch(e.target.value)} placeholder="检索..." className="w-full bg-black/40 border-none rounded-lg px-2 py-1 text-[10px] font-bold text-white outline-none" /></div>
-                             <div className="max-h-32 overflow-y-auto custom-scrollbar p-1">
-                                {filteredSentiments.map((s: any) => (
-                                  <button key={s.id} onClick={() => { setSelectedSentiment(s); setHasOptimized(false); setShowSentimentDropdown(false); }} className={cn("w-full px-3 py-2 rounded-lg flex items-center justify-between text-[10px] font-black transition-all hover:bg-white/5 text-left", selectedSentiment?.id === s.id ? "bg-cyan-600/20 text-cyan-400" : "text-slate-400")}>
-                                     <div className="flex items-center gap-2"><div className={cn("w-1 h-1 rounded-full", `bg-${s.color}-500`)} />{s.name}</div>
-                                     {selectedSentiment?.id === s.id && <Check size={10}/>}
-                                  </button>
-                                ))}
+                          <motion.div 
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }} 
+                            className="absolute bottom-full left-0 right-0 mb-3 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100]"
+                          >
+                             <div className="p-2.5 bg-white/5 border-b border-white/5">
+                                <div className="relative">
+                                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500" size={10} />
+                                   <input autoFocus value={sentimentSearch} onChange={(e) => setSentimentSearch(e.target.value)} placeholder="极速检索维度..." className="w-full bg-black/40 border-none rounded-lg pl-6 pr-2 py-1.5 text-[10px] font-bold text-white outline-none placeholder:text-slate-600" />
+                                </div>
+                             </div>
+                             <div className="max-h-48 overflow-y-auto custom-scrollbar p-1.5 space-y-1">
+                                {filteredSentiments.map((s: any) => {
+                                  const isSelected = selectedSentiment?.id === s.id;
+                                  return (
+                                    <button 
+                                      key={s.id} 
+                                      onClick={() => { setSelectedSentiment(s); setHasOptimized(false); setShowSentimentDropdown(false); }} 
+                                      className={cn(
+                                        "w-full px-3 py-2.5 rounded-xl flex items-center justify-between text-[10px] font-black transition-all text-left group",
+                                        isSelected 
+                                          ? `bg-${s.color}-500/20 text-${s.color}-400 border border-${s.color}-500/30 shadow-[0_0_15px_rgba(0,0,0,0.2)]` 
+                                          : "text-slate-500 hover:bg-white/5 hover:text-slate-200"
+                                      )}
+                                    >
+                                       <div className="flex items-center gap-2">
+                                          <div className={cn("w-1.5 h-1.5 rounded-full shadow-sm", `bg-${s.color}-500`, isSelected && "animate-pulse")} />
+                                          {s.name}
+                                       </div>
+                                       {isSelected && <Check size={12} className="animate-in zoom-in duration-300" />}
+                                    </button>
+                                  )
+                                })}
                              </div>
                           </motion.div>
                         )}
@@ -278,7 +315,7 @@ export const TacticalIsland = () => {
                      id="main-action-btn"
                      disabled={optimizing || !selectedSentiment || !content}
                      onClick={optimizeScript}
-                     className={cn("flex-1 h-full rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white" : "bg-cyan-600 text-white")}
+                     className={cn("flex-1 h-full rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]" : "bg-cyan-600 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]")}
                    >
                       {optimizing ? <Loader2 className="animate-spin" size={14}/> : (hasOptimized ? <CheckCircle2 size={14}/> : <Sparkles size={14}/>)}
                       {hasOptimized ? '再次回车复制' : 'AI 优化 (Enter)'}
@@ -308,7 +345,7 @@ export const TacticalIsland = () => {
                     <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
                     <HubBtn icon={isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />} active={isMuted} onClick={() => setMuted(!isMuted)} title={isMuted ? "解禁" : "静音"} color={isMuted ? "red" : "muted"} />
                     <div className="w-px h-5 bg-white/10 mx-0.5" />
-                    <HubBtn icon={<PenTool size={20} />} active={isScratchpad} onClick={() => { setIsScratchpad(true); setContent(''); setHasOptimized(false); }} title="草稿" color="emerald" />
+                    <HubBtn icon={<PenTool size={20} />} active={isScratchpad} onClick={() => { setContent(''); setIsScratchpad(true); setHasOptimized(false); }} title="草稿" color="emerald" />
                     <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="资料" color="white" />
                     <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
                     <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="画像" color={isCustomerHudEnabled ? "emerald" : "white"} />
