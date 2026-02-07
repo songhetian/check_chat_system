@@ -7,7 +7,7 @@ import {
   X, RefreshCw, AlertTriangle, TrendingDown, BellRing,
   Search, Filter, ChevronDown, MonitorStop, Globe, ShieldCheck,
   Power, PowerOff, Cpu, Radar, Shield, Maximize2, MonitorPlay, MonitorX,
-  Wifi, WifiOff, Clock
+  Wifi, WifiOff, Clock, Camera, Download, Trash2
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
@@ -52,7 +52,59 @@ export default function TacticalCommand() {
   const [search, setSearch] = useState('')
   const [liveChat, setLiveChat] = useState<any[]>([])
   const [screenShot, setScreenShot] = useState<string | null>(null)
+  const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [processing, setProcessing] = useState<string | null>(null)
+  
+  // 截图取证逻辑
+  const handleCapture = () => {
+    if (!screenShot || !activeAgent) return;
+    
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // 1. 绘制底图
+      ctx.drawImage(img, 0, 0);
+
+      // 2. 绘制水印 (右下角)
+      const padding = 40;
+      const fontSize = Math.max(20, Math.floor(canvas.width / 40));
+      ctx.font = `black ${fontSize}px sans-serif`;
+      
+      const timeStr = new Date().toLocaleString();
+      const watermarkText = `取证人: ${user?.real_name} | 目标: ${activeAgent.real_name} | ${timeStr}`;
+      
+      // 绘制半透明背景条提升文字可读性
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      const metrics = ctx.measureText(watermarkText);
+      const bgWidth = metrics.width + padding * 2;
+      const bgHeight = fontSize + padding;
+      ctx.fillRect(canvas.width - bgWidth, canvas.height - bgHeight, bgWidth, bgHeight);
+
+      // 绘制白色文字
+      ctx.fillStyle = 'white';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(watermarkText, canvas.width - bgWidth + padding, canvas.height - bgHeight / 2);
+
+      // 3. 生成最终图片
+      setCapturedImage(canvas.toDataURL('image/png'));
+      toast.success('证据快照已生成', { description: '已添加水印与时间戳' });
+    };
+    img.src = screenShot;
+  }
+
+  const downloadCapture = () => {
+    if (!capturedImage) return;
+    const link = document.createElement('a');
+    link.href = capturedImage;
+    link.download = `Evidence_${activeAgent?.real_name}_${new Date().getTime()}.png`;
+    link.click();
+  }
   
   // 链路控制
   const [isLinkEnabled, setIsLinkEnabled] = useState(true)
@@ -238,6 +290,9 @@ export default function TacticalCommand() {
                               <button onClick={toggleLink} className={cn("px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1.5 transition-all shadow-sm border cursor-pointer", isLinkEnabled ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-red-50 text-red-600 border-red-100")}>
                                  {isLinkEnabled ? <><MonitorPlay size={12}/> 链路已激活</> : <><MonitorX size={12}/> 链路已挂断</>}
                               </button>
+                              <button onClick={handleCapture} disabled={!isLinkEnabled || !screenShot} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-cyan-50 hover:text-cyan-600 transition-all border border-slate-200 disabled:opacity-30 cursor-pointer" title="一键取证快照">
+                                 <Camera size={14} />
+                              </button>
                               <button onClick={() => setIsScreenMaximized(true)} disabled={!isLinkEnabled || !screenShot} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-cyan-50 hover:text-cyan-600 transition-all border border-slate-200 disabled:opacity-30 cursor-pointer"><Maximize2 size={14} /></button>
                            </div>
                         </div>
@@ -304,6 +359,42 @@ export default function TacticalCommand() {
                     alt="Full View" 
                   />
                </div>
+            </motion.div>
+         )}
+      </AnimatePresence>
+
+      {/* 截图预览取证弹窗 */}
+      <AnimatePresence>
+         {capturedImage && (
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+              className="fixed inset-0 z-[10000] bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-10"
+            >
+               <motion.div 
+                 initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                 className="bg-white rounded-3xl overflow-hidden shadow-2xl max-w-5xl w-full flex flex-col"
+               >
+                  <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                     <div>
+                        <h4 className="text-lg font-black text-black uppercase italic">证据快照预览</h4>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">已自动注入：{activeAgent?.real_name} · 物理水印已锁定</p>
+                     </div>
+                     <div className="flex gap-3">
+                        <button onClick={downloadCapture} className="px-6 py-2.5 bg-cyan-600 text-white rounded-xl text-xs font-black shadow-lg hover:bg-cyan-700 transition-all flex items-center gap-2 active:scale-95">
+                           <Download size={16} /> 下载到本地
+                        </button>
+                        <button onClick={() => setCapturedImage(null)} className="p-2.5 bg-slate-200 text-slate-600 rounded-xl hover:bg-slate-300 transition-all active:scale-95">
+                           <X size={20} />
+                        </button>
+                     </div>
+                  </div>
+                  <div className="flex-1 bg-slate-900 p-4 flex items-center justify-center overflow-hidden">
+                     <img src={capturedImage} className="max-w-full max-h-[70vh] rounded-lg shadow-2xl object-contain" alt="Captured Evidence" />
+                  </div>
+                  <div className="p-4 bg-white border-t border-slate-100 text-center">
+                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Smart-CS Pro 数字化取证系统 · 物理链路快照</p>
+                  </div>
+               </motion.div>
             </motion.div>
          )}
       </AnimatePresence>
