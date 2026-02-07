@@ -3,6 +3,46 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
+import { spawn, ChildProcess } from 'child_process'
+
+// --- 0. 物理引擎进程管理 (V3.25) ---
+let pythonProcess: ChildProcess | null = null
+
+function startPythonEngine(): void {
+  const engineName = process.platform === 'win32' ? 'SmartCS_Engine.exe' : 'SmartCS_Engine'
+  // 开发环境下指向 core_engine/engine.py (假设已安装 python)
+  // 生产环境下指向 resources/SmartCS_Engine.exe
+  const enginePath = is.dev 
+    ? join(app.getAppPath(), 'core_engine', 'engine.py')
+    : join(process.resourcesPath, engineName)
+
+  console.log(`🚀 [引擎拉起] 正在尝试激活物理核心: ${enginePath}`)
+
+  try {
+    if (is.dev) {
+      pythonProcess = spawn('python3', [enginePath])
+    } else if (fs.existsSync(enginePath)) {
+      pythonProcess = spawn(enginePath)
+    }
+
+    pythonProcess?.stdout?.on('data', (data) => console.log(`[Engine]: ${data}`))
+    pythonProcess?.stderr?.on('data', (data) => console.error(`[Engine Error]: ${data}`))
+    
+    pythonProcess?.on('close', (code) => {
+      console.log(`🔌 [引擎离线] 核心进程已退出，状态码: ${code}`)
+    })
+  } catch (e) {
+    console.error('❌ [引擎启动失败]', e)
+  }
+}
+
+// 退出时确保杀死引擎
+app.on('before-quit', () => {
+  if (pythonProcess) {
+    console.log('🛑 [系统关闭] 正在同步注销物理核心...')
+    pythonProcess.kill()
+  }
+})
 
 // --- 1. 战术本地数据库初始化 (Better-SQLite3) ---
 // 使用 require 避免 Rollup 的动态 require 报错
@@ -313,6 +353,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  // 激活物理引擎
+  startPythonEngine()
+  
   createWindow()
 
   app.on('activate', function () {
