@@ -1,0 +1,25 @@
+# CRUD 审计守卫 Skill (CRUD Audit Guard)
+
+本 Skill 旨在确保 Smart-CS Pro 所有业务数据的增删改查（CRUD）操作遵循严格的权限校验、部门隔离及审计日志规范。
+
+## 核心开发指令
+
+### 1. 权限与隔离 (Auth & Isolation)
+- **必须** 使用 `Depends(check_permission(...))` 保护所有写操作。
+- **部门隔离**：
+  - 非超级管理员 (role_id != 3) 只能操作所属部门 (`user.get("dept_id")`) 的数据。
+  - 超级管理员 (role_id == 3) 可通过 `data.get("department_id")` 指定目标部门。若值为 `GLOBAL` 或未提供，则 `department_id` 应设为 `None`。
+
+### 2. 审计日志 (Mandatory Auditing)
+- **每一个** 成功的 `create`、`update` 或 `delete` 操作后，**必须** 调用 `record_audit` 函数。
+- 审计格式：`record_audit(operator, action, target, details)`。
+- `action` 命名规范：`[MODULE]_[ACTION]` (例如 `VOICE_SAVE`, `SOP_DELETE`)。
+
+### 3. 操作实现规范
+- **更新 (Update)**：必须先校验目标数据是否存在，且当前用户是否有权修改（非超管严禁修改跨部门数据）。
+- **删除 (Delete)**：统一使用逻辑删除 (`is_deleted = 1`)，严禁物理删除。
+- **事务处理**：涉及多表或敏感数据时，使用 `async with in_transaction() as conn`。
+
+## 触发场景
+- 新增或重写 FastAPI 业务接口。
+- 优化现有数据管理逻辑。

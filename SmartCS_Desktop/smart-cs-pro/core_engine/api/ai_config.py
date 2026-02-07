@@ -24,19 +24,58 @@ async def get_voice_alerts(page: int = 1, size: int = 50, search: str = "", curr
     return {"status": "ok", "data": data, "total": total}
 
 @router.post("/voice-alerts")
-async def save_voice_alert(data: dict, user: dict = Depends(get_current_user)):
+async def save_voice_alert(data: dict, user: dict = Depends(check_permission("admin:voice:create"))):
+    item_id = data.get("id")
     content = data.get("content")
-    dept_id = user.get("dept_id") if user.get("role_id") != 3 else data.get("department_id")
-    if dept_id == 'GLOBAL': dept_id = None
+    role_id = user.get("role_id")
+    dept_id = user.get("dept_id")
+
+    if item_id and "admin:voice:update" not in user.get("permissions", []):
+        raise HTTPException(status_code=403, detail="越权拦截：缺失语音更新权限")
+
+    # 确定目标部门 ID
+    target_dept_id = data.get("department_id")
+    if role_id != 3: 
+        target_dept_id = dept_id
+    elif not target_dept_id or target_dept_id == 'GLOBAL': 
+        target_dept_id = None
+
     async with in_transaction() as conn:
-        exists = await VoiceAlert.filter(content=content, department_id=dept_id, is_deleted=0).exists()
-        if not exists:
-            await VoiceAlert.create(content=content, department_id=dept_id)
-            return {"status": "ok", "message": "已自动入库"}
+        if item_id:
+            v_old = await VoiceAlert.get_or_none(id=item_id)
+            if not v_old: return {"status": "error", "message": "语音节点不存在"}
+            if role_id != 3 and v_old.department_id != dept_id:
+                raise HTTPException(status_code=403, detail="越权拦截：严禁修改非本部门语音")
+            
+            await VoiceAlert.filter(id=item_id).update(content=content, department_id=target_dept_id)
+            await record_audit(user["real_name"], "VOICE_UPDATE", content, f"更新语音项 [ID:{item_id}]")
+        else:
+            exists = await VoiceAlert.filter(content=content, department_id=target_dept_id, is_deleted=0).exists()
+            if not exists:
+                await VoiceAlert.create(content=content, department_id=target_dept_id)
+                await record_audit(user["real_name"], "VOICE_CREATE", content, "录入新战术语音")
+            return {"status": "ok", "message": "已同步至战术语音库"}
+    return {"status": "ok"}
+
+@router.post("/voice-alerts/delete")
+async def delete_voice_alert(data: dict, user: dict = Depends(check_permission("admin:voice:delete"))):
+    item_id = data.get("id")
+    role_id = user.get("role_id")
+    dept_id = user.get("dept_id")
+    
+    async with in_transaction() as conn:
+        v = await VoiceAlert.get_or_none(id=item_id)
+        if not v: return {"status": "error", "message": "语音项不存在"}
+        
+        if role_id != 3 and v.department_id != dept_id:
+            raise HTTPException(status_code=403, detail="越权拦截：严禁注销跨部门语音")
+
+        await VoiceAlert.filter(id=item_id).update(is_deleted=1)
+        await record_audit(user["real_name"], "VOICE_DELETE", v.content, f"物理清除语音节点 [ID:{item_id}]")
     return {"status": "ok"}
 
 @router.get("/sops")
-async def get_sops(page: int = 1, size: int = 50, search: str = "", current_user: dict = Depends(get_current_user)):
+async def get_sops(page: int = 1, size: int = 50, search: str = "", current_user: dict = Depends(check_permission("admin:ai:view"))):
     query = BusinessSOP.filter(is_deleted=0)
     role_id = current_user.get("role_id")
     dept_id = current_user.get("dept_id")
@@ -45,8 +84,60 @@ async def get_sops(page: int = 1, size: int = 50, search: str = "", current_user
     if search:
         query = query.filter(title__icontains=search)
     total = await query.count()
-    data = await query.offset((page - 1) * size).limit(size).order_by("-id").values("id", "title", "content", "sop_type", "department_id")
+    data = await query.select_related("department").offset((page - 1) * size).limit(size).order_by("-id").values(
+        "id", "title", "content", "sop_type", "department_id", "department__name"
+    )
     return {"status": "ok", "data": data, "total": total}
+
+@router.post("/sops")
+async def save_sop(data: dict, user: dict = Depends(check_permission("admin:ai:create"))):
+    item_id = data.get("id")
+    role_id = user.get("role_id")
+    dept_id = user.get("dept_id")
+    
+    if item_id and "admin:ai:update" not in user.get("permissions", []):
+        raise HTTPException(status_code=403, detail="越权拦截：缺失 SOP 更新权限")
+
+    target_dept_id = data.get("department_id")
+    if role_id != 3: target_dept_id = dept_id
+    elif not target_dept_id or target_dept_id == 'GLOBAL': target_dept_id = None
+
+    payload = {
+        "title": data.get("title"),
+        "content": data.get("content"),
+        "sop_type": data.get("sop_type", "TEXT"),
+        "department_id": target_dept_id
+    }
+
+    async with in_transaction() as conn:
+        if item_id:
+            s_old = await BusinessSOP.get_or_none(id=item_id)
+            if not s_old: return {"status": "error", "message": "SOP 节点不存在"}
+            if role_id != 3 and s_old.department_id != dept_id:
+                raise HTTPException(status_code=403, detail="越权拦截：严禁修改跨部门 SOP")
+            await BusinessSOP.filter(id=item_id).update(**payload)
+            await record_audit(user["real_name"], "SOP_UPDATE", data.get("title"), f"重校 SOP 规范 [ID:{item_id}]")
+        else:
+            await BusinessSOP.create(**payload)
+            await record_audit(user["real_name"], "SOP_CREATE", data.get("title"), "发布新业务规范 (SOP)")
+    return {"status": "ok"}
+
+@router.post("/sops/delete")
+async def delete_sop(data: dict, user: dict = Depends(check_permission("admin:ai:delete"))):
+    item_id = data.get("id")
+    role_id = user.get("role_id")
+    dept_id = user.get("dept_id")
+    
+    async with in_transaction() as conn:
+        s = await BusinessSOP.get_or_none(id=item_id)
+        if not s: return {"status": "error", "message": "SOP 不存在"}
+        
+        if role_id != 3 and s.department_id != dept_id:
+            raise HTTPException(status_code=403, detail="越权拦截：严禁移除跨部门 SOP")
+
+        await BusinessSOP.filter(id=item_id).update(is_deleted=1)
+        await record_audit(user["real_name"], "SOP_DELETE", s.title, f"销毁 SOP 节点 [ID:{item_id}]")
+    return {"status": "ok"}
 
 @router.get("/sentiments")
 async def get_sentiments(current_user: dict = Depends(get_current_user)):

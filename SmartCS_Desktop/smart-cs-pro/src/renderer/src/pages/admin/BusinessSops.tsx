@@ -41,11 +41,23 @@ export default function BusinessSopsPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
-      return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: payload })
+      const data = { ...payload };
+      if (data.department_id === 'GLOBAL') data.department_id = null;
+      return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business_sops_admin'] })
       setModalType('NONE'); toast.success('SOP规范已同步')
+    }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops/delete`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: { id } })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business_sops_admin'] })
+      setModalType('NONE'); toast.success('SOP节点已成功注销')
     }
   })
 
@@ -137,6 +149,21 @@ export default function BusinessSopsPage() {
                   <button disabled={saveMutation.isPending} onClick={() => saveMutation.mutate(editItem)} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3">
                     {saveMutation.isPending ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 固化规范文档
                   </button>
+               </div>
+            </motion.div>
+          </div>
+        )}
+
+        {modalType === 'DELETE' && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl relative z-10 p-10 text-center">
+               <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><ShieldAlert size={40} /></div>
+               <h3 className="text-xl font-black text-slate-900 mb-2 uppercase italic">注销 SOP 规范?</h3>
+               <p className="text-slate-500 text-xs font-medium mb-8">此操作将逻辑移除该业务指南，操作员端将无法再调取此规范文件。</p>
+               <div className="flex gap-4">
+                  <button onClick={() => setModalType('NONE')} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all">取消</button>
+                  <button disabled={deleteMutation.isPending} onClick={() => deleteMutation.mutate(editItem.id)} className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-red-200 active:scale-95 transition-all">确认注销</button>
                </div>
             </motion.div>
           </div>
