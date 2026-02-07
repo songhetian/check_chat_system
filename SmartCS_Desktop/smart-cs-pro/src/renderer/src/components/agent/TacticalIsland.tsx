@@ -51,51 +51,101 @@ export const TacticalIsland = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const fetchSentiments = async () => {
-    try {
-      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sentiments`, method: 'GET', headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` } })
-      if (res.status === 200) {
-        setSentiments(res.data.data)
-        // 默认选择 ID 为 4 的“中性”情绪，如果找不到选第一个
-        const neutral = res.data.data.find((s: any) => s.name.includes('中性')) || res.data.data[0]
-        setSelectedSentiment(neutral)
-      }
-    } catch (e) { console.error(e) }
-  }
+    const fetchSentiments = async () => {
 
-  useEffect(() => {
-    fetchSentiments()
-    // 关键修正：确保监听器能捕获到来自 useRiskSocket 的事件
-    const onCommand = (e: any) => {
-      console.log('📡 [Island] Received Command:', e.detail)
-      if (e.detail.type === 'TACTICAL_PUSH') {
-        setContent(e.detail.payload.content)
-        setIsPushMode(true)
-        setIsScratchpad(false)
-        setIsEvasionMode(false)
-        setHasOptimized(false)
-        // 强制唤起物理窗口
-        window.electron.ipcRenderer.send('resize-window', { width: 800, height: 550, center: false, x: window.screen.width - 820, y: 30 })
-        window.electron.ipcRenderer.send('set-always-on-top', true)
-      }
-    }
-    
-    const onDeptViolation = (e: any) => {
-      setEvasionInfo(e.detail)
-      setIsEvasionMode(true)
-      setIsPushMode(false)
-      setIsScratchpad(false)
-      window.api.callApi({ url: `http://localhost:8000/api/system/clear-input`, method: 'POST' }).catch(err => console.error('Clear input failed', err))
-      window.electron.ipcRenderer.send('set-always-on-top', true)
+      try {
+
+        console.log('📡 [Island] Fetching Sentiments...')
+
+        const res = await window.api.callApi({ 
+
+          url: `${CONFIG.API_BASE}/ai/sentiments`, 
+
+          method: 'GET', 
+
+          headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` } 
+
+        })
+
+        if (res.status === 200) {
+
+          console.log('✅ [Island] Sentiments Loaded:', res.data.data)
+
+          setSentiments(res.data.data)
+
+          const neutral = res.data.data.find((s: any) => s.name.includes('中性') || s.id === 0) || res.data.data[0]
+
+          setSelectedSentiment(neutral)
+
+        }
+
+      } catch (e) { console.error('❌ [Island] Load Sentiments Failed:', e) }
+
     }
 
-    window.addEventListener('ws-tactical-command', onCommand)
-    window.addEventListener('ws-dept-violation', onDeptViolation)
-    return () => {
-      window.removeEventListener('ws-tactical-command', onCommand)
-      window.removeEventListener('ws-dept-violation', onDeptViolation)
-    }
-  }, [])
+  
+
+    useEffect(() => {
+
+      fetchSentiments()
+
+      // 关键修正：统一指令接收中心
+
+      const onCommand = (e: any) => {
+
+        const data = e.detail;
+
+        console.log(`⚡ [Tactical Link] New Command: ${data.type}`, data);
+
+        
+
+        if (data.type === 'TACTICAL_PUSH') {
+
+          setContent(data.payload.content)
+
+          setIsPushMode(true)
+
+          setIsScratchpad(false)
+
+          setIsEvasionMode(false)
+
+          setHasOptimized(false)
+
+          window.electron.ipcRenderer.send('set-always-on-top', true)
+
+        }
+
+        
+
+        if (data.type === 'TACTICAL_DEPT_VIOLATION') {
+
+          setEvasionInfo(data)
+
+          setIsEvasionMode(true)
+
+          setIsPushMode(false)
+
+          setIsScratchpad(false)
+
+          // 物理干预
+
+          window.api.callApi({ url: `http://localhost:8000/api/system/clear-input`, method: 'POST' })
+
+        }
+
+      }
+
+      
+
+      window.addEventListener('ws-tactical-command', onCommand)
+
+      return () => {
+
+        window.removeEventListener('ws-tactical-command', onCommand)
+
+      }
+
+    }, [])
 
   // 点击外部关闭下拉框
   useEffect(() => {

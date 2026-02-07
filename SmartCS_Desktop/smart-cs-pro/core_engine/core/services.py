@@ -90,16 +90,15 @@ class SmartScanner:
     async def process(self, text, username="admin", redis_client=None, ws_manager=None):
         if not text: return False
         
-        # 1. 动态获取全量敏感词库
-        from core.models import SensitiveWord
-        words = await SensitiveWord.filter(is_active=1, is_deleted=0).values("word", "risk_level")
-        
+        # 1. 物理定位操作员
+        user = await User.get_or_none(username=username).select_related("department")
+        if not user: return False
+
+        # 2. 扫描高危全域敏感词
+        words = await SensitiveWord.filter(is_active=1).values("word", "risk_level")
         for w in words:
             if w["word"] in text:
-                # 2. 触发后端事务（存入数据库、更新分值、发送通知）
                 await execute_violation_workflow(username, w["word"], text, w["risk_level"], redis_client=redis_client)
-                
-                # 3. 如果提供了 WS 管理器，立即推送实时拦截信号
                 if ws_manager:
                     await ws_manager.broadcast({
                         "type": "VIOLATION",
@@ -107,8 +106,33 @@ class SmartScanner:
                         "keyword": w["word"],
                         "risk_level": w["risk_level"],
                         "context": text,
-                        "timestamp": time.time() * 1000,
                         "id": secrets.token_hex(12)
                     })
-                return True # 命中
-        return False # 未命中
+                return True 
+
+        # 3. 扫描部门规避词 (V3.33 静默拦截)
+        from tortoise.expressions import Q
+        dept_words = await DeptSensitiveWord.filter(
+            Q(department_id__isnull=True) | Q(department_id=user.department_id),
+            is_active=1, is_deleted=0
+        ).values("word", "suggestion")
+
+        for dw in dept_words:
+            if dw["word"] in text:
+                # 记录合规审计
+                await DeptComplianceLog.create(
+                    id=secrets.token_hex(12),
+                    user=user,
+                    word=dw["word"],
+                    context=text,
+                    department_id=user.department_id
+                )
+                if ws_manager:
+                    await ws_manager.broadcast({
+                        "type": "TACTICAL_DEPT_VIOLATION",
+                        "username": username,
+                        "keyword": dw["word"],
+                        "suggestion": dw.get("suggestion") or "请注意用语规范"
+                    })
+                return True
+        return False 

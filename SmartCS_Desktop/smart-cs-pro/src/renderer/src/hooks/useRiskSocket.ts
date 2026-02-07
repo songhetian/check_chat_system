@@ -82,6 +82,13 @@ export const useRiskSocket = () => {
         if (data.type === 'TACTICAL_DEPT_VIOLATION') {
           // 转发给坐席端悬浮岛实现静默拦截
           window.dispatchEvent(new CustomEvent('ws-dept-violation', { detail: data }))
+          // 同时作为通用指令分发
+          window.dispatchEvent(new CustomEvent('ws-tactical-command', { detail: data }))
+        }
+
+        if (data.type && data.type.startsWith('TACTICAL_')) {
+          // V3.33: 统一战术指令分发中心
+          window.dispatchEvent(new CustomEvent('ws-tactical-command', { detail: data }))
         }
 
         if (data.type === 'VIOLATION') {
