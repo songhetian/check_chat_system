@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Shield, BrainCircuit, Activity, Radar as RadarIcon, Trophy, BarChart, 
@@ -6,7 +6,7 @@ import {
   Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor,
   Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X, Maximize2,
   Package, BookOpen, Tags, SearchCheck, Filter, ChevronLeft, AlertOctagon, Wallet, Heart, Ban, Undo2,
-  UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain
+  UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain, PenTool, Send
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -29,17 +29,19 @@ export const TacticalIsland = () => {
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [showBigScreenModal, setShowBigScreenModal] = useState(false)
   
-  const [searchQuery, setSearchText] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
-  
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 话术推送与 AI 优化 (V3.28)
-  const [pushedScript, setPushedScript] = useState<string | null>(null)
+  // 核心：战术草稿与话术推送逻辑 (V3.29)
+  const [content, setContent] = useState('') // 当前编辑器内容
   const [isPushMode, setIsPushMode] = useState(false)
+  const [isScratchpad, setIsScratchpad] = useState(false)
   const [sentiments, setSentiments] = useState<any[]>([])
   const [selectedSentiment, setSelectedSentiment] = useState<any>(null)
   const [optimizing, setOptimizing] = useState(false)
+  const [hasOptimized, setHasOptimized] = useState(false) // 标记是否已经执行过 AI 优化
+
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const fetchSentiments = async () => {
     try {
@@ -55,8 +57,10 @@ export const TacticalIsland = () => {
     fetchSentiments()
     const onCommand = (e: any) => {
       if (e.detail.type === 'TACTICAL_PUSH') {
-        setPushedScript(e.detail.payload.content)
+        setContent(e.detail.payload.content)
         setIsPushMode(true)
+        setIsScratchpad(false)
+        setHasOptimized(false)
         window.electron.ipcRenderer.send('set-always-on-top', true)
       }
     }
@@ -64,12 +68,13 @@ export const TacticalIsland = () => {
     return () => window.removeEventListener('ws-tactical-command', onCommand)
   }, [])
 
+  // 核心：AI 优化逻辑 (Ollama)
   const optimizeScript = async () => {
-    if (!pushedScript || !selectedSentiment) return
+    if (!content || !selectedSentiment) return
     setOptimizing(true)
     try {
       const prompt = `你是一个专业的客服教练。请根据以下[原话术]和[当前客户态度]，优化出一句最合适的回话。只返回优化后的内容，不要有任何废话。
-      [原话术]: ${pushedScript}
+      [原话术]: ${content}
       [当前客户态度]: ${selectedSentiment.name} (${selectedSentiment.prompt_segment})
       优化后的回话：`
 
@@ -82,27 +87,46 @@ export const TacticalIsland = () => {
         body: JSON.stringify({ model, prompt, stream: false })
       })
       const data = await res.json()
-      // 核心：直接替换内容
-      setPushedScript(data.response)
-      toast.success('AI 优化完成', { description: '已自动替换当前话术内容' })
+      setContent(data.response)
+      setHasOptimized(true)
+      toast.success('AI 调优成功', { description: '再次回车即可一键复制' })
     } catch (e) {
       console.error('AI Optimize failed', e)
-      toast.error('AI 链路故障', { description: '无法连接到本地 Ollama 引擎' })
+      toast.error('AI 引擎未就绪')
     } finally {
       setOptimizing(false)
     }
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    window.dispatchEvent(new CustomEvent('trigger-toast', { 
-      detail: { title: '一键复制成功', message: '战术话术已存入剪贴板', type: 'success' } 
-    }))
+  const copyAndClose = () => {
+    navigator.clipboard.writeText(content)
+    toast.success('复制成功', { description: '话术已存入剪贴板，正在收起...' })
+    // 延迟收起，给用户一点反馈感
+    setTimeout(() => {
+      setIsPushMode(false)
+      setIsScratchpad(false)
+      setHasOptimized(false)
+    }, 200)
+  }
+
+  // 核心：双击回车闭环逻辑
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (!hasOptimized) {
+        // 第一次回车：优化
+        optimizeScript()
+      } else {
+        // 第二次回车：复制并关闭
+        copyAndClose()
+      }
+    }
   }
 
   useEffect(() => {
     const screenWidth = window.screen.width
     const screenHeight = window.screen.height
+    const active = isPushMode || isScratchpad
     
     let width = isFolded ? 80 : 720 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
@@ -112,8 +136,9 @@ export const TacticalIsland = () => {
 
     if (isLocked) {
       width = screenWidth; height = screenHeight; x = 0; y = 0;
-    } else if (isPushMode) {
-      width = 720; height = 420; x = screenWidth - 740; y = 30;
+    } else if (active) {
+      width = 720; height = 450;
+      x = screenWidth - 740; y = 30;
     } else if (showBigScreenModal) {
       width = 1280; height = 850; center = true
     } else if (layoutMode === 'SIDE') {
@@ -123,8 +148,15 @@ export const TacticalIsland = () => {
       y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
-    window.electron.ipcRenderer.send('set-always-on-top', isLocked || !showBigScreenModal)
-  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode])
+    window.electron.ipcRenderer.send('set-always-on-top', isLocked || active || !showBigScreenModal)
+    
+    // 激活草稿箱时自动聚焦
+    if (isScratchpad && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 300)
+    }
+  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad])
+
+  const isInSpecialMode = isPushMode || isScratchpad
 
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent text-black">
@@ -147,65 +179,83 @@ export const TacticalIsland = () => {
         initial={false}
         animate={{ 
           width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 720))),
-          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isPushMode ? 420 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
+          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isInSpecialMode ? 450 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
         className={cn(
           "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative",
-          isGlassMode ? "bg-slate-950/60 backdrop-blur-2xl shadow-none" : "bg-slate-950 shadow-none",
-          (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-2xl"
+          isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl shadow-none" : "bg-slate-950 shadow-none",
+          (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-[40px]"
         )}
         style={{ backfaceVisibility: 'hidden', transform: 'translate3d(0,0,0)' } as any}
       >
-        {isPushMode ? (
-          <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-slate-950">
+        {isInSpecialMode ? (
+          <div className="flex-1 flex flex-col p-8 text-white overflow-hidden bg-slate-950/40">
              <div className="flex justify-between items-start mb-6 shrink-0">
-                <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 bg-cyan-600 rounded-xl flex items-center justify-center shadow-lg animate-pulse"><Sparkles size={20}/></div>
+                <div className="flex items-center gap-4">
+                   <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse", isPushMode ? "bg-cyan-600 shadow-cyan-500/20" : "bg-emerald-600 shadow-emerald-500/20")}>
+                      {isPushMode ? <Sparkles size={24}/> : <PenTool size={24}/>}
+                   </div>
                    <div>
-                      <h4 className="text-lg font-black italic tracking-tighter uppercase">指挥部战术支援</h4>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Tactical Command Push Received</p>
+                      <h4 className="text-xl font-black italic tracking-tighter uppercase">{isPushMode ? '指挥部战术支援' : '战术草稿箱'}</h4>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-0.5">{isPushMode ? 'Tactical Push Active' : 'Scratchpad Ready'}</p>
                    </div>
                 </div>
-                <button onClick={() => setIsPushMode(false)} className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10"><Undo2 size={14}/> 返回面板</button>
+                <button onClick={() => { setIsPushMode(false); setIsScratchpad(false); setHasOptimized(false); }} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10 text-slate-300"><Undo2 size={16}/> 退出</button>
              </div>
 
-             <div className="flex-1 flex gap-6 min-h-0">
+             <div className="flex-1 flex gap-8 min-h-0">
                 <div className="flex-1 flex flex-col">
-                   <div className="flex-1 bg-black/40 p-6 rounded-[32px] border border-white/5 relative group overflow-y-auto custom-scrollbar">
-                      <div className="absolute top-4 right-6 text-[8px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
-                         <MessageSquareText size={10}/> 当前战术话术
+                   <div className="flex-1 bg-black/40 rounded-[32px] border border-white/5 relative group p-1 shadow-inner focus-within:border-cyan-500/50 transition-all">
+                      <div className="absolute top-4 right-6 text-[8px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2 pointer-events-none z-10">
+                         <MessageSquareText size={10}/> 编辑内容 (回车优化 / 再次回车复制)
                       </div>
-                      <p className="text-base font-medium leading-relaxed italic text-white mt-2">"{pushedScript}"</p>
+                      <textarea
+                        ref={inputRef}
+                        value={content}
+                        onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }}
+                        onKeyDown={handleKeyDown}
+                        placeholder="请输入心里话..."
+                        className="w-full h-full bg-transparent px-6 pt-10 pb-6 rounded-[32px] text-lg font-medium leading-relaxed italic text-white resize-none outline-none custom-scrollbar"
+                      />
                    </div>
-                   <div className="flex gap-3 mt-4">
-                      <button onClick={() => copyToClipboard(pushedScript || '')} className="flex-1 flex items-center justify-center gap-2 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-xs font-black transition-all border border-white/10 text-white active:scale-95 shadow-inner"><ImageIcon size={16}/> 复制当前内容</button>
+                   <div className="flex gap-4 mt-6">
+                      <button onClick={copyAndClose} className="flex-1 flex items-center justify-center gap-3 py-5 bg-white/5 hover:bg-white/10 rounded-2xl text-xs font-black transition-all border border-white/10 text-white active:scale-95 shadow-inner group">
+                         <ImageIcon size={18} className="text-slate-400 group-hover:text-white transition-colors" /> 
+                         仅复制当前
+                      </button>
                       <button 
-                        disabled={optimizing || !selectedSentiment}
+                        disabled={optimizing || !selectedSentiment || !content}
                         onClick={optimizeScript}
-                        className="flex-1 py-4 bg-cyan-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-cyan-900/20 hover:bg-cyan-500 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                        className={cn(
+                          "flex-[1.5] py-5 rounded-2xl font-black text-sm uppercase shadow-2xl transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-30",
+                          hasOptimized ? "bg-emerald-600 text-white shadow-emerald-900/20" : "bg-cyan-600 text-white shadow-cyan-900/20"
+                        )}
                       >
-                         {optimizing ? <Loader2 className="animate-spin" size={16}/> : <Sparkles size={16}/>}
-                         AI 态度调优并替换
+                         {optimizing ? <Loader2 className="animate-spin" size={20}/> : (hasOptimized ? <CheckCircle2 size={20}/> : <Sparkles size={20}/>)}
+                         {hasOptimized ? '再次回车确认复制' : 'AI 优化并替换 (Enter)'}
                       </button>
                    </div>
                 </div>
 
-                <div className="w-56 shrink-0 flex flex-col bg-white/5 p-4 rounded-[32px] border border-white/5">
-                   <span className="text-[9px] font-black text-slate-500 uppercase ml-2 mb-3 tracking-widest flex items-center gap-1.5"><Brain size={10}/> 客户实时情绪</span>
-                   <div className="flex-1 flex flex-col gap-2 overflow-y-auto custom-scrollbar pr-1">
+                <div className="w-64 shrink-0 flex flex-col bg-white/5 p-6 rounded-[40px] border border-white/5 shadow-inner">
+                   <span className="text-[10px] font-black text-slate-500 uppercase ml-2 mb-4 tracking-[0.2em] flex items-center gap-2"><Brain size={14} className="text-cyan-500"/> 客户情绪对齐</span>
+                   <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto custom-scrollbar pr-1">
                       {sentiments.map((s) => (
                         <button 
                           key={s.id}
-                          onClick={() => setSelectedSentiment(s)}
+                          onClick={() => { setSelectedSentiment(s); setHasOptimized(false); }}
                           className={cn(
-                            "py-3 px-4 rounded-xl text-[10px] font-black transition-all flex flex-col items-start gap-1 border text-left",
+                            "py-4 px-5 rounded-2xl text-[11px] font-black transition-all flex flex-col items-start gap-1.5 border text-left group/s",
                             selectedSentiment?.id === s.id 
-                              ? `bg-${s.color}-500/20 text-${s.color}-400 border-${s.color}-500/50 shadow-inner` 
-                              : "bg-white/5 text-slate-500 border-white/5 hover:bg-white/10"
+                              ? `bg-${s.color}-500/20 text-${s.color}-400 border-${s.color}-500/50 shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]` 
+                              : "bg-white/[0.02] text-slate-500 border-white/[0.05] hover:bg-white/5 hover:text-slate-300"
                           )}
                         >
-                           <span>{s.name}</span>
-                           <span className="text-[8px] opacity-40 font-medium truncate w-full">{s.prompt_segment}</span>
+                           <span className="flex items-center gap-2 uppercase tracking-tighter">
+                              <div className={cn("w-1.5 h-1.5 rounded-full", `bg-${s.color}-500`)} />
+                              {s.name}
+                           </span>
+                           <span className="text-[9px] opacity-30 font-medium leading-tight group-hover/s:opacity-60 transition-opacity">{s.prompt_segment}</span>
                         </button>
                       ))}
                    </div>
@@ -239,6 +289,7 @@ export const TacticalIsland = () => {
                         <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
                         <HubBtn icon={isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />} active={isMuted} onClick={() => setMuted(!isMuted)} title={isMuted ? "解禁" : "静音"} color={isMuted ? "red" : "muted"} />
                         <div className="w-px h-5 bg-white/10 mx-0.5" />
+                        <HubBtn icon={<PenTool size={20} />} active={isScratchpad} onClick={() => { setIsScratchpad(true); setContent(''); setHasOptimized(false); }} title="草稿" color="emerald" />
                         <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="资料" color="white" />
                         <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
                         <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="画像" color={isCustomerHudEnabled ? "emerald" : "white"} />
