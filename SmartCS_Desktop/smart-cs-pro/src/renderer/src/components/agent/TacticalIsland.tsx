@@ -18,7 +18,7 @@ export const TacticalIsland = () => {
     isAlerting, isOnline, violations, isGlassMode, setGlassMode,
     layoutMode, setLayoutMode, activeSideTool, setActiveSideTool,
     isCustomerHudEnabled, setCustomerHudEnabled, currentCustomer, setCurrentCustomer,
-    isOnboardingMode, setOnboardingMode, isMuted, setMuted
+    isOnboardingMode, setOnboardingMode, isMuted, setMuted, isLocked
   } = useRiskStore()
   
   const { user, logout } = useAuthStore()
@@ -37,17 +37,23 @@ export const TacticalIsland = () => {
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
   useEffect(() => {
-    const screenWidth = window.screen.availWidth
-    const screenHeight = window.screen.availHeight
+    const screenWidth = window.screen.width
+    const screenHeight = window.screen.height
     
-    // 物理宽度：安全宽度 720px
+    // 物理宽度计算
     let width = isFolded ? 80 : 720 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
     let y: number | undefined = undefined
     let center = false
 
-    if (showBigScreenModal) {
+    // V3.25: 锁定模式下的物理全屏自适应
+    if (isLocked) {
+      width = screenWidth;
+      height = screenHeight;
+      x = 0;
+      y = 0;
+    } else if (showBigScreenModal) {
       width = 1280; height = 850; center = true
     } else if (layoutMode === 'SIDE') {
       width = 440; height = screenHeight - 80; x = screenWidth - 460; y = 40
@@ -56,8 +62,9 @@ export const TacticalIsland = () => {
       y = 30
     }
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
-    window.electron.ipcRenderer.send('set-always-on-top', !showBigScreenModal)
-  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded])
+    // 锁定状态下强制置顶
+    window.electron.ipcRenderer.send('set-always-on-top', isLocked || !showBigScreenModal)
+  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked])
 
   const executeSearch = async () => {
     const apiType = activeSideTool === 'PRODUCTS' ? 'products' : 'violations'; 

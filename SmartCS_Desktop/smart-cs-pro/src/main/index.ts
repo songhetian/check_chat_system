@@ -23,10 +23,13 @@ function startPythonEngine(): void {
       // 关键修复：Windows 通常使用 'python' 而非 'python3'
       const cmd = process.platform === 'win32' ? 'python' : 'python3'
       pythonProcess = spawn(cmd, [enginePath], {
-        shell: process.platform === 'win32' // Windows 下启用 shell 以正确解析环境变量
+        shell: process.platform === 'win32', // Windows 下启用 shell 以正确解析环境变量
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8' } // 强制 Python 输出 UTF-8 解决乱码
       })
     } else if (fs.existsSync(enginePath)) {
-      pythonProcess = spawn(enginePath)
+      pythonProcess = spawn(enginePath, [], {
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+      })
     }
 
     pythonProcess?.stdout?.on('data', (data) => console.log(`[Engine]: ${data}`))

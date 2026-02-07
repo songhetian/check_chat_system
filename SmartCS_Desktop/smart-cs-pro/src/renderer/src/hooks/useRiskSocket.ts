@@ -102,10 +102,8 @@ export const useRiskSocket = () => {
            useRiskStore.getState().setIsLocked(nextState);
            
            // V3.24: 物理系统级锁定指令下发 (通知本地 Python 引擎)
-           // 关键：必须请求 127.0.0.1 或当前托管源，不能请求中央服务器
-           const localApiBase = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') 
-             ? `${window.location.origin}/api` 
-             : `http://localhost:8000/api`;
+           // 关键：强制发往引擎默认端口 8000
+           const localApiBase = `http://localhost:8000/api`;
 
            window.api.callApi({
              url: `${localApiBase}/system/lock`,

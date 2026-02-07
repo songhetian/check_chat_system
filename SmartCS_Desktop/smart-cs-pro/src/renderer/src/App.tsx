@@ -207,19 +207,19 @@ const AgentView = () => {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999999] bg-red-900/60 backdrop-blur-md flex flex-col items-center justify-center cursor-not-allowed select-none"
+            className="fixed inset-0 z-[999999] bg-red-600/40 backdrop-blur-md flex flex-col items-center justify-center cursor-not-allowed select-none"
             onContextMenu={(e) => e.preventDefault()}
           >
              <motion.div 
                initial={{ scale: 0.9 }}
                animate={{ scale: 1 }}
-               className="flex flex-col items-center text-center"
+               className="flex flex-col items-center text-center p-12 bg-black/20 rounded-[40px] border border-white/10"
              >
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-2xl mb-6 animate-pulse">
-                   <LockIcon size={40} className="text-red-600" strokeWidth={3} />
+                <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.3)] mb-8 animate-pulse">
+                   <LockIcon size={48} className="text-red-600" strokeWidth={3} />
                 </div>
-                <h3 className="text-4xl font-black text-white uppercase italic tracking-widest mb-2 shadow-sm">已开启锁定模式</h3>
-                <p className="text-red-100 text-sm font-bold opacity-80 uppercase tracking-[0.3em]">
+                <h3 className="text-5xl font-black text-white uppercase italic tracking-[0.2em] mb-4 drop-shadow-2xl">已开启锁定模式</h3>
+                <p className="text-red-10 text-base font-black opacity-90 uppercase tracking-[0.4em] animate-bounce">
                   Tactical Lock Protocol Active
                 </p>
              </motion.div>
