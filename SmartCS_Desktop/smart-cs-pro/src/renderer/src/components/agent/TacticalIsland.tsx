@@ -9,6 +9,7 @@ import {
   UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain, PenTool, Send,
   AlertTriangle, ChevronDown, Check
 } from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { cn, tacticalRequest } from '../../lib/utils'
@@ -23,7 +24,8 @@ export const TacticalIsland = () => {
     isOnboardingMode, setOnboardingMode, isMuted, setMuted, isLocked
   } = useRiskStore()
   
-  const { user, logout } = useAuthStore()
+  const { user, logout, token } = useAuthStore()
+  const queryClient = useQueryClient()
   const [isExpanded, setIsExpanded] = useState(false)
   const [isFolded, setIsFolded] = useState(false) 
   const [activeTab, setActiveTab] = useState<'AI' | 'RADAR' | 'TOOLS'>('AI')
@@ -33,11 +35,10 @@ export const TacticalIsland = () => {
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 核心：战术草稿与话术推送逻辑 (V3.32)
+  // 核心：战术草稿与话术推送逻辑 (V3.34 - React Query 纯净版)
   const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
-  const [sentiments, setSentiments] = useState<any[]>([])
   const [selectedSentiment, setSelectedSentiment] = useState<any>(null)
   const [optimizing, setOptimizing] = useState(false)
   const [hasOptimized, setHasOptimized] = useState(false)
@@ -51,103 +52,53 @@ export const TacticalIsland = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-    const fetchSentiments = async () => {
-
-      try {
-
-        console.log('📡 [Island] Fetching Sentiments...')
-
-        const res = await window.api.callApi({ 
-
-          url: `${CONFIG.API_BASE}/ai/sentiments`, 
-
-          method: 'GET', 
-
-          headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` } 
-
-        })
-
-        if (res.status === 200) {
-
-          console.log('✅ [Island] Sentiments Loaded:', res.data.data)
-
-          setSentiments(res.data.data)
-
-          const neutral = res.data.data.find((s: any) => s.name.includes('中性') || s.id === 0) || res.data.data[0]
-
-          setSelectedSentiment(neutral)
-
-        }
-
-      } catch (e) { console.error('❌ [Island] Load Sentiments Failed:', e) }
-
-    }
-
-  
-
-    useEffect(() => {
-
-      fetchSentiments()
-
-      // 关键修正：统一指令接收中心
-
-      const onCommand = (e: any) => {
-
-        const data = e.detail;
-
-        console.log(`⚡ [Tactical Link] New Command: ${data.type}`, data);
-
-        
-
-        if (data.type === 'TACTICAL_PUSH') {
-
-          setContent(data.payload.content)
-
-          setIsPushMode(true)
-
-          setIsScratchpad(false)
-
-          setIsEvasionMode(false)
-
-          setHasOptimized(false)
-
-          window.electron.ipcRenderer.send('set-always-on-top', true)
-
-        }
-
-        
-
-        if (data.type === 'TACTICAL_DEPT_VIOLATION') {
-
-          setEvasionInfo(data)
-
-          setIsEvasionMode(true)
-
-          setIsPushMode(false)
-
-          setIsScratchpad(false)
-
-          // 物理干预
-
-          window.api.callApi({ url: `http://localhost:8000/api/system/clear-input`, method: 'POST' })
-
-        }
-
+  // 1. 核心：由 useQuery 接管情绪数据 (物理卸载 useEffect)
+  const { data: sentiments = [] } = useQuery({
+    queryKey: ['ai_sentiments_island'],
+    queryFn: async () => {
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/ai/sentiments`, 
+        method: 'GET', 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      })
+      const data = res.data.data
+      // 自动对齐默认情绪
+      if (!selectedSentiment && data.length > 0) {
+        const neutral = data.find((s: any) => s.name.includes('中性') || s.id === 0) || data[0]
+        setSelectedSentiment(neutral)
       }
+      return data
+    },
+    enabled: !!token,
+    staleTime: 300000 // 5分钟强缓存
+  })
 
+  // 2. 仅保留纯粹的 WebSocket 事件监听
+  useEffect(() => {
+    const onCommand = (e: any) => {
+      const data = e.detail;
+      if (data.type === 'TACTICAL_PUSH') {
+        setContent(data.payload.content)
+        setIsPushMode(true)
+        setIsScratchpad(false)
+        setIsEvasionMode(false)
+        setHasOptimized(false)
+        window.electron.ipcRenderer.send('set-always-on-top', true)
+      }
       
-
-      window.addEventListener('ws-tactical-command', onCommand)
-
-      return () => {
-
-        window.removeEventListener('ws-tactical-command', onCommand)
-
+      if (data.type === 'TACTICAL_DEPT_VIOLATION') {
+        setEvasionInfo(data)
+        setIsEvasionMode(true)
+        setIsPushMode(false)
+        setIsScratchpad(false)
+        window.api.callApi({ url: `http://localhost:8000/api/system/clear-input`, method: 'POST' })
       }
+    }
+    
+    window.addEventListener('ws-tactical-command', onCommand)
+    return () => window.removeEventListener('ws-tactical-command', onCommand)
+  }, [])
 
-    }, [])
-
-  // 点击外部关闭下拉框
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -159,7 +110,7 @@ export const TacticalIsland = () => {
   }, [])
 
   const filteredSentiments = useMemo(() => {
-    return sentiments.filter(s => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
+    return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
   }, [sentiments, sentimentSearch])
 
   const optimizeScript = async () => {
@@ -213,7 +164,7 @@ export const TacticalIsland = () => {
     if (isLocked) {
       width = screenWidth; height = screenHeight; x = 0; y = 0;
     } else if (active) {
-      width = 800; height = 550; // V3.32: 增加高度适配上下布局
+      width = 800; height = 550;
       x = screenWidth - 820; y = 30;
     } else if (showBigScreenModal) {
       width = 1280; height = 850; center = true
@@ -302,7 +253,6 @@ export const TacticalIsland = () => {
                 <button onClick={() => { setIsPushMode(false); setIsScratchpad(false); setHasOptimized(false); }} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10 text-slate-300"><Undo2 size={16}/> 退出</button>
              </div>
 
-             {/* V3.32: 升级为上下布局，优化视觉呼吸感 */}
              <div className="flex-1 flex flex-col gap-6 min-h-0">
                 <div className="flex-1 flex flex-col">
                    <div className="flex-1 bg-black/40 rounded-[32px] border border-white/5 relative group p-1 shadow-inner focus-within:border-cyan-500/50 transition-all">
@@ -320,9 +270,7 @@ export const TacticalIsland = () => {
                    </div>
                 </div>
 
-                {/* 底部控制中心：情绪选择 + 动作按钮 */}
                 <div className="flex items-center gap-4 h-20 shrink-0 bg-white/5 p-2 rounded-[24px] border border-white/5">
-                   {/* 搜索式情绪下拉框 */}
                    <div className="relative w-64 h-full" ref={dropdownRef}>
                       <button 
                         onClick={() => setShowSentimentDropdown(!showSentimentDropdown)}
@@ -351,7 +299,7 @@ export const TacticalIsland = () => {
                                 />
                              </div>
                              <div className="max-h-48 overflow-y-auto custom-scrollbar p-1">
-                                {filteredSentiments.map(s => (
+                                {filteredSentiments.map((s: any) => (
                                   <button 
                                     key={s.id}
                                     onClick={() => { setSelectedSentiment(s); setHasOptimized(false); setShowSentimentDropdown(false); }}
