@@ -14,7 +14,6 @@ import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { cn, tacticalRequest } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
-import { toast } from 'sonner'
 
 export const TacticalIsland = () => {
   const { 
@@ -35,7 +34,7 @@ export const TacticalIsland = () => {
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 核心：战术草稿与话术推送逻辑 (V3.34 - React Query 纯净版)
+  // 核心状态 (V3.35)
   const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
@@ -45,14 +44,14 @@ export const TacticalIsland = () => {
   const [sentimentSearch, setSentimentSearch] = useState('')
   const [showSentimentDropdown, setShowSentimentDropdown] = useState(false)
 
-  // 战术规避模式 (V3.30)
+  // 战术规避模式
   const [isEvasionMode, setIsEvasionMode] = useState(false)
   const [evasionInfo, setEvasionInfo] = useState<any>(null)
 
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // 1. 核心：由 useQuery 接管情绪数据 (物理卸载 useEffect)
+  // 1. 数据采集：由 useQuery 接管
   const { data: sentiments = [] } = useQuery({
     queryKey: ['ai_sentiments_island'],
     queryFn: async () => {
@@ -62,7 +61,6 @@ export const TacticalIsland = () => {
         headers: { 'Authorization': `Bearer ${token}` } 
       })
       const data = res.data.data
-      // 自动对齐默认情绪
       if (!selectedSentiment && data.length > 0) {
         const neutral = data.find((s: any) => s.name.includes('中性') || s.id === 0) || data[0]
         setSelectedSentiment(neutral)
@@ -70,10 +68,10 @@ export const TacticalIsland = () => {
       return data
     },
     enabled: !!token,
-    staleTime: 300000 // 5分钟强缓存
+    staleTime: 300000
   })
 
-  // 2. 仅保留纯粹的 WebSocket 事件监听
+  // 2. 指令监听
   useEffect(() => {
     const onCommand = (e: any) => {
       const data = e.detail;
@@ -113,11 +111,12 @@ export const TacticalIsland = () => {
     return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
   }, [sentiments, sentimentSearch])
 
+  // 核心：修正 AI 优化逻辑
   const optimizeScript = async () => {
     if (!content || !selectedSentiment) return
     setOptimizing(true)
     try {
-      const prompt = `你是一个专业的客服教练。请根据以下[原话术]和[当前客户态度]，优化出一句最合适的回话。只返回优化后的内容，不要有任何废话。
+      const prompt = `你是一个专业的客服教练。请根据以下[原话术]和[当前客户态度]，优化出一句最合适的回话。只返回优化后的内容，不要有任何其他文字。
       [原话术]: ${content}
       [当前客户态度]: ${selectedSentiment.name} (${selectedSentiment.prompt_segment})
       优化后的回话：`
@@ -125,21 +124,30 @@ export const TacticalIsland = () => {
       const serverConfig = await window.api.getServerConfig()
       const res = await fetch(serverConfig.ai_engine.url, {
         method: 'POST',
-        body: JSON.stringify({ model: serverConfig.ai_engine.model, prompt, stream: false })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          model: serverConfig.ai_engine.model, 
+          prompt: prompt, 
+          stream: false 
+        })
       })
       const data = await res.json()
-      setContent(data.response)
-      setHasOptimized(true)
-      toast.success('AI 调优成功')
+      if (data.response) {
+        setContent(data.response.trim())
+        setHasOptimized(true)
+      }
     } catch (e) {
-      toast.error('AI 引擎未就绪')
+      console.error('AI Optimize failed', e)
     } finally { setOptimizing(false) }
   }
 
   const copyAndClose = () => {
+    if (!content) return
     navigator.clipboard.writeText(content)
-    toast.success('一键复制成功')
-    setTimeout(() => { setIsPushMode(false); setIsScratchpad(false); setHasOptimized(false); }, 200)
+    // 移除 toast 提示，直接静默关闭
+    setIsPushMode(false)
+    setIsScratchpad(false)
+    setHasOptimized(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -164,7 +172,8 @@ export const TacticalIsland = () => {
     if (isLocked) {
       width = screenWidth; height = screenHeight; x = 0; y = 0;
     } else if (active) {
-      width = 800; height = 550;
+      // V3.35: 压缩高度，减少输入框占用面积
+      width = 800; height = 420;
       x = screenWidth - 820; y = 30;
     } else if (showBigScreenModal) {
       width = 1280; height = 850; center = true
@@ -193,7 +202,7 @@ export const TacticalIsland = () => {
                 <AlertOctagon size={140} className="text-red-500 animate-pulse mx-auto mb-8" />
                 <div className="text-center space-y-4">
                    <h2 className="text-7xl font-black text-white italic tracking-tighter uppercase text-center">智脑战术警告</h2>
-                   <p className="text-2xl font-black text-red-400 uppercase tracking-[0.4em] text-center">检测到客户态度极其恶劣 · 请立即启用危机公关话术</p>
+                   <p className="text-2xl font-black text-red-400 uppercase tracking-[0.4em] text-center">检测到客户态度极其恶劣</p>
                 </div>
              </div>
           </motion.div>
@@ -205,7 +214,7 @@ export const TacticalIsland = () => {
         initial={false}
         animate={{ 
           width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 800))),
-          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isInSpecialMode || isEvasionMode ? 550 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
+          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isInSpecialMode || isEvasionMode ? 420 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
         className={cn(
           "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative",
@@ -216,71 +225,56 @@ export const TacticalIsland = () => {
       >
         {isEvasionMode ? (
           <div className="flex-1 flex flex-col p-8 text-white overflow-hidden bg-amber-900/40">
-             <div className="flex justify-between items-start mb-8 shrink-0">
+             <div className="flex justify-between items-start mb-4 shrink-0">
                 <div className="flex items-center gap-4">
-                   <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce"><AlertTriangle size={24} className="text-black"/></div>
-                   <div>
-                      <h4 className="text-xl font-black italic tracking-tighter uppercase text-amber-400">战术规避拦截</h4>
-                      <p className="text-[10px] font-bold text-amber-200/60 uppercase tracking-[0.3em] mt-0.5">Tactical Evasion Protocol</p>
-                   </div>
+                   <div className="w-10 h-10 bg-amber-500 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce"><AlertTriangle size={20} className="text-black"/></div>
+                   <h4 className="text-lg font-black italic tracking-tighter uppercase text-amber-400">战术规避拦截</h4>
                 </div>
-                <button onClick={() => setIsEvasionMode(false)} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10 text-amber-200"><Undo2 size={16}/> 关闭提示</button>
+                <button onClick={() => setIsEvasionMode(false)} className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10 text-amber-200"><Undo2 size={14}/> 关闭</button>
              </div>
-             <div className="flex-1 flex flex-col items-center justify-center text-center px-10 gap-6">
-                <div className="space-y-2">
-                   <p className="text-sm font-bold text-amber-200/80 uppercase tracking-widest">检测到禁忌词项</p>
-                   <div className="text-5xl font-black text-white italic tracking-tighter decoration-red-500 decoration-4 underline underline-offset-8">"{evasionInfo?.keyword}"</div>
+             <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
+                <div className="text-4xl font-black text-white italic tracking-tighter underline decoration-amber-500">"{evasionInfo?.keyword}"</div>
+                <div className="w-full max-w-md p-5 bg-black/40 rounded-[24px] border border-amber-500/30">
+                   <p className="text-xs font-black text-amber-400 uppercase mb-2">修正建议</p>
+                   <p className="text-base font-medium italic text-white">"{evasionInfo?.suggestion}"</p>
                 </div>
-                <div className="w-full max-w-md p-6 bg-black/40 rounded-[32px] border border-amber-500/30 shadow-2xl">
-                   <p className="text-xs font-black text-amber-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><CheckCircle2 size={14}/> 修正建议</p>
-                   <p className="text-lg font-medium leading-relaxed italic text-white">"{evasionInfo?.suggestion}"</p>
-                </div>
-                <p className="text-[10px] font-bold text-amber-200/40 uppercase tracking-[0.4em]">输入已物理清空 · 请使用建议语重新输入</p>
              </div>
           </div>
         ) : isInSpecialMode ? (
-          <div className="flex-1 flex flex-col p-8 text-white overflow-hidden bg-slate-950/40">
-             <div className="flex justify-between items-start mb-6 shrink-0">
+          <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-slate-950/40">
+             <div className="flex justify-between items-start mb-4 shrink-0">
                 <div className="flex items-center gap-4">
-                   <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse", isPushMode ? "bg-cyan-600 shadow-cyan-500/20" : "bg-emerald-600 shadow-emerald-500/20")}>
-                      {isPushMode ? <Sparkles size={24}/> : <PenTool size={24}/>}
+                   <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse", isPushMode ? "bg-cyan-600 shadow-cyan-500/20" : "bg-emerald-600 shadow-emerald-500/20")}>
+                      {isPushMode ? <Sparkles size={20}/> : <PenTool size={20}/>}
                    </div>
-                   <div>
-                      <h4 className="text-xl font-black italic tracking-tighter uppercase">{isPushMode ? '指挥部战术支援' : '战术草稿箱'}</h4>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-0.5">{isPushMode ? 'Tactical Push Active' : 'Scratchpad Ready'}</p>
-                   </div>
+                   <h4 className="text-lg font-black italic tracking-tighter uppercase">{isPushMode ? '指挥部战术支援' : '战术草稿箱'}</h4>
                 </div>
-                <button onClick={() => { setIsPushMode(false); setIsScratchpad(false); setHasOptimized(false); }} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10 text-slate-300"><Undo2 size={16}/> 退出</button>
+                <button onClick={() => { setIsPushMode(false); setIsScratchpad(false); setHasOptimized(false); }} className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10 text-slate-300"><Undo2 size={14}/> 退出</button>
              </div>
 
-             <div className="flex-1 flex flex-col gap-6 min-h-0">
-                <div className="flex-1 flex flex-col">
-                   <div className="flex-1 bg-black/40 rounded-[32px] border border-white/5 relative group p-1 shadow-inner focus-within:border-cyan-500/50 transition-all">
-                      <div className="absolute top-4 right-6 text-[8px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2 pointer-events-none z-10">
-                         <MessageSquareText size={10}/> 编辑内容 (回车优化 / 再次回车复制)
-                      </div>
-                      <textarea
-                        ref={inputRef}
-                        value={content}
-                        onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }}
-                        onKeyDown={handleKeyDown}
-                        placeholder="请输入心里话..."
-                        className="w-full h-full bg-transparent px-8 pt-12 pb-8 rounded-[32px] text-xl font-medium leading-relaxed italic text-white resize-none outline-none custom-scrollbar"
-                      />
-                   </div>
+             <div className="flex-1 flex flex-col gap-4 min-h-0">
+                <div className="flex-1 bg-black/40 rounded-[24px] border border-white/5 relative group shadow-inner focus-within:border-cyan-500/50 transition-all overflow-hidden">
+                   <textarea
+                     ref={inputRef}
+                     value={content}
+                     onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }}
+                     onKeyDown={handleKeyDown}
+                     placeholder="输入草稿内容..."
+                     className="w-full h-full bg-transparent px-6 py-6 rounded-[24px] text-lg font-medium leading-relaxed italic text-white resize-none outline-none custom-scrollbar"
+                   />
                 </div>
 
-                <div className="flex items-center gap-4 h-20 shrink-0 bg-white/5 p-2 rounded-[24px] border border-white/5">
-                   <div className="relative w-64 h-full" ref={dropdownRef}>
+                <div className="flex items-center gap-3 h-16 shrink-0 bg-white/5 p-1.5 rounded-[20px] border border-white/5">
+                   <div className="relative w-56 h-full" ref={dropdownRef}>
                       <button 
                         onClick={() => setShowSentimentDropdown(!showSentimentDropdown)}
-                        className="w-full h-full px-5 flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group"
+                        className="w-full h-full px-4 flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group"
                       >
-                         <div className="flex items-center gap-3">
-                            <Brain size={16} className={cn(selectedSentiment ? `text-${selectedSentiment.color}-400` : "text-slate-400")} />
-                            <span className="text-xs font-black text-white truncate">{selectedSentiment?.name || '选择情绪'}</span>
+                         <div className="flex items-center gap-2">
+                            <Brain size={14} className={cn(selectedSentiment ? `text-${selectedSentiment.color}-400` : "text-slate-400")} />
+                            <span className="text-[11px] font-black text-white truncate">{selectedSentiment?.name || '选择情绪'}</span>
                          </div>
-                         <ChevronDown size={16} className={cn("text-slate-500 transition-transform", showSentimentDropdown && "rotate-180")} />
+                         <ChevronDown size={14} className="text-slate-500" />
                       </button>
 
                       <AnimatePresence>
@@ -289,30 +283,30 @@ export const TacticalIsland = () => {
                             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                             className="absolute bottom-full left-0 right-0 mb-3 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100]"
                           >
-                             <div className="p-3 border-b border-white/5 bg-white/5">
+                             <div className="p-2.5 bg-white/5 border-b border-white/5">
                                 <input 
                                   autoFocus
                                   value={sentimentSearch}
                                   onChange={(e) => setSentimentSearch(e.target.value)}
-                                  placeholder="快速检索维度..."
-                                  className="w-full bg-black/40 border-none rounded-lg px-3 py-2 text-[10px] font-bold text-white outline-none"
+                                  placeholder="快速检索..."
+                                  className="w-full bg-black/40 border-none rounded-lg px-3 py-1.5 text-[10px] font-bold text-white outline-none"
                                 />
                              </div>
-                             <div className="max-h-48 overflow-y-auto custom-scrollbar p-1">
+                             <div className="max-h-40 overflow-y-auto custom-scrollbar p-1">
                                 {filteredSentiments.map((s: any) => (
                                   <button 
                                     key={s.id}
                                     onClick={() => { setSelectedSentiment(s); setHasOptimized(false); setShowSentimentDropdown(false); }}
                                     className={cn(
-                                      "w-full px-4 py-2.5 rounded-xl flex items-center justify-between text-[10px] font-black transition-all hover:bg-white/5 text-left group",
+                                      "w-full px-3 py-2 rounded-lg flex items-center justify-between text-[10px] font-black transition-all hover:bg-white/5 text-left",
                                       selectedSentiment?.id === s.id ? "bg-cyan-600/20 text-cyan-400" : "text-slate-400"
                                     )}
                                   >
                                      <div className="flex items-center gap-2">
-                                        <div className={cn("w-1.5 h-1.5 rounded-full", `bg-${s.color}-500`)} />
+                                        <div className={cn("w-1 h-1 rounded-full", `bg-${s.color}-500`)} />
                                         {s.name}
                                      </div>
-                                     {selectedSentiment?.id === s.id && <Check size={12}/>}
+                                     {selectedSentiment?.id === s.id && <Check size={10}/>}
                                   </button>
                                 ))}
                              </div>
@@ -321,20 +315,20 @@ export const TacticalIsland = () => {
                       </AnimatePresence>
                    </div>
 
-                   <button onClick={copyAndClose} className="px-6 h-full flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-black transition-all border border-white/10 text-slate-300 group">
-                      <ImageIcon size={18} className="text-slate-500 group-hover:text-white" /> 仅复制
+                   <button onClick={copyAndClose} className="px-4 h-full flex items-center gap-2 bg-white/5 hover:bg-white/10 rounded-xl text-[11px] font-black border border-white/10 text-slate-300">
+                      <ImageIcon size={16}/> 仅复制
                    </button>
 
                    <button 
                      disabled={optimizing || !selectedSentiment || !content}
                      onClick={optimizeScript}
                      className={cn(
-                       "flex-1 h-full rounded-xl font-black text-sm uppercase shadow-2xl transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-30",
-                       hasOptimized ? "bg-emerald-600 text-white" : "bg-cyan-600 text-white"
+                       "flex-1 h-full rounded-xl font-black text-xs uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-30",
+                       hasOptimized ? "bg-emerald-600 text-white shadow-lg" : "bg-cyan-600 text-white shadow-lg"
                      )}
                    >
-                      {optimizing ? <Loader2 className="animate-spin" size={20}/> : (hasOptimized ? <CheckCircle2 size={20}/> : <Sparkles size={20}/>)}
-                      {hasOptimized ? '再次回车确认复制' : 'AI 优化并替换 (Enter)'}
+                      {optimizing ? <Loader2 className="animate-spin" size={16}/> : (hasOptimized ? <CheckCircle2 size={16}/> : <Sparkles size={16}/>)}
+                      {hasOptimized ? '再次回车复制' : 'AI 调优 (Enter)'}
                    </button>
                 </div>
              </div>
