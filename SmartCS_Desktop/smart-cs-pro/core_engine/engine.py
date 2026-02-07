@@ -171,6 +171,25 @@ async def system_lock_api(request: Request):
     SYSTEM_LOCKED = lock if success else SYSTEM_LOCKED
     return {"status": "ok" if success else "error", "locked": SYSTEM_LOCKED}
 
+@app.post("/api/system/clear-input")
+async def clear_input_api():
+    """物理清空输入框 (模拟 Ctrl+A + Backspace)"""
+    if sys.platform == "win32":
+        try:
+            import pyautogui
+            pyautogui.hotkey('ctrl', 'a')
+            pyautogui.press('backspace')
+            return {"status": "ok"}
+        except ImportError:
+            # 备选方案：调用 powershell 脚本模拟按键
+            cmd = "powershell -Command \"$wshell = New-Object -ComObject WScript.Shell; $wshell.SendKeys('^a'); $wshell.SendKeys('{BACKSPACE}')\""
+            subprocess.run(cmd, shell=True)
+            return {"status": "ok"}
+        except Exception as e:
+            logger.error(f"❌ [清空输入失败] {e}")
+            return {"status": "error"}
+    return {"status": "skipped"}
+
 # 挂载业务路由 (所有路由均已带 /api 前缀)
 app.include_router(auth_router)
 app.include_router(admin_router)

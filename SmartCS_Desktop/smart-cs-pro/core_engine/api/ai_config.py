@@ -1,15 +1,77 @@
 from fastapi import APIRouter, Depends, Request, Query
-from core.models import SensitiveWord, KnowledgeBase, PolicyCategory, AuditLog, CustomerSentiment
+from core.models import SensitiveWord, KnowledgeBase, PolicyCategory, AuditLog, CustomerSentiment, DeptSensitiveWord, DeptComplianceLog
 from api.auth import get_current_user, check_permission
 from tortoise.transactions import in_transaction
+from tortoise.expressions import Q
 import json
 
-router = APIRouter(prefix="/api/ai", tags=["AI Policy"])
+# ... (保持原有代码不变)
 
-async def record_audit(operator: str, action: str, target: str, details: str):
-    await AuditLog.create(operator=operator, action=action, target=target, details=details)
+@router.get("/dept-words")
+async def get_dept_words(page: int = 1, size: int = 10, search: str = "", current_user: dict = Depends(get_current_user)):
+    query = DeptSensitiveWord.filter(is_deleted=0)
+    role_id = current_user.get("role_id")
+    dept_id = current_user.get("dept_id")
+    
+    if role_id != 3:
+        query = query.filter(Q(department_id__isnull=True) | Q(department_id=dept_id))
+    
+    if search:
+        query = query.filter(word__icontains=search)
+        
+    total = await query.count()
+    data = await query.select_related("category", "department").offset((page - 1) * size).limit(size).order_by("-id").values(
+        "id", "word", "suggestion", "category__name", "category_id", "department_id", "department__name", "is_active"
+    )
+    return {"status": "ok", "data": data, "total": total}
 
-@router.get("/sentiments")
+@router.post("/dept-words")
+async def save_dept_word(data: dict, user: dict = Depends(check_permission("admin:dept_word:create"))):
+    item_id = data.get("id")
+    role_id = user.get("role_id")
+    dept_id = user.get("dept_id")
+    
+    if item_id and "admin:dept_word:update" not in user.get("permissions", []):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="越权拦截：缺失更新权限")
+
+    target_dept_id = data.get("department_id")
+    if role_id != 3: target_dept_id = dept_id
+    elif not target_dept_id or target_dept_id == 'GLOBAL': target_dept_id = None
+
+    payload = {
+        "word": data.get("word"), 
+        "suggestion": data.get("suggestion"), 
+        "category_id": data.get("category_id"),
+        "department_id": target_dept_id
+    }
+
+    async with in_transaction() as conn:
+        if item_id: await DeptSensitiveWord.filter(id=item_id).update(**payload)
+        else: await DeptSensitiveWord.create(**payload)
+        await record_audit(user["real_name"], "DEPT_WORD_SAVE", data.get("word"), "更新部门合规词库")
+    return {"status": "ok"}
+
+@router.post("/dept-words/delete")
+async def delete_dept_word(data: dict, user: dict = Depends(check_permission("admin:dept_word:delete"))):
+    item_id = data.get("id")
+    async with in_transaction() as conn:
+        await DeptSensitiveWord.filter(id=item_id).update(is_deleted=1)
+        await record_audit(user["real_name"], "DEPT_WORD_DELETE", f"ID:{item_id}", "移除部门合规词")
+    return {"status": "ok"}
+
+@router.get("/compliance-logs")
+async def get_compliance_logs(page: int = 1, size: int = 15, current_user: dict = Depends(check_permission("audit:dept:log:view"))):
+    query = DeptComplianceLog.filter()
+    if current_user.get("role_id") != 3:
+        query = query.filter(department_id=current_user.get("dept_id"))
+    
+    total = await query.count()
+    data = await query.select_related("user", "department").offset((page - 1) * size).limit(size).order_by("-timestamp").values(
+        "id", "word", "context", "timestamp", "user__real_name", "department__name"
+    )
+    return {"status": "ok", "data": data, "total": total}
+
 async def get_sentiments(current_user: dict = Depends(get_current_user)):
     """[物理拉取] 获取动态客户情绪标签集"""
     data = await CustomerSentiment.filter(is_deleted=0).order_by("id").values()

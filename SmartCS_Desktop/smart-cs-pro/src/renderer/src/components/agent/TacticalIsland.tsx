@@ -6,7 +6,8 @@ import {
   Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor,
   Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X, Maximize2,
   Package, BookOpen, Tags, SearchCheck, Filter, ChevronLeft, AlertOctagon, Wallet, Heart, Ban, Undo2,
-  UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain, PenTool, Send
+  UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain, PenTool, Send,
+  AlertTriangle
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -41,6 +42,10 @@ export const TacticalIsland = () => {
   const [optimizing, setOptimizing] = useState(false)
   const [hasOptimized, setHasOptimized] = useState(false) // 标记是否已经执行过 AI 优化
 
+  // 战术规避模式 (V3.30)
+  const [isEvasionMode, setIsEvasionMode] = useState(false)
+  const [evasionInfo, setEvasionInfo] = useState<any>(null)
+
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const fetchSentiments = async () => {
@@ -60,12 +65,33 @@ export const TacticalIsland = () => {
         setContent(e.detail.payload.content)
         setIsPushMode(true)
         setIsScratchpad(false)
+        setIsEvasionMode(false)
         setHasOptimized(false)
         window.electron.ipcRenderer.send('set-always-on-top', true)
       }
     }
+    
+    const onDeptViolation = (e: any) => {
+      setEvasionInfo(e.detail)
+      setIsEvasionMode(true)
+      setIsPushMode(false)
+      setIsScratchpad(false)
+      
+      // 物理干预：瞬间清空
+      window.api.callApi({
+        url: `http://localhost:8000/api/system/clear-input`,
+        method: 'POST'
+      }).catch(err => console.error('Clear input failed', err))
+      
+      window.electron.ipcRenderer.send('set-always-on-top', true)
+    }
+
     window.addEventListener('ws-tactical-command', onCommand)
-    return () => window.removeEventListener('ws-tactical-command', onCommand)
+    window.addEventListener('ws-dept-violation', onDeptViolation)
+    return () => {
+      window.removeEventListener('ws-tactical-command', onCommand)
+      window.removeEventListener('ws-dept-violation', onDeptViolation)
+    }
   }, [])
 
   // 核心：AI 优化逻辑 (Ollama)
@@ -126,7 +152,7 @@ export const TacticalIsland = () => {
   useEffect(() => {
     const screenWidth = window.screen.width
     const screenHeight = window.screen.height
-    const active = isPushMode || isScratchpad
+    const active = isPushMode || isScratchpad || isEvasionMode
     
     let width = isFolded ? 80 : 720 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
@@ -188,7 +214,34 @@ export const TacticalIsland = () => {
         )}
         style={{ backfaceVisibility: 'hidden', transform: 'translate3d(0,0,0)' } as any}
       >
-        {isInSpecialMode ? (
+        {isEvasionMode ? (
+          <div className="flex-1 flex flex-col p-8 text-white overflow-hidden bg-amber-900/40">
+             <div className="flex justify-between items-start mb-8 shrink-0">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce"><AlertTriangle size={24} className="text-black"/></div>
+                   <div>
+                      <h4 className="text-xl font-black italic tracking-tighter uppercase text-amber-400">战术规避拦截</h4>
+                      <p className="text-[10px] font-bold text-amber-200/60 uppercase tracking-[0.3em] mt-0.5">Tactical Evasion Protocol</p>
+                   </div>
+                </div>
+                <button onClick={() => setIsEvasionMode(false)} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10 text-amber-200"><Undo2 size={16}/> 关闭提示</button>
+             </div>
+
+             <div className="flex-1 flex flex-col items-center justify-center text-center px-10 gap-6">
+                <div className="space-y-2">
+                   <p className="text-sm font-bold text-amber-200/80 uppercase tracking-widest">检测到禁忌词项</p>
+                   <div className="text-5xl font-black text-white italic tracking-tighter decoration-red-500 decoration-4 underline underline-offset-8">"{evasionInfo?.keyword}"</div>
+                </div>
+                
+                <div className="w-full max-w-md p-6 bg-black/40 rounded-[32px] border border-amber-500/30 shadow-2xl">
+                   <p className="text-xs font-black text-amber-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><CheckCircle2 size={14}/> 修正建议</p>
+                   <p className="text-lg font-medium leading-relaxed italic text-white">"{evasionInfo?.suggestion}"</p>
+                </div>
+
+                <p className="text-[10px] font-bold text-amber-200/40 uppercase tracking-[0.4em]">输入已物理清空 · 请使用建议语重新输入</p>
+             </div>
+          </div>
+        ) : isInSpecialMode ? (
           <div className="flex-1 flex flex-col p-8 text-white overflow-hidden bg-slate-950/40">
              <div className="flex justify-between items-start mb-6 shrink-0">
                 <div className="flex items-center gap-4">

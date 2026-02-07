@@ -193,3 +193,27 @@ class CustomerSentiment(BaseModel):
 
     class Meta:
         table = "customer_sentiments"
+
+class DeptSensitiveWord(BaseModel):
+    id = fields.IntField(pk=True)
+    word = fields.CharField(max_length=100)
+    suggestion = fields.CharField(max_length=200, null=True) # 修正建议，如 "请使用：好的/没问题"
+    category = fields.ForeignKeyField('models.PolicyCategory', related_name='dept_words')
+    department = fields.ForeignKeyField('models.Department', related_name='dept_words', null=True) # NULL 为全域规避
+    is_active = fields.IntField(default=1)
+    is_deleted = fields.IntField(default=0)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "dept_sensitive_words"
+
+class DeptComplianceLog(BaseModel):
+    id = fields.CharField(max_length=50, pk=True)
+    user = fields.ForeignKeyField('models.User', related_name='compliance_logs')
+    word = fields.CharField(max_length=100)
+    context = fields.TextField()
+    department = fields.ForeignKeyField('models.Department', related_name='compliance_logs')
+    timestamp = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "dept_compliance_logs"

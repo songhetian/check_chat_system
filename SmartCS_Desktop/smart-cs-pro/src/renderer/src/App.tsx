@@ -29,6 +29,8 @@ import NotificationsPage from './pages/admin/Notifications'
 import GlobalPolicyPage from './pages/hq/GlobalPolicy'
 import AiPerformancePage from './pages/hq/AiPerformance'
 import SentimentsPage from './pages/admin/Sentiments'
+import DeptWordsPage from './pages/admin/DeptWords'
+import ComplianceAuditPage from './pages/admin/ComplianceAudit'
 import { 
   CheckCircle2, AlertCircle, ShieldAlert, User, Search, Filter, Activity, 
   Globe, ShieldCheck, Users, ArrowRight, Award, GraduationCap, Volume2, VolumeX, RefreshCw,
@@ -259,6 +261,8 @@ function App() {
               <Route path="/rbac" element={<RbacPage />} />
               <Route path="/global-policy" element={<GlobalPolicyPage />} />
               <Route path="/sentiments" element={<SentimentsPage />} />
+              <Route path="/dept-words" element={<DeptWordsPage />} />
+              <Route path="/compliance-audit" element={<ComplianceAuditPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
             </Routes>
           </DashboardLayout>

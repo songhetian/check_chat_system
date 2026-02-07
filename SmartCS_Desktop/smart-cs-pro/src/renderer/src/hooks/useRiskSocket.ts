@@ -79,6 +79,11 @@ export const useRiskSocket = () => {
           window.dispatchEvent(new CustomEvent('ws-live-chat', { detail: data }))
         }
 
+        if (data.type === 'TACTICAL_DEPT_VIOLATION') {
+          // 转发给坐席端悬浮岛实现静默拦截
+          window.dispatchEvent(new CustomEvent('ws-dept-violation', { detail: data }))
+        }
+
         if (data.type === 'VIOLATION') {
           addViolation(data)
           setAlerting(true)

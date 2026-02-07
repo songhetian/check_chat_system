@@ -332,6 +332,18 @@ function createWindow(): void {
     }
   })
 
+  // V3.30: 物理干预指令 - 模拟删除输入
+  ipcMain.on('clear-input', () => {
+    if (process.platform === 'win32') {
+      const { keyboard, Key } = require('@nut-tree/nut-js')
+      // 战术连招：Ctrl+A -> Backspace
+      keyboard.config.autoDelayMs = 0
+      keyboard.pressKey(Key.LeftControl, Key.A)
+      keyboard.releaseKey(Key.LeftControl, Key.A)
+      keyboard.type(Key.Backspace)
+    }
+  })
+
   // 切换至大屏模式逻辑
   ipcMain.on('open-big-screen', () => {
     mainWindow.setSize(1280, 850, true)
