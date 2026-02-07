@@ -30,21 +30,27 @@ export const useRiskSocket = () => {
         useRiskStore.getState().setOnline(true)
         retryCount = 0;
 
-        // 核心：启动画面同步链路
-        const screenInterval = setInterval(async () => {
-          if (socket?.readyState === WebSocket.OPEN && window.api?.captureScreen) {
-            const imgData = await window.api.captureScreen();
-            if (imgData) {
-              socket.send(JSON.stringify({
-                type: 'SCREEN_SYNC',
-                payload: imgData
-              }));
+        // 核心：启动画面同步链路 (仅坐席)
+        const isAgent = useAuthStore.getState().user?.role_code === 'AGENT'
+        if (isAgent) {
+          const screenInterval = setInterval(async () => {
+            if (socket?.readyState === WebSocket.OPEN && window.api?.captureScreen) {
+              const imgData = await window.api.captureScreen();
+              if (imgData) {
+                socket.send(JSON.stringify({ type: 'SCREEN_SYNC', payload: imgData }));
+              }
             }
-          }
-        }, 3000); // 3秒/帧，平衡性能与实时性
+          }, 3000); 
+          (socket as any)._screenTimer = screenInterval;
+        }
 
-        // 存入清理逻辑
-        (socket as any)._screenTimer = screenInterval;
+        // V3.37: 战术级全局保活心跳 (全角色覆盖)
+        const heartbeatInterval = setInterval(() => {
+          if (socket?.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'HEARTBEAT', timestamp: Date.now() }));
+          }
+        }, 10000); // 10秒/次，确保管理端不掉线
+        (socket as any)._heartbeatTimer = heartbeatInterval;
       }
 
       socket.onmessage = (event) => {
@@ -163,6 +169,7 @@ export const useRiskSocket = () => {
       socket.onclose = () => {
         useRiskStore.getState().setOnline(false)
         if ((socket as any)._screenTimer) clearInterval((socket as any)._screenTimer);
+        if ((socket as any)._heartbeatTimer) clearInterval((socket as any)._heartbeatTimer);
         
         // V3.26: 战术级无限重连逻辑
         const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);

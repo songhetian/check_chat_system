@@ -251,6 +251,11 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
             await redis_mgr.mark_online(username)
             
             msg = json.loads(data)
+            if msg.get("type") == "HEARTBEAT":
+                # V3.37: 静默心跳响应
+                await redis_mgr.mark_online(username)
+                continue
+
             if msg.get("type") == "CHAT_TRANSMISSION":
                 # 战术加固：实时扫描内容敏感词
                 from core.services import SmartScanner, grant_user_reward
