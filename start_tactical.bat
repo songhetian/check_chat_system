@@ -1,10 +1,11 @@
 @echo off
-:: 强制设置终端编码为 UTF-8
+:: 强制设置终端编码为 UTF-8 (代码页 65001)
 chcp 65001 > nul
 set PYTHONIOENCODING=utf-8
 
 title Smart-CS Pro Tactical Launcher
-echo 🚀 [Smart-CS Pro] Starting Tactical Systems...
+echo 🚀 [启动中心] 正在初始化战术系统...
+echo 📍 当前路径: %~dp0
 
 :: 1. 进入核心目录
 cd /d "%~dp0SmartCS_Desktop\smart-cs-pro"

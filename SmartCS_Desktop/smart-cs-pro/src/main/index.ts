@@ -23,17 +23,18 @@ function startPythonEngine(): void {
       // 关键修复：Windows 通常使用 'python' 而非 'python3'
       const cmd = process.platform === 'win32' ? 'python' : 'python3'
       pythonProcess = spawn(cmd, [enginePath], {
-        shell: process.platform === 'win32', // Windows 下启用 shell 以正确解析环境变量
-        env: { ...process.env, PYTHONIOENCODING: 'utf-8' } // 强制 Python 输出 UTF-8 解决乱码
+        shell: process.platform === 'win32' // Windows 下启用 shell 以正确解析环境变量
       })
     } else if (fs.existsSync(enginePath)) {
-      pythonProcess = spawn(enginePath, [], {
-        env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
-      })
+      pythonProcess = spawn(enginePath)
     }
 
-    pythonProcess?.stdout?.on('data', (data) => console.log(`[Engine]: ${data}`))
-    pythonProcess?.stderr?.on('data', (data) => console.error(`[Engine Error]: ${data}`))
+    pythonProcess?.stdout?.on('data', (data) => {
+      process.stdout.write(`[Engine]: ${data.toString('utf8')}`)
+    })
+    pythonProcess?.stderr?.on('data', (data) => {
+      process.stderr.write(`[Engine Error]: ${data.toString('utf8')}`)
+    })
     
     pythonProcess?.on('close', (code) => {
       console.log(`🔌 [引擎离线] 核心进程已退出，状态码: ${code}`)
