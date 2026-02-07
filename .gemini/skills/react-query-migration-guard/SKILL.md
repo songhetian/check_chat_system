@@ -3,16 +3,18 @@ name: react-query-migration-guard
 description: 强制执行 React Query 迁移策略与 WebSocket 实时化改造。涵盖新增功能、Bug修复、功能迭代及轮询清理四个核心场景。
 ---
 
-# React Query 迁移与实时化最高准则 (V4.0 绝密优先版)
+# React Query 迁移与实时化最高准则 (V4.1 零轮询版)
 
 > ⚠️ **最高优先级指令 (PRIORITY: MAXIMUM)**: 
 > 在进行任何涉及数据拉取、状态同步或实时通信的开发时，**必须** 优先遵循本 Skill 的规范。
 
 ## 1. 架构进化红线 (The Red Line)
 1. **禁止一切 useEffect 获取数据**: 凡是 GET 请求，必须物理卸载 `useEffect`，全量改用 `useQuery`。
-2. **禁止 setInterval 轮询**: 
+2. **绝对禁止 setInterval 轮询 (Zero Polling Policy)**: 
+   - **禁止** 使用 `setInterval` 来同步后端数据、检查服务器状态或刷新界面。
    - 物理状态监控（如在线状态、报警）必须由 **WebSocket (useRiskSocket)** 驱动。
    - 准实时列表刷新必须由 `useQuery` 的 `refetchInterval` 接管。
+   - **违规判定**: 只要代码中出现用于数据同步的 `setInterval`，即判定为架构漏洞，必须立即重构。
 3. **强制 Auto-Commit**: 完成 React Query 迁移并校验通过后，必须立即执行 Git 提交。
 
 ## 2. 核心迁移策略 (Refactor on Touch)
