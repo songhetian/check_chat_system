@@ -30,15 +30,6 @@ export default function BusinessSopsPage() {
     enabled: !!token
   })
 
-  const { data: depts = [] } = useQuery({
-    queryKey: ['departments_all_sop'],
-    queryFn: async () => {
-      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments?size=100`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
-      return res.data.data
-    },
-    enabled: !!token && isHQ
-  })
-
   // 渲染优化 (V3.70 极速协议)
   const SopItems = useMemo(() => {
     return (sopData?.data || []).map((item: any) => (
@@ -51,7 +42,7 @@ export default function BusinessSopsPage() {
            </span>
         </td>
         <td className="px-6 py-5 text-center">
-          {!item.department_id ? <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-2xl text-[9px] font-black border border-amber-100">全域公共</span> : <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200">{item.department_name || '部门专用'}</span>}
+          <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase">部门专用</span>
         </td>
         <td className="px-8 py-5 text-center">
           <div className="flex justify-center gap-2">
@@ -65,13 +56,12 @@ export default function BusinessSopsPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const data = { ...payload };
-      if (data.department_id === 'GLOBAL') data.department_id = null;
-      return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data })
+      const { title, content, sop_type, id } = payload;
+      return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: { id, title, content, sop_type } })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business_sops_admin'] })
-      setModalType('NONE'); toast.success('SOP规范已同步')
+      setModalType('NONE'); toast.success('部门SOP规范已同步')
     }
   })
 
@@ -81,7 +71,7 @@ export default function BusinessSopsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business_sops_admin'] })
-      setModalType('NONE'); toast.success('SOP节点已成功注销')
+      setModalType('NONE'); toast.success('部门SOP已成功注销')
     }
   })
 
@@ -111,7 +101,7 @@ export default function BusinessSopsPage() {
            </div>
            <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 transition-all active:scale-95"><RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} /></button>
            {hasPermission('admin:sop:create') && (
-             <button onClick={() => { setEditItem({ title: '', content: '', sop_type: 'TEXT', department_id: isHQ ? 'GLOBAL' : user?.department_id }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 录入 SOP</button>
+             <button onClick={() => { setEditItem({ title: '', content: '', sop_type: 'TEXT' }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 录入 SOP</button>
            )}
         </div>
       </header>
@@ -142,10 +132,8 @@ export default function BusinessSopsPage() {
                       <TacticalSelect options={[{id: 'TEXT', name: '纯文本'}, {id: 'MD', name: 'Markdown'}, {id: 'IMAGE', name: '图片内容'}, {id: 'FILE', name: '外部文件路径'}]} value={editItem?.sop_type} onChange={(val) => setEditItem({...editItem, sop_type: val})} />
                     </div>
                     <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">作用域</label>
-                      {isHQ ? (
-                        <TacticalSelect options={[{id: 'GLOBAL', name: '全域公共'}, ...depts]} value={editItem?.department_id || 'GLOBAL'} onChange={(val) => setEditItem({...editItem, department_id: val})} />
-                      ) : <div className="px-6 py-4 bg-slate-100 rounded-2xl text-xs font-black text-slate-500 border border-slate-200 uppercase">限定本部门</div>}
+                      <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">数据归属</label>
+                      <div className="px-6 py-4 bg-slate-100 rounded-2xl text-xs font-black text-slate-500 border border-slate-200 uppercase tracking-widest">物理隔离：部门内部规范</div>
                     </div>
                   </div>
 

@@ -31,15 +31,6 @@ export default function VoiceAlertsPage() {
     enabled: !!token
   })
 
-  const { data: depts = [] } = useQuery({
-    queryKey: ['departments_all_voice'],
-    queryFn: async () => {
-      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments?size=100`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
-      return res.data.data
-    },
-    enabled: !!token && isHQ
-  })
-
   // 2. 渲染优化 (V3.70 极速协议)
   const VoiceItems = useMemo(() => {
     return (voiceData?.data || []).map((item: any) => (
@@ -48,7 +39,7 @@ export default function VoiceAlertsPage() {
            <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shadow-inner"><Mic size={14}/></div>{item.content}</div>
         </td>
         <td className="px-6 py-5 text-center">
-          {!item.department_id ? <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-2xl text-[9px] font-black border border-amber-100 uppercase">公共全域</span> : <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase">{item.department_name || '部门专用'}</span>}
+          <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase">部门专用</span>
         </td>
         <td className="px-6 py-5 text-slate-400 text-xs font-medium">{new Date(item.created_at).toLocaleString()}</td>
         <td className="px-8 py-5 text-center">
@@ -64,14 +55,12 @@ export default function VoiceAlertsPage() {
   // 3. 变更操作
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
-      // 规范化：如果是 GLOBAL 字符串，转换给后端处理或设为 null
-      const data = { ...payload };
-      if (data.department_id === 'GLOBAL') data.department_id = null;
-      return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/voice-alerts`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data })
+      // 强制对齐后端物理隔离逻辑，不再传递 department_id
+      return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/voice-alerts`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: { id: payload.id, content: payload.content } })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['voice_alerts_admin'] })
-      setModalType('NONE'); toast.success('语音话术已固化')
+      setModalType('NONE'); toast.success('部门语音话术已固化')
     }
   })
 
@@ -81,7 +70,7 @@ export default function VoiceAlertsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['voice_alerts_admin'] })
-      setModalType('NONE'); toast.success('语音节点已物理移除')
+      setModalType('NONE'); toast.success('部门语音已安全移除')
     }
   })
 
@@ -93,7 +82,7 @@ export default function VoiceAlertsPage() {
       <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter">战术语音库</h2>
-          <p className="text-slate-500 text-sm mt-1 font-medium italic text-red-600">管理指挥官下发的常用语音提醒话术 · 支持各部门独立配置</p>
+          <p className="text-slate-500 text-sm mt-1 font-medium italic text-red-600">管理本部门下发的语音提醒话术 · 物理链路隔离保护</p>
         </div>
         <div className="flex gap-3">
            <div className="relative">
@@ -102,7 +91,7 @@ export default function VoiceAlertsPage() {
            </div>
            <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 transition-all active:scale-95"><RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} /></button>
            {hasPermission('admin:voice:create') && (
-             <button onClick={() => { setEditItem({ content: '', department_id: isHQ ? 'GLOBAL' : user?.department_id }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 新增语音项</button>
+             <button onClick={() => { setEditItem({ content: '' }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 录入语音项</button>
            )}
         </div>
       </header>
@@ -125,12 +114,10 @@ export default function VoiceAlertsPage() {
             <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl relative z-10 p-12">
                <h3 className="text-2xl font-black text-slate-900 mb-8 italic uppercase flex items-center gap-3"><Mic className="text-red-500"/> 语音提醒内容重校</h3>
                <div className="space-y-6">
-                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">语音播放文本</label><textarea value={editItem?.content} onChange={(e)=>setEditItem({...editItem, content: e.target.value})} rows={3} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold border-none shadow-inner outline-none resize-none" placeholder="输入指挥部下发的文字，坐席端将自动转为语音..." /></div>
+                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">语音播放文本</label><textarea value={editItem?.content} onChange={(e)=>setEditItem({...editItem, content: e.target.value})} rows={3} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold border-none shadow-inner outline-none resize-none" placeholder="输入本部门战术指令，坐席端将自动转为语音..." /></div>
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">作用域</label>
-                    {isHQ ? (
-                      <TacticalSelect options={[{id: 'GLOBAL', name: '全域公共'}, ...depts]} value={editItem?.department_id || 'GLOBAL'} onChange={(val) => setEditItem({...editItem, department_id: val})} />
-                    ) : <div className="px-6 py-4 bg-slate-100 rounded-2xl text-xs font-black text-slate-500 border border-slate-200 uppercase tracking-widest">限定本部门</div>}
+                    <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">数据归属</label>
+                    <div className="px-6 py-4 bg-slate-100 rounded-2xl text-xs font-black text-slate-500 border border-slate-200 uppercase tracking-widest">物理隔离：限定本部门管理</div>
                   </div>
                   <button disabled={saveMutation.isPending} onClick={() => saveMutation.mutate(editItem)} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3">
                     {saveMutation.isPending ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 确认并固化
