@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Users, ShieldAlert, Activity, Radio, MessageSquare, 
@@ -55,14 +55,14 @@ export default function TacticalCommand() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [processing, setProcessing] = useState<string | null>(null)
   
-  // 话术推送增强 (V3.28)
+  // 话术推送增强 (V3.65: 极速版)
   const [showScriptModal, setShowScriptModal] = useState(false)
   const [scriptSearch, setScriptSearch] = useState('')
-  const [customMsg, setCustomMsg] = useState('') // V3.39: 自定义话术状态
+  const [customMsg, setCustomMsg] = useState('')
   const [kbList, setKbList] = useState<any[]>([])
   const [kbLoading, setKbListLoading] = useState(false)
 
-  const fetchKb = async () => {
+  const fetchKb = useCallback(async () => {
     if (!token) return
     setKbListLoading(true)
     try {
@@ -73,20 +73,36 @@ export default function TacticalCommand() {
       })
       if (res.status === 200) setKbList(res.data.data)
     } finally { setKbListLoading(false) }
-  }
+  }, [token, scriptSearch])
 
+  // 极速响应：搜索防抖缩短至 150ms
   useEffect(() => {
     if (showScriptModal) {
-      const timer = setTimeout(() => fetchKb(), 300)
+      const timer = setTimeout(() => fetchKb(), 150)
       return () => clearTimeout(timer)
     }
-  }, [scriptSearch, showScriptModal])
+  }, [scriptSearch, showScriptModal, fetchKb])
 
   const sendScript = async (answer: string) => {
     await executeIntervention('PUSH', '战术话术推送', { content: answer })
     setShowScriptModal(false)
     setCustomMsg('')
   }
+
+  // V3.65: 极速渲染组件
+  const ScriptItem = useMemo(() => kbList.map(item => (
+    <div 
+      key={item.id} 
+      onClick={() => sendScript(item.answer)}
+      className="p-4 rounded-xl border border-slate-100 bg-slate-50/30 hover:bg-cyan-600 hover:text-white cursor-pointer transition-colors group relative overflow-hidden active:scale-[0.98]"
+    >
+       <div className="flex justify-between items-start mb-1">
+          <span className="text-[11px] font-black group-hover:text-white transition-colors flex items-center gap-2"><Tag size={10}/> {item.keyword}</span>
+          <span className="px-1.5 py-0.5 bg-white/10 text-[8px] font-black rounded border border-current opacity-50 uppercase">{item.category__name}</span>
+       </div>
+       <p className="text-[11px] font-medium opacity-70 group-hover:opacity-100 line-clamp-1 italic leading-relaxed">"{item.answer}"</p>
+    </div>
+  )), [kbList])
   
   // 截图取证逻辑
   const handleCapture = () => {
@@ -318,7 +334,14 @@ export default function TacticalCommand() {
                            label={isInputLocked ? '锁定中' : '强制锁定'} 
                            color={isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200'} 
                         />
-                        <CommandBtn loading={processing === 'PUSH'} onClick={() => setShowScriptModal(true)} icon={Send} label="话术提示" color="bg-emerald-600/10 text-emerald-700 border border-emerald-100" />
+                        <CommandBtn 
+                           loading={processing === 'PUSH'} 
+                           onClick={() => setShowScriptModal(true)} 
+                           onMouseEnter={() => !kbList.length && fetchKb()} // V3.65: 悬停预加载
+                           icon={Send} 
+                           label="话术提示" 
+                           color="bg-emerald-600/10 text-emerald-700 border border-emerald-100" 
+                        />
                         <CommandBtn loading={processing === 'VOICE'} onClick={() => executeIntervention('VOICE', '语音警报')} icon={Mic} label="语音警报" color="bg-red-50/80 text-red-600 border border-red-100" />
                         <CommandBtn loading={processing === 'SOP'} onClick={() => executeIntervention('SOP', '推送规范')} icon={FileText} label="业务规范" color="bg-white text-cyan-700 border border-cyan-100" />
                      </div>
@@ -456,26 +479,13 @@ export default function TacticalCommand() {
                      </div>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-3 bg-white">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-2 bg-white">
                      {kbLoading ? (
-                        <div className="flex flex-col items-center justify-center py-20 opacity-20"><Loader2 className="animate-spin mb-4" size={40} /><span className="text-xs font-black uppercase">同步话术矩阵中...</span></div>
+                        <div className="flex flex-col items-center justify-center py-10 opacity-20"><Loader2 className="animate-spin mb-4" size={32} /><span className="text-[10px] font-black uppercase">同步中...</span></div>
                      ) : kbList.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 opacity-20"><Zap size={40} className="mb-4" /><span className="text-xs font-black uppercase">未发现匹配的战术策略</span></div>
+                        <div className="flex flex-col items-center justify-center py-10 opacity-20"><Zap size={32} className="mb-4" /><span className="text-[10px] font-black uppercase">未发现匹配</span></div>
                      ) : (
-                        kbList.map(item => (
-                           <div 
-                             key={item.id} 
-                             onClick={() => sendScript(item.answer)}
-                             className="p-5 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-cyan-50 hover:border-cyan-200 cursor-pointer transition-all group relative overflow-hidden"
-                           >
-                              <div className="flex justify-between items-start mb-2">
-                                 <span className="text-xs font-black text-black group-hover:text-cyan-700 transition-colors flex items-center gap-2"><Tag size={12}/> {item.keyword}</span>
-                                 <span className="px-2 py-0.5 bg-white text-[9px] font-black rounded-lg border border-slate-200 text-slate-400 group-hover:border-cyan-200 group-hover:text-cyan-600 uppercase">{item.category__name}</span>
-                              </div>
-                              <p className="text-xs font-medium text-slate-500 group-hover:text-cyan-800 line-clamp-2 italic leading-relaxed">"{item.answer}"</p>
-                              <div className="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0"><ArrowUpRight className="text-cyan-600" size={20}/></div>
-                           </div>
-                        ))
+                        ScriptItem
                      )}
                   </div>
                   
