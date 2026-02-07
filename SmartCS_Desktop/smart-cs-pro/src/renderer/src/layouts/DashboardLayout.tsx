@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog, Shield, Layers, Smile, ShieldCheck, FileSearch, RefreshCw, ChevronDown, Radar
+  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog, Shield, Layers, Smile, ShieldCheck, FileSearch, RefreshCw, ChevronDown, Radar, Mic, FileText
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { useRiskStore } from '../store/useRiskStore' 
@@ -50,6 +50,8 @@ const menuGroups = [
       { path: '/users', icon: UserCog, label: '成员账号管理' },
       { path: '/rbac', icon: Shield, label: '角色权限定义' },
       { path: '/categories', icon: Layers, label: '业务分类管理' },
+      { path: '/voice-alerts', icon: Mic, label: '语音库管理' },
+      { path: '/business-sops', icon: FileText, label: 'SOP规范管理' },
     ]
   },
   {
