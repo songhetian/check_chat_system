@@ -40,7 +40,16 @@ description: Smart-CS Pro (数智化运营治理平台) 专用开发与维护 Sk
 - **Electron 交互**: 检查 `src/main/index.ts` 中的 `ipcMain` 是否正确处理了 `src/preload/index.ts` 中定义的通道。
 - **OCR 识别**: 若屏幕扫描不准，检查 `engine.py` 中的 `regions` 坐标定义。
 
-## 3. 核心参考文档
+## 3. 极速弹窗协议 (High-Performance Modal Protocol) - **NEW**
+所有新增或重构的 Dashboard 弹窗必须强制执行以下性能标准：
+1. **悬停预加载 (Pre-fetching)**: 在触发按钮的 `onMouseEnter` 事件中执行数据拉取，消除点击后的加载感。
+2. **组件级缓存 (Memoization)**: 列表渲染必须包裹在 `useMemo` 中，防止输入搜索词时造成全量重绘。
+3. **极速响应**: 搜索防抖 (Debounce) 严禁超过 **150ms**。
+4. **渲染优化**: 
+   - 移除列表项中非必要的复杂阴影 (shadow) 和大规模过渡 (layout)。
+   - 点击操作必须支持 `active:scale-[0.98]` 的物理反馈感。
+
+## 4. 核心参考文档
 在执行任务前，请根据需要读取以下参考资料：
 - [UI 设计规范](references/ui-standards.md): 颜色、圆角、Tailwind 类。
 - [实时事件系统](references/event-system.md): WebSocket 事件定义、IPC 通道说明。
