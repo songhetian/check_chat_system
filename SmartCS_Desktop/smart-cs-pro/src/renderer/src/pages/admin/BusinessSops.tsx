@@ -39,6 +39,30 @@ export default function BusinessSopsPage() {
     enabled: !!token && isHQ
   })
 
+  // 渲染优化 (V3.70 极速协议)
+  const SopItems = useMemo(() => {
+    return (sopData?.data || []).map((item: any) => (
+      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center">
+        <td className="px-8 py-5 font-black text-slate-900 text-left">{item.title}</td>
+        <td className="px-6 py-5 text-left max-w-xs truncate italic opacity-60">"{item.content}"</td>
+        <td className="px-6 py-5 text-center">
+           <span className="px-3 py-1 bg-slate-100 rounded-2xl flex items-center justify-center gap-2 mx-auto w-fit border border-slate-200 text-[9px] font-black uppercase">
+              {getTypeIcon(item.sop_type)} {item.sop_type}
+           </span>
+        </td>
+        <td className="px-6 py-5 text-center">
+          {!item.department_id ? <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-2xl text-[9px] font-black border border-amber-100">全域公共</span> : <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200">{item.department_name || '部门专用'}</span>}
+        </td>
+        <td className="px-8 py-5 text-center">
+          <div className="flex justify-center gap-2">
+            {hasPermission('admin:sop:update') && (<button onClick={() => { setEditItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all active:scale-95"><Edit3 size={16} /></button>)}
+            {hasPermission('admin:sop:delete') && (<button onClick={() => { setEditItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all active:scale-95"><Trash2 size={16} /></button>)}
+          </div>
+        </td>
+      </tr>
+    ));
+  }, [sopData?.data, hasPermission]);
+
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
       const data = { ...payload };
@@ -75,7 +99,7 @@ export default function BusinessSopsPage() {
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
-      <header className="flex justify-between items-end bg-white p-8 rounded-3xl border border-slate-200 shadow-sm shrink-0">
+      <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter">SOP 业务规范库</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium italic text-emerald-600">管理各业务维度的标准操作流程 · 支持文字、Markdown、图片及多媒体附件</p>
@@ -83,39 +107,20 @@ export default function BusinessSopsPage() {
         <div className="flex gap-3">
            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input value={search} onChange={(e) => {setSearch(e.target.value); setPage(1);}} placeholder="搜索 SOP 标题..." className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold w-64 outline-none" />
+              <input value={search} onChange={(e) => {setSearch(e.target.value); setPage(1);}} placeholder="搜索 SOP 标题..." className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold w-64 outline-none" />
            </div>
-           <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 transition-all"><RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} /></button>
+           <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 transition-all active:scale-95"><RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} /></button>
            {hasPermission('admin:sop:create') && (
-             <button onClick={() => { setEditItem({ title: '', content: '', sop_type: 'TEXT', department_id: isHQ ? 'GLOBAL' : user?.department_id }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 录入 SOP</button>
+             <button onClick={() => { setEditItem({ title: '', content: '', sop_type: 'TEXT', department_id: isHQ ? 'GLOBAL' : user?.department_id }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all"><Plus size={16} /> 录入 SOP</button>
            )}
         </div>
       </header>
 
-      <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
          <div className="flex-1 overflow-y-auto custom-scrollbar">
             {isLoading ? <div className="h-64 flex flex-col items-center justify-center opacity-30"><Loader2 className="animate-spin mb-4" size={40} /></div> : (
               <TacticalTable headers={['规范标题', '内容预览', '载体类型', '作用域', '操作']}>
-                {listData.map((item: any) => (
-                  <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center">
-                    <td className="px-8 py-5 font-black text-slate-900 text-left">{item.title}</td>
-                    <td className="px-6 py-5 text-left max-w-xs truncate italic opacity-60">"{item.content}"</td>
-                    <td className="px-6 py-5 text-center">
-                       <span className="px-3 py-1 bg-slate-100 rounded-lg flex items-center justify-center gap-2 mx-auto w-fit border border-slate-200 text-[9px] font-black uppercase">
-                          {getTypeIcon(item.sop_type)} {item.sop_type}
-                       </span>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      {!item.department_id ? <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-xl text-[9px] font-black border border-amber-100">全域公共</span> : <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-xl text-[9px] font-black border border-slate-200">{item.department_name || '部门专用'}</span>}
-                    </td>
-                    <td className="px-8 py-5 text-center">
-                      <div className="flex justify-center gap-2">
-                        {hasPermission('admin:sop:update') && (<button onClick={() => { setEditItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all"><Edit3 size={16} /></button>)}
-                        {hasPermission('admin:sop:delete') && (<button onClick={() => { setEditItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all"><Trash2 size={16} /></button>)}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {SopItems}
               </TacticalTable>
             )}
          </div>
