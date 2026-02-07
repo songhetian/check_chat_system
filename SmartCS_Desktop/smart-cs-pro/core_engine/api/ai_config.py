@@ -1,11 +1,46 @@
-from fastapi import APIRouter, Depends, Request, Query
+from fastapi import APIRouter, Depends, Request, Query, HTTPException
 from core.models import SensitiveWord, KnowledgeBase, PolicyCategory, AuditLog, CustomerSentiment, DeptSensitiveWord, DeptComplianceLog
 from api.auth import get_current_user, check_permission
 from tortoise.transactions import in_transaction
 from tortoise.expressions import Q
 import json
 
-# ... (保持原有代码不变)
+router = APIRouter(prefix="/api/ai", tags=["AI Policy"])
+
+async def record_audit(operator: str, action: str, target: str, details: str):
+    await AuditLog.create(operator=operator, action=action, target=target, details=details)
+
+@router.get("/sentiments")
+async def get_sentiments(current_user: dict = Depends(get_current_user)):
+    """[物理拉取] 获取动态客户情绪标签集"""
+    data = await CustomerSentiment.filter(is_deleted=0).order_by("id").values()
+    return {"status": "ok", "data": data}
+
+@router.post("/sentiments")
+async def save_sentiment(data: dict, user: dict = Depends(check_permission("admin:sentiment:create"))):
+    item_id = data.get("id")
+    if item_id and "admin:sentiment:update" not in user.get("permissions", []):
+        raise HTTPException(status_code=403, detail="权限熔断：缺失情绪更新权限")
+        
+    payload = {
+        "name": data.get("name"), 
+        "prompt_segment": data.get("prompt_segment"), 
+        "color": data.get("color", "slate"),
+        "is_active": data.get("is_active", 1)
+    }
+    async with in_transaction() as conn:
+        if item_id: await CustomerSentiment.filter(id=item_id).update(**payload)
+        else: await CustomerSentiment.create(**payload)
+        await record_audit(user["real_name"], "SENTIMENT_SAVE", data.get("name"), "固化客户情绪维度")
+    return {"status": "ok"}
+
+@router.post("/sentiments/delete")
+async def delete_sentiment(data: dict, user: dict = Depends(check_permission("admin:sentiment:delete"))):
+    item_id = data.get("id")
+    async with in_transaction() as conn:
+        await CustomerSentiment.filter(id=item_id).update(is_deleted=1)
+        await record_audit(user["real_name"], "SENTIMENT_DELETE", f"ID:{item_id}", "注销情绪维度")
+    return {"status": "ok"}
 
 @router.get("/dept-words")
 async def get_dept_words(page: int = 1, size: int = 10, search: str = "", current_user: dict = Depends(get_current_user)):
@@ -32,7 +67,6 @@ async def save_dept_word(data: dict, user: dict = Depends(check_permission("admi
     dept_id = user.get("dept_id")
     
     if item_id and "admin:dept_word:update" not in user.get("permissions", []):
-        from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="越权拦截：缺失更新权限")
 
     target_dept_id = data.get("department_id")
@@ -72,39 +106,6 @@ async def get_compliance_logs(page: int = 1, size: int = 15, current_user: dict 
     )
     return {"status": "ok", "data": data, "total": total}
 
-async def get_sentiments(current_user: dict = Depends(get_current_user)):
-    """[物理拉取] 获取动态客户情绪标签集"""
-    data = await CustomerSentiment.filter(is_deleted=0).order_by("id").values()
-    return {"status": "ok", "data": data}
-
-@router.post("/sentiments")
-async def save_sentiment(data: dict, user: dict = Depends(check_permission("admin:sentiment:create"))):
-    item_id = data.get("id")
-    # 物理熔断：编辑需校验 update 权限
-    if item_id and "admin:sentiment:update" not in user.get("permissions", []):
-        from fastapi import HTTPException
-        raise HTTPException(status_code=403, detail="权限熔断：缺失情绪更新权限")
-        
-    payload = {
-        "name": data.get("name"), 
-        "prompt_segment": data.get("prompt_segment"), 
-        "color": data.get("color", "slate"),
-        "is_active": data.get("is_active", 1)
-    }
-    async with in_transaction() as conn:
-        if item_id: await CustomerSentiment.filter(id=item_id).update(**payload)
-        else: await CustomerSentiment.create(**payload)
-        await record_audit(user["real_name"], "SENTIMENT_SAVE", data.get("name"), "固化客户情绪维度")
-    return {"status": "ok"}
-
-@router.post("/sentiments/delete")
-async def delete_sentiment(data: dict, user: dict = Depends(check_permission("admin:sentiment:delete"))):
-    item_id = data.get("id")
-    async with in_transaction() as conn:
-        await CustomerSentiment.filter(id=item_id).update(is_deleted=1)
-        await record_audit(user["real_name"], "SENTIMENT_DELETE", f"ID:{item_id}", "注销情绪维度")
-    return {"status": "ok"}
-
 @router.get("/categories")
 async def get_categories(page: int = 1, size: int = 10, type: str = None, current_user: dict = Depends(get_current_user)):
     query = PolicyCategory.filter(is_deleted=0)
@@ -116,10 +117,7 @@ async def get_categories(page: int = 1, size: int = 10, type: str = None, curren
 @router.post("/categories")
 async def save_category(data: dict, user: dict = Depends(check_permission("admin:cat:create"))):
     cat_id = data.get("id")
-    is_edit = bool(cat_id)
-    # 逻辑熔断：编辑需校验 update 权限
-    if is_edit and "admin:cat:update" not in user.get("permissions", []):
-        from fastapi import HTTPException
+    if cat_id and "admin:cat:update" not in user.get("permissions", []):
         raise HTTPException(status_code=403, detail="权限熔断：缺失分类更新权限")
         
     payload = {"name": data.get("name"), "type": data.get("type"), "description": data.get("description")}
@@ -133,7 +131,7 @@ async def save_category(data: dict, user: dict = Depends(check_permission("admin
 async def delete_category(data: dict, user: dict = Depends(check_permission("admin:cat:delete"))):
     cat_id = data.get("id")
     async with in_transaction() as conn:
-        await PolicyCategory.filter(id=cat_id).update(is_deleted=1, using_db=conn)
+        await PolicyCategory.filter(id=cat_id).update(is_deleted=1)
         await record_audit(user["real_name"], "CAT_DELETE", f"ID:{cat_id}", "注销策略分类")
     return {"status": "ok"}
 
@@ -150,13 +148,12 @@ async def get_sensitive_words(page: int = 1, size: int = 10, current_user: dict 
 async def save_sensitive_word(data: dict, request: Request, user: dict = Depends(check_permission("admin:ai:create"))):
     word_id = data.get("id")
     if word_id and "admin:ai:update" not in user.get("permissions", []):
-        from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="权限熔断：缺失策略更新权限")
 
     payload = {"word": data.get("word"), "category_id": data.get("category_id"), "risk_level": data.get("risk_level", 5)}
     async with in_transaction() as conn:
-        if word_id: await SensitiveWord.filter(id=word_id).update(**payload).using_db(conn)
-        else: await SensitiveWord.create(**payload, using_db=conn)
+        if word_id: await SensitiveWord.filter(id=word_id).update(**payload)
+        else: await SensitiveWord.create(**payload)
         
         redis = request.app.state.redis
         if redis:
@@ -170,7 +167,7 @@ async def delete_sensitive_word(data: dict, request: Request, user: dict = Depen
     w_id = data.get("id")
     async with in_transaction() as conn:
         w = await SensitiveWord.get(id=w_id)
-        await SensitiveWord.filter(id=w_id).update(is_deleted=1, using_db=conn)
+        await SensitiveWord.filter(id=w_id).update(is_deleted=1)
         
         redis = request.app.state.redis
         if redis:
@@ -184,15 +181,11 @@ async def get_knowledge_base(
     page: int = 1, size: int = 10, search: str = "", 
     current_user: dict = Depends(get_current_user)
 ):
-    from tortoise.expressions import Q
     query = KnowledgeBase.filter(is_deleted=0)
-    
-    # 核心：权责隔离逻辑 (HQ 穿透，主管/坐席隔离)
     role_id = current_user.get("role_id")
     dept_id = current_user.get("dept_id")
     
-    if role_id != 3: # 非 HQ 角色
-        # 仅可见：全局话术 (department_id IS NULL) 或 本部门话术
+    if role_id != 3:
         query = query.filter(Q(department_id__isnull=True) | Q(department_id=dept_id))
     
     if search:
@@ -214,12 +207,10 @@ async def delete_knowledge_item(data: dict, request: Request, user: dict = Depen
         k = await KnowledgeBase.get_or_none(id=item_id)
         if not k: return {"status": "error", "message": "话术不存在"}
         
-        # 物理熔断：主管只能删除自己部门的话术
         if role_id != 3 and k.department_id != dept_id:
-            from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="越权拦截：严禁删除非本部门或全局话术")
 
-        await KnowledgeBase.filter(id=item_id).update(is_deleted=1, using_db=conn)
+        await KnowledgeBase.filter(id=item_id).update(is_deleted=1)
         
         redis = request.app.state.redis
         if redis:
@@ -235,18 +226,11 @@ async def save_knowledge_item(data: dict, request: Request, user: dict = Depends
     dept_id = user.get("dept_id")
     
     if item_id and "admin:ai:update" not in user.get("permissions", []):
-        from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="权限熔断：缺失策略更新权限")
 
-    # 核心：物理权责注入
     target_dept_id = data.get("department_id")
-    if role_id != 3: # 主管身份
-        # 强制修正：主管只能操作本部门话术
-        target_dept_id = dept_id
-    else:
-        # HQ 身份：如果是 '' 或 'GLOBAL'，设为 None
-        if not target_dept_id or target_dept_id == 'GLOBAL':
-            target_dept_id = None
+    if role_id != 3: target_dept_id = dept_id
+    elif not target_dept_id or target_dept_id == 'GLOBAL': target_dept_id = None
 
     payload = {
         "keyword": data.get("keyword"), 
@@ -257,14 +241,12 @@ async def save_knowledge_item(data: dict, request: Request, user: dict = Depends
 
     async with in_transaction() as conn:
         if item_id: 
-            # 越权校验：非 HQ 主管不能修改非本部门话术
             k_old = await KnowledgeBase.get_or_none(id=item_id)
             if role_id != 3 and k_old and k_old.department_id != dept_id:
-                from fastapi import HTTPException
                 raise HTTPException(status_code=403, detail="越权拦截：严禁修改非本部门或公共话术")
-            await KnowledgeBase.filter(id=item_id).update(**payload).using_db(conn)
+            await KnowledgeBase.filter(id=item_id).update(**payload)
         else: 
-            await KnowledgeBase.create(**payload, using_db=conn)
+            await KnowledgeBase.create(**payload)
 
         redis = request.app.state.redis
         if redis:
