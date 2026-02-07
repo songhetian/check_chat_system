@@ -12,168 +12,98 @@ export const useRiskSocket = () => {
     let socket: WebSocket | null = null;
     let reconnectTimeout: NodeJS.Timeout;
     let retryCount = 0;
-    const maxRetries = 10;
+
+    // V3.38: 战术级递归执行器 (代替禁止使用的 setInterval)
+    const runLoop = (fn: () => Promise<void> | void, delay: number, timerKey: string) => {
+      if (socket?.readyState !== WebSocket.OPEN) return;
+      
+      const execute = async () => {
+        if (socket?.readyState === WebSocket.OPEN) {
+          await fn();
+          (socket as any)[timerKey] = setTimeout(execute, delay);
+        }
+      };
+      (socket as any)[timerKey] = setTimeout(execute, delay);
+    };
 
     const connect = () => {
-      if (!user || !token || !CONFIG.WS_BASE) {
-        return;
-      }
+      if (!user || !token || !CONFIG.WS_BASE) return;
 
-      // 核心：建立物理连接，对参数进行编码以防止特殊字符干扰
       const wsUrl = `${CONFIG.WS_BASE}/risk?token=${encodeURIComponent(token)}&username=${encodeURIComponent(user.username)}`;
-      console.log(`📡 [WS链路] 正在尝试建立战术握手: ${wsUrl}`);
-      
       socket = new WebSocket(wsUrl)
 
       socket.onopen = () => {
-        console.log('✅ [WS链路] 物理握手成功，节点已激活');
+        console.log('✅ [WS链路] 物理握手成功');
         useRiskStore.getState().setOnline(true)
         retryCount = 0;
 
-        // 核心：启动画面同步链路 (仅坐席)
-        const isAgent = useAuthStore.getState().user?.role_code === 'AGENT'
-        if (isAgent) {
-          const screenInterval = setInterval(async () => {
-            if (socket?.readyState === WebSocket.OPEN && window.api?.captureScreen) {
+        // 1. 画面同步链路 (递归模式)
+        if (useAuthStore.getState().user?.role_code === 'AGENT') {
+          runLoop(async () => {
+            if (window.api?.captureScreen) {
               const imgData = await window.api.captureScreen();
-              if (imgData) {
+              if (imgData && socket?.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({ type: 'SCREEN_SYNC', payload: imgData }));
               }
             }
-          }, 3000); 
-          (socket as any)._screenTimer = screenInterval;
+          }, 3000, '_screenTimer');
         }
 
-        // V3.37: 战术级全局保活心跳 (全角色覆盖)
-        const heartbeatInterval = setInterval(() => {
-          if (socket?.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({ type: 'HEARTBEAT', timestamp: Date.now() }));
-          }
-        }, 10000); // 10秒/次，确保管理端不掉线
-        (socket as any)._heartbeatTimer = heartbeatInterval;
+        // 2. 全局保活心跳 (递归模式)
+        runLoop(() => {
+          socket?.send(JSON.stringify({ type: 'HEARTBEAT', timestamp: Date.now() }));
+        }, 10000, '_heartbeatTimer');
       }
 
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data)
         
-        // 0. 画面同步转发
         if (data.type === 'SCREEN_SYNC') {
           window.dispatchEvent(new CustomEvent('ws-screen-sync', { detail: data }));
         }
 
-        if (data.type === 'EMERGENCY_HELP') {
-          window.dispatchEvent(new CustomEvent('ws-emergency-help', { detail: data }));
-        }
-
-        if (data.type === 'REWARD') {
-          window.dispatchEvent(new CustomEvent('trigger-toast', { 
-            detail: { title: '战术奖励', message: `恭喜！获得 [${data.title}] 奖励 +${data.value} PT`, type: 'success' } 
-          }))
-          window.dispatchEvent(new CustomEvent('ws-reward-received', { detail: data }));
-        }
-
-        // 1. 全局语音闭环
-        if (data.voice_alert) {
-          const utter = new SpeechSynthesisUtterance(data.voice_alert);
-          utter.lang = 'zh-CN'; utter.rate = 0.9;
-          window.speechSynthesis.speak(utter);
-        }
-
-        // 2. 消息分发逻辑
         if (data.type === 'LIVE_CHAT') {
-          // 转发给指挥台监听器
           window.dispatchEvent(new CustomEvent('ws-live-chat', { detail: data }))
         }
 
         if (data.type === 'TACTICAL_DEPT_VIOLATION') {
-          // 转发给坐席端悬浮岛实现静默拦截
           window.dispatchEvent(new CustomEvent('ws-dept-violation', { detail: data }))
-          // 同时作为通用指令分发
           window.dispatchEvent(new CustomEvent('ws-tactical-command', { detail: data }))
         }
 
         if (data.type && data.type.startsWith('TACTICAL_')) {
-          // V3.33: 统一战术指令分发中心
           window.dispatchEvent(new CustomEvent('ws-tactical-command', { detail: data }))
         }
 
         if (data.type === 'VIOLATION') {
           addViolation(data)
           setAlerting(true)
-          
-          // 核心增强：如果是高危违规，立即触发本地“熔断”提示
           if (data.risk_level >= 4) {
              window.dispatchEvent(new CustomEvent('trigger-toast', { 
                detail: { title: '违规拦截', message: `检测到敏感词 [${data.keyword}]，已执行物理阻断！`, type: 'error' } 
              }))
           }
-
           window.dispatchEvent(new CustomEvent('trigger-violation-alert', { 
             detail: { id: data.id, agent: data.agent || data.real_name, keyword: data.keyword } 
           }))
           setTimeout(() => setAlerting(false), 5000)
         }
 
-        if (data.type === 'TACTICAL_LOCK') {
-           const isCurrentlyLocked = useRiskStore.getState().isLocked;
-           const nextState = !isCurrentlyLocked;
-           useRiskStore.getState().setIsLocked(nextState);
-           
-           // V3.24: 物理系统级锁定指令下发 (通知本地 Python 引擎)
-           // 关键：强制发往引擎默认端口 8000
-           const localApiBase = `http://localhost:8000/api`;
-
-           window.api.callApi({
-             url: `${localApiBase}/system/lock`,
-             method: 'POST',
-             data: { lock: nextState }
-           }).catch(e => console.error('Physical lock failed', e));
-
-           // V3.27: 优化交互体验 - 仅在锁定(全屏状态)时显示通知
-           if (nextState) {
-             window.dispatchEvent(new CustomEvent('trigger-toast', { 
-               detail: { 
-                 title: '系统已锁定', 
-                 message: '已执行指挥官下发的[系统物理锁定]动作，键盘鼠标已禁用', 
-                 type: 'error' 
-               } 
-             }))
-           }
-        }
-
         if (data.type === 'TERMINATE_SESSION') {
-          window.dispatchEvent(new CustomEvent('trigger-toast', { 
-            detail: { title: '会话冲突', message: data.message, type: 'error' } 
-          }))
           setTimeout(() => {
             useAuthStore.getState().logout();
             window.location.hash = '/login';
           }, 2000);
           return;
         }
-
-        if (data.type === 'ROLE_CHANGED') {
-          const userState = useAuthStore.getState().user;
-          if (data.target_user === userState?.username) {
-            window.dispatchEvent(new CustomEvent('trigger-toast', { 
-              detail: { title: '权限变更', message: data.message, type: 'error' } 
-            }))
-            setTimeout(() => {
-              useAuthStore.getState().logout();
-              window.location.hash = '/login';
-            }, 3000);
-          }
-        }
       }
 
       socket.onclose = () => {
         useRiskStore.getState().setOnline(false)
-        if ((socket as any)._screenTimer) clearInterval((socket as any)._screenTimer);
-        if ((socket as any)._heartbeatTimer) clearInterval((socket as any)._heartbeatTimer);
+        if ((socket as any)._screenTimer) clearTimeout((socket as any)._screenTimer);
+        if ((socket as any)._heartbeatTimer) clearTimeout((socket as any)._heartbeatTimer);
         
-        // V3.26: 战术级无限重连逻辑
         const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
-        console.warn(`🔌 [WS链路] 物理连接断开，${delay/1000}s 后进行第 ${retryCount + 1} 次尝试...`);
         reconnectTimeout = setTimeout(connect, delay);
         retryCount++;
       }
@@ -185,7 +115,6 @@ export const useRiskSocket = () => {
 
     connect();
 
-    // 核心：监听外部发送指令请求
     const handleSendMsg = (e: any) => {
       if (socket?.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(e.detail));
