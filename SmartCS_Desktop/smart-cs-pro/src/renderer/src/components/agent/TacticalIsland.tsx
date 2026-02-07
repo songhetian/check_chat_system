@@ -7,7 +7,7 @@ import {
   Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X, Maximize2,
   Package, BookOpen, Tags, SearchCheck, Filter, ChevronLeft, AlertOctagon, Wallet, Heart, Ban, Undo2,
   UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain, PenTool, Send,
-  AlertTriangle
+  AlertTriangle, ChevronDown, Check
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -33,40 +33,49 @@ export const TacticalIsland = () => {
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 核心：战术草稿与话术推送逻辑 (V3.29)
-  const [content, setContent] = useState('') // 当前编辑器内容
+  // 核心：战术草稿与话术推送逻辑 (V3.32)
+  const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
   const [sentiments, setSentiments] = useState<any[]>([])
   const [selectedSentiment, setSelectedSentiment] = useState<any>(null)
   const [optimizing, setOptimizing] = useState(false)
-  const [hasOptimized, setHasOptimized] = useState(false) // 标记是否已经执行过 AI 优化
+  const [hasOptimized, setHasOptimized] = useState(false)
+  const [sentimentSearch, setSentimentSearch] = useState('')
+  const [showSentimentDropdown, setShowSentimentDropdown] = useState(false)
 
   // 战术规避模式 (V3.30)
   const [isEvasionMode, setIsEvasionMode] = useState(false)
   const [evasionInfo, setEvasionInfo] = useState<any>(null)
 
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const fetchSentiments = async () => {
     try {
       const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sentiments`, method: 'GET', headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` } })
       if (res.status === 200) {
         setSentiments(res.data.data)
-        if (res.data.data.length > 0) setSelectedSentiment(res.data.data[1] || res.data.data[0])
+        // 默认选择 ID 为 4 的“中性”情绪，如果找不到选第一个
+        const neutral = res.data.data.find((s: any) => s.name.includes('中性')) || res.data.data[0]
+        setSelectedSentiment(neutral)
       }
     } catch (e) { console.error(e) }
   }
 
   useEffect(() => {
     fetchSentiments()
+    // 关键修正：确保监听器能捕获到来自 useRiskSocket 的事件
     const onCommand = (e: any) => {
+      console.log('📡 [Island] Received Command:', e.detail)
       if (e.detail.type === 'TACTICAL_PUSH') {
         setContent(e.detail.payload.content)
         setIsPushMode(true)
         setIsScratchpad(false)
         setIsEvasionMode(false)
         setHasOptimized(false)
+        // 强制唤起物理窗口
+        window.electron.ipcRenderer.send('resize-window', { width: 800, height: 550, center: false, x: window.screen.width - 820, y: 30 })
         window.electron.ipcRenderer.send('set-always-on-top', true)
       }
     }
@@ -76,12 +85,7 @@ export const TacticalIsland = () => {
       setIsEvasionMode(true)
       setIsPushMode(false)
       setIsScratchpad(false)
-      
-      window.api.callApi({
-        url: `http://localhost:8000/api/system/clear-input`,
-        method: 'POST'
-      }).catch(err => console.error('Clear input failed', err))
-      
+      window.api.callApi({ url: `http://localhost:8000/api/system/clear-input`, method: 'POST' }).catch(err => console.error('Clear input failed', err))
       window.electron.ipcRenderer.send('set-always-on-top', true)
     }
 
@@ -93,6 +97,21 @@ export const TacticalIsland = () => {
     }
   }, [])
 
+  // 点击外部关闭下拉框
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowSentimentDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const filteredSentiments = useMemo(() => {
+    return sentiments.filter(s => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
+  }, [sentiments, sentimentSearch])
+
   const optimizeScript = async () => {
     if (!content || !selectedSentiment) return
     setOptimizing(true)
@@ -103,43 +122,30 @@ export const TacticalIsland = () => {
       优化后的回话：`
 
       const serverConfig = await window.api.getServerConfig()
-      const aiUrl = serverConfig.ai_engine.url
-      const model = serverConfig.ai_engine.model
-
-      const res = await fetch(aiUrl, {
+      const res = await fetch(serverConfig.ai_engine.url, {
         method: 'POST',
-        body: JSON.stringify({ model, prompt, stream: false })
+        body: JSON.stringify({ model: serverConfig.ai_engine.model, prompt, stream: false })
       })
       const data = await res.json()
       setContent(data.response)
       setHasOptimized(true)
-      toast.success('AI 调优成功', { description: '再次回车即可一键复制' })
+      toast.success('AI 调优成功')
     } catch (e) {
-      console.error('AI Optimize failed', e)
       toast.error('AI 引擎未就绪')
-    } finally {
-      setOptimizing(false)
-    }
+    } finally { setOptimizing(false) }
   }
 
   const copyAndClose = () => {
     navigator.clipboard.writeText(content)
-    toast.success('复制成功', { description: '话术已存入剪贴板，正在收起...' })
-    setTimeout(() => {
-      setIsPushMode(false)
-      setIsScratchpad(false)
-      setHasOptimized(false)
-    }, 200)
+    toast.success('一键复制成功')
+    setTimeout(() => { setIsPushMode(false); setIsScratchpad(false); setHasOptimized(false); }, 200)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (!hasOptimized) {
-        optimizeScript()
-      } else {
-        copyAndClose()
-      }
+      if (!hasOptimized) optimizeScript()
+      else copyAndClose()
     }
   }
 
@@ -148,7 +154,6 @@ export const TacticalIsland = () => {
     const screenHeight = window.screen.height
     const active = isPushMode || isScratchpad || isEvasionMode
     
-    // 物理宽度计算 (V3.31: 扩宽至 800px 解决裁剪问题)
     let width = isFolded ? 80 : 800 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined = undefined
@@ -158,7 +163,7 @@ export const TacticalIsland = () => {
     if (isLocked) {
       width = screenWidth; height = screenHeight; x = 0; y = 0;
     } else if (active) {
-      width = 800; height = 450;
+      width = 800; height = 550; // V3.32: 增加高度适配上下布局
       x = screenWidth - 820; y = 30;
     } else if (showBigScreenModal) {
       width = 1280; height = 850; center = true
@@ -199,7 +204,7 @@ export const TacticalIsland = () => {
         initial={false}
         animate={{ 
           width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 800))),
-          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isInSpecialMode || isEvasionMode ? 450 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
+          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isInSpecialMode || isEvasionMode ? 550 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
         className={cn(
           "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative",
@@ -220,18 +225,15 @@ export const TacticalIsland = () => {
                 </div>
                 <button onClick={() => setIsEvasionMode(false)} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10 text-amber-200"><Undo2 size={16}/> 关闭提示</button>
              </div>
-
              <div className="flex-1 flex flex-col items-center justify-center text-center px-10 gap-6">
                 <div className="space-y-2">
                    <p className="text-sm font-bold text-amber-200/80 uppercase tracking-widest">检测到禁忌词项</p>
                    <div className="text-5xl font-black text-white italic tracking-tighter decoration-red-500 decoration-4 underline underline-offset-8">"{evasionInfo?.keyword}"</div>
                 </div>
-                
                 <div className="w-full max-w-md p-6 bg-black/40 rounded-[32px] border border-amber-500/30 shadow-2xl">
                    <p className="text-xs font-black text-amber-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><CheckCircle2 size={14}/> 修正建议</p>
                    <p className="text-lg font-medium leading-relaxed italic text-white">"{evasionInfo?.suggestion}"</p>
                 </div>
-
                 <p className="text-[10px] font-bold text-amber-200/40 uppercase tracking-[0.4em]">输入已物理清空 · 请使用建议语重新输入</p>
              </div>
           </div>
@@ -250,7 +252,8 @@ export const TacticalIsland = () => {
                 <button onClick={() => { setIsPushMode(false); setIsScratchpad(false); setHasOptimized(false); }} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-2 font-black text-xs transition-all border border-white/10 text-slate-300"><Undo2 size={16}/> 退出</button>
              </div>
 
-             <div className="flex-1 flex gap-8 min-h-0">
+             {/* V3.32: 升级为上下布局，优化视觉呼吸感 */}
+             <div className="flex-1 flex flex-col gap-6 min-h-0">
                 <div className="flex-1 flex flex-col">
                    <div className="flex-1 bg-black/40 rounded-[32px] border border-white/5 relative group p-1 shadow-inner focus-within:border-cyan-500/50 transition-all">
                       <div className="absolute top-4 right-6 text-[8px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2 pointer-events-none z-10">
@@ -262,50 +265,79 @@ export const TacticalIsland = () => {
                         onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }}
                         onKeyDown={handleKeyDown}
                         placeholder="请输入心里话..."
-                        className="w-full h-full bg-transparent px-6 pt-10 pb-6 rounded-[32px] text-lg font-medium leading-relaxed italic text-white resize-none outline-none custom-scrollbar"
+                        className="w-full h-full bg-transparent px-8 pt-12 pb-8 rounded-[32px] text-xl font-medium leading-relaxed italic text-white resize-none outline-none custom-scrollbar"
                       />
-                   </div>
-                   <div className="flex gap-4 mt-6">
-                      <button onClick={copyAndClose} className="flex-1 flex items-center justify-center gap-3 py-5 bg-white/5 hover:bg-white/10 rounded-2xl text-xs font-black transition-all border border-white/10 text-white active:scale-95 shadow-inner group">
-                         <ImageIcon size={18} className="text-slate-400 group-hover:text-white transition-colors" /> 
-                         仅复制当前
-                      </button>
-                      <button 
-                        disabled={optimizing || !selectedSentiment || !content}
-                        onClick={optimizeScript}
-                        className={cn(
-                          "flex-[1.5] py-5 rounded-2xl font-black text-sm uppercase shadow-2xl transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-30",
-                          hasOptimized ? "bg-emerald-600 text-white shadow-emerald-900/20" : "bg-cyan-600 text-white shadow-cyan-900/20"
-                        )}
-                      >
-                         {optimizing ? <Loader2 className="animate-spin" size={20}/> : (hasOptimized ? <CheckCircle2 size={20}/> : <Sparkles size={20}/>)}
-                         {hasOptimized ? '再次回车确认复制' : 'AI 优化并替换 (Enter)'}
-                      </button>
                    </div>
                 </div>
 
-                <div className="w-64 shrink-0 flex flex-col bg-white/5 p-6 rounded-[40px] border border-white/5 shadow-inner">
-                   <span className="text-[10px] font-black text-slate-500 uppercase ml-2 mb-4 tracking-[0.2em] flex items-center gap-2"><Brain size={14} className="text-cyan-500"/> 客户情绪对齐</span>
-                   <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto custom-scrollbar pr-1">
-                      {sentiments.map((s) => (
-                        <button 
-                          key={s.id}
-                          onClick={() => { setSelectedSentiment(s); setHasOptimized(false); }}
-                          className={cn(
-                            "py-4 px-5 rounded-2xl text-[11px] font-black transition-all flex flex-col items-start gap-1.5 border text-left group/s",
-                            selectedSentiment?.id === s.id 
-                              ? `bg-${s.color}-500/20 text-${s.color}-400 border-${s.color}-500/50 shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]` 
-                              : "bg-white/[0.02] text-slate-500 border-white/[0.05] hover:bg-white/5 hover:text-slate-300"
-                          )}
-                        >
-                           <span className="flex items-center gap-2 uppercase tracking-tighter">
-                              <div className={cn("w-1.5 h-1.5 rounded-full", `bg-${s.color}-500`)} />
-                              {s.name}
-                           </span>
-                           <span className="text-[9px] opacity-30 font-medium leading-tight group-hover/s:opacity-60 transition-opacity">{s.prompt_segment}</span>
-                        </button>
-                      ))}
+                {/* 底部控制中心：情绪选择 + 动作按钮 */}
+                <div className="flex items-center gap-4 h-20 shrink-0 bg-white/5 p-2 rounded-[24px] border border-white/5">
+                   {/* 搜索式情绪下拉框 */}
+                   <div className="relative w-64 h-full" ref={dropdownRef}>
+                      <button 
+                        onClick={() => setShowSentimentDropdown(!showSentimentDropdown)}
+                        className="w-full h-full px-5 flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group"
+                      >
+                         <div className="flex items-center gap-3">
+                            <Brain size={16} className={cn(selectedSentiment ? `text-${selectedSentiment.color}-400` : "text-slate-400")} />
+                            <span className="text-xs font-black text-white truncate">{selectedSentiment?.name || '选择情绪'}</span>
+                         </div>
+                         <ChevronDown size={16} className={cn("text-slate-500 transition-transform", showSentimentDropdown && "rotate-180")} />
+                      </button>
+
+                      <AnimatePresence>
+                        {showSentimentDropdown && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                            className="absolute bottom-full left-0 right-0 mb-3 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100]"
+                          >
+                             <div className="p-3 border-b border-white/5 bg-white/5">
+                                <input 
+                                  autoFocus
+                                  value={sentimentSearch}
+                                  onChange={(e) => setSentimentSearch(e.target.value)}
+                                  placeholder="快速检索维度..."
+                                  className="w-full bg-black/40 border-none rounded-lg px-3 py-2 text-[10px] font-bold text-white outline-none"
+                                />
+                             </div>
+                             <div className="max-h-48 overflow-y-auto custom-scrollbar p-1">
+                                {filteredSentiments.map(s => (
+                                  <button 
+                                    key={s.id}
+                                    onClick={() => { setSelectedSentiment(s); setHasOptimized(false); setShowSentimentDropdown(false); }}
+                                    className={cn(
+                                      "w-full px-4 py-2.5 rounded-xl flex items-center justify-between text-[10px] font-black transition-all hover:bg-white/5 text-left group",
+                                      selectedSentiment?.id === s.id ? "bg-cyan-600/20 text-cyan-400" : "text-slate-400"
+                                    )}
+                                  >
+                                     <div className="flex items-center gap-2">
+                                        <div className={cn("w-1.5 h-1.5 rounded-full", `bg-${s.color}-500`)} />
+                                        {s.name}
+                                     </div>
+                                     {selectedSentiment?.id === s.id && <Check size={12}/>}
+                                  </button>
+                                ))}
+                             </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                    </div>
+
+                   <button onClick={copyAndClose} className="px-6 h-full flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-black transition-all border border-white/10 text-slate-300 group">
+                      <ImageIcon size={18} className="text-slate-500 group-hover:text-white" /> 仅复制
+                   </button>
+
+                   <button 
+                     disabled={optimizing || !selectedSentiment || !content}
+                     onClick={optimizeScript}
+                     className={cn(
+                       "flex-1 h-full rounded-xl font-black text-sm uppercase shadow-2xl transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-30",
+                       hasOptimized ? "bg-emerald-600 text-white" : "bg-cyan-600 text-white"
+                     )}
+                   >
+                      {optimizing ? <Loader2 className="animate-spin" size={20}/> : (hasOptimized ? <CheckCircle2 size={20}/> : <Sparkles size={20}/>)}
+                      {hasOptimized ? '再次回车确认复制' : 'AI 优化并替换 (Enter)'}
+                   </button>
                 </div>
              </div>
           </div>
