@@ -13,6 +13,7 @@ async def record_audit(operator: str, action: str, target: str, details: str):
 @router.get("/sentiments")
 async def get_sentiments(current_user: dict = Depends(check_permission("admin:sentiment:view"))):
     """[物理拉取] 获取动态客户情绪标签集"""
+    print(f"🔍 [DEBUG] 正在为用户 {current_user.get('username')} 拉取情绪维度数据")
     data = await CustomerSentiment.filter(is_deleted=0).order_by("id").values()
     return {"status": "ok", "data": data}
 

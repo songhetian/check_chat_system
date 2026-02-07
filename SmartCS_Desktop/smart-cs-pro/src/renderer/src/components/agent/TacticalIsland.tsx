@@ -51,14 +51,22 @@ export const TacticalIsland = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // 3. 数据同步：React Query 极速通道
+  // 3. 数据同步：React Query 极速通道 (强制本地化闭环)
   const { data: sentiments = [] } = useQuery({
-    queryKey: ['ai_sentiments_island_v3'],
+    queryKey: ['ai_sentiments_island_v4'],
     queryFn: async () => {
-      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sentiments`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
-      return res.data.data
+      // V3.54: 强制请求本地引擎，解决 IP 路由导致的跨网段加载失败
+      const localBase = "http://localhost:8000/api";
+      const res = await window.api.callApi({ 
+        url: `${localBase}/ai/sentiments`, 
+        method: 'GET', 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      })
+      console.log('📡 [Island] 情绪数据加载结果:', res.data);
+      return res.data.data || []
     },
-    enabled: !!token
+    enabled: !!token,
+    refetchOnWindowFocus: true
   })
 
   // 默认情绪对齐
