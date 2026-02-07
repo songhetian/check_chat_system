@@ -127,6 +127,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pendingSyncCount = sysStatus?.pendingSyncCount ?? 0
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 
+  // V3.71: 401 自动熔断自愈逻辑
+  useEffect(() => {
+    const handleGlobalError = (event: any) => {
+      // 检查是否为 401 令牌未命中
+      if (event.detail?.status === 401) {
+        console.error('🚨 [鉴权熔断] 令牌失效，正在紧急重置链路...');
+        logout();
+        window.location.hash = '/login';
+      }
+    };
+    window.addEventListener('api-response-error', handleGlobalError);
+    return () => window.removeEventListener('api-response-error', handleGlobalError);
+  }, [logout]);
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden select-none font-sans text-black">
       <AnimatePresence mode="wait">
