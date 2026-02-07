@@ -206,12 +206,22 @@ function createWindow(): void {
     }
   })
 
-  // 核心：战术截屏接口 (用于实时监控)
+  // 核心：战术截屏接口 (V3.20 高清重构)
   ipcMain.handle('capture-screen', async () => {
     try {
-      const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width: 800, height: 450 } })
+      const { screen } = require('electron')
+      const primaryDisplay = screen.getPrimaryDisplay()
+      const { width, height } = primaryDisplay.size
+      
+      const sources = await desktopCapturer.getSources({ 
+        types: ['screen'], 
+        thumbnailSize: { width: width, height: height } // 物理 1:1 采样
+      })
+      
       if (sources.length > 0) {
-        return sources[0].thumbnail.toDataURL()
+        // 使用 90% 质量 JPEG 确保文字不模糊，且体积平衡
+        const image = sources[0].thumbnail.toJPEG(90)
+        return `data:image/jpeg;base64,${image.toString('base64')}`
       }
       return null
     } catch (e) {
