@@ -31,7 +31,7 @@ import AiPerformancePage from './pages/hq/AiPerformance'
 import { 
   CheckCircle2, AlertCircle, ShieldAlert, User, Search, Filter, Activity, 
   Globe, ShieldCheck, Users, ArrowRight, Award, GraduationCap, Volume2, VolumeX, RefreshCw,
-  Loader2
+  Loader2, Lock as LockIcon, Unlock as UnlockIcon
 } from 'lucide-react'
 import { cn } from './lib/utils'
 import { CONFIG } from './lib/config'
@@ -155,6 +155,7 @@ const AdminHome = () => {
 const AgentView = () => {
   const isRedAlert = useRiskStore(s => s.isRedAlert)
   const isMuted = useRiskStore(s => s.isMuted)
+  const isLocked = useRiskStore(s => s.isLocked)
 
   useEffect(() => {
     const onToast = (e: any) => { 
@@ -198,6 +199,36 @@ const AgentView = () => {
   return (
     <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600")}>
       <TacticalIsland />
+      
+      {/* V3.22: 物理锁定遮罩 - 阻止一切交互 */}
+      <AnimatePresence>
+        {isLocked && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[99999] bg-slate-950/60 backdrop-blur-xl flex flex-col items-center justify-center cursor-not-allowed select-none"
+            onContextMenu={(e) => e.preventDefault()}
+          >
+             <motion.div 
+               initial={{ scale: 0.9, y: 20 }}
+               animate={{ scale: 1, y: 0 }}
+               className="bg-white p-12 rounded-[32px] shadow-2xl flex flex-col items-center text-center max-w-sm border border-slate-100"
+             >
+                <div className="w-24 h-24 bg-red-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-red-600/20 mb-8 animate-pulse">
+                   <LockIcon size={48} className="text-white" strokeWidth={3} />
+                </div>
+                <h3 className="text-2xl font-black text-black uppercase italic tracking-tight mb-2">系统已被物理锁定</h3>
+                <p className="text-slate-500 text-sm font-bold leading-relaxed mb-6">
+                  指挥官已接管该工作站控制权。<br/>键盘及鼠标输入已被暂时禁用。
+                </p>
+                <div className="px-6 py-2 bg-slate-100 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest border border-slate-200">
+                  Tactical Lock Protocol Active
+                </div>
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

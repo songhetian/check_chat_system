@@ -97,8 +97,16 @@ export const useRiskSocket = () => {
         }
 
         if (data.type === 'TACTICAL_LOCK') {
+           const isCurrentlyLocked = useRiskStore.getState().isLocked;
+           const nextState = !isCurrentlyLocked;
+           useRiskStore.getState().setIsLocked(nextState);
+           
            window.dispatchEvent(new CustomEvent('trigger-toast', { 
-             detail: { title: '指令到达', message: '已执行指挥官下发的[输入锁定]动作', type: 'error' } 
+             detail: { 
+               title: nextState ? '系统已锁定' : '系统已解锁', 
+               message: nextState ? '已执行指挥官下发的[输入锁定]动作，请等待进一步指令' : '指挥官已解除系统锁定状态', 
+               type: nextState ? 'error' : 'success' 
+             } 
            }))
         }
 

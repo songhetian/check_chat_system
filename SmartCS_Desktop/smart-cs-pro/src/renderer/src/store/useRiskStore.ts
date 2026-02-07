@@ -30,6 +30,7 @@ interface RiskState {
   isOnboardingMode: boolean
   isAiOptimizeEnabled: boolean
   isScreenMaximized: boolean // V3.19: 全局全屏观察状态
+  isLocked: boolean // V3.22: 物理锁定状态
   layoutMode: 'FLOAT' | 'SIDE'
   activeSideTool: 'PRODUCTS' | 'KNOWLEDGE' | 'CUSTOMERS' | null
   isCustomerHudEnabled: boolean
@@ -47,6 +48,7 @@ interface RiskState {
   setOnboardingMode: (enabled: boolean) => void
   setAiOptimize: (enabled: boolean) => void
   setIsScreenMaximized: (enabled: boolean) => void
+  setIsLocked: (enabled: boolean) => void
   setLayoutMode: (mode: 'FLOAT' | 'SIDE') => void
   setActiveSideTool: (tool: 'PRODUCTS' | 'KNOWLEDGE' | null) => void
   setCustomerHudEnabled: (enabled: boolean) => void
@@ -66,6 +68,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   isOnboardingMode: true,
   isAiOptimizeEnabled: false,
   isScreenMaximized: false,
+  isLocked: false,
   layoutMode: 'FLOAT',
   activeSideTool: null,
   isCustomerHudEnabled: false,
@@ -83,6 +86,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   setOnboardingMode: (isOnboardingMode) => set({ isOnboardingMode }),
   setAiOptimize: (isAiOptimizeEnabled) => set({ isAiOptimizeEnabled }),
   setIsScreenMaximized: (isScreenMaximized) => set({ isScreenMaximized }),
+  setIsLocked: (isLocked) => set({ isLocked }),
   setLayoutMode: (layoutMode) => set({ layoutMode }),
   setActiveSideTool: (activeSideTool) => set({ activeSideTool }),
   setCustomerHudEnabled: (isCustomerHudEnabled) => set({ isCustomerHudEnabled }),
