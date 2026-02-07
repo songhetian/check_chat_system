@@ -200,31 +200,28 @@ const AgentView = () => {
     <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600")}>
       <TacticalIsland />
       
-      {/* V3.22: 物理锁定遮罩 - 阻止一切交互 */}
+      {/* V3.22: 物理锁定遮罩 - 阻止一切交互，且覆盖悬浮框 */}
       <AnimatePresence>
         {isLocked && (
           <motion.div 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[99999] bg-slate-950/60 backdrop-blur-xl flex flex-col items-center justify-center cursor-not-allowed select-none"
+            className="fixed inset-0 z-[999999] bg-red-900/60 backdrop-blur-md flex flex-col items-center justify-center cursor-not-allowed select-none"
             onContextMenu={(e) => e.preventDefault()}
           >
              <motion.div 
-               initial={{ scale: 0.9, y: 20 }}
-               animate={{ scale: 1, y: 0 }}
-               className="bg-white p-12 rounded-[32px] shadow-2xl flex flex-col items-center text-center max-w-sm border border-slate-100"
+               initial={{ scale: 0.9 }}
+               animate={{ scale: 1 }}
+               className="flex flex-col items-center text-center"
              >
-                <div className="w-24 h-24 bg-red-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-red-600/20 mb-8 animate-pulse">
-                   <LockIcon size={48} className="text-white" strokeWidth={3} />
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-2xl mb-6 animate-pulse">
+                   <LockIcon size={40} className="text-red-600" strokeWidth={3} />
                 </div>
-                <h3 className="text-2xl font-black text-black uppercase italic tracking-tight mb-2">系统已被物理锁定</h3>
-                <p className="text-slate-500 text-sm font-bold leading-relaxed mb-6">
-                  指挥官已接管该工作站控制权。<br/>键盘及鼠标输入已被暂时禁用。
-                </p>
-                <div className="px-6 py-2 bg-slate-100 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest border border-slate-200">
+                <h3 className="text-4xl font-black text-white uppercase italic tracking-widest mb-2 shadow-sm">已开启锁定模式</h3>
+                <p className="text-red-100 text-sm font-bold opacity-80 uppercase tracking-[0.3em]">
                   Tactical Lock Protocol Active
-                </div>
+                </p>
              </motion.div>
           </motion.div>
         )}

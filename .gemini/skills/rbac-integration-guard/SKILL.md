@@ -28,6 +28,10 @@ description: RBAC 权限集成与 SQL 自动化守卫。当新增功能、API �
 *   **热更新**：完成 SQL 编写后，优先尝试使用 `run_shell_command` 通过 `mysql` 命令行直接执行该 SQL 片段。
 *   **重置策略**：如果架构变更过于复杂导致执行失败，在征得用户同意或为了保持环境一致性的情况下，可以执行 `DROP DATABASE` 并重新运行全量 `central_production.sql`。
 
+## 4. 物理环境配置 (Credential Reference)
+*   **本地 MySQL**: `mysql -u root -p123456 -h 127.0.0.1`
+*   **默认数据库**: `smart_cs`
+
 ## 操作指南
 
 ### 场景 A：新增功能点（以新增“实时录音协助”为例）
