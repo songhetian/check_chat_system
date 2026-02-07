@@ -78,7 +78,8 @@ const AdminHome = () => {
       return res.data
     },
     enabled: !!token,
-    refetchInterval: 10000
+    refetchInterval: 10000,
+    staleTime: 5000
   })
 
   const depts = deptsQuery.data || []

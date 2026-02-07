@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ShieldCheck, AlertTriangle, Zap, Brain, 
@@ -7,6 +7,7 @@ import {
   MessageSquare, FileText, Download, Upload,
   FileSpreadsheet, AlertCircle, Tag, ShieldAlert
 } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { cn } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
 import { TacticalTable, TacticalPagination } from '../../components/ui/TacticalTable'
@@ -16,53 +17,86 @@ import { toast } from 'sonner'
 
 export default function GlobalPolicyPage() {
   const { token, hasPermission, user } = useAuthStore()
+  const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'WORDS' | 'KNOWLEDGE'>('WORDS')
-  const [words, setWords] = useState<any[]>([])
-  const [kb, setKb] = useState<any[]>([])
-  const [cats, setCats] = useState<any[]>([])
-  const [depts, setDepts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
-  const [total, setTotal] = useState(0)
   const [search, setSearch] = useState('')
   
   const [modalType, setModalType] = useState<'NONE' | 'EDIT' | 'DELETE'>('NONE')
   const [editItem, setEditItem] = useState<any>(null)
-  const [processing, setProcessing] = useState(false)
 
   const isHQ = user?.role_id === 3 || user?.role_code === 'HQ'
 
-  const fetchData = async (silent = false) => {
-    if (!token) return
-    if (!silent) setLoading(true)
-    try {
+  // 1. 数据采集：React Query 物理隔离版
+  const { data: policyData, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['global_policy', activeTab, page, search],
+    queryFn: async () => {
       const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
-      // 战术增强：加入 search 参数实现服务端过滤
-      const [resData, resCats, resDepts] = await Promise.all([
-        window.api.callApi({ url: `${CONFIG.API_BASE}/${endpoint}?page=${page}&size=10&search=${encodeURIComponent(search)}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }),
-        window.api.callApi({ url: `${CONFIG.API_BASE}/ai/categories?type=${activeTab}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }),
-        isHQ ? window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments?size=100`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }) : Promise.resolve({status: 200, data: {data: []}})
-      ])
-      
-      if (resData.status === 200) {
-        if (activeTab === 'WORDS') setWords(resData.data.data)
-        else setKb(resData.data.data)
-        setTotal(resData.data.total)
-      }
-      if (resCats.status === 200) setCats(resCats.data.data)
-      if (resDepts.status === 200) setDepts(resDepts.data.data)
-    } catch (e) { console.error(e) }
-    finally { setLoading(false) }
-  }
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/${endpoint}?page=${page}&size=10&search=${encodeURIComponent(search)}`, 
+        method: 'GET', 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      })
+      return res.data
+    },
+    enabled: !!token,
+    staleTime: 30000
+  })
 
-  // 战术搜索防抖
-  useEffect(() => {
-    const timer = setTimeout(() => { fetchData() }, 300);
-    return () => clearTimeout(timer);
-  }, [search])
+  const { data: cats = [] } = useQuery({
+    queryKey: ['categories', activeTab],
+    queryFn: async () => {
+      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/ai/categories?type=${activeTab}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
+      return res.data.data
+    },
+    enabled: !!token
+  })
 
-  useEffect(() => { setPage(1); setSearch('') }, [activeTab])
-  useEffect(() => { fetchData() }, [activeTab, page, token])
+  const { data: depts = [] } = useQuery({
+    queryKey: ['departments_all_policy'],
+    queryFn: async () => {
+      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments?size=100`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
+      return res.data.data
+    },
+    enabled: !!token && isHQ
+  })
+
+  // 2. 变更操作
+  const saveMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
+      const data = { ...payload };
+      if (data.department_id === 'GLOBAL') data.department_id = null;
+      return window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/${endpoint}`, 
+        method: 'POST', 
+        headers: { 'Authorization': `Bearer ${token}` },
+        data 
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['global_policy'] })
+      setModalType('NONE')
+      toast.success('策略已固化')
+    }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: any) => {
+      const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words/delete' : 'ai/knowledge-base/delete'
+      return window.api.callApi({
+        url: `${CONFIG.API_BASE}/${endpoint}`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: { id }
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['global_policy'] })
+      setModalType('NONE')
+      toast.success('策略节点已清除')
+    }
+  })
 
   const handleEdit = (item: any) => {
     setEditItem({ ...item });
@@ -74,75 +108,20 @@ export default function GlobalPolicyPage() {
     setModalType('DELETE');
   }
 
-  const handleSave = async () => {
-    if (!token || !editItem || processing) return
-    const isEdit = !!editItem.id
-    const perm = isEdit ? 'admin:ai:update' : 'admin:ai:create'
-    if (!hasPermission(perm)) {
-      toast.error('权限拦截', { description: '您没有执行该操作的权限' });
-      return;
-    }
-
-    setProcessing(true)
-    try {
-      const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words' : 'ai/knowledge-base'
-      
-      // 修正部门选择：如果是 HQ 选择了 'GLOBAL'，设为 null
-      const payload = { ...editItem };
-      if (payload.department_id === 'GLOBAL') payload.department_id = null;
-
-      const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/${endpoint}`, 
-        method: 'POST', 
-        headers: { 'Authorization': `Bearer ${token}` },
-        data: payload 
-      })
-      if (res.data.status === 'ok') { 
-        setModalType('NONE'); 
-        fetchData(true); 
-        toast.success(isEdit ? '策略已优化' : '新策略已就绪');
-      } else {
-        toast.error('保存失败', { description: res.data.message });
-      }
-    } finally {
-      setProcessing(false)
-    }
-  }
-
-  const executeDelete = async () => {
-    if (!editItem || !token || !hasPermission('admin:ai:delete') || processing) return
-    setProcessing(true)
-    try {
-      const endpoint = activeTab === 'WORDS' ? 'ai/sensitive-words/delete' : 'ai/knowledge-base/delete'
-      const res = await window.api.callApi({
-        url: `${CONFIG.API_BASE}/${endpoint}`,
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        data: { id: editItem.id }
-      })
-      if (res.data.status === 'ok') {
-        setModalType('NONE'); 
-        fetchData(true);
-        toast.success('策略节点已清除');
-      } else {
-        toast.error('注销失败', { description: res.data.message });
-      }
-    } finally {
-      setProcessing(false)
-    }
-  }
+  const listData = policyData?.data || []
+  const total = policyData?.total || 0
 
   return (
     <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-xl border border-slate-200 shadow-sm shrink-0 gap-6">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0 gap-6">
         <div><h2 className="text-3xl font-black text-slate-900 uppercase italic">全域 AI 决策中心</h2><p className="text-slate-500 text-sm mt-1 font-medium">配置全局对话拦截权重与智能纠偏话术矩阵</p></div>
         <div className="flex flex-wrap gap-3">
            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="快速过滤关键词..." className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold w-64 focus:ring-2 focus:ring-slate-900 transition-all outline-none" />
+              <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="快速过滤关键词..." className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold w-64 focus:ring-2 focus:ring-slate-900 transition-all outline-none" />
            </div>
-           <button onClick={() => fetchData()} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all group">
-             <RefreshCw size={18} className={cn(loading && "animate-spin")} />
+           <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-xl shadow-sm border border-slate-200 hover:bg-slate-100 transition-all group">
+             <RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} />
            </button>
            {hasPermission('admin:ai:create') && (
              <button onClick={() => { setEditItem(activeTab === 'WORDS' ? { word: '', category_id: cats[0]?.id || '', risk_level: 5, is_active: 1 } : { keyword: '', answer: '', category_id: cats[0]?.id || '', is_active: 1, department_id: isHQ ? 'GLOBAL' : user?.department_id }); setModalType('EDIT'); }} className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black shadow-xl active:scale-95 transition-all"><Plus size={14} /> 录入新策略</button>
@@ -151,16 +130,16 @@ export default function GlobalPolicyPage() {
       </header>
 
       <div className="flex gap-4 p-2 bg-white/50 backdrop-blur-sm rounded-xl border border-slate-200/50 self-start">
-         <TabButton active={activeTab === 'WORDS'} icon={Sliders} label="风险敏感词库" onClick={() => setActiveTab('WORDS')} />
-         <TabButton active={activeTab === 'KNOWLEDGE'} icon={Brain} label="智能话术矩阵" onClick={() => setActiveTab('KNOWLEDGE')} />
+         <TabButton active={activeTab === 'WORDS'} icon={Sliders} label="风险敏感词库" onClick={() => { setActiveTab('WORDS'); setPage(1); setSearch(''); }} />
+         <TabButton active={activeTab === 'KNOWLEDGE'} icon={Brain} label="智能话术矩阵" onClick={() => { setActiveTab('KNOWLEDGE'); setPage(1); setSearch(''); }} />
       </div>
 
-      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
+      <div className="flex-1 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-0">
          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {loading ? <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black italic opacity-50"><Loader2 className="animate-spin" size={40} /><span>调取策略中...</span></div> : (
+            {isLoading ? <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4 uppercase font-black italic opacity-50"><Loader2 className="animate-spin" size={40} /><span>调取策略中...</span></div> : (
               activeTab === 'WORDS' ? (
                 <TacticalTable headers={['敏感词', '所属分类', '风险权重', '状态', '战术调整']}>
-                  {words.map(w => (
+                  {listData.map((w: any) => (
                     <tr key={w.id} className="hover:bg-slate-50/50 transition-colors group text-center text-sm font-bold text-slate-600">
                       <td className="px-8 py-5 font-black text-slate-900">{w.word}</td>
                       <td className="px-6 py-5 text-center"><span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-xl text-[10px] font-black inline-flex items-center gap-1.5 border border-slate-200"><Tag size={10}/>{w.category__name}</span></td>
@@ -181,7 +160,7 @@ export default function GlobalPolicyPage() {
                 </TacticalTable>
               ) : (
                 <TacticalTable headers={['触发关键词', '建议内容', '业务分类', '作用域', '状态', '战术调整']}>
-                  {kb.map(k => (
+                  {listData.map((k: any) => (
                     <tr key={k.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center">
                       <td className="px-8 py-5 font-black text-slate-900">{k.keyword}</td>
                       <td className="px-6 py-5 max-w-md"><p className="text-xs font-medium text-slate-600 line-clamp-2 italic">"{k.answer}"</p></td>
@@ -217,7 +196,7 @@ export default function GlobalPolicyPage() {
         {modalType === 'EDIT' && (
           <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="bg-white w-full max-w-xl rounded-xl shadow-2xl relative z-10 p-10">
+            <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="bg-white w-full max-w-xl rounded-[40px] shadow-2xl relative z-10 p-10">
                <div className="flex justify-between items-center mb-8"><h3 className="text-2xl font-black text-slate-900 uppercase italic">策略参数重校</h3><button onClick={() => setModalType('NONE')} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><X size={24}/></button></div>
                <div className="space-y-8">
                   {activeTab === 'WORDS' ? (
@@ -249,8 +228,8 @@ export default function GlobalPolicyPage() {
                       <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-3 ml-1 tracking-widest">纠偏建议内容</label><textarea value={editItem?.answer || ''} onChange={(e)=>setEditItem({...editItem, answer: e.target.value})} rows={4} className="w-full px-6 py-4 bg-slate-50 rounded-xl text-sm font-medium text-slate-900 shadow-inner resize-none leading-relaxed outline-none" /></div>
                     </>
                   )}
-                  <button disabled={processing} onClick={handleSave} className="w-full py-5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
-                    {processing ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 确认并固化
+                  <button disabled={saveMutation.isPending} onClick={() => saveMutation.mutate(editItem)} className="w-full py-5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+                    {saveMutation.isPending ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 确认并固化
                   </button>
                </div>
             </motion.div>
@@ -261,15 +240,15 @@ export default function GlobalPolicyPage() {
       <AnimatePresence>
         {modalType === 'DELETE' && (
           <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !processing && setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-10 text-center">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !deleteMutation.isPending && setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="bg-white w-full max-w-md rounded-[40px] shadow-2xl relative z-10 p-10 text-center">
                <div className="w-20 h-20 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-6 border border-red-100 shadow-inner"><ShieldAlert size={40} className="animate-pulse" /></div>
                <h3 className="text-xl font-black text-slate-900 mb-2 italic">注销该策略节点？</h3>
-               <p className="text-xs text-slate-400 font-medium mb-8 leading-relaxed px-4">注销策略 <span className="text-red-600 font-black">[{editItem?.word || editItem?.keyword}]</span> 将导致 AI 引擎失去对应的实战识别能力。此操作受到动作级权限 <span className="text-slate-900 font-black">[admin:ai:delete]</span> 的严密监管。</p>
+               <p className="text-xs text-slate-400 font-medium mb-8 leading-relaxed px-4">注销策略 <span className="text-red-600 font-black">[{editItem?.word || editItem?.keyword}]</span> 将导致 AI 引擎失去对应的实战识别能力。</p>
                <div className="grid grid-cols-2 gap-4">
-                  <button disabled={processing} onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-xl font-black text-xs uppercase hover:bg-slate-200 transition-all disabled:opacity-50">放弃动作</button>
-                  <button disabled={processing} onClick={executeDelete} className="py-4 bg-red-500 text-white rounded-xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                    {processing && <Loader2 className="animate-spin" size={16} />} 确认物理清除
+                  <button onClick={() => setModalType('NONE')} className="py-4 bg-slate-100 text-slate-500 rounded-xl font-black text-xs uppercase hover:bg-slate-200 transition-all">放弃动作</button>
+                  <button disabled={deleteMutation.isPending} onClick={() => deleteMutation.mutate(editItem.id)} className="py-4 bg-red-500 text-white rounded-xl font-black text-xs uppercase shadow-xl hover:bg-red-600 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    {deleteMutation.isPending && <Loader2 className="animate-spin" size={16} />} 确认物理清除
                   </button>
                </div>
             </motion.div>

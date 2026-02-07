@@ -1,15 +1,14 @@
-import React, { useRef, useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import React, { useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog, Shield, Layers, Smile, ShieldCheck, FileSearch
+  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog, Shield, Layers, Smile, ShieldCheck, FileSearch, RefreshCw
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { useRiskStore } from '../store/useRiskStore' // V3.19: 引入风险状态库
+import { useRiskStore } from '../store/useRiskStore' 
 import { cn } from '../lib/utils'
 import { CONFIG } from '../lib/config'
-import { toast } from 'sonner'
 
 interface Notification {
   id: string
@@ -39,19 +38,53 @@ const menu = [
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuthStore()
-  const isScreenMaximized = useRiskStore(s => s.isScreenMaximized) // V3.19: 监听全屏观察状态
+  const { user, logout, token } = useAuthStore()
+  const isScreenMaximized = useRiskStore(s => s.isScreenMaximized) 
   const location = useLocation()
-  const navigate = useNavigate()
-  const notifRef = useRef<HTMLDivElement | null>(null)
-  const bellRef = useRef<HTMLButtonElement | null>(null)
-  
+  const queryClient = useQueryClient()
   const [showNotif, setShowNotif] = useState(false)
   const [isFullScreen, setIsFullScreen] = useState(false)
   const [selectedMsg, setSelectedMsg] = useState<Notification | null>(null)
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [pendingSyncCount, setPendingSyncCount] = useState(0)
-  const [isServerOnline, setIsServerOnline] = useState(true)
+  
+  const bellRef = useRef<HTMLButtonElement | null>(null)
+
+  // 1. 核心：通知系统迁移至 React Query (代替 setInterval)
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['notifications_recent'],
+    queryFn: async () => {
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/admin/notifications?size=5`, 
+        method: 'GET', 
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      return res.data.data as Notification[]
+    },
+    enabled: !!token,
+    refetchInterval: 30000 
+  })
+
+  // 2. 核心：同步状态与健康检查迁移至 React Query
+  const { data: sysStatus } = useQuery({
+    queryKey: ['system_status'],
+    queryFn: async () => {
+      let pendingCount = 0;
+      if (window.api?.getSyncStatus) {
+        const syncRes = await window.api.getSyncStatus()
+        pendingCount = syncRes.pendingCount
+      }
+      try {
+        const healthRes = await window.api.callApi({ url: '/health', method: 'GET' })
+        return { isOnline: healthRes.status === 200, pendingSyncCount: pendingCount }
+      } catch {
+        return { isOnline: false, pendingSyncCount: pendingCount }
+      }
+    },
+    refetchInterval: 5000, 
+    staleTime: 2000
+  })
+
+  const isServerOnline = sysStatus?.isOnline ?? true
+  const pendingSyncCount = sysStatus?.pendingSyncCount ?? 0
 
   const handleMinimize = () => window.electron.ipcRenderer.send('minimize-window')
   const handleClose = () => window.electron.ipcRenderer.send('close-window')
@@ -61,47 +94,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.electron.ipcRenderer.send('set-fullscreen', next)
   }
 
-  const fetchRecentNotifs = async () => {
-    const token = useAuthStore.getState().token
-    if (!token) return
-    try {
-      const res = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/admin/notifications?size=5`, 
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      if (res.status === 200) setNotifications(res.data.data)
-    } catch (e) { console.error(e) }
-  }
-
-  useEffect(() => { 
-    fetchRecentNotifs() 
-    const timer = setInterval(fetchRecentNotifs, 30000)
-    return () => clearInterval(timer)
-  }, [])
-
-  useEffect(() => {
-    const checkSyncStatus = async () => {
-      if (window.api?.getSyncStatus) {
-        const { pendingCount } = await window.api.getSyncStatus()
-        setPendingSyncCount(pendingCount)
-      }
-      try {
-        const res = await window.api.callApi({ url: '/health', method: 'GET' })
-        setIsServerOnline(res.status === 200)
-      } catch {
-        setIsServerOnline(false)
-      }
-    }
-    checkSyncStatus()
-    const timer = setInterval(checkSyncStatus, 5000)
-    return () => clearInterval(timer)
-  }, [])
-
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 
   const handleItemClick = async (n: Notification) => {
-    const token = useAuthStore.getState().token
     setSelectedMsg(n)
     if (n.is_read === 0 && token) {
       await window.api.callApi({ 
@@ -110,7 +105,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         headers: { 'Authorization': `Bearer ${token}` },
         data: { id: n.id } 
       })
-      fetchRecentNotifs()
+      queryClient.invalidateQueries({ queryKey: ['notifications_recent'] })
     }
   }
 
@@ -121,7 +116,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden select-none font-sans text-black">
-      {/* V3.19: 全屏观察时物理隐藏侧边栏 */}
       <AnimatePresence mode="wait">
         {!isScreenMaximized && (
           <motion.aside 
@@ -163,7 +157,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </AnimatePresence>
 
       <main className={cn("flex-1 flex flex-col overflow-hidden relative", isScreenMaximized ? "z-[1000]" : "z-10")}>
-        {/* V3.19: 全屏观察时物理隐藏顶栏 */}
         <AnimatePresence mode="wait">
           {!isScreenMaximized && (
             <motion.header 
@@ -180,6 +173,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <div className="flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-100 rounded-xl shadow-sm">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                     <span className="text-[10px] font-bold text-red-700 uppercase tracking-tighter">系统脱机</span>
+                  </div>
+                )}
+                {pendingSyncCount > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-cyan-50 border border-cyan-100 rounded-xl shadow-sm animate-pulse">
+                    <RefreshCw size={10} className="animate-spin text-cyan-600" />
+                    <span className="text-[10px] font-bold text-cyan-700 uppercase tracking-tighter">数据待同步: {pendingSyncCount}</span>
                   </div>
                 )}
               </div>
@@ -208,7 +207,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </section>
 
-        {/* 通知气泡逻辑保持不变，但只有在非全屏时显示 */}
         <AnimatePresence>
           {showNotif && !isScreenMaximized && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute top-16 right-8 w-80 bg-white border border-slate-200 shadow-2xl rounded-xl overflow-hidden z-[500]">
