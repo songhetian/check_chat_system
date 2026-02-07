@@ -111,13 +111,16 @@ export const useRiskSocket = () => {
              data: { lock: nextState }
            }).catch(e => console.error('Physical lock failed', e));
 
-           window.dispatchEvent(new CustomEvent('trigger-toast', { 
-             detail: { 
-               title: nextState ? '系统已锁定' : '系统已解锁', 
-               message: nextState ? '已执行指挥官下发的[系统物理锁定]动作，键盘鼠标已禁用' : '指挥官已解除系统锁定状态', 
-               type: nextState ? 'error' : 'success' 
-             } 
-           }))
+           // V3.27: 优化交互体验 - 仅在锁定(全屏状态)时显示通知
+           if (nextState) {
+             window.dispatchEvent(new CustomEvent('trigger-toast', { 
+               detail: { 
+                 title: '系统已锁定', 
+                 message: '已执行指挥官下发的[系统物理锁定]动作，键盘鼠标已禁用', 
+                 type: 'error' 
+               } 
+             }))
+           }
         }
 
         if (data.type === 'TERMINATE_SESSION') {
