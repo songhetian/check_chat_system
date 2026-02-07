@@ -93,9 +93,15 @@ export default function TacticalCommand() {
 
       // 3. 生成最终图片
       setCapturedImage(canvas.toDataURL('image/png'));
+      setIsScreenMaximized(true); // 进入全屏模式以隐藏侧边栏
       toast.success('证据快照已生成', { description: '已添加水印与时间戳' });
     };
     img.src = screenShot;
+  }
+
+  const closeCapturePreview = () => {
+    setCapturedImage(null);
+    setIsScreenMaximized(false); // 退出全屏模式
   }
 
   const downloadCapture = () => {
@@ -383,7 +389,7 @@ export default function TacticalCommand() {
                         <button onClick={downloadCapture} className="px-6 py-2.5 bg-cyan-600 text-white rounded-xl text-xs font-black shadow-lg hover:bg-cyan-700 transition-all flex items-center gap-2 active:scale-95">
                            <Download size={16} /> 下载到本地
                         </button>
-                        <button onClick={() => setCapturedImage(null)} className="p-2.5 bg-slate-200 text-slate-600 rounded-xl hover:bg-slate-300 transition-all active:scale-95">
+                        <button onClick={closeCapturePreview} className="p-2.5 bg-slate-200 text-slate-600 rounded-xl hover:bg-slate-300 transition-all active:scale-95">
                            <X size={20} />
                         </button>
                      </div>

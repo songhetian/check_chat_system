@@ -119,13 +119,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden select-none font-sans text-black">
       {/* V3.19: 全屏观察时物理隐藏侧边栏 */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {!isScreenMaximized && (
           <motion.aside 
+            key="sidebar"
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 256, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="bg-slate-900 flex flex-col border-r border-slate-800 shrink-0 relative z-20 overflow-hidden"
+            className="bg-slate-900 flex flex-col border-r border-slate-800 shrink-0 relative z-[100] overflow-hidden"
           >
             <div className="p-6 w-64">
               <div className="flex items-center gap-3 mb-10 px-2 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
@@ -158,11 +159,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
       </AnimatePresence>
 
-      <main className="flex-1 flex flex-col overflow-hidden relative z-10">
+      <main className={cn("flex-1 flex flex-col overflow-hidden relative", isScreenMaximized ? "z-[1000]" : "z-10")}>
         {/* V3.19: 全屏观察时物理隐藏顶栏 */}
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {!isScreenMaximized && (
             <motion.header 
+              key="header"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 64, opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -199,7 +201,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
         </AnimatePresence>
 
-        <section className={cn("flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 transition-all duration-500", isScreenMaximized ? "p-0 bg-black" : "p-6")}>
+        <section className={cn("flex-1 overflow-y-auto custom-scrollbar transition-all duration-500", isScreenMaximized ? "p-0 bg-transparent" : "p-6 bg-slate-50/50")}>
           {children}
         </section>
 
