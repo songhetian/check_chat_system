@@ -34,7 +34,7 @@ export const TacticalIsland = () => {
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 核心状态 (V3.41: 极速抗干扰版)
+  // 核心状态 (V3.43: 语义增强版)
   const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
@@ -73,7 +73,9 @@ export const TacticalIsland = () => {
     const onCommand = (e: any) => {
       const data = e.detail;
       if (data.type === 'TACTICAL_PUSH') {
-        setContent(data.payload.content)
+        // 关键修复：弹射时强制重置所有状态并装载内容
+        console.log('🚀 [Link] Payload received:', data.payload.content);
+        setContent(data.payload.content || '')
         setIsPushMode(true); setIsScratchpad(false); setIsEvasionMode(false); setHasOptimized(false);
         window.electron.ipcRenderer.send('set-always-on-top', true)
       }
@@ -91,20 +93,23 @@ export const TacticalIsland = () => {
     return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
   }, [sentiments, sentimentSearch])
 
-  // V3.41: 物理纠偏协议 - 彻底过滤 AI 废话
+  // V3.43: 深度语义调优引擎 (Anti-Leak)
   const optimizeScript = async () => {
     if (!content || !selectedSentiment || optimizing) return
     setOptimizing(true)
-    setHasOptimized(false) // 开始新一轮优化时重置状态
+    setHasOptimized(false)
     try {
-      // 增强型提示词：使用角色边界指令
-      const systemPrompt = `你是一个专业的客服辅助AI。你的唯一任务是重写话术。
-指令：根据[客户情绪:${selectedSentiment.name}]重写以下话术。
-规则：
-1. 严禁输出"收到"、"我理解了"、"优化如下"等任何解释。
-2. 严禁输出引号。
-3. 仅输出最终重写后的那一句话。
-4. 语言要专业、得体。`
+      // 工业级结构化 Prompt
+      const sentimentContext = selectedSentiment.id === 0 ? "保持极度专业、礼貌、简洁的标准语气" : `客户当前处于[${selectedSentiment.name}]状态，引导建议是：${selectedSentiment.prompt_segment}`;
+      
+      const systemPrompt = `你是一个专业的金牌客服。
+[任务]：对用户的原始回复进行重写优化。
+[背景]：${sentimentContext}。
+[规则]：
+1. 严禁输出任何引言（如"好的"、"建议如下"、"我理解了"）。
+2. 严禁输出任何解释、标点说明或引号。
+3. 仅输出优化后的那一句话。
+4. 语言风格：专业、高效、具备亲和力。`
 
       const serverConfig = await window.api.getServerConfig()
       const url = serverConfig.ai_engine.url
@@ -113,17 +118,21 @@ export const TacticalIsland = () => {
       const payload = isChatApi 
         ? { model: serverConfig.ai_engine.model, messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: `待重写话术: ${content}` }
-          ], stream: false, options: { num_predict: 128, temperature: 0.2, top_p: 0.9 } }
-        : { model: serverConfig.ai_engine.model, prompt: `${systemPrompt}\n\n待重写话术: ${content}\n\n重写结果:`, stream: false, options: { num_predict: 128, temperature: 0.2 } };
+            { role: 'user', content: `原始话术：${content}\n\n直接输出优化结果：` }
+          ], stream: false, options: { num_predict: 128, temperature: 0.1, top_p: 0.9, stop: ["\n", "[", "原始"] } }
+        : { model: serverConfig.ai_engine.model, prompt: `${systemPrompt}\n\n原始话术：${content}\n\n优化后的单句回复：`, stream: false, options: { num_predict: 128, temperature: 0.1 } };
 
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       const data = await res.json()
       let responseText = isChatApi ? data.message?.content : data.response
       
       if (responseText) {
-        // 后置清洗：移除常见的 AI 元语言前缀
-        responseText = responseText.replace(/^(好的|收到|我理解了|重写后的内容如下|优化后：|回复：|["'“”])/g, '').trim()
+        // 极致过滤逻辑：清洗常见的废话前缀和引号
+        responseText = responseText.trim()
+          .replace(/^(好的|收到|明白了|理解了|优化后|回复如下|对话建议)[:：\s]*/g, '')
+          .replace(/^["'“](.*)["'”]$/g, '$1') // 移除外层引号
+          .trim();
+          
         if (responseText.length > 0) {
           setContent(responseText)
           setHasOptimized(true)
@@ -131,7 +140,7 @@ export const TacticalIsland = () => {
       }
     } catch (e) { 
       console.error(e)
-      toast.error('AI 链路超时，请检查 Ollama 状态')
+      toast.error('AI 引擎未就绪')
     } finally { setOptimizing(false) }
   }
 
@@ -141,25 +150,16 @@ export const TacticalIsland = () => {
     resetSpecialModes()
   }
 
-  // V3.41: 加固型全局回车监听
+  // 键盘监听逻辑
   useEffect(() => {
     const active = isPushMode || isScratchpad
     if (!active) return
-
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // 正在优化中，物理锁定所有回车动作
-      if (optimizing) {
-        if (e.key === 'Enter') e.preventDefault()
-        return
-      }
-
+      if (optimizing) { if (e.key === 'Enter') e.preventDefault(); return; }
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
-        if (!hasOptimized) {
-          optimizeScript()
-        } else {
-          copyAndClose()
-        }
+        if (!hasOptimized) optimizeScript()
+        else copyAndClose()
       }
     }
     window.addEventListener('keydown', handleGlobalKeyDown)
@@ -193,7 +193,7 @@ export const TacticalIsland = () => {
           width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 800))),
           height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isPushMode || isScratchpad || isEvasionMode ? 320 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
-        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl" : "bg-slate-950", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
+        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl shadow-none" : "bg-slate-950 shadow-none", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
       >
         {isEvasionMode ? (
           <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-amber-950/60">
@@ -272,7 +272,7 @@ export const TacticalIsland = () => {
                    <button 
                      disabled={optimizing || !selectedSentiment || !content}
                      onClick={optimizeScript}
-                     className={cn("flex-1 h-full rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white shadow-emerald-900/40" : "bg-cyan-600 text-white shadow-cyan-900/40")}
+                     className={cn("flex-1 h-full rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/40" : "bg-cyan-600 text-white shadow-lg shadow-cyan-900/40")}
                    >
                       {optimizing ? <Loader2 className="animate-spin" size={14}/> : (hasOptimized ? <CheckCircle2 size={14}/> : <Sparkles size={14}/>)}
                       {hasOptimized ? '再次回车复制' : 'AI 优化 (Enter)'}
