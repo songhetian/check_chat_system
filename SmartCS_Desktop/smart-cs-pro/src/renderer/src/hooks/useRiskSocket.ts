@@ -103,8 +103,30 @@ export const useRiskSocket = () => {
     }
 
     connect();
+
+    // V3.74: HTTP 链路熔断监听 (来自主进程转发失败信号)
+    const handleLinkBreak = () => {
+      if (useRiskStore.getState().isOnline) {
+        console.warn('⚡ [链路熔断] HTTP 转发失败，强制进入脱机模式');
+        useRiskStore.getState().setOnline(false);
+      }
+    };
+    
+    // 使用 electron-toolkit 暴露的 ipcRenderer
+    if (window.electron?.ipcRenderer) {
+      window.electron.ipcRenderer.on('TACTICAL_LINK_BREAK', handleLinkBreak);
+    }
+
     const handleSendMsg = (e: any) => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(e.detail)); }
     window.addEventListener('send-risk-msg', handleSendMsg);
-    return () => { socket?.close(); clearTimeout(reconnectTimeout); window.removeEventListener('send-risk-msg', handleSendMsg); }
+    
+    return () => { 
+      socket?.close(); 
+      clearTimeout(reconnectTimeout); 
+      window.removeEventListener('send-risk-msg', handleSendMsg);
+      if (window.electron?.ipcRenderer) {
+        window.electron.ipcRenderer.removeAllListeners('TACTICAL_LINK_BREAK');
+      }
+    }
   }, [user, token])
 }
