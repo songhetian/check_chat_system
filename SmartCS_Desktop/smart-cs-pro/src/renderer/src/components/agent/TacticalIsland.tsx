@@ -34,7 +34,7 @@ export const TacticalIsland = () => {
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showCriticalAlert, setShowCriticalAlert] = useState(false)
 
-  // 核心状态 (V3.43: 语义增强版)
+  // 核心状态 (V3.45: 流式打字机版)
   const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
@@ -73,8 +73,6 @@ export const TacticalIsland = () => {
     const onCommand = (e: any) => {
       const data = e.detail;
       if (data.type === 'TACTICAL_PUSH') {
-        // 关键修复：弹射时强制重置所有状态并装载内容
-        console.log('🚀 [Link] Payload received:', data.payload.content);
         setContent(data.payload.content || '')
         setIsPushMode(true); setIsScratchpad(false); setIsEvasionMode(false); setHasOptimized(false);
         window.electron.ipcRenderer.send('set-always-on-top', true)
@@ -89,59 +87,75 @@ export const TacticalIsland = () => {
     return () => window.removeEventListener('ws-tactical-command', onCommand)
   }, [])
 
-  const filteredSentiments = useMemo(() => {
-    return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
-  }, [sentiments, sentimentSearch])
-
-  // V3.43: 深度语义调优引擎 (Anti-Leak)
+  // V3.45: 流式渲染核心逻辑 (Streaming reader)
   const optimizeScript = async () => {
     if (!content || !selectedSentiment || optimizing) return
+    
     setOptimizing(true)
     setHasOptimized(false)
+    
+    const originalText = content;
+    // 预清空内容以准备流式注入
+    setContent('') 
+
     try {
-      // 工业级结构化 Prompt
-      const sentimentContext = selectedSentiment.id === 0 ? "保持极度专业、礼貌、简洁的标准语气" : `客户当前处于[${selectedSentiment.name}]状态，引导建议是：${selectedSentiment.prompt_segment}`;
-      
       const systemPrompt = `你是一个专业的金牌客服。
 [任务]：对用户的原始回复进行重写优化。
-[背景]：${sentimentContext}。
+[背景]：客户当前处于[${selectedSentiment.name}]状态，引导建议是：${selectedSentiment.prompt_segment}。
 [规则]：
-1. 严禁输出任何引言（如"好的"、"建议如下"、"我理解了"）。
+1. 严禁输出任何引言（如"好的"、"收到"、"建议如下"）。
 2. 严禁输出任何解释、标点说明或引号。
-3. 仅输出优化后的那一句话。
-4. 语言风格：专业、高效、具备亲和力。`
+3. 仅输出优化后的那一句话。`
 
       const serverConfig = await window.api.getServerConfig()
       const url = serverConfig.ai_engine.url
       const isChatApi = url.endsWith('/chat')
       
       const payload = isChatApi 
-        ? { model: serverConfig.ai_engine.model, messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: `原始话术：${content}\n\n直接输出优化结果：` }
-          ], stream: false, options: { num_predict: 128, temperature: 0.1, top_p: 0.9, stop: ["\n", "[", "原始"] } }
-        : { model: serverConfig.ai_engine.model, prompt: `${systemPrompt}\n\n原始话术：${content}\n\n优化后的单句回复：`, stream: false, options: { num_predict: 128, temperature: 0.1 } };
+        ? { model: serverConfig.ai_engine.model, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `原始话术：${originalText}\n\n直接输出优化结果：` }], stream: true, options: { temperature: 0.1 } }
+        : { model: serverConfig.ai_engine.model, prompt: `${systemPrompt}\n\n原始话术：${originalText}\n\n优化后的单句回复：`, stream: true, options: { temperature: 0.1 } };
 
-      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      const data = await res.json()
-      let responseText = isChatApi ? data.message?.content : data.response
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.body) throw new Error('ReadableStream not supported')
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
       
-      if (responseText) {
-        // 极致过滤逻辑：清洗常见的废话前缀和引号
-        responseText = responseText.trim()
-          .replace(/^(好的|收到|明白了|理解了|优化后|回复如下|对话建议)[:：\s]*/g, '')
-          .replace(/^["'“](.*)["'”]$/g, '$1') // 移除外层引号
-          .trim();
-          
-        if (responseText.length > 0) {
-          setContent(responseText)
-          setHasOptimized(true)
+      let fullText = ''
+      
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        
+        const chunk = decoder.decode(value, { stream: true })
+        // Ollama 每一行都是一个 JSON 对象
+        const lines = chunk.split('\n').filter(l => l.trim())
+        
+        for (const line of lines) {
+          try {
+            const json = JSON.parse(line)
+            const token = isChatApi ? json.message?.content : json.response
+            if (token) {
+              fullText += token
+              // 实时更新编辑器内容 (带清洗)
+              setContent(fullText.replace(/^(好的|收到|明白了|理解了|优化后|回复如下|对话建议)[:：\s]*/g, '').replace(/^["'“](.*)["'”]$/g, '$1').trim())
+            }
+          } catch (e) { /* 忽略不完整的 JSON 块 */ }
         }
       }
+      
+      setHasOptimized(true)
     } catch (e) { 
       console.error(e)
-      toast.error('AI 引擎未就绪')
-    } finally { setOptimizing(false) }
+      setContent(originalText) // 失败回滚
+      toast.error('AI 链路中断')
+    } finally { 
+      setOptimizing(false) 
+    }
   }
 
   const copyAndClose = () => {
@@ -150,21 +164,13 @@ export const TacticalIsland = () => {
     resetSpecialModes()
   }
 
-  // 键盘监听逻辑
-  useEffect(() => {
-    const active = isPushMode || isScratchpad
-    if (!active) return
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (optimizing) { if (e.key === 'Enter') e.preventDefault(); return; }
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
-        if (!hasOptimized) optimizeScript()
-        else copyAndClose()
-      }
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (!hasOptimized && !optimizing) optimizeScript()
+      else if (hasOptimized) copyAndClose()
     }
-    window.addEventListener('keydown', handleGlobalKeyDown)
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown)
-  }, [isPushMode, isScratchpad, hasOptimized, optimizing, content, selectedSentiment])
+  }
 
   useEffect(() => {
     const screenWidth = window.screen.width
@@ -185,6 +191,12 @@ export const TacticalIsland = () => {
     if (isScratchpad && inputRef.current) setTimeout(() => inputRef.current?.focus(), 300)
   }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad, isEvasionMode])
 
+  const filteredSentiments = useMemo(() => {
+    return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
+  }, [sentiments, sentimentSearch])
+
+  const isInSpecialMode = isPushMode || isScratchpad
+
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent text-black">
       <motion.div 
@@ -193,7 +205,7 @@ export const TacticalIsland = () => {
           width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 800))),
           height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isPushMode || isScratchpad || isEvasionMode ? 320 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
-        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl shadow-none" : "bg-slate-950 shadow-none", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
+        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl" : "bg-slate-950", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
       >
         {isEvasionMode ? (
           <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-amber-950/60">
@@ -216,7 +228,7 @@ export const TacticalIsland = () => {
           <div className="flex-1 flex flex-col p-5 text-white overflow-hidden bg-slate-950/40">
              <div className="flex justify-between items-start mb-3 shrink-0">
                 <div className="flex items-center gap-3">
-                   <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse", isPushMode ? "bg-cyan-600" : "bg-emerald-600")}>
+                   <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-2xl", isPushMode ? "bg-cyan-600" : "bg-emerald-600", optimizing && "animate-pulse")}>
                       {isPushMode ? <Sparkles size={20}/> : <PenTool size={20}/>}
                    </div>
                    <h4 className="text-lg font-black italic tracking-tighter uppercase">{isPushMode ? '指挥部战术支援' : '战术草稿箱'}</h4>
@@ -226,19 +238,12 @@ export const TacticalIsland = () => {
 
              <div className="flex-1 flex flex-col gap-3 min-h-0">
                 <div className="flex-1 bg-black/40 rounded-2xl border border-white/5 relative group shadow-inner focus-within:border-cyan-500/50 transition-all overflow-hidden">
-                   <AnimatePresence>
-                     {optimizing && (
-                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center gap-2">
-                          <Loader2 className="animate-spin text-cyan-500" size={24} />
-                          <span className="text-[8px] font-black text-cyan-500 uppercase tracking-[0.3em]">AI 调优中...</span>
-                       </motion.div>
-                     )}
-                   </AnimatePresence>
                    <textarea
                      ref={inputRef}
                      value={content}
                      onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }}
-                     placeholder="输入内容并回车优化..."
+                     onKeyDown={handleKeyDown}
+                     placeholder={optimizing ? "AI 正在思考并注入内容..." : "输入内容并回车优化..."}
                      className="w-full h-full bg-transparent px-5 py-5 text-sm font-medium leading-relaxed italic text-white resize-none outline-none custom-scrollbar"
                    />
                 </div>
@@ -270,9 +275,10 @@ export const TacticalIsland = () => {
                    </div>
                    <button onClick={copyAndClose} className="px-4 h-full flex items-center gap-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black border border-white/10 text-slate-300 transition-all active:scale-95"><ImageIcon size={14}/> 复制</button>
                    <button 
+                     id="main-action-btn"
                      disabled={optimizing || !selectedSentiment || !content}
                      onClick={optimizeScript}
-                     className={cn("flex-1 h-full rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/40" : "bg-cyan-600 text-white shadow-lg shadow-cyan-900/40")}
+                     className={cn("flex-1 h-full rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white" : "bg-cyan-600 text-white")}
                    >
                       {optimizing ? <Loader2 className="animate-spin" size={14}/> : (hasOptimized ? <CheckCircle2 size={14}/> : <Sparkles size={14}/>)}
                       {hasOptimized ? '再次回车复制' : 'AI 优化 (Enter)'}
