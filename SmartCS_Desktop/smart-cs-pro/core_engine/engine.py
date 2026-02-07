@@ -77,6 +77,15 @@ class ConnectionManager:
         for connection in self.active_connections.values():
             await connection.send_json(message)
 
+    async def send_personal_message(self, message: dict, username: str):
+        """
+        [战术点对点] 向指定操作员发送指令
+        """
+        if username in self.active_connections:
+            await self.active_connections[username].send_json(message)
+        else:
+            logger.warning(f"⚠️ [指令丢包] 目标节点 {username} 脱机，无法送达")
+
 manager = ConnectionManager()
 
 async def online_status_cleaner():
