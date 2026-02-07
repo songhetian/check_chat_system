@@ -9,7 +9,9 @@ description: 强制执行 React Query 迁移策略与 WebSocket 实时化改造�
 > 在进行任何涉及数据拉取、状态同步或实时通信的开发时，**必须** 优先遵循本 Skill 的规范。
 
 ## 1. 架构进化红线 (The Red Line)
-1. **禁止一切 useEffect 获取数据**: 凡是 GET 请求，必须物理卸载 `useEffect`，全量改用 `useQuery`。
+1. **禁止使用 useEffect 获取数据**: 
+   - 凡是 GET 请求、数据初始化或状态同步，**必须** 物理卸载 `useEffect`，全量改用 `useQuery`。
+   - **例外许可**: 允许使用 `useEffect` 进行 **非数据类系统级副作用**，例如 `window.addEventListener` (键盘/全局事件监听) 或 WebSocket 基础连接挂载。
 2. **绝对禁止 setInterval 轮询 (Zero Polling Policy)**: 
    - **禁止** 使用 `setInterval` 来同步后端数据、检查服务器状态或刷新界面。
    - 物理状态监控（如在线状态、报警）必须由 **WebSocket (useRiskSocket)** 驱动。
