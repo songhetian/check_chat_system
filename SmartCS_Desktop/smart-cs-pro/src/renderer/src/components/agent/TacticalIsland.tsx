@@ -27,13 +27,13 @@ export const TacticalIsland = () => {
   const { user, logout, token } = useAuthStore()
   const queryClient = useQueryClient()
   
-  // 1. UI 状态管理
+  // 1. 基础 UI 状态
   const [isExpanded, setIsExpanded] = useState(false)
   const [isFolded, setIsFolded] = useState(false) 
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [showBigScreenModal, setShowBigScreenModal] = useState(false)
 
-  // 2. 战术实战状态 (V3.60: 紧凑高对比度版)
+  // 2. 战术实战状态 (V3.61: 稳定兼容版)
   const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
@@ -49,33 +49,26 @@ export const TacticalIsland = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // 3. 数据拉取 (V3.60: 多路自愈探测)
-  const { data: sentiments = [], refetch, status: queryStatus } = useQuery({
-    queryKey: ['ai_sentiments_tactical_v3.6'],
+  // 3. 数据拉取：V3.61 多路加速版
+  const { data: sentiments = [], refetch } = useQuery({
+    queryKey: ['ai_sentiments_island_v3.61'],
     queryFn: async () => {
-      // 尝试本地引擎
-      try {
-        const res = await window.api.callApi({ 
-          url: `http://localhost:8000/api/ai/sentiments`, 
-          method: 'GET', 
-          headers: { 'Authorization': `Bearer ${token}` } 
-        })
-        if (res.status === 200 && res.data?.data) return res.data.data
-      } catch (e) {}
-      
-      // 回退至配置引擎
-      const resFallback = await window.api.callApi({ 
-        url: `${CONFIG.API_BASE}/ai/sentiments`, 
-        method: 'GET', 
-        headers: { 'Authorization': `Bearer ${token}` } 
-      })
-      return resFallback.data.data || []
+      const endpoints = [`http://localhost:8000/api/ai/sentiments`, `${CONFIG.API_BASE}/ai/sentiments`];
+      for (const url of endpoints) {
+        try {
+          const res = await window.api.callApi({ url, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
+          if (res.status === 200 && res.data?.data) return res.data.data
+        } catch (e) {}
+      }
+      return []
     },
     enabled: !!token,
-    staleTime: 60000
+    staleTime: 300000
   })
 
-  // 默认情绪自动锚定
+  // 补强：监听 token 变化自动刷新，解决初始加载为空的问题
+  useEffect(() => { if (token) refetch(); }, [token])
+
   useEffect(() => {
     if (sentiments.length > 0 && !selectedSentiment) {
       const neutral = sentiments.find((s: any) => s.name.includes('中性') || s.id === 4) || sentiments[0]
@@ -109,9 +102,7 @@ export const TacticalIsland = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowSentimentDropdown(false)
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) setShowSentimentDropdown(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -121,7 +112,7 @@ export const TacticalIsland = () => {
     return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
   }, [sentiments, sentimentSearch])
 
-  // 流式 AI 调优
+  // V3.61: Qwen 友好型提示词协议
   const optimizeScript = async () => {
     if (!content || !selectedSentiment || optimizing) return
     setOptimizing(true); setHasOptimized(false);
@@ -129,11 +120,21 @@ export const TacticalIsland = () => {
     setContent('') 
 
     try {
-      const systemPrompt = `你是一个专业的客服。指令：根据[客户情绪:${selectedSentiment.name}]重写话术。规则：仅输出最终重写后的单句话,无引言,无引号.`
       const serverConfig = await window.api.getServerConfig()
-      const payload = { model: serverConfig.ai_engine.model, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `原话:${originalText}` }], stream: true, options: { temperature: 0.1, num_predict: 128 } };
+      // 极简指令：模型越小指令越要直接
+      const prompt = `请直接重写这段话术，使其语气更加${selectedSentiment.name}。规则：只输出重写后的一句话，不要有任何多余的解释。原文：${originalText}`;
 
-      const response = await fetch(serverConfig.ai_engine.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      const response = await fetch(serverConfig.ai_engine.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: serverConfig.ai_engine.model,
+          prompt: prompt,
+          stream: true,
+          options: { temperature: 0.1, stop: ["\n", "["] }
+        })
+      })
+
       if (!response.body) throw new Error('Stream missing')
       const reader = response.body.getReader(); const decoder = new TextDecoder();
       let fullText = ''
@@ -144,7 +145,8 @@ export const TacticalIsland = () => {
         const lines = chunk.split('\n').filter(l => l.trim())
         for (const line of lines) {
           try {
-            const json = JSON.parse(line); const token = json.message?.content || json.response
+            const json = JSON.parse(line)
+            const token = json.response || json.message?.content
             if (token) {
               fullText += token
               setContent(fullText.replace(/^(好的|收到|明白了|理解了|优化后|回复如下|对话建议)[:：\s]*/g, '').replace(/^["'“](.*)["'”]$/g, '$1').trim())
@@ -153,7 +155,7 @@ export const TacticalIsland = () => {
         }
       }
       setHasOptimized(true)
-    } catch (e) { setContent(originalText); toast.error('AI 链路超时') } finally { setOptimizing(false) }
+    } catch (e) { setContent(originalText); toast.error('AI 引擎未响应') } finally { setOptimizing(false) }
   }
 
   const copyAndClose = () => {
@@ -162,16 +164,23 @@ export const TacticalIsland = () => {
     resetSpecialModes()
   }
 
-  // 全局回车监听
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (!hasOptimized && !optimizing) optimizeScript()
+      else if (hasOptimized) copyAndClose()
+    }
+  }
+
   useEffect(() => {
     const active = isPushMode || isScratchpad
     if (!active) return
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (optimizing) { if (e.key === 'Enter') e.preventDefault(); return; }
       if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
-        if (!hasOptimized) optimizeScript()
-        else copyAndClose()
+        e.preventDefault(); 
+        const btn = document.getElementById('main-action-btn')
+        btn?.click()
       }
     }
     window.addEventListener('keydown', handleGlobalKeyDown)
@@ -183,14 +192,14 @@ export const TacticalIsland = () => {
     const screenHeight = window.screen.height
     const active = isPushMode || isScratchpad || isEvasionMode
     
-    // V3.60: 缩减至 640px 极致宽度
-    let width = isFolded ? 80 : 640 
+    // V3.61: 扩宽至 760px 确保按钮全显示
+    let width = isFolded ? 80 : 760 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined, y: number | undefined, center = false
 
     if (isLocked) { width = screenWidth; height = screenHeight; x = 0; y = 0; } 
-    else if (active) { width = 640; height = 320; x = screenWidth - 660; y = 30; } 
-    else { x = isFolded ? screenWidth - 100 : screenWidth - 660; y = 30 }
+    else if (active) { width = 760; height = 320; x = screenWidth - 780; y = 30; } 
+    else { x = isFolded ? screenWidth - 100 : screenWidth - 780; y = 30 }
     
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', isLocked || active || !showBigScreenModal)
@@ -204,13 +213,13 @@ export const TacticalIsland = () => {
       <motion.div 
         layout
         animate={{ 
-          width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 640))),
-          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isInSpecialMode || isEvasionMode ? 320 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
+          width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 760))),
+          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isPushMode || isScratchpad || isEvasionMode ? 320 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
-        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/80 backdrop-blur-2xl shadow-2xl" : "bg-slate-950 shadow-2xl", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
+        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl" : "bg-slate-950", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
       >
         {isEvasionMode ? (
-          <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-amber-950/80">
+          <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-amber-950/60">
              <div className="flex justify-between items-start shrink-0">
                 <div className="flex items-center gap-3">
                    <div className="w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center shadow-2xl animate-bounce"><AlertTriangle size={16} className="text-black"/></div>
@@ -220,7 +229,7 @@ export const TacticalIsland = () => {
              </div>
              <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
                 <div className="text-3xl font-black text-white italic tracking-tighter underline decoration-amber-500">"{evasionInfo?.keyword}"</div>
-                <div className="w-full max-w-sm p-4 bg-black/60 rounded-2xl border border-amber-500/20">
+                <div className="w-full max-w-sm p-4 bg-black/40 rounded-2xl border border-amber-500/30">
                    <p className="text-[10px] font-black text-amber-400 uppercase mb-1">修正建议</p>
                    <p className="text-sm font-medium italic text-white leading-relaxed">"{evasionInfo?.suggestion}"</p>
                 </div>
@@ -230,7 +239,7 @@ export const TacticalIsland = () => {
           <div className="flex-1 flex flex-col p-5 text-white overflow-hidden">
              <div className="flex justify-between items-start mb-3 shrink-0">
                 <div className="flex items-center gap-3">
-                   <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center", isPushMode ? "bg-cyan-600 shadow-cyan-500/30 shadow-lg" : "bg-emerald-600 shadow-emerald-500/30 shadow-lg", optimizing && "animate-pulse")}>
+                   <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-2xl", isPushMode ? "bg-cyan-600 shadow-cyan-500/30 shadow-lg" : "bg-emerald-600 shadow-emerald-500/30 shadow-lg", optimizing && "animate-pulse")}>
                       {isPushMode ? <Sparkles size={20}/> : <PenTool size={20}/>}
                    </div>
                    <h4 className="text-lg font-black italic tracking-tighter uppercase">{isPushMode ? '指挥部支援' : '战术草稿箱'}</h4>
@@ -239,7 +248,6 @@ export const TacticalIsland = () => {
              </div>
 
              <div className="flex-1 flex flex-col gap-3 min-h-0">
-                {/* 强化对比度输入区 */}
                 <div className="flex-1 bg-black rounded-2xl border border-white/10 relative group shadow-inner transition-all overflow-hidden">
                    <AnimatePresence>
                      {optimizing && (
@@ -253,16 +261,17 @@ export const TacticalIsland = () => {
                      ref={inputRef}
                      value={content}
                      onChange={(e) => { setContent(e.target.value); setHasOptimized(false); }}
-                     placeholder="在此输入或等待弹射内容..."
+                     onKeyDown={handleKeyDown}
+                     placeholder="输入内容并回车优化..."
                      className="w-full h-full bg-transparent px-5 py-5 text-sm font-bold leading-relaxed text-white resize-none outline-none custom-scrollbar"
                    />
                 </div>
 
                 <div className="flex items-center gap-2 h-14 shrink-0">
                    <div className="relative flex-1 h-full" ref={dropdownRef}>
-                      <button onClick={() => setShowSentimentDropdown(!showSentimentDropdown)} className="w-full h-full px-4 flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all">
+                      <button onClick={() => setShowSentimentDropdown(!showSentimentDropdown)} className="w-full h-full px-4 flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all">
                          <div className="flex items-center gap-2">
-                            <Brain size={14} className={cn(selectedSentiment ? `text-${selectedSentiment.color}-400` : "text-slate-400")} />
+                            <Brain size={14} className={cn(selectedSentiment ? `text-${selectedSentiment.color}-400 shadow-[0_0_8px_rgba(0,0,0,0.5)]` : "text-slate-400")} />
                             <span className="text-[10px] font-black text-white truncate">{selectedSentiment?.name || '情绪加载中...'}</span>
                          </div>
                          <div className="flex items-center gap-2">
@@ -272,27 +281,30 @@ export const TacticalIsland = () => {
                       </button>
                       <AnimatePresence>
                         {showSentimentDropdown && (
-                          <motion.div initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }} className="absolute bottom-full left-0 right-0 mb-2 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100]">
-                             <div className="p-2 bg-white/5 border-b border-white/5 flex gap-2">
+                          <motion.div initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }} className="absolute bottom-full left-0 right-0 mb-3 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100]">
+                             <div className="p-2.5 bg-white/5 border-b border-white/5 flex gap-2">
                                 <Search size={10} className="mt-2.5 text-slate-500" />
-                                <input autoFocus value={sentimentSearch} onChange={(e) => setSentimentSearch(e.target.value)} placeholder="搜索维度..." className="flex-1 bg-transparent border-none py-1.5 text-[10px] font-bold text-white outline-none" />
+                                <input autoFocus value={sentimentSearch} onChange={(e) => setSentimentSearch(e.target.value)} placeholder="极速检索维度..." className="flex-1 bg-transparent border-none py-1.5 text-[10px] font-bold text-white outline-none" />
                              </div>
-                             <div className="max-h-40 overflow-y-auto custom-scrollbar p-1">
-                                {filteredSentiments.map((s: any) => (
-                                  <button key={s.id} onClick={() => { setSelectedSentiment(s); setHasOptimized(false); setShowSentimentDropdown(false); }} className={cn("w-full px-3 py-2 rounded-lg flex items-center justify-between text-[10px] font-black transition-all hover:bg-white/5 text-left", selectedSentiment?.id === s.id ? "bg-cyan-600/20 text-cyan-400" : "text-slate-400")}>
-                                     <div className="flex items-center gap-2"><div className={cn("w-1 h-1 rounded-full", `bg-${s.color}-500`)} />{s.name}</div>
-                                     {selectedSentiment?.id === s.id && <Check size={10}/>}
-                                  </button>
-                                ))}
+                             <div className="max-h-48 overflow-y-auto custom-scrollbar p-1.5 space-y-1">
+                                {filteredSentiments.map((s: any) => {
+                                  const isSelected = selectedSentiment?.id === s.id;
+                                  return (
+                                    <button key={s.id} onClick={() => { setSelectedSentiment(s); setHasOptimized(false); setShowSentimentDropdown(false); }} className={cn("w-full px-3 py-2.5 rounded-xl flex items-center justify-between text-[10px] font-black transition-all text-left", isSelected ? `bg-${s.color}-500/20 text-${s.color}-400 border border-${s.color}-500/30 shadow-[0_0_15px_rgba(0,0,0,0.2)]` : "text-slate-500 hover:bg-white/5 hover:text-slate-200")}>
+                                       <div className="flex items-center gap-2"><div className={cn("w-1.5 h-1.5 rounded-full shadow-sm", `bg-${s.color}-500`, isSelected && "animate-pulse")} />{s.name}</div>
+                                       {isSelected && <Check size={12} className="animate-in zoom-in duration-300" />}
+                                    </button>
+                                  )
+                                })}
                              </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
                    </div>
-                   <button onClick={copyAndClose} className="px-5 h-full flex items-center gap-2 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black border border-white/10 text-slate-300">复制</button>
-                   <button onClick={optimizeScript} disabled={optimizing || !selectedSentiment || !content} className={cn("px-8 h-full rounded-2xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white shadow-emerald-500/30" : "bg-cyan-600 text-white shadow-cyan-500/30")}>
+                   <button onClick={copyAndClose} className="px-5 h-full flex items-center gap-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black border border-white/10 text-slate-300">复制</button>
+                   <button id="main-action-btn" onClick={optimizeScript} disabled={optimizing || !selectedSentiment || !content} className={cn("px-8 h-full rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 active:scale-95", hasOptimized ? "bg-emerald-600 text-white shadow-emerald-500/30" : "bg-cyan-600 text-white shadow-cyan-500/30")}>
                       {optimizing ? <Loader2 className="animate-spin" size={14}/> : (hasOptimized ? <CheckCircle2 size={14}/> : <Sparkles size={14}/>)}
-                      {hasOptimized ? '再次回车复制' : 'AI 调优'}
+                      {hasOptimized ? '再次回车复制' : 'AI 优化'}
                    </button>
                 </div>
              </div>
