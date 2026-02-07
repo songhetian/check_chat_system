@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import {
-  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog, Shield, Layers
+  LayoutDashboard, ShieldAlert, Settings, Package, LogOut, Bell, Wrench, Contact2, Minus, X, Info, MailOpen, Square, Copy as CopyIcon, Zap, Building2, UserCog, Shield, Layers, Smile
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { useRiskStore } from '../store/useRiskStore' // V3.19: 引入风险状态库
@@ -24,6 +24,7 @@ const menu = [
   { path: '/', icon: LayoutDashboard, label: '系统运行首页' },
   { path: '/command', icon: Zap, label: '成员实时监控' },
   { path: '/alerts', icon: ShieldAlert, label: '违规行为审计' },
+  { path: '/sentiments', icon: Smile, label: '情绪维度定义' },
   { path: '/notifications', icon: Bell, label: '系统消息中心' },
   { path: '/rbac', icon: Shield, label: '角色权限定义' },
   { path: '/categories', icon: Layers, label: '业务分类管理' },

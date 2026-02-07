@@ -6,12 +6,13 @@ import {
   Volume2, VolumeX, User as UserIcon, GraduationCap, Sparkles, Box, Search, Video, Monitor,
   Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X, Maximize2,
   Package, BookOpen, Tags, SearchCheck, Filter, ChevronLeft, AlertOctagon, Wallet, Heart, Ban, Undo2,
-  UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2
+  UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain
 } from 'lucide-react'
 import { useRiskStore } from '../../store/useRiskStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { cn, tacticalRequest } from '../../lib/utils'
 import { CONFIG } from '../../lib/config'
+import { toast } from 'sonner'
 
 export const TacticalIsland = () => {
   const { 
@@ -36,15 +37,25 @@ export const TacticalIsland = () => {
   // 话术推送与 AI 优化 (V3.28)
   const [pushedScript, setPushedScript] = useState<string | null>(null)
   const [isPushMode, setIsPushMode] = useState(false)
-  const [attitude, setAttitude] = useState('NORMAL')
+  const [sentiments, setSentiments] = useState<any[]>([])
+  const [selectedSentiment, setSelectedSentiment] = useState<any>(null)
   const [optimizing, setOptimizing] = useState(false)
-  const [optimizedText, setOptimizedText] = useState<string | null>(null)
+
+  const fetchSentiments = async () => {
+    try {
+      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sentiments`, method: 'GET', headers: { 'Authorization': `Bearer ${useAuthStore.getState().token}` } })
+      if (res.status === 200) {
+        setSentiments(res.data.data)
+        if (res.data.data.length > 0) setSelectedSentiment(res.data.data[1] || res.data.data[0])
+      }
+    } catch (e) { console.error(e) }
+  }
 
   useEffect(() => {
+    fetchSentiments()
     const onCommand = (e: any) => {
       if (e.detail.type === 'TACTICAL_PUSH') {
         setPushedScript(e.detail.payload.content)
-        setOptimizedText(null)
         setIsPushMode(true)
         window.electron.ipcRenderer.send('set-always-on-top', true)
       }
@@ -54,12 +65,12 @@ export const TacticalIsland = () => {
   }, [])
 
   const optimizeScript = async () => {
-    if (!pushedScript) return
+    if (!pushedScript || !selectedSentiment) return
     setOptimizing(true)
     try {
       const prompt = `你是一个专业的客服教练。请根据以下[原话术]和[当前客户态度]，优化出一句最合适的回话。只返回优化后的内容，不要有任何废话。
       [原话术]: ${pushedScript}
-      [当前客户态度]: ${attitude === 'ANGRY' ? '极其恶劣/投诉倾向' : (attitude === 'NORMAL' ? '普通/一般' : '良好/赞美')}
+      [当前客户态度]: ${selectedSentiment.name} (${selectedSentiment.prompt_segment})
       优化后的回话：`
 
       const serverConfig = await window.api.getServerConfig()
@@ -71,10 +82,12 @@ export const TacticalIsland = () => {
         body: JSON.stringify({ model, prompt, stream: false })
       })
       const data = await res.json()
-      setOptimizedText(data.response)
+      // 核心：直接替换内容
+      setPushedScript(data.response)
+      toast.success('AI 优化完成', { description: '已自动替换当前话术内容' })
     } catch (e) {
       console.error('AI Optimize failed', e)
-      setOptimizedText(pushedScript)
+      toast.error('AI 链路故障', { description: '无法连接到本地 Ollama 引擎' })
     } finally {
       setOptimizing(false)
     }
@@ -157,37 +170,45 @@ export const TacticalIsland = () => {
              </div>
 
              <div className="flex-1 flex gap-6 min-h-0">
-                <div className="flex-1 flex flex-col gap-4">
-                   <div className="bg-black/40 p-5 rounded-[24px] border border-white/5 relative group">
-                      <div className="absolute top-3 right-4 text-[8px] font-black text-slate-600 uppercase tracking-widest">原始参考话术</div>
-                      <p className="text-sm font-medium leading-relaxed italic text-slate-300">"{pushedScript}"</p>
-                      <button onClick={() => copyToClipboard(pushedScript || '')} className="mt-4 flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-black transition-all"><ImageIcon size={12}/> 复制原文</button>
+                <div className="flex-1 flex flex-col">
+                   <div className="flex-1 bg-black/40 p-6 rounded-[32px] border border-white/5 relative group overflow-y-auto custom-scrollbar">
+                      <div className="absolute top-4 right-6 text-[8px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                         <MessageSquareText size={10}/> 当前战术话术
+                      </div>
+                      <p className="text-base font-medium leading-relaxed italic text-white mt-2">"{pushedScript}"</p>
                    </div>
-
-                   {optimizedText && (
-                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-cyan-600/20 p-5 rounded-[24px] border border-cyan-500/30 relative">
-                        <div className="absolute top-3 right-4 text-[8px] font-black text-cyan-500 uppercase tracking-widest">AI 态度优化版</div>
-                        <p className="text-sm font-black leading-relaxed text-cyan-50 italic">"{optimizedText}"</p>
-                        <button onClick={() => copyToClipboard(optimizedText)} className="mt-4 flex items-center gap-2 px-6 py-2 bg-cyan-600 text-white rounded-lg text-[10px] font-black transition-all shadow-lg hover:bg-cyan-500"><MessageSquareText size={12}/> 点击一键复制 (推荐)</button>
-                     </motion.div>
-                   )}
+                   <div className="flex gap-3 mt-4">
+                      <button onClick={() => copyToClipboard(pushedScript || '')} className="flex-1 flex items-center justify-center gap-2 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-xs font-black transition-all border border-white/10 text-white active:scale-95 shadow-inner"><ImageIcon size={16}/> 复制当前内容</button>
+                      <button 
+                        disabled={optimizing || !selectedSentiment}
+                        onClick={optimizeScript}
+                        className="flex-1 py-4 bg-cyan-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-cyan-900/20 hover:bg-cyan-500 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                      >
+                         {optimizing ? <Loader2 className="animate-spin" size={16}/> : <Sparkles size={16}/>}
+                         AI 态度调优并替换
+                      </button>
+                   </div>
                 </div>
 
-                <div className="w-48 shrink-0 flex flex-col gap-4">
-                   <div className="flex flex-col gap-2">
-                      <span className="text-[9px] font-black text-slate-500 uppercase ml-1">当前客户态度</span>
-                      <button onClick={() => setAttitude('HAPPY')} className={cn("py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-2 border", attitude === 'HAPPY' ? "bg-emerald-500 text-white border-emerald-400" : "bg-white/5 text-slate-400 border-white/5")}>良好 / 认可</button>
-                      <button onClick={() => setAttitude('NORMAL')} className={cn("py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-2 border", attitude === 'NORMAL' ? "bg-slate-700 text-white border-slate-600" : "bg-white/5 text-slate-400 border-white/5")}>普通 / 一般</button>
-                      <button onClick={() => setAttitude('ANGRY')} className={cn("py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-2 border", attitude === 'ANGRY' ? "bg-red-600 text-white border-red-500" : "bg-white/5 text-slate-400 border-white/5")}>极度恶劣 / 投诉</button>
+                <div className="w-56 shrink-0 flex flex-col bg-white/5 p-4 rounded-[32px] border border-white/5">
+                   <span className="text-[9px] font-black text-slate-500 uppercase ml-2 mb-3 tracking-widest flex items-center gap-1.5"><Brain size={10}/> 客户实时情绪</span>
+                   <div className="flex-1 flex flex-col gap-2 overflow-y-auto custom-scrollbar pr-1">
+                      {sentiments.map((s) => (
+                        <button 
+                          key={s.id}
+                          onClick={() => setSelectedSentiment(s)}
+                          className={cn(
+                            "py-3 px-4 rounded-xl text-[10px] font-black transition-all flex flex-col items-start gap-1 border text-left",
+                            selectedSentiment?.id === s.id 
+                              ? `bg-${s.color}-500/20 text-${s.color}-400 border-${s.color}-500/50 shadow-inner` 
+                              : "bg-white/5 text-slate-500 border-white/5 hover:bg-white/10"
+                          )}
+                        >
+                           <span>{s.name}</span>
+                           <span className="text-[8px] opacity-40 font-medium truncate w-full">{s.prompt_segment}</span>
+                        </button>
+                      ))}
                    </div>
-                   <button 
-                     disabled={optimizing}
-                     onClick={optimizeScript}
-                     className="mt-auto py-4 bg-white text-black rounded-xl font-black text-xs uppercase shadow-xl hover:bg-slate-100 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
-                   >
-                      {optimizing ? <Loader2 className="animate-spin" size={16}/> : <BrainCircuit size={16}/>}
-                      优化并应用
-                   </button>
                 </div>
              </div>
           </div>

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request, Query
-from core.models import SensitiveWord, KnowledgeBase, PolicyCategory, AuditLog
+from core.models import SensitiveWord, KnowledgeBase, PolicyCategory, AuditLog, CustomerSentiment
 from api.auth import get_current_user, check_permission
 from tortoise.transactions import in_transaction
 import json
@@ -8,6 +8,40 @@ router = APIRouter(prefix="/api/ai", tags=["AI Policy"])
 
 async def record_audit(operator: str, action: str, target: str, details: str):
     await AuditLog.create(operator=operator, action=action, target=target, details=details)
+
+@router.get("/sentiments")
+async def get_sentiments(current_user: dict = Depends(get_current_user)):
+    """[物理拉取] 获取动态客户情绪标签集"""
+    data = await CustomerSentiment.filter(is_deleted=0).order_by("id").values()
+    return {"status": "ok", "data": data}
+
+@router.post("/sentiments")
+async def save_sentiment(data: dict, user: dict = Depends(check_permission("admin:sentiment:create"))):
+    item_id = data.get("id")
+    # 物理熔断：编辑需校验 update 权限
+    if item_id and "admin:sentiment:update" not in user.get("permissions", []):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="权限熔断：缺失情绪更新权限")
+        
+    payload = {
+        "name": data.get("name"), 
+        "prompt_segment": data.get("prompt_segment"), 
+        "color": data.get("color", "slate"),
+        "is_active": data.get("is_active", 1)
+    }
+    async with in_transaction() as conn:
+        if item_id: await CustomerSentiment.filter(id=item_id).update(**payload)
+        else: await CustomerSentiment.create(**payload)
+        await record_audit(user["real_name"], "SENTIMENT_SAVE", data.get("name"), "固化客户情绪维度")
+    return {"status": "ok"}
+
+@router.post("/sentiments/delete")
+async def delete_sentiment(data: dict, user: dict = Depends(check_permission("admin:sentiment:delete"))):
+    item_id = data.get("id")
+    async with in_transaction() as conn:
+        await CustomerSentiment.filter(id=item_id).update(is_deleted=1)
+        await record_audit(user["real_name"], "SENTIMENT_DELETE", f"ID:{item_id}", "注销情绪维度")
+    return {"status": "ok"}
 
 @router.get("/categories")
 async def get_categories(page: int = 1, size: int = 10, type: str = None, current_user: dict = Depends(get_current_user)):

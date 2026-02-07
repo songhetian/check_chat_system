@@ -182,3 +182,14 @@ class Platform(BaseModel):
 
     class Meta:
         table = "platforms"
+
+class CustomerSentiment(BaseModel):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=50) # 标签名称：如 "极度愤怒"
+    prompt_segment = fields.CharField(max_length=200) # AI 提示词片段：如 "语言极其犀利且带有攻击性"
+    color = fields.CharField(max_length=20, default="red") # UI 颜色方案
+    is_active = fields.IntField(default=1)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = "customer_sentiments"
