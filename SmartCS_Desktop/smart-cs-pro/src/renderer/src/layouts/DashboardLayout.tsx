@@ -78,7 +78,7 @@ const menuGroups = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout, token } = useAuthStore()
-  const isScreenMaximized = useRiskStore(s => s.isScreenMaximized) 
+  const { isOnline, setOnline, isScreenMaximized } = useRiskStore() 
   const location = useLocation()
   const queryClient = useQueryClient()
   
@@ -105,6 +105,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     refetchInterval: 30000 
   })
 
+  // V3.75: 指挥中心状态同步引擎
   const { data: sysStatus } = useQuery({
     queryKey: ['system_status'],
     queryFn: async () => {
@@ -115,8 +116,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
       try {
         const healthRes = await window.api.callApi({ url: '/health', method: 'GET' })
-        return { isOnline: healthRes.status === 200, pendingSyncCount: pendingCount }
+        const currentStatus = healthRes.status === 200;
+        if (currentStatus !== isOnline) setOnline(currentStatus);
+        return { isOnline: currentStatus, pendingSyncCount: pendingCount }
       } catch {
+        if (isOnline) setOnline(false);
         return { isOnline: false, pendingSyncCount: pendingCount }
       }
     },
@@ -124,22 +128,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     staleTime: 2000
   })
 
-  const isServerOnline = sysStatus?.isOnline ?? true
   const pendingSyncCount = sysStatus?.pendingSyncCount ?? 0
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 
   // V3.72: 脱机态势实时感知
   useEffect(() => {
-    if (!isServerOnline) {
-      toast.error('物理链路中断', {
-        description: '系统已进入脱机工作模式，部分实时功能将暂不可用',
-        duration: Infinity, // 物理挂起直到恢复
+    if (!isOnline && token) {
+      toast.error('指挥中心脱机', {
+        description: '物理链路已中断，系统进入离线暂存模式',
+        duration: Infinity, 
         id: 'system-offline-toast'
       });
     } else {
       toast.dismiss('system-offline-toast');
     }
-  }, [isServerOnline]);
+  }, [isOnline]);
 
   // V3.71: 401 自动熔断自愈逻辑
   useEffect(() => {
@@ -166,9 +169,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             exit={{ width: 0, opacity: 0 }}
             className={cn(
               "bg-slate-900 flex flex-col border-r shrink-0 relative z-[100] overflow-hidden transition-all duration-1000",
-              !isServerOnline ? "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]" : "border-slate-800"
+              !isOnline ? "border-red-600 shadow-[inset_-10px_0_30px_rgba(220,38,38,0.1)]" : "border-slate-800"
             )}
           >
+            {/* V3.75: 脱机侧边标识 */}
+            {!isOnline && (
+              <div className="absolute top-0 left-0 w-1 h-full bg-red-600 animate-pulse z-50" />
+            )}
             {/* Logo 区 */}
             <div className="p-6 shrink-0">
               <div className="flex items-center gap-3 mb-8 px-2 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>
@@ -258,15 +265,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 64, opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 cursor-move overflow-hidden" 
+              className={cn(
+                "border-b flex items-center justify-between px-8 shrink-0 cursor-move overflow-hidden transition-all duration-500",
+                !isOnline ? "bg-red-50 border-red-200" : "bg-white border-slate-200"
+              )}
               style={{ WebkitAppRegion: 'drag' } as any}
             >
               <div className="flex items-center gap-4">
-                <div className="px-4 py-1.5 bg-slate-100 rounded-full text-[10px] font-black text-black uppercase tracking-widest leading-none">指挥中心控制台</div>
-                {!isServerOnline && (
-                  <div className="flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-100 rounded-xl shadow-sm">
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    <span className="text-[10px] font-bold text-red-700 uppercase tracking-tighter">系统脱机</span>
+                <div className={cn(
+                  "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest leading-none transition-colors",
+                  !isOnline ? "bg-red-600 text-white animate-pulse" : "bg-slate-100 text-black"
+                )}>指挥中心 {isOnline ? '控制台' : '脱机模式'}</div>
+                {!isOnline && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-white border border-red-200 rounded-xl shadow-sm">
+                    <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
+                    <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter italic">链路物理挂断</span>
                   </div>
                 )}
                 {pendingSyncCount > 0 && (
@@ -297,7 +310,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
         </AnimatePresence>
 
-        <section className={cn("flex-1 overflow-y-auto custom-scrollbar transition-all duration-500", isScreenMaximized ? "p-0 bg-transparent" : "p-6 bg-slate-50/50")}>
+        <section className={cn("flex-1 overflow-y-auto custom-scrollbar transition-all duration-500 relative", isScreenMaximized ? "p-0 bg-transparent" : "p-6 bg-slate-50/50")}>
+          {/* V3.75: 内容区物理脱机遮罩 */}
+          {!isOnline && !isScreenMaximized && (
+            <div className="absolute inset-0 z-[100] bg-red-50/10 backdrop-blur-[1px] pointer-events-none border-t border-red-100 flex items-center justify-center">
+               <div className="bg-red-600 text-white px-6 py-3 rounded-2xl shadow-2xl font-black text-xs uppercase tracking-[0.2em] animate-bounce flex items-center gap-3">
+                  <Zap size={16} className="fill-current" /> 物理链路已中断 · 正在尝试重连
+               </div>
+            </div>
+          )}
           {children}
         </section>
 
