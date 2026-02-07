@@ -27,13 +27,11 @@ export const TacticalIsland = () => {
   const { user, logout, token } = useAuthStore()
   const queryClient = useQueryClient()
   
-  // 1. 基础 UI 状态
   const [isExpanded, setIsExpanded] = useState(false)
   const [isFolded, setIsFolded] = useState(false) 
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [showBigScreenModal, setShowBigScreenModal] = useState(false)
 
-  // 2. 战术实战状态 (V3.61: 稳定兼容版)
   const [content, setContent] = useState('') 
   const [isPushMode, setIsPushMode] = useState(false)
   const [isScratchpad, setIsScratchpad] = useState(false)
@@ -49,7 +47,6 @@ export const TacticalIsland = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // 3. 数据拉取：V3.61 多路加速版
   const { data: sentiments = [], refetch } = useQuery({
     queryKey: ['ai_sentiments_island_v3.61'],
     queryFn: async () => {
@@ -66,7 +63,6 @@ export const TacticalIsland = () => {
     staleTime: 300000
   })
 
-  // 补强：监听 token 变化自动刷新，解决初始加载为空的问题
   useEffect(() => { if (token) refetch(); }, [token])
 
   useEffect(() => {
@@ -81,7 +77,6 @@ export const TacticalIsland = () => {
     setEvasionInfo(null); setHasOptimized(false); setOptimizing(false);
   }
 
-  // 指令监听中心
   useEffect(() => {
     const onCommand = (e: any) => {
       const data = e.detail;
@@ -112,50 +107,59 @@ export const TacticalIsland = () => {
     return sentiments.filter((s: any) => s.name.toLowerCase().includes(sentimentSearch.toLowerCase()))
   }, [sentiments, sentimentSearch])
 
-  // V3.61: Qwen 友好型提示词协议
+  // V3.62: 核心流式优化引擎 (支持 /api/chat 与 /api/generate)
   const optimizeScript = async () => {
     if (!content || !selectedSentiment || optimizing) return
     setOptimizing(true); setHasOptimized(false);
     const originalText = content;
-    setContent('') 
-
+    
     try {
       const serverConfig = await window.api.getServerConfig()
-      // 极简指令：模型越小指令越要直接
-      const prompt = `请直接重写这段话术，使其语气更加${selectedSentiment.name}。规则：只输出重写后的一句话，不要有任何多余的解释。原文：${originalText}`;
+      const url = serverConfig.ai_engine.url
+      const isChatApi = url.endsWith('/chat')
+      
+      // 结构化指令
+      const systemMsg = `你是一个专业的客服。请重写这段话术，使其语气更加${selectedSentiment.name}。规则：只输出重写后的一句话,不要有任何多余文字,无引号.`
+      
+      const payload = isChatApi 
+        ? { model: serverConfig.ai_engine.model, messages: [{ role: 'user', content: `${systemMsg}\n原文：${originalText}` }], stream: true, options: { temperature: 0.1, num_predict: 128 } }
+        : { model: serverConfig.ai_engine.model, prompt: `${systemMsg}\n原文：${originalText}\n优化回复：`, stream: true, options: { temperature: 0.1, num_predict: 128 } };
 
-      const response = await fetch(serverConfig.ai_engine.url, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: serverConfig.ai_engine.model,
-          prompt: prompt,
-          stream: true,
-          options: { temperature: 0.1, stop: ["\n", "["] }
-        })
+        body: JSON.stringify(payload)
       })
 
       if (!response.body) throw new Error('Stream missing')
       const reader = response.body.getReader(); const decoder = new TextDecoder();
-      let fullText = ''
+      let fullText = ''; setContent(''); // 开始流式前清空内容
+
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
+        
         const chunk = decoder.decode(value, { stream: true })
         const lines = chunk.split('\n').filter(l => l.trim())
+        
         for (const line of lines) {
           try {
             const json = JSON.parse(line)
-            const token = json.response || json.message?.content
+            const token = isChatApi ? json.message?.content : json.response
             if (token) {
               fullText += token
+              // 实时同步并清洗
               setContent(fullText.replace(/^(好的|收到|明白了|理解了|优化后|回复如下|对话建议)[:：\s]*/g, '').replace(/^["'“](.*)["'”]$/g, '$1').trim())
             }
           } catch (e) {}
         }
       }
       setHasOptimized(true)
-    } catch (e) { setContent(originalText); toast.error('AI 引擎未响应') } finally { setOptimizing(false) }
+    } catch (e) { 
+      console.error(e)
+      setContent(originalText); 
+      toast.error('AI 链路故障') 
+    } finally { setOptimizing(false) }
   }
 
   const copyAndClose = () => {
@@ -191,8 +195,6 @@ export const TacticalIsland = () => {
     const screenWidth = window.screen.width
     const screenHeight = window.screen.height
     const active = isPushMode || isScratchpad || isEvasionMode
-    
-    // V3.61: 扩宽至 760px 确保按钮全显示
     let width = isFolded ? 80 : 760 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined, y: number | undefined, center = false
@@ -216,7 +218,7 @@ export const TacticalIsland = () => {
           width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 760))),
           height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isPushMode || isScratchpad || isEvasionMode ? 320 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
         }}
-        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl" : "bg-slate-950", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
+        className={cn("pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative", isGlassMode ? "bg-slate-950/60 backdrop-blur-3xl shadow-none" : "bg-slate-950 shadow-none", (showBigScreenModal || layoutMode === 'SIDE' || isLocked) ? "rounded-none" : "rounded-3xl")}
       >
         {isEvasionMode ? (
           <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-amber-950/60">
