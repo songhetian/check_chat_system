@@ -16,30 +16,39 @@ import shutil, os, uuid
 
 @router.post("/sops/upload")
 async def upload_sop_file(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
-    """[物理载荷] 处理 SOP 附件上传"""
+    """[物理载荷] 处理 SOP 附件上传 (支持图片、文档、视频)"""
     try:
         # 获取绝对路径
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         upload_dir = os.path.join(base_dir, "assets", "uploads")
         os.makedirs(upload_dir, exist_ok=True)
         
-        # 生成唯一文件名防止覆盖
-        ext = os.path.splitext(file.filename)[1]
+        # 扩展物理校验：允许视频格式
+        ext = os.path.splitext(file.filename)[1].lower()
+        allowed_exts = [
+            '.jpg', '.jpeg', '.png', '.gif', '.webp', 
+            '.md', '.pdf', '.doc', '.docx', '.xlsx', '.xls', '.ppt', '.pptx', '.zip',
+            '.mp4', '.webm', '.mov', '.avi'
+        ]
+        
+        if ext not in allowed_exts:
+            return {"status": "error", "message": f"物理拦截：不支持的格式 {ext}"}
+
+        # 生成唯一文件名
         new_filename = f"{uuid.uuid4()}{ext}"
         file_path = os.path.join(upload_dir, new_filename)
         
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
-        # 返回可供局域网访问的相对 URL
-        # 注意：前端需要结合 CONFIG.API_BASE 的域名部分来拼接完整地址
         return {
             "status": "ok", 
             "url": f"/assets/uploads/{new_filename}",
-            "filename": file.filename
+            "filename": file.filename,
+            "type": ext.replace('.', '').upper()
         }
     except Exception as e:
-        return {"status": "error", "message": f"物理存储失败: {str(e)}"}
+        return {"status": "error", "message": f"物理存储异常: {str(e)}"}
 
 @router.get("/voice-alerts")
 async def get_voice_alerts(page: int = 1, size: int = 50, search: str = "", current_user: dict = Depends(get_current_user)):
