@@ -47,7 +47,19 @@ from api.rbac import router as rbac_router
 from api.ai_config import router as ai_router
 
 # --- 1. 环境初始化 ---
-load_dotenv()
+# V3.90: 增强型环境感知，确保在不同启动路径下都能准确定位 .env
+env_paths = [
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+]
+for p in env_paths:
+    if os.path.exists(p):
+        load_dotenv(p)
+        print(f"📡 [环境引擎] 已物理挂载配置文件: {p}")
+        break
+else:
+    load_dotenv() # 回退到标准加载
+
 logger = logging.getLogger("SmartCS")
 logging.basicConfig(level=logging.INFO)
 

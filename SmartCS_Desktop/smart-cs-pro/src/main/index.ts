@@ -193,30 +193,49 @@ function createWindow(): void {
 
   // 核心：战术 API 转发桥 (增强版)
   ipcMain.handle('call-api', async (_, { url, method, data, headers }) => {
-    // 自动补全 URL：如果传入的是相对路径，则拼上中央服务器基地址
-    const finalUrl = url.startsWith('http') ? url : `${serverConfig.network.central_server_url}${url}`
-    
-    const finalHeaders: Record<string, string> = { 
-      'Content-Type': 'application/json',
-      ...(headers || {})
-    }
-
-    if (finalHeaders['Authorization'] && !finalHeaders['Authorization'].startsWith('Bearer ')) {
-      finalHeaders['Authorization'] = `Bearer ${finalHeaders['Authorization']}`
-    }
-
     try {
+      // 自动补全 URL：如果传入的是相对路径，则拼上中央服务器基地址
+      const finalUrl = url.startsWith('http') ? url : `${serverConfig.network.central_server_url}${url}`
+      
+      const finalHeaders: Record<string, string> = { 
+        'Content-Type': 'application/json',
+        ...(headers || {})
+      }
+
+      if (finalHeaders['Authorization'] && !finalHeaders['Authorization'].startsWith('Bearer ')) {
+        finalHeaders['Authorization'] = `Bearer ${finalHeaders['Authorization']}`
+      }
+
       console.log(`📡 [API 转发] ${method || 'GET'} -> ${finalUrl}`)
+      
+      // V3.92: 增加请求体安全序列化
+      let body: string | undefined = undefined;
+      if (data) {
+        try {
+          body = JSON.stringify(data);
+        } catch (jsonErr) {
+          console.error('❌ [API 请求体序列化失败]', jsonErr);
+          return { status: 400, error: "无效的请求载荷" };
+        }
+      }
+
       const response = await fetch(finalUrl, {
         method: method || 'GET',
         headers: finalHeaders,
-        body: data ? JSON.stringify(data) : undefined,
+        body,
         signal: AbortSignal.timeout(10000)
       })
       
       let result;
       try {
-        result = await response.json()
+        const text = await response.text();
+        // 如果返回体过大，可能导致解析阶段内存溢出
+        if (text.length > 5 * 1024 * 1024) { // 5MB 熔断
+           console.warn(`⚠️ [API 响应过大] ${url}: ${Math.round(text.length/1024)}KB`);
+           result = { status: 'error', message: "响应数据超出安全阈值" };
+        } else {
+           result = JSON.parse(text);
+        }
       } catch (e) {
         result = { status: response.ok ? 'ok' : 'error' }
       }
@@ -238,36 +257,41 @@ function createWindow(): void {
         }
       }
 
-      // 成功后触发一次静默同步
-      syncOfflineData()
+      // 成功后触发一次静默同步 (异步执行，不阻塞当前响应)
+      syncOfflineData().catch(e => console.error('Sync failed', e));
       
       return { status: response.status, data: result }
     } catch (e: any) {
-      console.error(`❌ [API 转发失败] URL: ${url} | Error: ${e.message}`)
+      console.error(`❌ [API 转发崩溃拦截] URL: ${url} | Error: ${e.message}`)
       
-      // 离线读缓存逻辑：如果是 GET 请求失败，尝试从缓存返回
-      if (method === 'GET' || !method) {
-        const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
-        const cached = db.prepare('SELECT data FROM api_cache WHERE url = ?').get(cleanUrl) as { data: string } | undefined
-        if (cached) {
-          console.log(`📦 [离线守卫] 从本地读缓存返回数据: ${url}`)
-          return { status: 200, data: JSON.parse(cached.data), _fromCache: true }
-        }
-      }
-
-      // 离线写队列逻辑：全量拦截策略
-      if (method !== 'GET' && method !== 'HEAD') {
-        saveToOfflineQueue(finalUrl, method || 'POST', data, finalHeaders)
-        
-        // 关键：返回符合前端预期的 "ok" 状态，确保 UI 能够正常闭环（如关闭弹窗）
-        return { 
-          status: 200, 
-          data: { 
-            status: 'ok', 
-            message: "数据已记录至离线缓冲，连接恢复后自动同步",
-            _isOffline: true 
+      try {
+        // 离线读缓存逻辑：如果是 GET 请求失败，尝试从缓存返回
+        if (method === 'GET' || !method) {
+          const finalUrl = url.startsWith('http') ? url : `${serverConfig.network.central_server_url}${url}`
+          const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
+          const cached = db.prepare('SELECT data FROM api_cache WHERE url = ?').get(cleanUrl) as { data: string } | undefined
+          if (cached) {
+            console.log(`📦 [离线守卫] 从本地读缓存返回数据: ${url}`)
+            return { status: 200, data: JSON.parse(cached.data), _fromCache: true }
           }
         }
+
+        // 离线写队列逻辑：全量拦截策略
+        if (method !== 'GET' && method !== 'HEAD') {
+          const finalUrl = url.startsWith('http') ? url : `${serverConfig.network.central_server_url}${url}`
+          saveToOfflineQueue(finalUrl, method || 'POST', data, headers)
+          
+          return { 
+            status: 200, 
+            data: { 
+              status: 'ok', 
+              message: "数据已记录至离线缓冲，连接恢复后自动同步",
+              _isOffline: true 
+            }
+          }
+        }
+      } catch (offlineErr) {
+        console.error('❌ [离线逻辑次生故障]', offlineErr);
       }
 
       let errorMsg = "中枢通讯链路断开"
