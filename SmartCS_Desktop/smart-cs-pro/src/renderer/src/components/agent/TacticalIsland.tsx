@@ -250,8 +250,8 @@ export const TacticalIsland = () => {
     else if (layoutMode === 'SIDE') {
       width = 440; height = 850; x = screenWidth - 460; y = (screenHeight - 850) / 2;
     }
-    else if (active) { width = 800; height = 350; x = screenWidth - 820; y = 60; } 
-    else { x = isFolded ? screenWidth - 100 : screenWidth - 820; y = 60 }
+    else if (active) { width = 800; height = 350; x = screenWidth - 820; y = 30; } 
+    else { x = isFolded ? screenWidth - 100 : screenWidth - 820; y = 30 }
     
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', isLocked || active || showVoiceAlertOverlay || !showBigScreenModal)

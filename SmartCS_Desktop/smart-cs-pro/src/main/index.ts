@@ -371,11 +371,11 @@ function createWindow(): void {
     width: 1440,
     height: 960,
     show: false,
-    frame: true, // 恢复标准边框
-    transparent: false, // 禁用透明
+    frame: false, // 恢复无边框
+    transparent: true, // 恢复透明
     alwaysOnTop: false,
     autoHideMenuBar: true,
-    backgroundColor: '#ffffff', // 恢复标准白背景
+    backgroundColor: '#00000000', // 恢复透明底色
     hasShadow: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
