@@ -231,9 +231,6 @@ function createWindow(): void {
     } catch (e: any) {
       console.error(`❌ [API 转发失败] URL: ${url} | Error: ${e.message}`)
       
-      // V3.74: 物理链路熔断信号 - 实时通知前端进入脱机模式
-      mainWindow.webContents.send('TACTICAL_LINK_BREAK')
-
       // 离线读缓存逻辑：如果是 GET 请求失败，尝试从缓存返回
       if (method === 'GET' || !method) {
         const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')

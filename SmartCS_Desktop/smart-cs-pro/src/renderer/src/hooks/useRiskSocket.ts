@@ -11,6 +11,7 @@ export const useRiskSocket = () => {
   useEffect(() => {
     let socket: WebSocket | null = null;
     let reconnectTimeout: NodeJS.Timeout;
+    let graceTimer: NodeJS.Timeout;
     let retryCount = 0;
 
     const runLoop = (fn: () => Promise<void> | void, delay: number, timerKey: string) => {
@@ -31,6 +32,7 @@ export const useRiskSocket = () => {
 
       socket.onopen = () => {
         console.log('✅ [WS链路] 物理握手成功');
+        clearTimeout(graceTimer);
         useRiskStore.getState().setOnline(true)
         retryCount = 0;
 
@@ -91,11 +93,20 @@ export const useRiskSocket = () => {
       }
 
       socket.onclose = () => {
-        useRiskStore.getState().setOnline(false)
+        // V3.82: 增加断开缓冲，避免瞬间闪断导致 UI 剧烈抖动
+        clearTimeout(graceTimer);
+        graceTimer = setTimeout(() => {
+          if (!socket || socket.readyState !== WebSocket.OPEN) {
+            useRiskStore.getState().setOnline(false)
+          }
+        }, 3000);
+
         if ((socket as any)._screenTimer) clearTimeout((socket as any)._screenTimer);
         if ((socket as any)._heartbeatTimer) clearTimeout((socket as any)._heartbeatTimer);
         const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
-        reconnectTimeout = setTimeout(connect, delay);
+        reconnectTimeout = setTimeout(() => {
+          connect();
+        }, delay);
         retryCount++;
       }
       socket.onerror = () => socket?.close();
@@ -118,20 +129,9 @@ export const useRiskSocket = () => {
     window.addEventListener('mousemove', syncActivity);
     window.addEventListener('keydown', syncActivity);
 
-    // V3.74: HTTP 链路熔断监听 (来自主进程转发失败信号)
-    const handleLinkBreak = () => {
-      if (useRiskStore.getState().isOnline) {
-        console.warn('⚡ [链路熔断] HTTP 转发失败，强制进入脱机模式');
-        useRiskStore.getState().setOnline(false);
-      }
-    };
-    
     // 使用 electron-toolkit 暴露的 ipcRenderer
     let removeLinkBreakListener: (() => void) | undefined;
-    if (window.electron?.ipcRenderer) {
-      removeLinkBreakListener = window.electron.ipcRenderer.on('TACTICAL_LINK_BREAK', handleLinkBreak);
-    }
-
+    
     const handleSendMsg = (e: any) => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(e.detail)); }
     window.addEventListener('send-risk-msg', handleSendMsg);
 
@@ -148,6 +148,7 @@ export const useRiskSocket = () => {
     return () => { 
       socket?.close(); 
       clearTimeout(reconnectTimeout); 
+      clearTimeout(graceTimer);
       window.removeEventListener('send-risk-msg', handleSendMsg);
       unsubscribeOnline();
       if (removeLinkBreakListener) {

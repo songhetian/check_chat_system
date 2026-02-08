@@ -37,6 +37,8 @@ export function useSystemStatus() {
     },
     refetchInterval: 5000, 
     staleTime: 2000,
+    retry: 2, // 失败后重试 2 次，即总共尝试 3 次
+    retryDelay: 1000, // 每次重试间隔 1 秒
     // 即使在没有 token 的情况下也要运行，因为我们需要知道服务器是否存活
   })
 }
