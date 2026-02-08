@@ -38,7 +38,7 @@ export default function BusinessSopsPage() {
         <td className="px-6 py-5 text-left max-w-xs truncate italic opacity-60">"{item.content}"</td>
         <td className="px-6 py-5 text-center">
            <span className="px-3 py-1 bg-slate-100 rounded-2xl flex items-center justify-center gap-2 mx-auto w-fit border border-slate-200 text-[9px] font-black uppercase">
-              {getTypeIcon(item.sop_type)} {item.sop_type}
+              {getTypeIcon(item?.sop_type)} {item?.sop_type || 'TEXT'}
            </span>
         </td>
         <td className="px-6 py-5 text-center">
@@ -67,6 +67,7 @@ export default function BusinessSopsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
+      if (!id) throw new Error('ID missing');
       return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops/delete`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: { id } })
     },
     onSuccess: () => {
@@ -79,6 +80,7 @@ export default function BusinessSopsPage() {
   const total = sopData?.total || 0
 
   const getTypeIcon = (type: string) => {
+    if (!type) return <FileText className="text-slate-400" size={16}/>;
     switch(type) {
       case 'MD': return <FileCode className="text-cyan-500" size={16}/>
       case 'IMAGE': return <ImageIcon className="text-amber-500" size={16}/>
@@ -129,7 +131,11 @@ export default function BusinessSopsPage() {
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">载体类型</label>
-                      <TacticalSelect options={[{id: 'TEXT', name: '纯文本'}, {id: 'MD', name: 'Markdown'}, {id: 'IMAGE', name: '图片内容'}, {id: 'FILE', name: '外部文件路径'}]} value={editItem?.sop_type} onChange={(val) => setEditItem({...editItem, sop_type: val})} />
+                      <TacticalSelect 
+                        options={[{id: 'TEXT', name: '纯文本'}, {id: 'MD', name: 'Markdown'}, {id: 'IMAGE', name: '图片内容'}, {id: 'FILE', name: '外部文件路径'}]} 
+                        value={editItem?.sop_type || 'TEXT'} 
+                        onChange={(val) => setEditItem({...editItem, sop_type: val})} 
+                      />
                     </div>
                     <div>
                       <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">数据归属</label>
@@ -156,7 +162,7 @@ export default function BusinessSopsPage() {
                <p className="text-slate-500 text-xs font-medium mb-8">此操作将逻辑移除该业务指南，操作员端将无法再调取此规范文件。</p>
                <div className="flex gap-4">
                   <button onClick={() => setModalType('NONE')} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all">取消</button>
-                  <button disabled={deleteMutation.isPending} onClick={() => deleteMutation.mutate(editItem.id)} className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-red-200 active:scale-95 transition-all">确认注销</button>
+                  <button disabled={deleteMutation.isPending} onClick={() => editItem?.id && deleteMutation.mutate(editItem.id)} className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-red-200 active:scale-95 transition-all">确认注销</button>
                </div>
             </motion.div>
           </div>
