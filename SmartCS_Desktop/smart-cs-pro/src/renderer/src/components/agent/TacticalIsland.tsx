@@ -193,7 +193,6 @@ export const TacticalIsland = () => {
           window.speechSynthesis.speak(utterance);
         } catch (e) {}
       }
-      toast.error('链路中断', { description: '与指挥中心失去物理连接' });
 
       // V3.78: 脱机强制自愈展开 - 链路断开时，强制展开面板以显示警告，防止用户找不到入口
       if (isFolded) setIsFolded(false);
