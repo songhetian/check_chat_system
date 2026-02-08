@@ -221,7 +221,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
       </AnimatePresence>
 
-      <main className={cn("flex-1 flex flex-col overflow-hidden relative", isScreenMaximized ? "z-[1000]" : "z-10")}>
+      <main className={cn("flex-1 flex flex-col overflow-hidden relative", isScreenMaximized ? "z-[1000]" : "z-[101]")}>
         <AnimatePresence mode="wait">
           {!isScreenMaximized && (
             <motion.header 

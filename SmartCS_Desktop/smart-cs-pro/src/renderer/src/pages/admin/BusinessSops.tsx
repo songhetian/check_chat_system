@@ -128,13 +128,13 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
   const isFileMode = ['IMAGE', 'FILE', 'MD'].includes(editItem.sop_type)
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 lg:p-8">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 lg:p-8">
       <div onClick={onCancel} className="absolute inset-0 bg-slate-950/80 backdrop-blur-md cursor-pointer" />
       
-      <div className="bg-white w-full max-w-5xl h-[80vh] rounded-[48px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative z-10 flex overflow-hidden border border-white/20">
+      <div className="bg-white w-full max-w-4xl h-[80vh] rounded-[48px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative z-10 flex overflow-hidden border border-white/20">
          
          {/* 左栏：核心配置 */}
-         <div className="w-[400px] bg-slate-50 border-r border-slate-100 flex flex-col p-10 shrink-0">
+         <div className="w-[320px] bg-slate-50 border-r border-slate-100 flex flex-col p-8 shrink-0">
             <header className="mb-10">
                <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center mb-4 shadow-xl">
                   <Plus size={24} />
