@@ -254,15 +254,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <div className="flex items-center gap-4">
                 <div className={cn(
-                  "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest leading-none transition-colors",
-                  !isOnline ? "bg-red-600 text-white animate-pulse" : "bg-slate-100 text-black"
-                )}>指挥中心 {isOnline ? '控制台' : '脱机模式'}</div>
-                {!isOnline && (
-                  <div className="flex items-center gap-2 px-3 py-1 bg-white border border-red-200 rounded-xl shadow-sm">
-                    <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
-                    <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter italic">链路物理挂断</span>
-                  </div>
-                )}
+                  "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest leading-none transition-colors flex items-center gap-2",
+                  !isOnline ? "bg-red-600 text-white" : "bg-slate-100 text-black"
+                )}>
+                  {!isOnline && <div className="w-2 h-2 bg-white rounded-full animate-pulse" />}
+                  指挥中心 {isOnline ? '控制台' : '脱机模式'}
+                </div>
                 {pendingSyncCount > 0 && (
                   <div className="flex items-center gap-2 px-3 py-1 bg-cyan-50 border border-cyan-100 rounded-xl shadow-sm animate-pulse">
                     <RefreshCw size={10} className="animate-spin text-cyan-600" />
@@ -292,14 +289,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </AnimatePresence>
 
         <section className={cn("flex-1 overflow-y-auto custom-scrollbar transition-all duration-500 relative", isScreenMaximized ? "p-0 bg-transparent" : "p-6 bg-slate-50/50")}>
-          {/* V3.75: 内容区物理脱机遮罩 */}
-          {!isOnline && !isScreenMaximized && (
-            <div className="absolute inset-0 z-[100] bg-red-50/10 backdrop-blur-[1px] pointer-events-none border-t border-red-100 flex items-center justify-center">
-               <div className="bg-red-600 text-white px-6 py-3 rounded-2xl shadow-2xl font-black text-xs uppercase tracking-[0.2em] animate-bounce flex items-center gap-3">
-                  <Zap size={16} className="fill-current" /> 物理链路已中断 · 正在尝试重连
-               </div>
-            </div>
-          )}
           {children}
         </section>
 

@@ -132,20 +132,20 @@ const AdminHome = () => {
                </button>
             </div>
           ) : (
-            <TacticalTable headers={['成员姓名', '所属部门', '获得奖项', '工作进度', '综合评分', '管理操作']}>
+            <TacticalTable headers={['成员身份标识', '所属业务部门', '荣誉勋章', '实战培训进度', '综合战术评分', '链路管理']}>
               {agents.map((agent: any) => (
                 <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors text-sm font-bold text-black text-center">
-                  <td className="px-8 py-3 text-left"><div className="flex items-center justify-center gap-3"><div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs", agent.is_online ? "bg-cyan-600 text-white shadow-md" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div><div className="flex flex-col text-left"><span className="text-xs font-black text-black">{agent.real_name}</span><span className="text-[9px] text-slate-500 font-mono">@{agent.username}</span></div></div></td>
-                  <td className="px-6 py-3 text-center font-bold text-black text-[10px] uppercase">{agent.dept_name || '未归类'}</td>
-                  <td className="px-6 py-3 text-center"><div className="flex justify-center gap-1">{agent.reward_count > 0 ? <div className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-xl border border-amber-100 flex items-center gap-1"><Award size={10}/> <span className="text-[10px] font-black">{agent.reward_count}</span></div> : <span className="opacity-20 text-slate-300">-</span>}</div></td>
-                  <td className="px-6 py-3 text-center"><div className="flex flex-col items-center gap-1"><div className="w-16 h-1 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-cyan-500" style={{ width: `${agent.training_progress || 0}%` }} /></div><span className="text-[8px] font-black text-slate-500">{agent.training_progress || 0}%</span></div></td>
-                  <td className="px-6 py-3 text-center">
-                    <div className="flex flex-col items-center gap-1">
-                       <div className="flex items-center gap-1 text-black italic font-black text-[11px]"><Activity size={12} className="text-cyan-600" /> {agent.tactical_score}</div>
-                       {agent.last_violation_type && <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[8px] font-black rounded-xl border border-red-100 uppercase tracking-tighter">违规: {agent.last_violation_type}</span>}
+                  <td className="px-10 py-4 text-left"><div className="flex items-center justify-start gap-4"><div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-sm", agent.is_online ? "bg-cyan-600 text-white shadow-cyan-200" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div><div className="flex flex-col text-left"><span className="text-sm font-black text-black leading-none">{agent.real_name}</span><span className="text-[10px] text-slate-500 font-mono mt-1">@{agent.username}</span></div></div></td>
+                  <td className="px-6 py-4 text-center font-bold text-black text-[11px] uppercase whitespace-nowrap">{agent.dept_name || '未归类'}</td>
+                  <td className="px-6 py-4 text-center"><div className="flex justify-center gap-1">{agent.reward_count > 0 ? <div className="px-3 py-1 bg-amber-50 text-amber-700 rounded-xl border border-amber-100 flex items-center gap-1.5"><Award size={12}/> <span className="text-[11px] font-black">{agent.reward_count}</span></div> : <span className="opacity-20 text-slate-300">-</span>}</div></td>
+                  <td className="px-6 py-4 text-center"><div className="flex flex-col items-center gap-2"><div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.5)]" style={{ width: `${agent.training_progress || 0}%` }} /></div><span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">{agent.training_progress || 0}%</span></div></td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex flex-col items-center gap-1.5">
+                       <div className="flex items-center gap-2 text-black italic font-black text-base"><Activity size={16} className="text-cyan-600" /> {agent.tactical_score}</div>
+                       {agent.last_violation_type && <span className="px-3 py-1 bg-red-50 text-red-600 text-[9px] font-black rounded-xl border border-red-100 uppercase tracking-tighter shadow-sm">高危违规: {agent.last_violation_type}</span>}
                     </div>
                   </td>
-                  <td className="px-8 py-3 text-center"><button className="p-2 bg-black text-white rounded-xl hover:bg-cyan-600 transition-all shadow-md active:scale-90"><ShieldCheck size={14} /></button></td>
+                  <td className="px-10 py-4 text-center"><button className="p-3 bg-black text-white rounded-xl hover:bg-cyan-600 transition-all shadow-lg active:scale-90 flex items-center justify-center mx-auto"><ShieldCheck size={18} /></button></td>
                 </tr>
               ))}
             </TacticalTable>

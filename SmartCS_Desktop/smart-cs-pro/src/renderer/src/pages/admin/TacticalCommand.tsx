@@ -211,11 +211,11 @@ export default function TacticalCommand() {
       const isActive = activeAgent?.username === a.username;
       return (
         <tr key={a.username} onClick={() => { setActiveAgent(a); setLiveChat([]); setScreenShot(null); setLastFrameTime(0); }} className={cn("cursor-pointer transition-all duration-300", isActive ? "bg-cyan-600/10 text-cyan-900" : "hover:bg-cyan-50/50 text-black")}>
-          <td className="px-4 py-3 text-left"><div className="flex items-center gap-2"><div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-all", a.is_online ? "bg-emerald-500/10 text-emerald-600" : "bg-slate-100 text-slate-400")}>{a.real_name[0]}</div><span className="text-[11px] font-black truncate">{a.real_name}</span></div></td>
-          <td className="px-2 py-3 text-center"><span className="text-[10px] font-bold text-slate-500 uppercase">{a.dept_name || '未分配'}</span></td>
-          <td className="px-2 py-3 text-center"><div className="flex justify-center items-center gap-1.5"><div className={cn("w-1.5 h-1.5 rounded-full transition-all", theme.dot)} /><span className={cn("text-[9px] font-black uppercase", isActive ? "text-cyan-700" : "text-slate-500")}>{theme.label}</span></div></td>
-          <td className="px-2 py-3 text-center"><span className={cn("text-[10px] font-black", isActive ? "text-cyan-700" : "text-slate-600")}>{formatLastActivity(a.last_activity)}</span></td>
-          <td className="px-4 py-3 text-center"><RoleBadge roleId={a.role_id} roleName={a.role_name} /></td>
+          <td className="px-5 py-4 text-left"><div className="flex items-center gap-3"><div className={cn("w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-all shadow-sm", a.is_online ? "bg-emerald-500/10 text-emerald-600" : "bg-slate-100 text-slate-400")}>{a.real_name[0]}</div><span className="text-[11px] font-black truncate">{a.real_name}</span></div></td>
+          <td className="px-3 py-4 text-center"><span className="text-[10px] font-bold text-slate-500 uppercase">{a.dept_name || '未分配'}</span></td>
+          <td className="px-3 py-4 text-center"><div className="flex justify-center items-center gap-2"><div className={cn("w-2 h-2 rounded-full transition-all", theme.dot)} /><span className={cn("text-[9px] font-black uppercase tracking-tighter", isActive ? "text-cyan-700" : "text-slate-500")}>{theme.label}</span></div></td>
+          <td className="px-4 py-4 text-center"><span className={cn("text-[10px] font-black whitespace-nowrap", isActive ? "text-cyan-700" : "text-slate-600")}>{formatLastActivity(a.last_activity)}</span></td>
+          <td className="px-5 py-4 text-center"><RoleBadge roleId={a.role_id} roleName={a.role_name} /></td>
         </tr>
       );
     });
@@ -270,7 +270,7 @@ export default function TacticalCommand() {
       </header>
 
       <main className="flex-1 flex gap-6 min-h-0">
-        <div className="w-full lg:w-[420px] flex flex-col bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden shrink-0">
+        <div className="w-full lg:w-[480px] flex flex-col bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden shrink-0">
            <div className="p-4 border-b border-slate-100 space-y-3">
               <div className="flex items-center justify-between">
                  <h3 className="text-[10px] font-black text-cyan-700 uppercase tracking-widest flex items-center gap-2"><Radio size={12} className="text-cyan-600 animate-pulse" /> 成员监控矩阵</h3>
@@ -279,7 +279,7 @@ export default function TacticalCommand() {
               <TacticalSearch value={search} onChange={setSearch} placeholder="搜索成员姓名..." />
            </div>
            <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
-              <TacticalTable headers={['成员', '部门', '状态', '最后活动', '身份']}>
+              <TacticalTable headers={['成员', '部门', '当前状态', '上次活跃时间', '职权身份']}>
                 {AgentItems}
               </TacticalTable>
            </div>
