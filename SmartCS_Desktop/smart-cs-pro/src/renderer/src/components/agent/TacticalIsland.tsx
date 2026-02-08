@@ -185,7 +185,7 @@ export const TacticalIsland = () => {
 
   useEffect(() => {
     if (!isOnline && token) {
-      // V3.73: 物理链路中断瞬间触发语音警报 (仅播报一次)
+      // V3.73: 物理链路中断瞬间触发语音警报
       if (!isMuted) {
         try {
           const utterance = new SpeechSynthesisUtterance("警告：物理链路已中断，系统进入脱机模式");
@@ -194,6 +194,9 @@ export const TacticalIsland = () => {
         } catch (e) {}
       }
       toast.error('链路中断', { description: '与指挥中心失去物理连接' });
+
+      // V3.78: 脱机强制自愈展开 - 链路断开时，强制展开面板以显示警告，防止用户找不到入口
+      if (isFolded) setIsFolded(false);
     }
   }, [isOnline])
 
@@ -288,9 +291,11 @@ export const TacticalIsland = () => {
             {/* V3.73: 物理链路中断覆盖层 */}
             {!isOnline && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-50 bg-red-600/10 backdrop-blur-[2px] pointer-events-none flex items-center justify-center">
-                <div className="flex items-center gap-2 px-3 py-1 bg-red-600 text-white rounded-full text-[9px] font-black uppercase tracking-tighter shadow-lg animate-pulse">
-                   <Zap size={10} className="fill-current"/> 链路已挂断 · 脱机模式
-                </div>
+                {!isFolded && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-red-600 text-white rounded-full text-[9px] font-black uppercase tracking-tighter shadow-lg animate-pulse">
+                    <Zap size={10} className="fill-current"/> 链路已挂断 · 脱机模式
+                  </div>
+                )}
               </motion.div>
             )}
             {!isFolded && (

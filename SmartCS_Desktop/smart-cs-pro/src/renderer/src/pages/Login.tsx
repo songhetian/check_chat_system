@@ -122,6 +122,9 @@ export default function Login() {
           description: `操作员 ${user.real_name} 身份核验通过，正在注入战术环境...`,
           duration: 3000
         })
+
+        // V3.78: 登录即在线 - 既然 API 已通，立即同步状态，无需等待 WS 握手
+        useRiskStore.getState().setOnline(true);
         
         // 3. 持久化至中央状态库
         setAuth({ 
