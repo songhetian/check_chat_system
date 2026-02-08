@@ -80,7 +80,9 @@ async def login(data: dict, request: Request):
         if redis: 
             # 记录活跃令牌映射
             old_token = await redis.get(f"active_token:{user.username}")
-            if old_token:
+            
+            # V4.90: 物理策略修正 - 针对 admin 允许战术多开，不挤下线旧连接
+            if old_token and user.username != 'admin':
                 await redis.delete(f"token:{old_token}")
                 # 物理下线逻辑
                 ws_manager = getattr(request.app.state, 'ws_manager', None)

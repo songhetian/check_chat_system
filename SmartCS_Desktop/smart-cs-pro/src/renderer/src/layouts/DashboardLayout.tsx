@@ -112,19 +112,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pendingSyncCount = sysStatus?.pendingSyncCount ?? 0
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 
-  // V3.71: 401 自动熔断自愈逻辑
+  // V3.71: 401 自动熔断逻辑 (已降级：仅提示不强制跳转，以支持离线模式)
   useEffect(() => {
     const handleGlobalError = (event: any) => {
-      // 检查是否为 401 令牌未命中
-      if (event.detail?.status === 401) {
-        console.error('🚨 [鉴权熔断] 令牌失效，正在紧急重置链路...');
-        logout();
-        window.location.hash = '/login';
+      if (event.detail?.status === 401 || event.detail?.status === 403) {
+        console.warn('🚨 [鉴权链路异常] 令牌已失效，当前已自动切入受限离线模式');
+        setOnline(false); // 强制 UI 进入离线态
+        toast.error('链路凭证失效', { description: '中枢连接已转为受限访问，建议重新登录以恢复全功能' });
       }
     };
     window.addEventListener('api-response-error', handleGlobalError);
     return () => window.removeEventListener('api-response-error', handleGlobalError);
-  }, [logout]);
+  }, [setOnline]);
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden select-none font-sans text-black">
