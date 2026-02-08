@@ -132,7 +132,7 @@ const AdminHome = () => {
                </button>
             </div>
           ) : (
-            <TacticalTable headers={['成员身份标识', '所属业务部门', '荣誉勋章', '实战培训进度', '综合战术评分', '链路管理']}>
+            <TacticalTable headers={['成员身份标识', '所属业务部门', '荣誉勋章', '实战培训进度', '综合战术评分', '上次活跃', '链路管理']}>
               {agents.map((agent: any) => (
                 <tr key={agent.username} className="group hover:bg-slate-50/50 transition-colors text-sm font-bold text-black text-center">
                   <td className="px-10 py-4 text-left"><div className="flex items-center justify-start gap-4"><div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-sm", agent.is_online ? "bg-cyan-600 text-white shadow-cyan-200" : "bg-slate-100 text-slate-400")}>{agent.real_name[0]}</div><div className="flex flex-col text-left"><span className="text-sm font-black text-black leading-none">{agent.real_name}</span><span className="text-[10px] text-slate-500 font-mono mt-1">@{agent.username}</span></div></div></td>
@@ -144,6 +144,16 @@ const AdminHome = () => {
                        <div className="flex items-center gap-2 text-black italic font-black text-base"><Activity size={16} className="text-cyan-600" /> {agent.tactical_score}</div>
                        {agent.last_violation_type && <span className="px-3 py-1 bg-red-50 text-red-600 text-[9px] font-black rounded-xl border border-red-100 uppercase tracking-tighter shadow-sm">高危违规: {agent.last_violation_type}</span>}
                     </div>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {(() => {
+                      const timestamp = agent.last_activity;
+                      if (!timestamp) return <span className="opacity-20 font-black italic text-[10px]">从未活动</span>;
+                      const diff = Math.floor(Date.now() / 1000) - timestamp;
+                      if (diff < 60) return <span className="text-emerald-600 font-black animate-pulse text-[10px] uppercase">刚才</span>;
+                      if (diff < 3600) return <span className="text-cyan-600 font-black text-[10px]">{Math.floor(diff / 60)} 分钟前</span>;
+                      return <span className="text-slate-400 font-bold text-[10px]">{Math.floor(diff / 3600)} 小时前</span>;
+                    })()}
                   </td>
                   <td className="px-10 py-4 text-center"><button className="p-3 bg-black text-white rounded-xl hover:bg-cyan-600 transition-all shadow-lg active:scale-90 flex items-center justify-center mx-auto"><ShieldCheck size={18} /></button></td>
                 </tr>
