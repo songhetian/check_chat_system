@@ -5,6 +5,10 @@ import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
 import { spawn, ChildProcess } from 'child_process'
 
+// V3.96: 紧急诊断模式 - 禁用硬件加速并恢复标准背景，排除 Mac GPU 渲染冲突导致的透明窗口卡死
+// 必须在 app ready 之前调用
+app.disableHardwareAcceleration();
+
 // --- 0. 物理引擎进程管理 (V3.25) ---
 let pythonProcess: ChildProcess | null = null
 
@@ -22,10 +26,12 @@ function startPythonEngine(): void {
     if (process.platform === 'win32') {
       spawn('cmd', ['/c', `for /f "tokens=5" %a in ('netstat -aon ^| findstr :${port}') do taskkill /f /pid %a`], { shell: true })
     } else {
-      // Mac/Linux: 使用 lsof 查找并杀掉进程
-      spawn('sh', ['-c', `lsof -ti:${port} | xargs kill -9`], { shell: true })
+      // Mac/Linux: 使用 lsof 查找并强制杀掉所有占用该端口的进程
+      const cmd = `lsof -ti:${port} | xargs kill -9`
+      require('child_process').execSync(cmd)
+      console.log(`🧹 [端口清理] 已强制排空端口 ${port}`)
     }
-  } catch (e) { console.warn('⚠️ 端口清理跳过') }
+  } catch (e) { console.warn('⚠️ 端口清理跳过或端口未被占用') }
 
   try {
     if (is.dev) {
@@ -356,9 +362,6 @@ function createWindow(): void {
       return null
     }
   })
-
-  // V3.96: 紧急诊断模式 - 禁用硬件加速并恢复标准背景，排除 Mac GPU 渲染冲突导致的透明窗口卡死
-  app.disableHardwareAcceleration();
 
   // 核心：创建标准窗口 (初始提升至工业级宽屏尺寸)
   const mainWindow = new BrowserWindow({
