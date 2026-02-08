@@ -38,6 +38,7 @@ interface RiskState {
   currentCustomer: any | null
   violations: Violation[]
   resolvedViolations: Violation[]
+  sopHistory: any[] // V3.88: SOP 指令历史记录
   lastAiAnalysis: AiUltraAnalysis | null
   sendMessage: ((msg: any) => void) | null
 
@@ -57,6 +58,7 @@ interface RiskState {
   setCurrentCustomer: (customer: any | null) => void
   setAiAnalysis: (analysis: AiUltraAnalysis) => void
   addViolation: (violation: Violation) => void
+  addSopHistory: (sop: any) => void
   resolveViolation: (violationId: string, solution: string) => void
   setSendMessage: (fn: (msg: any) => void) => void
 }
@@ -78,6 +80,7 @@ export const useRiskStore = create<RiskState>((set) => ({
   currentCustomer: null,
   violations: [],
   resolvedViolations: [],
+  sopHistory: [],
   lastAiAnalysis: null,
   sendMessage: null,
 
@@ -97,6 +100,12 @@ export const useRiskStore = create<RiskState>((set) => ({
   setCurrentCustomer: (currentCustomer) => set({ currentCustomer }),
   setAiAnalysis: (lastAiAnalysis) => set({ lastAiAnalysis }),
   addViolation: (violation) => set((state) => ({ violations: [violation, ...state.violations] })),
+  addSopHistory: (sop) => set((state) => ({ 
+    sopHistory: [
+      { ...sop, timestamp: Date.now(), id: `sop_${Date.now()}` }, 
+      ...state.sopHistory.slice(0, 19) // 仅保留最近 20 条
+    ] 
+  })),
   resolveViolation: (id, solution) => set((state) => {
     const v = state.violations.find(x => x.id === id);
     if (!v) return state;

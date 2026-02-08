@@ -21,7 +21,8 @@ export const TacticalIsland = () => {
     isOnline, isGlassMode, setGlassMode,
     layoutMode, setLayoutMode, activeSideTool, setActiveSideTool,
     isCustomerHudEnabled, setCustomerHudEnabled,
-    isOnboardingMode, setOnboardingMode, isMuted, setMuted, isLocked
+    isOnboardingMode, setOnboardingMode, isMuted, setMuted, isLocked,
+    sopHistory
   } = useRiskStore()
   
   const { user, logout, token } = useAuthStore()
@@ -38,6 +39,7 @@ export const TacticalIsland = () => {
   const [isScratchpad, setIsScratchpad] = useState(false)
   const [isEvasionMode, setIsEvasionMode] = useState(false)
   const [isSopMode, setIsSopMode] = useState(false) // V3.70: SOP 模式
+  const [isHistoryMode, setIsHistoryMode] = useState(false) // V3.88: 历史记录模式
   
   const [evasionInfo, setEvasionInfo] = useState<any>(null)
   const [sopInfo, setSopInfo] = useState<any>(null)
@@ -78,7 +80,7 @@ export const TacticalIsland = () => {
   }, [sentiments, selectedSentiment])
 
   const resetSpecialModes = () => {
-    setIsPushMode(false); setIsScratchpad(false); setIsEvasionMode(false); setIsSopMode(false);
+    setIsPushMode(false); setIsScratchpad(false); setIsEvasionMode(false); setIsSopMode(false); setIsHistoryMode(false);
     setEvasionInfo(null); setSopInfo(null); setHasOptimized(false); setOptimizing(false); setVoicePulse(false);
   }
 
@@ -126,7 +128,14 @@ export const TacticalIsland = () => {
       }
 
       if (data.type === 'TACTICAL_SOP') {
-        setSopInfo(data.payload)
+        const sopData = data.payload;
+        if (!sopData || !sopData.content) {
+          console.warn('⚠️ [指令中心] 接收到空负载 SOP');
+          return;
+        }
+        
+        setSopInfo(sopData)
+        useRiskStore.getState().addSopHistory(sopData)
         setIsSopMode(true); setIsPushMode(false); setIsScratchpad(false); setIsEvasionMode(false);
       }
       
@@ -211,7 +220,7 @@ export const TacticalIsland = () => {
   useEffect(() => {
     const screenWidth = window.screen.width
     const screenHeight = window.screen.height
-    const active = isPushMode || isScratchpad || isEvasionMode || isSopMode || showVoiceAlertOverlay
+    const active = isPushMode || isScratchpad || isEvasionMode || isSopMode || isHistoryMode || showVoiceAlertOverlay
     let width = isFolded ? 80 : 800 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined, y: number | undefined, center = false
@@ -227,7 +236,7 @@ export const TacticalIsland = () => {
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
     window.electron.ipcRenderer.send('set-always-on-top', isLocked || active || showVoiceAlertOverlay || !showBigScreenModal)
     if (isScratchpad && inputRef.current) setTimeout(() => inputRef.current?.focus(), 300)
-  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad, isEvasionMode, isSopMode, showVoiceAlertOverlay])
+  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad, isEvasionMode, isSopMode, isHistoryMode, showVoiceAlertOverlay])
 
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent text-black">
@@ -256,6 +265,37 @@ export const TacticalIsland = () => {
                    <p className="text-[10px] font-black text-amber-400 uppercase mb-1">修正建议</p>
                    <p className="text-sm font-medium italic text-white leading-relaxed">"{evasionInfo?.suggestion}"</p>
                 </div>
+             </div>
+          </div>
+        ) : isHistoryMode ? (
+          <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-slate-900/80">
+             <div className="flex justify-between items-start mb-4 shrink-0">
+                <div className="flex items-center gap-3"><div className="w-8 h-8 bg-cyan-600 rounded-xl flex items-center justify-center shadow-lg"><History size={16} className="text-white"/></div><h4 className="text-base font-black italic tracking-tighter uppercase text-cyan-400">指令下发历史</h4></div>
+                <button onClick={resetSpecialModes} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg flex items-center gap-2 font-black text-[10px] border border-white/10 text-slate-300"><Undo2 size={12}/> 返回</button>
+             </div>
+             <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2">
+                {sopHistory.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center opacity-20 gap-2">
+                     <Box size={40} />
+                     <p className="text-[10px] font-black uppercase">暂无指令记录</p>
+                  </div>
+                ) : (
+                  sopHistory.map((sop: any) => (
+                    <div key={sop.id} className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-cyan-500/30 transition-all group">
+                       <div className="flex justify-between items-start mb-2">
+                          <h5 className="text-sm font-black text-white group-hover:text-cyan-400 transition-colors">{sop.title}</h5>
+                          <span className="text-[8px] font-mono text-slate-500">{new Date(sop.timestamp).toLocaleTimeString()}</span>
+                       </div>
+                       <p className="text-[10px] text-slate-400 line-clamp-2 mb-3 font-medium italic leading-relaxed">"{sop.content}"</p>
+                       <div className="flex gap-2">
+                          <button onClick={() => { setSopInfo(sop); setIsSopMode(true); setIsHistoryMode(false); }} className="px-3 py-1.5 bg-cyan-600/20 text-cyan-400 rounded-lg text-[9px] font-black uppercase hover:bg-cyan-600 hover:text-white transition-all">查看详情</button>
+                          {(sop.sop_type === 'FILE' || sop.sop_type === 'IMAGE') && (
+                            <button onClick={() => window.open(sop.content)} className="px-3 py-1.5 bg-white/5 text-slate-300 rounded-lg text-[9px] font-black uppercase hover:bg-white/10 transition-all flex items-center gap-1.5"><Download size={10}/> 下载文件</button>
+                          )}
+                       </div>
+                    </div>
+                  ))
+                )}
              </div>
           </div>
         ) : isSopMode ? (
@@ -329,6 +369,7 @@ export const TacticalIsland = () => {
                     <HubBtn icon={<Ghost size={20} />} active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} title="外观" color="muted" />
                     <HubBtn icon={<GraduationCap size={20} />} active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} title="培训" color="emerald" />
                     <HubBtn icon={isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />} active={isMuted} onClick={() => setMuted(!isMuted)} title={isMuted ? "解禁" : "静音"} color={isMuted ? "red" : "muted"} />
+                    <HubBtn icon={<History size={20} />} active={isHistoryMode} onClick={() => setIsHistoryMode(!isHistoryMode)} title="历史" color="muted" />
                     <div className="w-px h-5 bg-white/10 mx-0.5" />
                     <HubBtn icon={<PenTool size={20} />} active={isScratchpad} onClick={() => { setContent(''); setIsScratchpad(true); setHasOptimized(false); }} title="草稿" color="emerald" />
                     <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="资料" color="white" />
