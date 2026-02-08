@@ -26,6 +26,8 @@ const getTypeIcon = (type: string) => {
 const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
   const [editItem, setEditItem] = useState(item || { title: '', content: '', sop_type: 'TEXT' })
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
   const { token } = useAuthStore()
 
   const handleSave = () => {
@@ -34,34 +36,44 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
     onSave(editItem);
   }
 
-  const triggerFileUpload = async () => {
+  // 物理上传核心引擎 (支持进度监控)
+  const uploadFile = async (fileObj: { name: string, data: string }) => {
     try {
-      let filters: any[] = [];
-      if (editItem.sop_type === 'IMAGE') filters = [{ name: '全息图片', extensions: ['jpg', 'png', 'gif', 'webp'] }];
-      else if (editItem.sop_type === 'MD') filters = [{ name: 'Markdown 文档', extensions: ['md'] }];
-      else filters = [{ name: '业务附件', extensions: ['pdf', 'doc', 'docx', 'zip'] }];
+      setIsUploading(true); setUploadProgress(0);
       
-      const file = await window.api.selectFile({ title: `物理拉取 - ${editItem.sop_type} 载体`, filters })
-      if (!file) return;
-
-      setIsUploading(true)
-      const byteCharacters = atob(file.data);
+      const byteCharacters = atob(fileObj.data);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) { byteNumbers[i] = byteCharacters.charCodeAt(i); }
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray]);
       
       const formData = new FormData()
-      formData.append('file', blob, file.name)
+      formData.append('file', blob, fileObj.name)
       const apiHost = CONFIG.API_BASE.replace('/api', '')
-      
-      const response = await fetch(`${CONFIG.API_BASE}/ai/sops/upload`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      })
-      
-      const result = await response.json()
+
+      // 使用 XMLHttpRequest 以获得原生进度监控
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${CONFIG.API_BASE}/ai/sops/upload`, true);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          setUploadProgress(percent);
+        }
+      };
+
+      const resultPromise = new Promise((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status === 200) resolve(JSON.parse(xhr.responseText));
+          else reject(new Error('上传失败'));
+        };
+        xhr.onerror = () => reject(new Error('网络链路异常'));
+      });
+
+      xhr.send(formData);
+      const result: any = await resultPromise;
+
       if (result.status === 'ok') {
         setEditItem({ ...editItem, content: `${apiHost}${result.url}` })
         toast.success('物理载荷同步成功')
@@ -71,7 +83,37 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
     } catch (e) {
       toast.error('物理上传中断')
     } finally {
-      setIsUploading(false)
+      setIsUploading(false); setUploadProgress(0);
+    }
+  }
+
+  const triggerNativeUpload = async () => {
+    let filters: any[] = [];
+    if (editItem.sop_type === 'IMAGE') filters = [{ name: '图片', extensions: ['jpg', 'png', 'gif', 'webp'] }];
+    else if (editItem.sop_type === 'MD') filters = [{ name: 'Markdown', extensions: ['md'] }];
+    else filters = [{ name: '附件', extensions: ['pdf', 'doc', 'docx', 'zip'] }];
+    
+    const file = await window.api.selectFile({ title: '选取战术载体', filters })
+    if (file) uploadFile(file);
+  }
+
+  // 拖拽处理
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault(); setIsDragging(false);
+    if (!['IMAGE', 'FILE', 'MD'].includes(editItem.sop_type)) {
+      toast.error('当前载体类型不支持拖拽上传', { description: '请先切换类型为图片或文档' });
+      return;
+    }
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      // 将 File 转为 Base64 以复用逻辑 (Electron 模式下 selectFile 返回的是 base64)
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = (event.target?.result as string).split(',')[1];
+        uploadFile({ name: file.name, data: base64 });
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -142,20 +184,38 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
          </div>
 
          {/* 右栏：内容编辑/上传区 */}
-         <div className="flex-1 bg-white flex flex-col overflow-hidden">
-            <header className="px-10 py-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+         <div 
+           className={cn(
+             "flex-1 bg-white flex flex-col overflow-hidden transition-colors duration-300",
+             isDragging && "bg-cyan-50/50"
+           )}
+           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+           onDragLeave={() => setIsDragging(false)}
+           onDrop={handleDrop}
+         >
+            <header className="px-10 py-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30 shrink-0">
                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">规范载体详情内容</span>
                {isFileMode && (
                  <button 
-                   onClick={triggerFileUpload}
+                   onClick={triggerNativeUpload}
                    disabled={isUploading}
                    className="flex items-center gap-2 px-5 py-2.5 bg-cyan-600 text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-cyan-200 hover:bg-cyan-500 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                  >
                    {isUploading ? <Loader2 className="animate-spin" size={14}/> : <UploadCloud size={14}/>}
-                   物理文件上传
+                   {isUploading ? `同步中 ${uploadProgress}%` : '物理文件上传'}
                  </button>
                )}
             </header>
+
+            {/* 战术进度条 */}
+            {isUploading && (
+              <div className="h-1 w-full bg-slate-100 shrink-0">
+                <div 
+                  className="h-full bg-cyan-500 transition-all duration-300 shadow-[0_0_8px_rgba(6,182,212,0.5)]" 
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
 
             <div className="flex-1 p-10 overflow-y-auto no-scrollbar bg-slate-50/10">
                {editItem.sop_type === 'TEXT' ? (
