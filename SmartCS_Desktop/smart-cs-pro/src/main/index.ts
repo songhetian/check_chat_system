@@ -298,6 +298,10 @@ function createWindow(): void {
       
       return { status: response.status, data: result }
     } catch (e: any) {
+      // V4.85: 增加 401 物理信号分发逻辑
+      if (e.status === 401 || (e.message && e.message.includes('401'))) {
+         console.warn('🚨 [鉴权熔断] 检测到令牌失效信号');
+      }
       console.error(`❌ [API 转发崩溃拦截] URL: ${url} | Error: ${e.message}`)
       
       try {

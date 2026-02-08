@@ -9,32 +9,37 @@ interface Option {
 
 interface TacticalSelectProps {
   options: Option[]
-  value: string | number
+  value: string | number | null | undefined
   onChange: (value: string | number) => void
   placeholder?: string
   className?: string
   showSearch?: boolean
   disabled?: boolean
+  position?: 'top' | 'bottom'
 }
 
 export function TacticalSelect({ 
-  options, 
+  options = [], 
   value, 
   onChange, 
   placeholder = "请选择...", 
   className, 
   showSearch = true, 
-  disabled = false 
+  disabled = false,
+  position = 'bottom'
 }: TacticalSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [search, setSearch] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   
-  const selectedOption = options.find(o => String(o.id) === String(value))
+  // 核心：处理 ID 匹配，强制转为 String 进行稳健对比
+  const selectedOption = useMemo(() => 
+    options.find(o => String(o.id) === String(value)), 
+  [options, value]);
   
-  const filteredOptions = useMemo(() => options.filter(o => 
-    o.name.toLowerCase().includes(search.toLowerCase())
-  ), [options, search]);
+  const filteredOptions = useMemo(() => 
+    options.filter(o => o.name.toLowerCase().includes(search.toLowerCase())), 
+  [options, search]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,17 +66,20 @@ export function TacticalSelect({
           isOpen ? "ring-2 ring-cyan-500/20 border-cyan-500 shadow-lg" : ""
         )}
       >
-        <span className={cn(selectedOption ? "text-slate-900" : "text-slate-400")}>
+        <span className={cn("truncate pr-2", selectedOption ? "text-slate-900" : "text-slate-400")}>
           {selectedOption ? selectedOption.name : placeholder}
         </span>
-        <ChevronDown size={14} className={cn("text-slate-400 transition-transform duration-200", isOpen && "rotate-180 text-cyan-600")} />
+        <ChevronDown size={14} className={cn("text-slate-400 transition-transform duration-200 shrink-0", isOpen && "rotate-180 text-cyan-600")} />
       </div>
 
       {/* 下拉列表容器 */}
       {isOpen && (
         <div 
           style={{ willChange: 'transform, opacity' }}
-          className="absolute z-[1100] left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col p-2 animate-in fade-in zoom-in-95 duration-100"
+          className={cn(
+            "absolute z-[1100] left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col p-2 animate-in fade-in zoom-in-95 duration-100",
+            position === 'top' ? "bottom-full mb-2" : "mt-2"
+          )}
         >
           {showSearch && (
             <div className="relative mb-2 shrink-0">
@@ -81,12 +89,12 @@ export function TacticalSelect({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="搜索项..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-xl text-[11px] font-black text-black focus:ring-2 focus:ring-cyan-500/20 outline-none"
+                className="w-full pl-10 pr-4 py-2 bg-slate-100/50 border-none rounded-xl text-[11px] font-black text-black focus:ring-2 focus:ring-cyan-500/20 outline-none"
               />
             </div>
           )}
 
-          <div className="max-h-64 overflow-y-auto space-y-0.5 no-scrollbar overscroll-contain">
+          <div className="max-h-60 overflow-y-auto space-y-0.5 no-scrollbar overscroll-contain">
             {filteredOptions.length === 0 ? (
               <div className="p-6 text-center text-[10px] font-black text-slate-300 uppercase italic tracking-widest flex flex-col items-center gap-2">
                  无匹配结果
@@ -105,7 +113,7 @@ export function TacticalSelect({
                       "px-4 py-2.5 rounded-xl text-[11px] font-bold flex items-center justify-between cursor-pointer transition-colors",
                       isSelected 
                         ? "bg-cyan-500/10 text-cyan-700 ring-1 ring-cyan-500/20" 
-                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        : "text-slate-600 hover:bg-slate-100/50 hover:text-slate-900"
                     )}
                   >
                     <span className="truncate pr-4">{opt.name}</span>

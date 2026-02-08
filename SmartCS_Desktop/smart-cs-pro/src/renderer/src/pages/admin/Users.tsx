@@ -202,13 +202,21 @@ export default function UsersPage() {
                       value={u.role_id} 
                       onChange={(val) => handleRoleChangeRequest(u, val)} 
                       showSearch={false}
+                      position="top"
                       className="!py-1 !px-2 !rounded-xl !text-[11px] font-black"
                     />
                   </div></div></td>
                   <td className="px-8 py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
                        {hasPermission('admin:user:update') && (
-                         <button onClick={() => { setTargetUser({...u, department_id: u.department_id || ''}); setModalType('EDIT'); }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-xl transition-all shadow-sm border border-cyan-100 cursor-pointer"><Edit3 size={14} /></button>
+                         <button onClick={() => { 
+                           // 核心修复：确保 ID 物理回填，支持数字与 null 的鲁棒转换
+                           setTargetUser({
+                             ...u, 
+                             department_id: (u.department_id === null || u.department_id === undefined) ? '' : u.department_id
+                           }); 
+                           setModalType('EDIT'); 
+                         }} className="p-2 bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white rounded-xl transition-all shadow-sm border border-cyan-100 cursor-pointer" title="重校信息"><Edit3 size={14} /></button>
                        )}
                        {hasPermission('admin:user:delete') && (
                          <button onClick={() => { setTargetUser(u); setModalType('DELETE'); }} className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm border border-red-100 cursor-pointer"><Trash2 size={14} /></button>

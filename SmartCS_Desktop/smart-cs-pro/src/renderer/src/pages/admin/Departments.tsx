@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Plus, Trash2, Building2, Loader2, RefreshCw, 
@@ -11,6 +11,7 @@ import { CONFIG } from '../../lib/config'
 import { useAuthStore } from '../../store/useAuthStore'
 import { TacticalTable, TacticalPagination } from '../../components/ui/TacticalTable'
 import { TacticalSearch } from '../../components/ui/TacticalSearch'
+import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { toast } from 'sonner'
 
 // Lightweight Performance Modal
@@ -127,7 +128,7 @@ export default function DepartmentsPage() {
 
   const depts = deptsQuery.data?.data || []
   const total = deptsQuery.data?.total || 0
-  const deptUsers = deptUsersQuery.data || []
+  const deptUsers = useMemo(() => (deptUsersQuery.data || []).map((u: any) => ({ id: u.id, name: `${u.real_name} (@${u.username})` })), [deptUsersQuery.data]);
   const isPending = saveMutation.isPending || deleteMutation.isPending
 
   return (
@@ -190,16 +191,14 @@ export default function DepartmentsPage() {
           {modalType === 'EDIT' && (
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">指派部门负责人</label>
-              <div className="relative group"><div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-cyan-500 transition-colors"><Search size={12} /></div><input disabled={saveMutation.isPending} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="检索负责人姓名..." className="w-full pl-9 pr-4 py-2 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-900 shadow-inner disabled:opacity-50" /></div>
-              <div className="max-h-36 overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl p-1.5 bg-slate-50/30">
-                 {deptUsers.map((u: any) => (
-                   <div key={u.id} onClick={() => !saveMutation.isPending && setManagerId(u.id)} className={cn("p-2 rounded-xl cursor-pointer flex justify-between items-center transition-all mb-1 last:mb-0", managerId == u.id ? "bg-cyan-500 text-white shadow-md" : "hover:bg-white text-slate-600", saveMutation.isPending && "opacity-50 cursor-not-allowed")}>
-                      <span className="text-[11px] font-black">{u.real_name} <span className={cn("text-[9px] opacity-50 ml-1 font-mono", managerId == u.id ? "text-white" : "text-slate-400")}>@{u.username}</span></span>
-                      {managerId == u.id && <CheckCircle2 size={12} />}
-                   </div>
-                 ))}
-                 {deptUsers.length === 0 && <div className="p-4 text-center text-[10px] text-slate-300 italic font-bold">无匹配人员</div>}
-              </div>
+              <TacticalSelect 
+                disabled={saveMutation.isPending} 
+                options={deptUsers} 
+                value={managerId} 
+                onChange={(val: string | number) => setManagerId(String(val))} 
+                placeholder="搜索并选择负责人..." 
+              />
+              <p className="text-[9px] text-slate-400 italic">注：仅展示该部门下的成员载荷</p>
             </div>
           )}
           <button disabled={saveMutation.isPending} onClick={() => saveMutation.mutate()} className="w-full py-3 bg-slate-900 text-white rounded-xl font-black text-xs uppercase shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
