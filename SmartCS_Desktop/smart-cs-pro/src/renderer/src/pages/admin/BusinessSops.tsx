@@ -264,13 +264,16 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
                                 {isVideo ? <PlayCircle size={40}/> : <FileCode size={40}/>}
                              </div>
                            )}
-                           <div className="p-4 flex items-center justify-between">
+                           <div className="p-4 flex items-center justify-between bg-white">
                               <div className="flex-1 min-w-0 pr-2">
-                                 <p className="text-[10px] font-black text-slate-900 truncate uppercase tracking-tighter">{fileName}</p>
+                                 <p className="text-[11px] font-black text-slate-900 truncate uppercase tracking-tighter" title={fileName}>{fileName}</p>
+                                 <p className="text-[9px] font-bold text-emerald-600/60 uppercase mt-0.5 tracking-widest flex items-center gap-1">
+                                    <CheckCircle2 size={8}/> 载荷已就绪
+                                 </p>
                               </div>
                               <div className="flex items-center gap-1">
-                                 <button onClick={() => window.open(url)} className="p-2 text-slate-400 hover:text-cyan-600 transition-colors cursor-pointer"><ExternalLink size={14}/></button>
-                                 <button onClick={() => removeFile(idx)} className="p-2 text-slate-400 hover:text-red-500 transition-colors cursor-pointer"><Trash2 size={14}/></button>
+                                 <button onClick={() => window.open(url)} className="p-2 text-slate-400 hover:text-cyan-600 transition-colors cursor-pointer" title="物理预览"><ExternalLink size={14}/></button>
+                                 <button onClick={() => removeFile(idx)} className="p-2 text-slate-400 hover:text-red-500 transition-colors cursor-pointer" title="从队列移除"><Trash2 size={14}/></button>
                               </div>
                            </div>
                         </div>
