@@ -15,13 +15,24 @@ export default function Login() {
   const [bootStatus, setBootStatus] = useState('等待身份验证...')
   const [progress, setProgress] = useState(0)
   const [formData, setFormData] = useState({ username: '', password: '' })
+  const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  // 核心：已登录自动重定向
+  // 核心：已登录自动重定向与凭证回填
   useEffect(() => {
     if (user) {
       navigate('/')
+    } else {
+      // 物理回填已记忆的凭证
+      const saved = localStorage.getItem('smart-cs-remembered');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setFormData({ username: parsed.u || '', password: parsed.p || '' });
+          setRememberMe(true);
+        } catch (e) {}
+      }
     }
   }, [user])
 
@@ -139,6 +150,13 @@ export default function Login() {
           department_id: user.department_id,
           tactical_score: user.tactical_score
         }, token)
+
+        // 4. 物理级凭证记忆处理
+        if (rememberMe) {
+          localStorage.setItem('smart-cs-remembered', JSON.stringify({ u: formData.username, p: formData.password }));
+        } else {
+          localStorage.removeItem('smart-cs-remembered');
+        }
         
         // 延迟 1.5 秒跳转，给 Toast 留出在大窗口显示的时间
         setTimeout(() => {
@@ -233,7 +251,19 @@ export default function Login() {
                           onChange={(e) => setFormData({...formData, password: e.target.value})}
                           placeholder="请输入密码" 
                           className="w-full bg-black/80 border border-white/10 rounded-xl py-4 px-6 text-sm !text-white focus:border-cyan-500/50 focus:bg-black transition-all outline-none placeholder:text-slate-400 font-mono tracking-widest !font-black" 
-                        />          </div>
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2 pl-2">
+                         <input 
+                           type="checkbox" 
+                           id="remember" 
+                           checked={rememberMe} 
+                           onChange={(e) => setRememberMe(e.target.checked)}
+                           className="w-3 h-3 rounded bg-black border-white/10 accent-cyan-500 cursor-pointer"
+                         />
+                         <label htmlFor="remember" className="text-[9px] font-black text-slate-500 uppercase tracking-widest cursor-pointer hover:text-cyan-400 transition-colors">记住战术凭证 / Remember Credentials</label>
+                      </div>
 
           <button
             type="submit"
