@@ -195,12 +195,13 @@ export default function TacticalCommand() {
 
   // V3.76: 格式化最后活动时间
   const formatLastActivity = (timestamp: number | null) => {
-    if (!timestamp) return <span className="opacity-20">-</span>;
+    if (!timestamp) return <span className="opacity-20 font-black italic">从未活动</span>;
     const diff = Math.floor(Date.now() / 1000) - timestamp;
-    if (diff < 60) return <span className="text-emerald-600 font-black animate-pulse flex items-center justify-center gap-1"><Activity size={10}/> 刚才</span>;
-    if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
-    return '1天前';
+    if (diff < 60) return <span className="text-emerald-600 font-black animate-pulse flex items-center justify-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-100 uppercase text-[9px]"><Activity size={10}/> 刚才</span>;
+    if (diff < 300) return <span className="text-cyan-600 font-black uppercase text-[10px]">{Math.floor(diff / 60)} 分钟前</span>;
+    if (diff < 3600) return <span className="text-slate-500 font-bold uppercase text-[10px]">{Math.floor(diff / 60)} 分钟前</span>;
+    if (diff < 86400) return <span className="text-red-400 font-bold italic uppercase text-[10px]">{Math.floor(diff / 3600)} 小时前</span>;
+    return <span className="text-red-600 font-black italic tracking-tighter uppercase text-[9px]">超过1天</span>;
   };
 
   // V3.70: 极速渲染协议 - 成员矩阵缓存

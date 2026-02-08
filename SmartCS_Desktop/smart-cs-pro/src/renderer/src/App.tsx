@@ -248,9 +248,20 @@ const AgentView = () => {
 function App() {
   const { user } = useAuthStore()
   useRiskSocket()
+  
+  const isAgent = user?.role_code === 'AGENT' || user?.role_id === ROLE_ID.AGENT;
+
   return (
     <Router>
-      <Toaster position="bottom-right" expand={true} richColors />
+      <Toaster 
+        position={isAgent ? "top-center" : "bottom-right"} 
+        expand={true} 
+        richColors 
+        theme="dark"
+        toastOptions={{
+          style: isAgent ? { marginTop: '12px' } : {}
+        }}
+      />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/big-screen" element={<BigScreen />} />
