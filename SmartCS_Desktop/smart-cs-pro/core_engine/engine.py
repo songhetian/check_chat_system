@@ -324,13 +324,19 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
         await manager.broadcast({"type": "TACTICAL_NODE_SYNC", "username": username, "status": "OFFLINE"})
 
 # --- 物理资产托管：Web 态势舱支持 ---
+# V4.10: 增加自动化资产目录初始化
+upload_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "uploads")
+os.makedirs(upload_path, exist_ok=True)
+
 # 自动检测并托管前端静态资源
 dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist", "renderer")
 if os.path.exists(dist_path):
     app.mount("/", StaticFiles(directory=dist_path, html=True), name="static")
     logger.info(f"🌐 [Web链路] 已激活前端托管: {dist_path}")
-else:
-    logger.warning(f"⚠️ [Web链路] 未发现 dist 目录，请先执行 npm run build")
+
+# 物理挂载上传目录，支持局域网 IP 访问
+app.mount("/assets", StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")), name="assets")
+logger.info(f"📁 [资产链路] 上传中枢已挂载: /assets/uploads")
 
 
 # --- 5. 物理引擎挂载已移至 lifespan ---

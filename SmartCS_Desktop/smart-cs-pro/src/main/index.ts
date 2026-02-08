@@ -388,6 +388,29 @@ function createWindow(): void {
     }
   })
 
+  // V4.15: 物理文件选择器
+  ipcMain.handle('select-file', async (_, options: { title?: string, filters?: any[] }) => {
+    const result = await dialog.showOpenDialog(mainWindow!, {
+      title: options.title || '选择战术附件',
+      properties: ['openFile'],
+      filters: options.filters || [{ name: '所有文件', extensions: ['*'] }]
+    })
+    
+    if (!result.canceled && result.filePaths.length > 0) {
+      // 读取文件为 Buffer (以便前端上传)
+      const filePath = result.filePaths[0]
+      const fileName = filePath.split(/[\\\/]/).pop()
+      const fileData = fs.readFileSync(filePath)
+      return { 
+        path: filePath, 
+        name: fileName, 
+        data: fileData.toString('base64'),
+        type: fileName?.split('.').pop()
+      }
+    }
+    return null
+  })
+
   // 窗口控制逻辑
   ipcMain.on('minimize-window', () => mainWindow.minimize())
   ipcMain.on('close-window', () => mainWindow.close())

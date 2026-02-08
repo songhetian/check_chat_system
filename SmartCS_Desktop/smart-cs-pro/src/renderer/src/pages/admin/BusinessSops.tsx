@@ -21,16 +21,67 @@ const getTypeIcon = (type: string) => {
   }
 }
 
-// V4.00: 弹窗组件隔离 (核心性能优化点)
+// V4.20: 弹窗组件隔离与物理上传增强
 const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
   const [editItem, setEditItem] = useState(item || { title: '', content: '', sop_type: 'TEXT' })
+  const [isUploading, setIsEUploading] = useState(false)
+  const { token } = useAuthStore()
 
   const handleSave = () => {
     if (!editItem.title || editItem.title.trim() === '') {
-      toast.error('规范标题为必填项', { description: '请输入战术规范的标题名称' });
-      return;
+      toast.error('规范标题为必填项'); return;
+    }
+    if (!editItem.content || editItem.content.trim() === '') {
+      toast.error('规范内容不能为空'); return;
     }
     onSave(editItem);
+  }
+
+  const triggerFileUpload = async () => {
+    try {
+      const filters = editItem.sop_type === 'IMAGE' 
+        ? [{ name: '图片', extensions: ['jpg', 'png', 'gif', 'webp'] }]
+        : [{ name: '文档', extensions: ['pdf', 'doc', 'docx', 'xlsx', 'zip', 'md'] }]
+      
+      const file = await window.api.selectFile({ title: '选择 SOP 附件', filters })
+      if (!file) return;
+
+      setIsEUploading(true)
+      
+      // 构造 FormData 进行上传
+      // 注意：由于是 Electron，我们需要将 Base64 转回 Blob
+      const byteCharacters = atob(file.data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) { byteNumbers[i] = byteCharacters.charCodeAt(i); }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray]);
+      
+      const formData = new FormData()
+      formData.append('file', blob, file.name)
+
+      // 获取当前 API 基地址的域名部分
+      const apiHost = CONFIG.API_BASE.replace('/api', '')
+      
+      const response = await fetch(`${CONFIG.API_BASE}/ai/sops/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      })
+      
+      const result = await response.json()
+      if (result.status === 'ok') {
+        // 拼接完整的局域网访问地址
+        setEditItem({ ...editItem, content: `${apiHost}${result.url}` })
+        toast.success('战术附件已同步至云端')
+      } else {
+        toast.error('上传失败', { description: result.message })
+      }
+    } catch (e) {
+      console.error('Upload Error', e);
+      toast.error('物理上传中断')
+    } finally {
+      setIsEUploading(false)
+    }
   }
 
   return (
@@ -47,11 +98,8 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
               <input 
                 value={editItem.title || ''} 
                 onChange={(e)=>setEditItem({...editItem, title: e.target.value})} 
-                className={cn(
-                  "w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold border outline-none transition-all",
-                  (!editItem.title || editItem.title.trim() === '') ? "border-red-200" : "border-transparent focus:border-cyan-500"
-                )}
-                placeholder="如：售后退换货 SOP v1.2" 
+                className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold border border-transparent focus:border-cyan-500 outline-none transition-all"
+                placeholder="输入规范名称..." 
               />
             </div>
             
@@ -60,34 +108,60 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
                 <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">载体类型</label>
                 <TacticalSelect 
                   options={[
-                    {id: 'TEXT', name: '纯文本'}, 
-                    {id: 'MD', name: 'Markdown 指南'}, 
-                    {id: 'IMAGE', name: '全息图片'}, 
-                    {id: 'FILE', name: '外部文件/附件'}
+                    {id: 'TEXT', name: '纯文本'}, {id: 'MD', name: 'Markdown'}, {id: 'IMAGE', name: '全息图片'}, {id: 'FILE', name: '外部文件'}
                   ]} 
                   value={editItem.sop_type || 'TEXT'} 
-                  onChange={(val) => setEditItem({...editItem, sop_type: val})} 
+                  onChange={(val) => setEditItem({...editItem, sop_type: val, content: ''})} 
                 />
               </div>
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">数据归属</label>
-                <div className="px-6 py-4 bg-slate-100 rounded-2xl text-xs font-black text-slate-500 border border-slate-200 uppercase tracking-widest">物理隔离：部门内部规范</div>
+                <div className="px-6 py-4 bg-slate-100 rounded-2xl text-xs font-black text-slate-500 border border-slate-200">物理隔离：部门内部</div>
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">详细内容 / 远程 URL 地址</label>
-              <textarea 
-                value={editItem.content || ''} 
-                onChange={(e)=>setEditItem({...editItem, content: e.target.value})} 
-                rows={6} 
-                className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-medium border border-transparent focus:border-cyan-500 outline-none resize-none transition-all no-scrollbar" 
-                placeholder="输入详细文本、Markdown 内容，或文件的网络地址..." 
-              />
+              <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">
+                {['IMAGE', 'FILE'].includes(editItem.sop_type) ? '附件内容' : '详细内容'}
+              </label>
+              
+              {['IMAGE', 'FILE'].includes(editItem.sop_type) ? (
+                <div className="space-y-3">
+                   <div className="flex gap-3">
+                      <input 
+                        value={editItem.content || ''} 
+                        onChange={(e)=>setEditItem({...editItem, content: e.target.value})} 
+                        className="flex-1 px-6 py-4 bg-slate-50 rounded-2xl text-xs font-medium border border-transparent focus:border-cyan-500 outline-none"
+                        placeholder="输入 URL 或点击右侧上传..." 
+                      />
+                      <button 
+                        onClick={triggerFileUpload}
+                        disabled={isUploading}
+                        className="px-6 bg-cyan-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-lg active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                      >
+                        {isUploading ? <Loader2 className="animate-spin" size={14}/> : <Plus size={14}/>}
+                        上传文件
+                      </button>
+                   </div>
+                   {editItem.content && editItem.sop_type === 'IMAGE' && (
+                     <div className="relative w-full h-40 rounded-2xl overflow-hidden border-2 border-dashed border-slate-200">
+                        <img src={editItem.content} className="w-full h-full object-contain" />
+                     </div>
+                   )}
+                </div>
+              ) : (
+                <textarea 
+                  value={editItem.content || ''} 
+                  onChange={(e)=>setEditItem({...editItem, content: e.target.value})} 
+                  rows={6} 
+                  className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-medium border border-transparent focus:border-cyan-500 outline-none resize-none transition-all no-scrollbar" 
+                  placeholder={editItem.sop_type === 'MD' ? "# 标题\n\n使用 Markdown 格式输入内容..." : "输入规范详细文本..."} 
+                />
+              )}
             </div>
 
             <button 
-              disabled={isPending} 
+              disabled={isPending || isUploading} 
               onClick={handleSave} 
               className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer"
             >

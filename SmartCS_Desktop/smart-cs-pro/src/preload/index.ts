@@ -5,6 +5,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   getServerConfig: () => ipcRenderer.invoke('get-server-config'),
   captureScreen: () => ipcRenderer.invoke('capture-screen'),
+  selectFile: (options: { title?: string, filters?: any[] }) => ipcRenderer.invoke('select-file', options),
   // 补全：支持自定义 headers 注入 (用于 Bearer Token)
   callApi: (payload: { url: string, method?: string, data?: any, headers?: any }) => 
     ipcRenderer.invoke('call-api', payload)
