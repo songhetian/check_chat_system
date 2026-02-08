@@ -63,14 +63,13 @@ export const useRiskSocket = () => {
         }
 
         if (data.type === 'TACTICAL_LOCK') {
-           const isCurrentlyLocked = useRiskStore.getState().isLocked;
-           const nextState = !isCurrentlyLocked;
-           useRiskStore.getState().setIsLocked(nextState);
+           const targetLockState = data.payload?.lock ?? !useRiskStore.getState().isLocked;
+           useRiskStore.getState().setIsLocked(targetLockState);
            // 触发物理封锁
            window.api.callApi({
              url: `http://localhost:8000/api/system/lock`,
              method: 'POST',
-             data: { lock: nextState }
+             data: { lock: targetLockState }
            }).catch(e => console.error('Physical lock failed', e));
         }
 

@@ -243,7 +243,13 @@ export default function TacticalCommand() {
     setProcessing(type)
     try {
       const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/command`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: { username: activeAgent.username, type, payload } })
-      if (res.status === 200 || res.data?.status === 'ok') { if (type === 'LOCK') setIsInputLocked(!isInputLocked); toast.success('指令已送达'); }
+      if (res.status === 200 || res.data?.status === 'ok') { 
+        if (type === 'LOCK') {
+          const nextState = payload.lock !== undefined ? payload.lock : !isInputLocked;
+          setIsInputLocked(nextState);
+        }
+        toast.success('指令已送达'); 
+      }
     } finally { setProcessing(null) }
   }
 
@@ -302,7 +308,7 @@ export default function TacticalCommand() {
                         </div>
                      </div>
                      <div className="grid grid-cols-4 gap-4">
-                        <CommandBtn active={isInputLocked} loading={processing === 'LOCK'} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定')} icon={isInputLocked ? Lock : Unlock} label={isInputLocked ? '锁定中' : '强制锁定'} color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : (isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200')} disabled={!isOnline} />
+                        <CommandBtn active={isInputLocked} loading={processing === 'LOCK'} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定', { lock: !isInputLocked })} icon={isInputLocked ? Lock : Unlock} label={isInputLocked ? '锁定中' : '强制锁定'} color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : (isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200')} disabled={!isOnline} />
                         <CommandBtn loading={processing === 'PUSH'} onClick={() => setShowScriptModal(true)} onMouseEnter={() => !kbList.length && fetchKb()} icon={Send} label="话术提示" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-emerald-600/10 text-emerald-700 border border-emerald-100'} disabled={!isOnline} />
                         <CommandBtn loading={processing === 'VOICE'} onClick={() => setShowVoiceModal(true)} onMouseEnter={() => !voiceList.length && fetchVoice()} icon={Mic} label="语音警报" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-red-50/80 text-red-600 border border-red-100'} disabled={!isOnline} />
                         <CommandBtn loading={processing === 'SOP'} onClick={() => setShowSopModal(true)} onMouseEnter={() => !sopList.length && fetchSop()} icon={FileText} label="业务规范" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-white text-cyan-700 border border-cyan-100'} disabled={!isOnline} />
