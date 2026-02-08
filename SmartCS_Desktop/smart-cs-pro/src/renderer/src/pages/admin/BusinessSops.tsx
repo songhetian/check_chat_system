@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   FileText, Loader2, RefreshCw, X, Plus, Save, Trash2, Edit3, ShieldAlert, Tag, Search, FileType, Image as ImageIcon, FileCode, Paperclip

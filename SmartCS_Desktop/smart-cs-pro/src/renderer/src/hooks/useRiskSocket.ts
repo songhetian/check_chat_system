@@ -128,8 +128,9 @@ export const useRiskSocket = () => {
     };
     
     // 使用 electron-toolkit 暴露的 ipcRenderer
+    let removeLinkBreakListener: (() => void) | undefined;
     if (window.electron?.ipcRenderer) {
-      window.electron.ipcRenderer.on('TACTICAL_LINK_BREAK', handleLinkBreak);
+      removeLinkBreakListener = window.electron.ipcRenderer.on('TACTICAL_LINK_BREAK', handleLinkBreak);
     }
 
     const handleSendMsg = (e: any) => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(e.detail)); }
@@ -139,8 +140,8 @@ export const useRiskSocket = () => {
       socket?.close(); 
       clearTimeout(reconnectTimeout); 
       window.removeEventListener('send-risk-msg', handleSendMsg);
-      if (window.electron?.ipcRenderer) {
-        window.electron.ipcRenderer.removeAllListeners('TACTICAL_LINK_BREAK');
+      if (removeLinkBreakListener) {
+        removeLinkBreakListener();
       }
     }
   }, [user, token])
