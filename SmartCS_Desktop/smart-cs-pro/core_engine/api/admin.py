@@ -64,9 +64,11 @@ async def get_agents(
         is_locked = await redis_mgr.client.get(f"agent_lock_status:{a['username']}") == "1"
         
         return {
+            "id": a["id"], # 显式包含 ID 用于管理
             "username": a["username"], "real_name": a["real_name"],
             "role_id": a["role_id"], "role_name": a["role__name"], "role_code": a["role__code"],
             "dept_name": dept.name if dept else "全域节点",
+            "department_id": a["department_id"], # 核心修复：确保回传 ID 用于前端回填
             "is_manager": m_count > 0, "is_online": a["username"] in online_usernames,
             "is_locked": is_locked,
             "tactical_score": a["tactical_score"], "reward_count": r_count,
@@ -76,6 +78,16 @@ async def get_agents(
         }
     result = await asyncio.gather(*[process_agent(a) for a in agents_data])
     return {"status": "ok", "data": result, "total": total}
+
+@router.get("/departments/users")
+async def get_dept_users(dept_id: int = Query(...), search: str = Query(""), current_user: dict = Depends(get_current_user)):
+    """[物理检索] 获取指定部门的所有成员，用于指派主管"""
+    query = User.filter(department_id=dept_id, is_deleted=0)
+    if search:
+        query = query.filter(Q(real_name__icontains=search) | Q(username__icontains=search))
+    
+    data = await query.values("id", "username", "real_name")
+    return {"status": "ok", "data": data}
 
 @router.post("/agents/update-info")
 async def update_agent_info(data: dict, user: dict = Depends(check_permission("admin:user:update"))):
