@@ -7,7 +7,7 @@ import {
   Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X, Maximize2,
   Package, BookOpen, Tags, SearchCheck, Filter, ChevronLeft, AlertOctagon, Wallet, Heart, Ban, Undo2,
   UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain, PenTool, Send,
-  AlertTriangle, ChevronDown, Check, RefreshCw, FileText, Download, ExternalLink, Mic
+  AlertTriangle, ChevronDown, Check, RefreshCw, FileText, Download, ExternalLink, Mic, Clock, ShieldAlert
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useRiskStore } from '../../store/useRiskStore'
@@ -234,15 +234,21 @@ export const TacticalIsland = () => {
   useEffect(() => {
     const screenWidth = window.screen.width
     const screenHeight = window.screen.height
-    const active = isPushMode || isScratchpad || isEvasionMode || isSopMode || isHistoryMode || showVoiceAlertOverlay
+    const active = isPushMode || isScratchpad || isEvasionMode || isSopMode || isHistoryMode || showVoiceAlertOverlay || isExpanded || showHelpModal
     let width = isFolded ? 80 : 800 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined, y: number | undefined, center = false
 
     if (isLocked) { width = screenWidth; height = screenHeight; x = 0; y = 0; } 
     else if (showVoiceAlertOverlay) { 
-      // V3.87: 视觉警报时，临时将窗口扩展至全屏透明层，确保中心弹窗可见
       width = screenWidth; height = screenHeight; x = 0; y = 0;
+    }
+    else if (isHistoryMode || isExpanded || showHelpModal) {
+      // V3.88: 历史、面板、求助模式使用更大的居中窗口
+      width = 1000; height = 650; center = true;
+    }
+    else if (layoutMode === 'SIDE') {
+      width = 440; height = 850; x = screenWidth - 460; y = (screenHeight - 850) / 2;
     }
     else if (active) { width = 800; height = 350; x = screenWidth - 820; y = 30; } 
     else { x = isFolded ? screenWidth - 100 : screenWidth - 820; y = 30 }
@@ -282,37 +288,96 @@ export const TacticalIsland = () => {
              </div>
           </div>
         ) : isHistoryMode ? (
-          <div className="flex-1 flex flex-col p-6 text-white overflow-hidden bg-slate-900/80">
-             <div className="flex justify-between items-start mb-4 shrink-0">
-                <div className="flex items-center gap-3"><div className="w-8 h-8 bg-cyan-600 rounded-xl flex items-center justify-center shadow-lg"><History size={16} className="text-white"/></div><h4 className="text-base font-black italic tracking-tighter uppercase text-cyan-400">指令下发历史</h4></div>
-                <button onClick={resetSpecialModes} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg flex items-center gap-2 font-black text-[10px] border border-white/10 text-slate-300"><Undo2 size={12}/> 返回</button>
+          <div className="flex-1 flex flex-col p-8 text-white overflow-hidden bg-slate-900/90">
+             <div className="flex justify-between items-start mb-6 shrink-0">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-cyan-600 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse"><History size={24} className="text-white"/></div>
+                   <div>
+                      <h4 className="text-2xl font-black italic tracking-tighter uppercase text-cyan-400">战术指令历史中枢</h4>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Command Transmission Archives</p>
+                   </div>
+                </div>
+                <button onClick={resetSpecialModes} className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl flex items-center gap-3 font-black text-xs border border-white/10 text-slate-300 transition-all active:scale-95"><Undo2 size={16}/> 返回主链路</button>
              </div>
-             <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2">
+             <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
                 {sopHistory.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center opacity-20 gap-2">
-                     <Box size={40} />
-                     <p className="text-[10px] font-black uppercase">暂无指令记录</p>
+                  <div className="h-full flex flex-col items-center justify-center opacity-20 gap-4">
+                     <Box size={80} strokeWidth={1} />
+                     <p className="text-sm font-black uppercase tracking-widest">暂无指令记录存档</p>
                   </div>
                 ) : (
                   sopHistory.map((sop: any) => (
-                    <div key={sop.id} className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-cyan-500/30 transition-all group">
-                       <div className="flex justify-between items-start mb-2">
+                    <div key={sop.id} className="p-6 bg-white/[0.03] rounded-[24px] border border-white/5 hover:border-cyan-500/40 transition-all group relative overflow-hidden">
+                       <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><Zap size={60} /></div>
+                       <div className="flex justify-between items-start mb-3 relative z-10">
                           <div>
-                             <h5 className="text-sm font-black text-white group-hover:text-cyan-400 transition-colors">{sop.title}</h5>
-                             <p className="text-[8px] font-black text-cyan-600 uppercase tracking-widest mt-0.5">指令源: {sop.commander || '指挥部'}</p>
+                             <h5 className="text-lg font-black text-white group-hover:text-cyan-400 transition-colors">{sop.title}</h5>
+                             <div className="flex items-center gap-3 mt-1">
+                                <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-400 rounded text-[9px] font-black uppercase tracking-tighter border border-cyan-500/30">源: {sop.commander || '指挥部'}</span>
+                                <span className="text-[9px] font-mono text-slate-500 flex items-center gap-1"><Clock size={10}/> {new Date(sop.timestamp).toLocaleString()}</span>
+                             </div>
                           </div>
-                          <span className="text-[8px] font-mono text-slate-500">{new Date(sop.timestamp).toLocaleTimeString()}</span>
                        </div>
-                       <p className="text-[10px] text-slate-400 line-clamp-2 mb-3 font-medium italic leading-relaxed">"{sop.content}"</p>
-                       <div className="flex gap-2">
-                          <button onClick={() => { setSopInfo(sop); setIsSopMode(true); setIsHistoryMode(false); }} className="px-3 py-1.5 bg-cyan-600/20 text-cyan-400 rounded-lg text-[9px] font-black uppercase hover:bg-cyan-600 hover:text-white transition-all">查看详情</button>
+                       <p className="text-sm text-slate-400 line-clamp-2 mb-4 font-medium italic leading-relaxed border-l-2 border-white/10 pl-4">"{sop.content}"</p>
+                       <div className="flex gap-3 relative z-10">
+                          <button onClick={() => { setSopInfo(sop); setIsSopMode(true); setIsHistoryMode(false); }} className="px-6 py-2 bg-cyan-600 text-white rounded-xl text-[10px] font-black uppercase hover:bg-cyan-500 shadow-lg shadow-cyan-900/20 transition-all active:scale-95">调取详细规程</button>
                           {(sop.sop_type === 'FILE' || sop.sop_type === 'IMAGE') && (
-                            <button onClick={() => window.open(sop.content)} className="px-3 py-1.5 bg-white/5 text-slate-300 rounded-lg text-[9px] font-black uppercase hover:bg-white/10 transition-all flex items-center gap-1.5"><Download size={10}/> 下载文件</button>
+                            <button onClick={() => window.open(sop.content)} className="px-6 py-2 bg-white/10 text-white rounded-xl text-[10px] font-black uppercase hover:bg-white/20 transition-all flex items-center gap-2 border border-white/10"><Download size={12}/> 获取原始附件</button>
                           )}
                        </div>
                     </div>
                   ))
                 )}
+             </div>
+          </div>
+        ) : showHelpModal ? (
+          <div className="flex-1 flex flex-col p-8 text-white overflow-hidden bg-red-950/80">
+             <div className="flex justify-between items-start mb-8">
+                <div className="flex items-center gap-4">
+                   <div className="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce"><Hand size={32} className="text-white"/></div>
+                   <div>
+                      <h4 className="text-3xl font-black italic tracking-tighter uppercase text-red-500">紧急战术求助</h4>
+                      <p className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.4em]">Emergency Support Request</p>
+                   </div>
+                </div>
+                <button onClick={() => setShowHelpModal(false)} className="p-3 bg-white/5 hover:bg-red-600 rounded-xl transition-all"><X size={24}/></button>
+             </div>
+             <div className="grid grid-cols-2 gap-6 flex-1">
+                <HelpCard icon={ShieldAlert} title="遭受言语攻击" desc="客户存在极端情绪或人身攻击" onClick={() => { window.dispatchEvent(new CustomEvent('send-risk-msg', { detail: { type: 'EMERGENCY_HELP', subType: 'ATTACK', content: '请求介入：遭遇客户言语攻击' } })); setShowHelpModal(false); toast.success('求助信号已并发至所有主管'); }} />
+                <HelpCard icon={Zap} title="业务知识盲区" desc="遇到无法回答的专业技术问题" onClick={() => { window.dispatchEvent(new CustomEvent('send-risk-msg', { detail: { type: 'EMERGENCY_HELP', subType: 'KNOWLEDGE', content: '请求支持：遇到业务知识盲区' } })); setShowHelpModal(false); toast.success('战术支援申请已发送'); }} />
+                <HelpCard icon={BrainCircuit} title="复杂投诉处理" desc="需要高级别权限介入协调" onClick={() => { window.dispatchEvent(new CustomEvent('send-risk-msg', { detail: { type: 'EMERGENCY_HELP', subType: 'COMPLAINT', content: '紧急：需要主管介入处理投诉' } })); setShowHelpModal(false); toast.success('投诉升级指令已下发'); }} />
+                <HelpCard icon={Activity} title="系统链路异常" desc="遭遇延迟、报错等物理故障" onClick={() => { window.dispatchEvent(new CustomEvent('send-risk-msg', { detail: { type: 'EMERGENCY_HELP', subType: 'SYSTEM', content: '异常上报：系统运行不稳定' } })); setShowHelpModal(false); toast.error('故障报告已提交至技术部'); }} />
+             </div>
+          </div>
+        ) : isExpanded ? (
+          <div className="flex-1 flex flex-col p-8 text-white overflow-hidden bg-slate-900/95">
+             <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-slate-800 border border-white/10 rounded-2xl flex items-center justify-center shadow-inner"><LayoutGrid size={24} className="text-cyan-400"/></div>
+                   <h4 className="text-2xl font-black italic tracking-tighter uppercase">战术应用矩阵</h4>
+                </div>
+                <button onClick={() => setIsExpanded(false)} className="p-2 hover:bg-white/5 rounded-xl transition-all"><X size={20}/></button>
+             </div>
+             <div className="grid grid-cols-3 gap-6">
+                <ToolItem icon={Monitor} title="实时态势感应" active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} />
+                <ToolItem icon={GraduationCap} title="战术自愈培训" active={isOnboardingMode} onClick={() => setOnboardingMode(!isOnboardingMode)} />
+                <ToolItem icon={Ghost} title="全息外观切换" active={!isGlassMode} onClick={() => setGlassMode(!isGlassMode)} />
+                <ToolItem icon={VolumeX} title="静默监听模式" active={isMuted} onClick={() => setMuted(!isMuted)} />
+                <ToolItem icon={Maximize2} title="全景视野展开" onClick={() => { setShowBigScreenModal(true); setIsExpanded(false); }} />
+                <ToolItem icon={LogOut} title="退出战术链路" color="text-red-500" onClick={() => { logout(); window.location.hash = '/login'; }} />
+             </div>
+          </div>
+        ) : layoutMode === 'SIDE' ? (
+          <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden">
+             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                <h4 className="font-black text-white italic uppercase flex items-center gap-3">
+                   {activeSideTool === 'PRODUCTS' ? <><Package size={18} className="text-cyan-400"/> 商品战术资料</> : <><BookOpen size={18} className="text-cyan-400"/> 业务实战手册</>}
+                </h4>
+                <button onClick={() => setLayoutMode('FLOAT')} className="p-2 hover:bg-white/10 rounded-xl text-slate-400"><X size={20}/></button>
+             </div>
+             <div className="flex-1 p-4 flex flex-col items-center justify-center opacity-30 gap-4">
+                <Loader2 size={40} className="animate-spin text-cyan-500" />
+                <p className="text-[10px] font-black uppercase tracking-widest">正在拉取加密数据流...</p>
              </div>
           </div>
         ) : isSopMode ? (
@@ -433,6 +498,30 @@ export const TacticalIsland = () => {
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+function ToolItem({ icon: Icon, title, active, onClick, color }: any) {
+  return (
+    <button onClick={onClick} className={cn(
+      "flex flex-col items-center justify-center gap-3 p-6 rounded-[24px] border transition-all active:scale-95 group",
+      active ? "bg-cyan-600 border-cyan-500 text-white shadow-lg shadow-cyan-900/40" : "bg-white/[0.03] border-white/5 hover:border-white/20 text-slate-400 hover:text-white"
+    )}>
+       <Icon size={28} className={cn("group-hover:scale-110 transition-transform", color)} />
+       <span className="text-[10px] font-black uppercase tracking-widest">{title}</span>
+    </button>
+  )
+}
+
+function HelpCard({ icon: Icon, title, desc, onClick }: any) {
+  return (
+    <button onClick={onClick} className="flex flex-col items-start gap-3 p-6 rounded-[32px] bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-red-500/40 transition-all text-left group active:scale-[0.98]">
+       <div className="w-10 h-10 bg-red-600/20 text-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"><Icon size={20}/></div>
+       <div>
+          <h5 className="text-sm font-black text-white group-hover:text-red-400 transition-colors uppercase italic">{title}</h5>
+          <p className="text-[10px] text-slate-500 font-medium leading-relaxed mt-1">{desc}</p>
+       </div>
+    </button>
   )
 }
 
