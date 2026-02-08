@@ -64,6 +64,17 @@ input::placeholder, textarea::placeholder {
   @apply text-slate-400 font-normal;
 }
 
+/* 5. 战术滚动条精简：物理隐藏 */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
 /* 隐藏 Chrome 等浏览器的黄色自动填充背景，并强制文字为亮色 */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
