@@ -7,7 +7,7 @@ import {
   Ghost, Square, History, Fingerprint, Hand, Image as ImageIcon, MessageSquareText, CheckCircle2, Globe, ArrowRight, X, Maximize2,
   Package, BookOpen, Tags, SearchCheck, Filter, ChevronLeft, AlertOctagon, Wallet, Heart, Ban, Undo2,
   UserSearch, Layers, Star, Info, Link2, ScanEye, Crosshair, HelpCircle, ChevronsLeft, ChevronsRight, Loader2, Brain, PenTool, Send,
-  AlertTriangle, ChevronDown, Check, RefreshCw, FileText, Download, ExternalLink
+  AlertTriangle, ChevronDown, Check, RefreshCw, FileText, Download, ExternalLink, Mic
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useRiskStore } from '../../store/useRiskStore'
@@ -47,6 +47,8 @@ export const TacticalIsland = () => {
   const [sentimentSearch, setSentimentSearch] = useState('')
   const [showSentimentDropdown, setShowSentimentDropdown] = useState(false)
   const [voicePulse, setVoicePulse] = useState(false) // 语音视觉脉冲
+  const [voiceAlertText, setVoiceAlertText] = useState('') // V3.86: 语音视觉提示文案
+  const [showVoiceAlertOverlay, setShowVoiceAlertOverlay] = useState(false) // 是否显示视觉提示
 
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -98,7 +100,14 @@ export const TacticalIsland = () => {
 
       if (data.type === 'TACTICAL_VOICE') {
         setVoicePulse(true)
-        setTimeout(() => setVoicePulse(false), 5000)
+        setVoiceAlertText(data.payload?.content || '收到指令推送')
+        setShowVoiceAlertOverlay(true)
+        
+        // 5秒后自动关闭视觉提示
+        setTimeout(() => {
+          setVoicePulse(false)
+          setShowVoiceAlertOverlay(false)
+        }, 5000)
         
         // V3.71: 补全语音合成播放逻辑 (Web Speech API)
         if (!isMuted && data.payload?.content) {
@@ -335,6 +344,32 @@ export const TacticalIsland = () => {
           </div>
         )}
       </motion.div>
+
+      {/* V3.86: 语音指令视觉备份弹窗 (非阻塞) */}
+      <AnimatePresence>
+        {showVoiceAlertOverlay && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: -50 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none"
+          >
+            <div className="bg-red-600/90 backdrop-blur-xl px-12 py-8 rounded-[40px] shadow-[0_0_100px_rgba(220,38,38,0.5)] border border-white/20 flex flex-col items-center gap-6 max-w-2xl text-center">
+               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-2xl animate-bounce">
+                  <Mic size={40} className="text-red-600" strokeWidth={3} />
+               </div>
+               <div className="space-y-2">
+                  <h3 className="text-4xl font-black text-white uppercase italic tracking-widest drop-shadow-lg">收到战术指令</h3>
+                  <p className="text-red-50 text-xl font-black italic leading-tight">"{voiceAlertText}"</p>
+               </div>
+               <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  <span className="text-[10px] font-black text-white/60 uppercase tracking-[0.4em]">Tactical Voice Transmission Active</span>
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

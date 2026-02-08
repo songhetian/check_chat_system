@@ -67,6 +67,7 @@ export const useRiskSocket = () => {
         if (data.type === 'TACTICAL_LOCK') {
            const targetLockState = data.payload?.lock ?? !useRiskStore.getState().isLocked;
            useRiskStore.getState().setIsLocked(targetLockState);
+           useRiskStore.getState().setLockMessage(data.payload?.message || '');
            // 触发物理封锁
            window.api.callApi({
              url: `http://localhost:8000/api/system/lock`,

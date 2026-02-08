@@ -173,6 +173,7 @@ const AgentView = () => {
   const isRedAlert = useRiskStore(s => s.isRedAlert)
   const isMuted = useRiskStore(s => s.isMuted)
   const isLocked = useRiskStore(s => s.isLocked)
+  const lockMessage = useRiskStore(s => s.lockMessage)
 
   useEffect(() => {
     const onToast = (e: any) => { 
@@ -244,9 +245,11 @@ const AgentView = () => {
                 <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.3)] mb-8 animate-pulse">
                    <LockIcon size={48} className="text-red-600" strokeWidth={3} />
                 </div>
-                <h3 className="text-5xl font-black text-white uppercase italic tracking-[0.2em] mb-4 drop-shadow-2xl">已开启锁定模式</h3>
+                <h3 className="text-5xl font-black text-white uppercase italic tracking-[0.2em] mb-4 drop-shadow-2xl">
+                  {lockMessage || '已开启锁定模式'}
+                </h3>
                 <p className="text-red-10 text-base font-black opacity-90 uppercase tracking-[0.4em] animate-bounce">
-                  Tactical Lock Protocol Active
+                  {lockMessage ? 'Administrative Intervention Active' : 'Tactical Lock Protocol Active'}
                 </p>
              </motion.div>
           </motion.div>

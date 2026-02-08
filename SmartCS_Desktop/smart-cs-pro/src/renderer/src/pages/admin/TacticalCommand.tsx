@@ -72,6 +72,9 @@ export default function TacticalCommand() {
   const [sopList, setSopList] = useState<any[]>([])
   const [sopLoading, setSopLoading] = useState(false)
 
+  const [showLockPrompt, setShowLockPrompt] = useState(false)
+  const [pendingLockMsg, setPendingLockMsg] = useState('')
+
   const isHQ = user?.role_id === ROLE_ID.HQ || user?.role_code === 'HQ'
 
   // 数据预取与加速 (V3.70)
@@ -308,7 +311,21 @@ export default function TacticalCommand() {
                         </div>
                      </div>
                      <div className="grid grid-cols-4 gap-4">
-                        <CommandBtn active={isInputLocked} loading={processing === 'LOCK'} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定', { lock: !isInputLocked })} icon={isInputLocked ? Lock : Unlock} label={isInputLocked ? '锁定中' : '强制锁定'} color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : (isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200')} disabled={!isOnline} />
+                        <CommandBtn 
+                          active={isInputLocked} 
+                          loading={processing === 'LOCK'} 
+                          onClick={() => {
+                            if (isInputLocked) {
+                              executeIntervention('LOCK', '解锁', { lock: false });
+                            } else {
+                              setShowLockPrompt(true);
+                            }
+                          }} 
+                          icon={isInputLocked ? Lock : Unlock} 
+                          label={isInputLocked ? '锁定中' : '强制锁定'} 
+                          color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : (isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200')} 
+                          disabled={!isOnline} 
+                        />
                         <CommandBtn loading={processing === 'PUSH'} onClick={() => setShowScriptModal(true)} onMouseEnter={() => !kbList.length && fetchKb()} icon={Send} label="话术提示" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-emerald-600/10 text-emerald-700 border border-emerald-100'} disabled={!isOnline} />
                         <CommandBtn loading={processing === 'VOICE'} onClick={() => setShowVoiceModal(true)} onMouseEnter={() => !voiceList.length && fetchVoice()} icon={Mic} label="语音警报" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-red-50/80 text-red-600 border border-red-100'} disabled={!isOnline} />
                         <CommandBtn loading={processing === 'SOP'} onClick={() => setShowSopModal(true)} onMouseEnter={() => !sopList.length && fetchSop()} icon={FileText} label="业务规范" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-white text-cyan-700 border border-cyan-100'} disabled={!isOnline} />
@@ -397,6 +414,60 @@ export default function TacticalCommand() {
                   <div className="p-8 border-b border-emerald-100 flex justify-between items-center bg-emerald-50/30"><div><h4 className="text-xl font-black text-emerald-700 uppercase italic tracking-tighter">业务规范推送</h4><p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-1">强制对齐：{activeAgent?.real_name} · 支持 MD/图片/文件</p></div><button onClick={() => setShowSopModal(false)} className="p-2 hover:bg-white rounded-xl transition-all text-emerald-300 border border-transparent hover:border-emerald-100"><X size={20}/></button></div>
                   <div className="p-6 bg-white shrink-0"><div className="relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} /><input value={sopSearch} onChange={(e) => setSopSearch(e.target.value)} placeholder="检索 SOP 指南名称..." className="w-full pl-12 pr-6 py-4 bg-slate-100 border-none rounded-2xl text-sm font-bold text-black focus:ring-2 focus:ring-emerald-600 transition-all outline-none" /></div></div>
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-2 bg-white">{sopLoading ? <div className="flex flex-col items-center justify-center py-10 opacity-20"><Loader2 className="animate-spin mb-4" size={32} /></div> : sopList.length === 0 ? <div className="flex flex-col items-center justify-center py-10 opacity-20 font-black uppercase text-[10px]">无规范文档</div> : SopItem}</div>
+               </motion.div>
+            </div>
+         )}
+      </AnimatePresence>
+
+      {/* V3.86: 锁定文案弹窗 */}
+      <AnimatePresence>
+         {showLockPrompt && (
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 text-black">
+               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowLockPrompt(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+               <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} className="bg-white w-full max-w-md rounded-[32px] shadow-2xl relative z-10 overflow-hidden p-8">
+                  <div className="flex items-center gap-4 mb-6">
+                     <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center shadow-inner">
+                        <Lock size={24} />
+                     </div>
+                     <div>
+                        <h4 className="text-xl font-black text-black uppercase italic tracking-tighter">强制干预确认</h4>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">目标节点：{activeAgent?.real_name}</p>
+                     </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                     <div className="space-y-1">
+                        <label className="text-[10px] font-black text-red-600 uppercase ml-2 flex items-center gap-1">自定义封锁文案 (可选)</label>
+                        <input 
+                           autoFocus
+                           value={pendingLockMsg} 
+                           onChange={(e) => setPendingLockMsg(e.target.value)} 
+                           placeholder="例如：请立即停止违规操作，等待主管谈话" 
+                           className="w-full bg-slate-100 border-none rounded-2xl py-4 px-6 text-sm font-bold text-black focus:ring-2 focus:ring-red-600 transition-all outline-none" 
+                           onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                 executeIntervention('LOCK', '锁定', { lock: true, message: pendingLockMsg });
+                                 setShowLockPrompt(false);
+                                 setPendingLockMsg('');
+                              }
+                           }}
+                        />
+                     </div>
+                     
+                     <div className="flex gap-3">
+                        <button onClick={() => setShowLockPrompt(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all active:scale-95">取消</button>
+                        <button 
+                           onClick={() => {
+                              executeIntervention('LOCK', '锁定', { lock: true, message: pendingLockMsg });
+                              setShowLockPrompt(false);
+                              setPendingLockMsg('');
+                           }} 
+                           className="flex-[2] py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-red-900/20 hover:bg-red-700 transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                           确认并执行锁定
+                        </button>
+                     </div>
+                  </div>
                </motion.div>
             </div>
          )}
