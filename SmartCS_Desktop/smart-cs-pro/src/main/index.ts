@@ -70,21 +70,25 @@ const dbPath = join(app.getPath('userData'), 'client_tactical_buffer.db')
 const db = new Database(dbPath)
 
 // 初始化本地缓存表
-db.exec(`
-  CREATE TABLE IF NOT EXISTS offline_queue (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    url TEXT NOT NULL,
-    method TEXT NOT NULL,
-    data TEXT,
-    headers TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
-  CREATE TABLE IF NOT EXISTS api_cache (
-    url TEXT PRIMARY KEY,
-    data TEXT NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
-`)
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS offline_queue (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      url TEXT NOT NULL,
+      method TEXT NOT NULL,
+      data TEXT,
+      headers TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS api_cache (
+      url TEXT PRIMARY KEY,
+      data TEXT NOT NULL,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+} catch (e) {
+  console.error('❌ [SQLite 初始化失败]', e)
+}
 
 function createWindow(): void {
   // 核心：从 .env 加载并覆盖 server_config.json
@@ -219,9 +223,19 @@ function createWindow(): void {
       
       // 战术增强：如果是 GET 请求成功，存入读缓存 (排除健康检查)
       if ((method === 'GET' || !method) && response.ok && !url.includes('/health')) {
-        const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
-        const stmt = db.prepare('INSERT OR REPLACE INTO api_cache (url, data) VALUES (?, ?)')
-        stmt.run(cleanUrl, JSON.stringify(result))
+        try {
+          const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
+          const cacheData = JSON.stringify(result)
+          // V3.82: 增加大容量缓存保护，防止 SQLite 物理溢出导致进程崩溃
+          if (cacheData.length < 1024 * 1024) { // 限制 1MB
+            const stmt = db.prepare('INSERT OR REPLACE INTO api_cache (url, data) VALUES (?, ?)')
+            stmt.run(cleanUrl, cacheData)
+          } else {
+            console.warn(`⚠️ [读缓存跳过] 数据过大 (${Math.round(cacheData.length/1024)}KB): ${url}`)
+          }
+        } catch (sqliteErr) {
+          console.error('❌ [读缓存写入失败]', sqliteErr)
+        }
       }
 
       // 成功后触发一次静默同步

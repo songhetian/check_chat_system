@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  FileText, Loader2, RefreshCw, X, Plus, Save, Trash2, Edit3, ShieldAlert, Tag, Search, FileType, Image as ImageIcon, FileCode, Paperclip
+  FileText, Loader2, RefreshCw, X, Plus, Save, Trash2, Edit3, ShieldAlert, Tag, Search, FileType, Image, FileCode, Paperclip
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { cn } from '../../lib/utils'
@@ -24,35 +24,69 @@ export default function BusinessSopsPage() {
   const { data: sopData, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['business_sops_admin', page, search],
     queryFn: async () => {
-      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops?page=${page}&size=10&search=${encodeURIComponent(search)}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } })
-      return res.data
+      try {
+        const res = await window.api.callApi({ 
+          url: `${CONFIG.API_BASE}/ai/sops?page=${page}&size=10&search=${encodeURIComponent(search)}`, 
+          method: 'GET', 
+          headers: { 'Authorization': `Bearer ${token}` } 
+        })
+        
+        if (res.status !== 200 || res.data?.status === 'error') {
+          const msg = res.data?.message || res.error || '指挥中心同步失败';
+          toast.error('SOP 获取异常', { description: msg });
+          throw new Error(msg);
+        }
+        
+        return res.data
+      } catch (err: any) {
+        console.error('❌ [SOP Query Error]', err);
+        throw err;
+      }
     },
-    enabled: !!token
+    enabled: !!token,
+    retry: false, // 避免报错后反复请求导致 UI 闪烁或卡死
+    staleTime: 5000
   })
 
   // 渲染优化 (V3.70 极速协议)
   const SopItems = useMemo(() => {
-    return (sopData?.data || []).map((item: any) => (
-      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center">
-        <td className="px-8 py-5 font-black text-slate-900 text-left">{item.title}</td>
-        <td className="px-6 py-5 text-left max-w-xs truncate italic opacity-60">"{item.content}"</td>
+    // 增加数据安全性检查，防止渲染崩溃
+    const items = Array.isArray(sopData?.data) ? sopData.data : [];
+    if (items.length === 0) {
+      return (
+        <tr>
+          <td colSpan={5} className="py-20 text-center text-slate-400 italic font-medium opacity-50">
+            {isLoading ? "正在同步指挥中心数据..." : "暂无 SOP 业务规范记录"}
+          </td>
+        </tr>
+      );
+    }
+
+    return items.map((item: any) => (
+      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center border-b border-slate-50">
+        <td className="px-8 py-5 font-black text-slate-900 text-left">{item.title || '未命名规范'}</td>
+        <td className="px-6 py-5 text-left max-w-xs truncate italic opacity-60">
+          {item.content ? `"${item.content}"` : <span className="text-[10px] uppercase tracking-tighter opacity-30">空内容</span>}
+        </td>
         <td className="px-6 py-5 text-center">
            <span className="px-3 py-1 bg-slate-100 rounded-2xl flex items-center justify-center gap-2 mx-auto w-fit border border-slate-200 text-[9px] font-black uppercase">
               {getTypeIcon(item?.sop_type)} {item?.sop_type || 'TEXT'}
            </span>
         </td>
         <td className="px-6 py-5 text-center">
-          <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase">部门专用</span>
+          <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase">
+            {item.department__name || '全域规范'}
+          </span>
         </td>
         <td className="px-8 py-5 text-center">
           <div className="flex justify-center gap-2">
-            {hasPermission('admin:sop:update') && (<button onClick={() => { setEditItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all active:scale-95"><Edit3 size={16} /></button>)}
-            {hasPermission('admin:sop:delete') && (<button onClick={() => { setEditItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all active:scale-95"><Trash2 size={16} /></button>)}
+            {hasPermission('admin:sop:update') && (<button onClick={() => { setEditItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all active:scale-95" title="修订"><Edit3 size={16} /></button>)}
+            {hasPermission('admin:sop:delete') && (<button onClick={() => { setEditItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all active:scale-95" title="废弃"><Trash2 size={16} /></button>)}
           </div>
         </td>
       </tr>
     ));
-  }, [sopData?.data, hasPermission]);
+  }, [sopData?.data, hasPermission, isLoading]);
 
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
@@ -83,7 +117,7 @@ export default function BusinessSopsPage() {
     if (!type) return <FileText className="text-slate-400" size={16}/>;
     switch(type) {
       case 'MD': return <FileCode className="text-cyan-500" size={16}/>
-      case 'IMAGE': return <ImageIcon className="text-amber-500" size={16}/>
+      case 'IMAGE': return <Image className="text-amber-500" size={16}/>
       case 'FILE': return <Paperclip className="text-purple-500" size={16}/>
       default: return <FileText className="text-slate-400" size={16}/>
     }

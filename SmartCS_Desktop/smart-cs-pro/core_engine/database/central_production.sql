@@ -313,3 +313,4 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES ('agent:action:side_p
 
 INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (1, 'agent:action:side_panel'), (1, 'agent:view:customer_insight'), (1, 'agent:alert:attitude'), (3, 'agent:action:side_panel'), (3, 'agent:view:customer_insight'), (3, 'agent:alert:attitude');
 
+INSERT IGNORE INTO role_permissions (role_id, permission_code) SELECT 2, code FROM permissions WHERE code LIKE 'admin:sop:%';

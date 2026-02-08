@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request, Query, HTTPException
-from core.models import SensitiveWord, KnowledgeBase, PolicyCategory, AuditLog, CustomerSentiment, DeptSensitiveWord, DeptComplianceLog, VoiceAlert, BusinessSOP
+from core.models import SensitiveWord, KnowledgeBase, PolicyCategory, AuditLog, CustomerSentiment, DeptSensitiveWord, DeptComplianceLog, VoiceAlert, BusinessSOP, Department
 from api.auth import get_current_user, check_permission
 from tortoise.transactions import in_transaction
 from tortoise.expressions import Q
@@ -68,25 +68,44 @@ async def delete_voice_alert(data: dict, user: dict = Depends(check_permission("
     return {"status": "ok"}
 
 @router.get("/sops")
-async def get_sops(page: int = 1, size: int = 50, search: str = "", current_user: dict = Depends(check_permission("admin:ai:view"))):
-    dept_id = current_user.get("dept_id")
-    # 强制物理隔离：仅能查看本部门 SOP
-    query = BusinessSOP.filter(is_deleted=0, department_id=dept_id)
-    
-    if search:
-        query = query.filter(title__icontains=search)
-    total = await query.count()
-    data = await query.select_related("department").offset((page - 1) * size).limit(size).order_by("-id").values(
-        "id", "title", "content", "sop_type", "department_id", "department__name"
-    )
-    return {"status": "ok", "data": data, "total": total}
+async def get_sops(page: int = 1, size: int = 50, search: str = "", current_user: dict = Depends(check_permission("admin:sop:view"))):
+    try:
+        role_id = current_user.get("role_id")
+        dept_id = current_user.get("dept_id")
+        
+        # 强制物理隔离与角色权限自适应
+        if role_id == 3: # HQ 角色可以看到所有 SOP
+            query = BusinessSOP.filter(is_deleted=0)
+        else: # 其它角色仅能看到本部门 SOP
+            query = BusinessSOP.filter(is_deleted=0, department_id=dept_id)
+        
+        if search:
+            query = query.filter(title__icontains=search)
+            
+        total = await query.count()
+        data = await query.offset((page - 1) * size).limit(size).order_by("-id").values(
+            "id", "title", "content", "sop_type", "department_id"
+        )
+        
+        # 补全部门名称逻辑，避免 select_related 在 values 中可能的异常
+        for item in data:
+            if item.get("department_id"):
+                dept = await Department.get_or_none(id=item["department_id"])
+                item["department__name"] = dept.name if dept else "未知部门"
+            else:
+                item["department__name"] = "全域规范"
+                
+        return {"status": "ok", "data": data, "total": total}
+    except Exception as e:
+        print(f"❌ [SOP] 数据调取失败: {e}")
+        return {"status": "error", "message": str(e)}
 
 @router.post("/sops")
-async def save_sop(data: dict, user: dict = Depends(check_permission("admin:ai:create"))):
+async def save_sop(data: dict, user: dict = Depends(check_permission("admin:sop:create"))):
     item_id = data.get("id")
     dept_id = user.get("dept_id")
     
-    if item_id and "admin:ai:update" not in user.get("permissions", []):
+    if item_id and "admin:sop:update" not in user.get("permissions", []):
         raise HTTPException(status_code=403, detail="越权拦截：缺失 SOP 更新权限")
 
     payload = {
@@ -111,7 +130,7 @@ async def save_sop(data: dict, user: dict = Depends(check_permission("admin:ai:c
     return {"status": "ok"}
 
 @router.post("/sops/delete")
-async def delete_sop(data: dict, user: dict = Depends(check_permission("admin:ai:delete"))):
+async def delete_sop(data: dict, user: dict = Depends(check_permission("admin:sop:delete"))):
     item_id = data.get("id")
     dept_id = user.get("dept_id")
     
@@ -280,35 +299,38 @@ async def get_knowledge_base(
     page: int = 1, size: int = 10, search: str = "", 
     current_user: dict = Depends(check_permission("admin:ai:view"))
 ):
-    query = KnowledgeBase.filter(is_deleted=0)
-    role_id = current_user.get("role_id")
-    dept_id = current_user.get("dept_id")
-    
-    if role_id != 3:
-        query = query.filter(Q(department_id__isnull=True) | Q(department_id=dept_id))
-    
-    if search:
-        query = query.filter(Q(keyword__icontains=search) | Q(answer__icontains=search))
+    try:
+        role_id = current_user.get("role_id")
+        dept_id = current_user.get("dept_id")
         
-    total = await query.count()
-    data = await query.select_related("category", "department").offset((page - 1) * size).limit(size).order_by("-id").values(
-        "id", "keyword", "answer", "is_active", "category__name", "category_id", "department_id", "department__name"
-    )
-    return {"status": "ok", "data": data, "total": total}
-    role_id = current_user.get("role_id")
-    dept_id = current_user.get("dept_id")
-    
-    if role_id != 3:
-        query = query.filter(Q(department_id__isnull=True) | Q(department_id=dept_id))
-    
-    if search:
-        query = query.filter(Q(keyword__icontains=search) | Q(answer__icontains=search))
+        query = KnowledgeBase.filter(is_deleted=0)
         
-    total = await query.count()
-    data = await query.select_related("category", "department").offset((page - 1) * size).limit(size).order_by("-id").values(
-        "id", "keyword", "answer", "is_active", "category__name", "category_id", "department_id", "department__name"
-    )
-    return {"status": "ok", "data": data, "total": total}
+        if role_id != 3: # 非 HQ 角色仅能看到全局或本部门话术
+            query = query.filter(Q(department_id__isnull=True) | Q(department_id=dept_id))
+        
+        if search:
+            query = query.filter(Q(keyword__icontains=search) | Q(answer__icontains=search))
+            
+        total = await query.count()
+        data = await query.offset((page - 1) * size).limit(size).order_by("-id").values(
+            "id", "keyword", "answer", "is_active", "category_id", "department_id"
+        )
+        
+        # 补充关联数据，确保 values() 稳定性
+        for item in data:
+            if item.get("category_id"):
+                cat = await PolicyCategory.get_or_none(id=item["category_id"])
+                item["category__name"] = cat.name if cat else "未分类"
+            if item.get("department_id"):
+                dept = await Department.get_or_none(id=item["department_id"])
+                item["department__name"] = dept.name if dept else "未知部门"
+            else:
+                item["department__name"] = "全局共享"
+                
+        return {"status": "ok", "data": data, "total": total}
+    except Exception as e:
+        print(f"❌ [KB] 数据调取异常: {e}")
+        return {"status": "error", "message": str(e)}
 
 @router.post("/knowledge-base/delete")
 async def delete_knowledge_item(data: dict, request: Request, user: dict = Depends(check_permission("admin:ai:delete"))):
