@@ -148,6 +148,24 @@ export const TacticalIsland = () => {
           return;
         }
         
+        // V4.01: SOP 强化提醒
+        setVoicePulse(true)
+        setVoiceAlertText(`收到业务规范: ${sopData.title || '新指令'}`)
+        setShowVoiceAlertOverlay(true)
+        
+        // 语音播报
+        if (!isMuted) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(`收到新的业务规范指引：${sopData.title || ''}`);
+          utterance.lang = 'zh-CN';
+          window.speechSynthesis.speak(utterance);
+        }
+
+        setTimeout(() => {
+          setVoicePulse(false)
+          setShowVoiceAlertOverlay(false)
+        }, 5000)
+
         setSopInfo(sopData)
         useRiskStore.getState().addSopHistory(sopData)
         setIsSopMode(true); setIsPushMode(false); setIsScratchpad(false); setIsEvasionMode(false);

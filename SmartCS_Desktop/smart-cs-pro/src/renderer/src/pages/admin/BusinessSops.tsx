@@ -25,21 +25,32 @@ const getTypeIcon = (type: string) => {
 const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
   const [editItem, setEditItem] = useState(item || { title: '', content: '', sop_type: 'TEXT' })
 
+  const handleSave = () => {
+    if (!editItem.title || editItem.title.trim() === '') {
+      toast.error('规范标题为必填项', { description: '请输入战术规范的标题名称' });
+      return;
+    }
+    onSave(editItem);
+  }
+
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
       <div onClick={onCancel} className="absolute inset-0 bg-slate-950/60 cursor-pointer" />
-      <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl relative z-10 p-12 overflow-y-auto max-h-[90vh]">
+      <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl relative z-10 p-12 overflow-y-auto max-h-[90vh] no-scrollbar">
          <div className="flex justify-between items-start mb-8">
             <h3 className="text-2xl font-black text-slate-900 italic uppercase flex items-center gap-3"><FileText className="text-emerald-500"/> 业务规范定义</h3>
             <button onClick={onCancel} className="p-2 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"><X size={24}/></button>
          </div>
          <div className="space-y-6">
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">规范标题</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">规范标题 <span className="text-red-500">*</span></label>
               <input 
                 value={editItem.title || ''} 
                 onChange={(e)=>setEditItem({...editItem, title: e.target.value})} 
-                className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold border border-transparent focus:border-cyan-500 outline-none transition-all" 
+                className={cn(
+                  "w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold border outline-none transition-all",
+                  (!editItem.title || editItem.title.trim() === '') ? "border-red-200" : "border-transparent focus:border-cyan-500"
+                )}
                 placeholder="如：售后退换货 SOP v1.2" 
               />
             </div>
@@ -48,7 +59,12 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">载体类型</label>
                 <TacticalSelect 
-                  options={[{id: 'TEXT', name: '纯文本'}, {id: 'MD', name: 'Markdown'}, {id: 'IMAGE', name: '图片内容'}, {id: 'FILE', name: '外部文件路径'}]} 
+                  options={[
+                    {id: 'TEXT', name: '纯文本'}, 
+                    {id: 'MD', name: 'Markdown 指南'}, 
+                    {id: 'IMAGE', name: '全息图片'}, 
+                    {id: 'FILE', name: '外部文件/附件'}
+                  ]} 
                   value={editItem.sop_type || 'TEXT'} 
                   onChange={(val) => setEditItem({...editItem, sop_type: val})} 
                 />
@@ -60,19 +76,19 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">详细内容 / 文件链接</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">详细内容 / 远程 URL 地址</label>
               <textarea 
                 value={editItem.content || ''} 
                 onChange={(e)=>setEditItem({...editItem, content: e.target.value})} 
                 rows={6} 
-                className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-medium border border-transparent focus:border-cyan-500 outline-none resize-none transition-all" 
-                placeholder="输入 SOP 详细说明..." 
+                className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-medium border border-transparent focus:border-cyan-500 outline-none resize-none transition-all no-scrollbar" 
+                placeholder="输入详细文本、Markdown 内容，或文件的网络地址..." 
               />
             </div>
 
             <button 
               disabled={isPending} 
-              onClick={() => onSave(editItem)} 
+              onClick={handleSave} 
               className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer"
             >
               {isPending ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 固化规范文档
@@ -84,12 +100,14 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
 })
 
 export default function BusinessSopsPage() {
-  const { token, hasPermission } = useAuthStore()
+  const { token, hasPermission, user } = useAuthStore()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [modalType, setModalType] = useState<'NONE' | 'EDIT' | 'DELETE'>('NONE')
   const [activeItem, setActiveItem] = useState<any>(null)
+
+  const isHQ = user?.role_id === 3 || user?.role_code === 'HQ'
 
   const { data: sopData, isLoading, isFetching, refetch, isError, error: queryError } = useQuery({
     queryKey: ['business_sops_admin', page, search],
@@ -129,24 +147,27 @@ export default function BusinessSopsPage() {
 
     return items.map((item: any) => (
       <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center border-b border-slate-50">
-        <td className="px-8 py-5 font-black text-slate-900 text-left">{item.title || '未命名规范'}</td>
-        <td className="px-6 py-5 text-left max-w-xs truncate italic opacity-60">
+        <td className="px-8 py-5 font-black text-slate-900 text-left min-w-[200px]">{item.title || '未命名规范'}</td>
+        <td className="px-6 py-5 text-left max-w-md truncate italic opacity-60">
           {item.content ? `"${item.content}"` : <span className="text-[10px] uppercase tracking-tighter opacity-30">空内容</span>}
         </td>
         <td className="px-6 py-5 text-center">
-           <span className="px-3 py-1 bg-slate-100 rounded-2xl flex items-center justify-center gap-2 mx-auto w-fit border border-slate-200 text-[9px] font-black uppercase">
+           <span className="px-3 py-1 bg-slate-100 rounded-2xl flex items-center justify-center gap-2 mx-auto w-fit border border-slate-200 text-[9px] font-black uppercase shadow-sm">
               {getTypeIcon(item?.sop_type)} {item?.sop_type || 'TEXT'}
            </span>
         </td>
         <td className="px-6 py-5 text-center">
-          <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase">
-            {item.department__name || '全域规范'}
+          <span className={cn(
+            "px-3 py-1 rounded-2xl text-[9px] font-black border uppercase tracking-widest",
+            item.department_id ? "bg-slate-50 text-slate-500 border-slate-200" : "bg-cyan-50 text-cyan-600 border-cyan-100"
+          )}>
+            {item.department__name || (item.department_id ? '未知部门' : '全域规范')}
           </span>
         </td>
         <td className="px-8 py-5 text-center">
           <div className="flex justify-center gap-2">
-            {hasPermission('admin:sop:update') && (<button onClick={() => { setActiveItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all active:scale-95 cursor-pointer" title="修订"><Edit3 size={16} /></button>)}
-            {hasPermission('admin:sop:delete') && (<button onClick={() => { setActiveItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all active:scale-95 cursor-pointer" title="废弃"><Trash2 size={16} /></button>)}
+            {hasPermission('admin:sop:update') && (<button onClick={() => { setActiveItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all active:scale-95 cursor-pointer border border-transparent hover:border-slate-200" title="修订"><Edit3 size={16} /></button>)}
+            {hasPermission('admin:sop:delete') && (<button onClick={() => { setActiveItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all active:scale-95 cursor-pointer border border-transparent hover:border-slate-200" title="废弃"><Trash2 size={16} /></button>)}
           </div>
         </td>
       </tr>
