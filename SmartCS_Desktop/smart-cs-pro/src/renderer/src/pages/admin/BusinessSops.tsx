@@ -21,32 +21,32 @@ export default function BusinessSopsPage() {
 
   const isHQ = user?.role_id === 3 || user?.role_code === 'HQ'
 
-  const { data: sopData, isLoading, isFetching, refetch } = useQuery({
+  const { data: sopData, isLoading, isFetching, refetch, isError, error: queryError } = useQuery({
     queryKey: ['business_sops_admin', page, search],
     queryFn: async () => {
-      try {
-        const res = await window.api.callApi({ 
-          url: `${CONFIG.API_BASE}/ai/sops?page=${page}&size=10&search=${encodeURIComponent(search)}`, 
-          method: 'GET', 
-          headers: { 'Authorization': `Bearer ${token}` } 
-        })
-        
-        if (res.status !== 200 || res.data?.status === 'error') {
-          const msg = res.data?.message || res.error || '指挥中心同步失败';
-          toast.error('SOP 获取异常', { description: msg });
-          throw new Error(msg);
-        }
-        
-        return res.data
-      } catch (err: any) {
-        console.error('❌ [SOP Query Error]', err);
-        throw err;
+      const res = await window.api.callApi({ 
+        url: `${CONFIG.API_BASE}/ai/sops?page=${page}&size=10&search=${encodeURIComponent(search)}`, 
+        method: 'GET', 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      })
+      
+      if (res.status !== 200 || res.data?.status === 'error') {
+        throw new Error(res.data?.message || res.error || '指挥中心同步失败');
       }
+      
+      return res.data
     },
     enabled: !!token,
-    retry: false, // 避免报错后反复请求导致 UI 闪烁或卡死
+    retry: false,
     staleTime: 5000
   })
+
+  // V3.97: 安全副作用管理 - 仅在渲染周期外触发 UI 提示
+  React.useEffect(() => {
+    if (isError && queryError) {
+      toast.error('SOP 获取异常', { description: queryError instanceof Error ? queryError.message : String(queryError) });
+    }
+  }, [isError, queryError]);
 
   // 渲染优化 (V3.70 极速协议)
   const SopItems = useMemo(() => {

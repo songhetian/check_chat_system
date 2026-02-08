@@ -357,16 +357,19 @@ function createWindow(): void {
     }
   })
 
+  // V3.96: 紧急诊断模式 - 禁用硬件加速并恢复标准背景，排除 Mac GPU 渲染冲突导致的透明窗口卡死
+  app.disableHardwareAcceleration();
+
   // 核心：创建标准窗口 (初始提升至工业级宽屏尺寸)
   const mainWindow = new BrowserWindow({
     width: 1440,
     height: 960,
     show: false,
-    frame: false,
-    transparent: true,
+    frame: true, // 恢复标准边框
+    transparent: false, // 禁用透明
     alwaysOnTop: false,
     autoHideMenuBar: true,
-    backgroundColor: '#00000000', // 确保 macOS 下透明背景不会闪烁
+    backgroundColor: '#ffffff', // 恢复标准白背景
     hasShadow: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
