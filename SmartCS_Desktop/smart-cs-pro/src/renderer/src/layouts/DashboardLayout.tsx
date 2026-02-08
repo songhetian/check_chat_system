@@ -112,19 +112,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pendingSyncCount = sysStatus?.pendingSyncCount ?? 0
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 
-  // V3.72: 脱机态势实时感知
-  useEffect(() => {
-    if (!isOnline && token) {
-      toast.error('指挥中心脱机', {
-        description: '物理链路已中断，系统进入离线暂存模式',
-        duration: Infinity, 
-        id: 'system-offline-toast'
-      });
-    } else {
-      toast.dismiss('system-offline-toast');
-    }
-  }, [isOnline]);
-
   // V3.71: 401 自动熔断自愈逻辑
   useEffect(() => {
     const handleGlobalError = (event: any) => {
@@ -150,13 +137,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             exit={{ width: 0, opacity: 0 }}
             className={cn(
               "bg-slate-900 flex flex-col border-r shrink-0 relative z-[100] overflow-hidden transition-all duration-1000",
-              !isOnline ? "border-red-600 shadow-[inset_-10px_0_30px_rgba(220,38,38,0.1)]" : "border-slate-800"
+              !isOnline ? "border-slate-800" : "border-slate-800"
             )}
           >
-            {/* V3.75: 脱机侧边标识 */}
-            {!isOnline && (
-              <div className="absolute top-0 left-0 w-1 h-full bg-red-600 animate-pulse z-50" />
-            )}
             {/* Logo 区 */}
             <div className="p-6 shrink-0">
               <div className="flex items-center gap-3 mb-8 px-2 cursor-move" style={{ WebkitAppRegion: 'drag' } as any}>

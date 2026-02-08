@@ -42,7 +42,7 @@ const RoleBadge = ({ roleId, roleName }: { roleId: number, roleName: string }) =
 
 export default function TacticalCommand() {
   const { token, user } = useAuthStore()
-  const { isScreenMaximized, setIsScreenMaximized } = useRiskStore() 
+  const { isOnline, isScreenMaximized, setIsScreenMaximized } = useRiskStore() 
   const [agents, setAgents] = useState<any[]>([])
   const [depts, setDepts] = useState<any[]>([])
   const [deptId, setDeptId] = useState<string>('')
@@ -235,6 +235,10 @@ export default function TacticalCommand() {
   const toggleLink = () => { const nextState = !isLinkEnabled; setIsLinkEnabled(nextState); if (!nextState) { setScreenShot(null); setLastFrameTime(0); setIsScreenMaximized(false); } }
 
   const executeIntervention = async (type: string, description: string, payload: any = {}) => {
+    if (!isOnline) {
+      toast.error('指令发射失败', { description: '战术链路已中断，脱机模式下禁止远程干预' });
+      return;
+    }
     if (!activeAgent || !token || processing) return
     setProcessing(type)
     try {
@@ -298,10 +302,10 @@ export default function TacticalCommand() {
                         </div>
                      </div>
                      <div className="grid grid-cols-4 gap-4">
-                        <CommandBtn active={isInputLocked} loading={processing === 'LOCK'} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定')} icon={isInputLocked ? Lock : Unlock} label={isInputLocked ? '锁定中' : '强制锁定'} color={isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200'} />
-                        <CommandBtn loading={processing === 'PUSH'} onClick={() => setShowScriptModal(true)} onMouseEnter={() => !kbList.length && fetchKb()} icon={Send} label="话术提示" color="bg-emerald-600/10 text-emerald-700 border border-emerald-100" />
-                        <CommandBtn loading={processing === 'VOICE'} onClick={() => setShowVoiceModal(true)} onMouseEnter={() => !voiceList.length && fetchVoice()} icon={Mic} label="语音警报" color="bg-red-50/80 text-red-600 border border-red-100" />
-                        <CommandBtn loading={processing === 'SOP'} onClick={() => setShowSopModal(true)} onMouseEnter={() => !sopList.length && fetchSop()} icon={FileText} label="业务规范" color="bg-white text-cyan-700 border border-cyan-100" />
+                        <CommandBtn active={isInputLocked} loading={processing === 'LOCK'} onClick={() => executeIntervention('LOCK', isInputLocked ? '解锁' : '锁定')} icon={isInputLocked ? Lock : Unlock} label={isInputLocked ? '锁定中' : '强制锁定'} color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : (isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200')} disabled={!isOnline} />
+                        <CommandBtn loading={processing === 'PUSH'} onClick={() => setShowScriptModal(true)} onMouseEnter={() => !kbList.length && fetchKb()} icon={Send} label="话术提示" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-emerald-600/10 text-emerald-700 border border-emerald-100'} disabled={!isOnline} />
+                        <CommandBtn loading={processing === 'VOICE'} onClick={() => setShowVoiceModal(true)} onMouseEnter={() => !voiceList.length && fetchVoice()} icon={Mic} label="语音警报" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-red-50/80 text-red-600 border border-red-100'} disabled={!isOnline} />
+                        <CommandBtn loading={processing === 'SOP'} onClick={() => setShowSopModal(true)} onMouseEnter={() => !sopList.length && fetchSop()} icon={FileText} label="业务规范" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-white text-cyan-700 border border-cyan-100'} disabled={!isOnline} />
                      </div>
                   </section>
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
@@ -408,9 +412,9 @@ export default function TacticalCommand() {
   )
 }
 
-function CommandBtn({ onClick, onMouseEnter, icon: Icon, label, color, active, loading }: any) {
+function CommandBtn({ onClick, onMouseEnter, icon: Icon, label, color, active, loading, disabled }: any) {
   return (
-    <button onClick={onClick} onMouseEnter={onMouseEnter} disabled={loading} className={cn("flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-30 group cursor-pointer", color)}>
+    <button onClick={onClick} onMouseEnter={onMouseEnter} disabled={loading || disabled} className={cn("flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer", color)}>
        {loading ? <Loader2 size={20} className="animate-spin" /> : <Icon size={20} className={cn("group-hover:scale-110 transition-transform", active && "animate-bounce")} />}
        <span className="text-[10px] font-black uppercase tracking-tight">{label}</span>
     </button>
