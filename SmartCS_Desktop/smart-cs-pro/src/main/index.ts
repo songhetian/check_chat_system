@@ -296,12 +296,16 @@ function createWindow(): void {
       // 成功后触发一次静默同步 (异步执行，不阻塞当前响应)
       syncOfflineData().catch(e => console.error('Sync failed', e));
       
+      // V4.85: 增加鉴权熔断物理信号分发逻辑
+      if (response.status === 401 || response.status === 403) {
+         console.warn(`🚨 [鉴权熔断] 检测到令牌失效信号: ${finalUrl}`);
+         BrowserWindow.getAllWindows().forEach(win => {
+           win.webContents.send('api-response-error', { status: response.status, url: finalUrl });
+         });
+      }
+
       return { status: response.status, data: result }
     } catch (e: any) {
-      // V4.85: 增加 401 物理信号分发逻辑
-      if (e.status === 401 || (e.message && e.message.includes('401'))) {
-         console.warn('🚨 [鉴权熔断] 检测到令牌失效信号');
-      }
       console.error(`❌ [API 转发崩溃拦截] URL: ${url} | Error: ${e.message}`)
       
       try {
