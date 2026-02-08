@@ -62,33 +62,45 @@ app.on('before-quit', () => {
   }
 })
 
-// --- 1. 战术本地数据库初始化 (Better-SQLite3) ---
-// 使用 require 避免 Rollup 的动态 require 报错
-const Database = require('better-sqlite3')
+// --- 1. 战术本地数据库管理 (Better-SQLite3) ---
+let db: any = null;
 
-const dbPath = join(app.getPath('userData'), 'client_tactical_buffer.db')
-const db = new Database(dbPath)
+function initDatabase(): void {
+  try {
+    const Database = require('better-sqlite3')
+    const dbPath = join(app.getPath('userData'), 'client_tactical_buffer.db')
+    db = new Database(dbPath)
 
-// 初始化本地缓存表
-try {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS offline_queue (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      url TEXT NOT NULL,
-      method TEXT NOT NULL,
-      data TEXT,
-      headers TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE TABLE IF NOT EXISTS api_cache (
-      url TEXT PRIMARY KEY,
-      data TEXT NOT NULL,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `)
-} catch (e) {
-  console.error('❌ [SQLite 初始化失败]', e)
+    // 初始化本地缓存表
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS offline_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        url TEXT NOT NULL,
+        method TEXT NOT NULL,
+        data TEXT,
+        headers TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE TABLE IF NOT EXISTS api_cache (
+        url TEXT PRIMARY KEY,
+        data TEXT NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `)
+    console.log('✅ [SQLite] 战术本地缓冲已激活')
+  } catch (e) {
+    console.error('❌ [SQLite 初始化失败]', e)
+  }
 }
+
+// 全局异常熔断保护 (V3.95)
+process.on('uncaughtException', (error) => {
+  console.error('🚨 [主进程致命异常]:', error)
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.error('🚨 [异步链路熔断]:', reason)
+})
 
 function createWindow(): void {
   // 核心：从 .env 加载并覆盖 server_config.json
@@ -145,47 +157,62 @@ function createWindow(): void {
 
   // 暴露同步状态给前端
   ipcMain.handle('get-sync-status', async () => {
-    const row = db.prepare('SELECT COUNT(*) as count FROM offline_queue').get() as { count: number }
-    return { pendingCount: row.count }
+    if (!db) return { pendingCount: 0 }
+    try {
+      const row = db.prepare('SELECT COUNT(*) as count FROM offline_queue').get() as { count: number }
+      return { pendingCount: row.count }
+    } catch (e) {
+      return { pendingCount: 0 }
+    }
   })
 
   // 核心：离线暂存逻辑
   const saveToOfflineQueue = (url: string, method: string, data: any, headers: any) => {
-    const stmt = db.prepare('INSERT INTO offline_queue (url, method, data, headers) VALUES (?, ?, ?, ?)')
-    stmt.run(url, method, JSON.stringify(data), JSON.stringify(headers))
-    console.log(`📦 [离线守卫] 数据已存入本地战术缓冲: ${url}`)
+    if (!db) return
+    try {
+      const stmt = db.prepare('INSERT INTO offline_queue (url, method, data, headers) VALUES (?, ?, ?, ?)')
+      stmt.run(url, method, JSON.stringify(data), JSON.stringify(headers))
+      console.log(`📦 [离线守卫] 数据已存入本地战术缓冲: ${url}`)
+    } catch (e) {
+      console.error('❌ [离线暂存失败]', e)
+    }
   }
 
   // 核心：战术同步引擎 (网络恢复后自动补发)
   let isSyncing = false
   const syncOfflineData = async () => {
-    if (isSyncing) return
-    const records = db.prepare('SELECT * FROM offline_queue ORDER BY id ASC LIMIT 10').all() as any[]
-    
-    if (records.length === 0) return
-    
-    isSyncing = true
-    console.log(`🔄 [同步引擎] 发现 ${records.length} 条离线数据，尝试同步...`)
+    if (isSyncing || !db) return
+    try {
+      const records = db.prepare('SELECT * FROM offline_queue ORDER BY id ASC LIMIT 10').all() as any[]
+      
+      if (records.length === 0) return
+      
+      isSyncing = true
+      console.log(`🔄 [同步引擎] 发现 ${records.length} 条离线数据，尝试同步...`)
 
-    for (const record of records) {
-      try {
-        const response = await fetch(record.url, {
-          method: record.method,
-          headers: JSON.parse(record.headers),
-          body: record.data,
-          signal: AbortSignal.timeout(5000)
-        })
+      for (const record of records) {
+        try {
+          const response = await fetch(record.url, {
+            method: record.method,
+            headers: JSON.parse(record.headers),
+            body: record.data,
+            signal: AbortSignal.timeout(5000)
+          })
 
-        if (response.ok) {
-          db.prepare('DELETE FROM offline_queue WHERE id = ?').run(record.id)
-          console.log(`✅ [同步成功] 记录 ID: ${record.id}`)
+          if (response.ok) {
+            db.prepare('DELETE FROM offline_queue WHERE id = ?').run(record.id)
+            console.log(`✅ [同步成功] 记录 ID: ${record.id}`)
+          }
+        } catch (e) {
+          console.warn(`⚠️ [同步中断] 网络仍不稳定: ${record.url}`)
+          break // 退出循环，等待下一次尝试
         }
-      } catch (e) {
-        console.warn(`⚠️ [同步中断] 网络仍不稳定: ${record.url}`)
-        break // 退出循环，等待下一次尝试
       }
+    } catch (dbErr) {
+      console.error('❌ [同步引擎数据库异常]', dbErr)
+    } finally {
+      isSyncing = false
     }
-    isSyncing = false
   }
 
   // 定时检查心跳并同步 (每 30 秒)
@@ -241,7 +268,7 @@ function createWindow(): void {
       }
       
       // 战术增强：如果是 GET 请求成功，存入读缓存 (排除健康检查)
-      if ((method === 'GET' || !method) && response.ok && !url.includes('/health')) {
+      if (db && (method === 'GET' || !method) && response.ok && !url.includes('/health')) {
         try {
           const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
           const cacheData = JSON.stringify(result)
@@ -266,7 +293,7 @@ function createWindow(): void {
       
       try {
         // 离线读缓存逻辑：如果是 GET 请求失败，尝试从缓存返回
-        if (method === 'GET' || !method) {
+        if (db && (method === 'GET' || !method)) {
           const finalUrl = url.startsWith('http') ? url : `${serverConfig.network.central_server_url}${url}`
           const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
           const cached = db.prepare('SELECT data FROM api_cache WHERE url = ?').get(cleanUrl) as { data: string } | undefined
@@ -421,7 +448,10 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // 激活物理引擎
+  // 1. 初始化本地数据库
+  initDatabase()
+
+  // 2. 激活物理引擎
   startPythonEngine()
   
   createWindow()
