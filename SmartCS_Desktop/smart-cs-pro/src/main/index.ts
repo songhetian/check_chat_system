@@ -5,9 +5,8 @@ import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
 import { spawn, ChildProcess } from 'child_process'
 
-// V3.96: 紧急诊断模式 - 禁用硬件加速并恢复标准背景，排除 Mac GPU 渲染冲突导致的透明窗口卡死
-// 必须在 app ready 之前调用
-app.disableHardwareAcceleration();
+// V3.100: 恢复硬件加速以提升 Mac 渲染性能，配合非透明窗口使用是安全的
+// app.disableHardwareAcceleration(); // 已注释
 
 // --- 0. 物理引擎进程管理 (V3.25) ---
 let pythonProcess: ChildProcess | null = null

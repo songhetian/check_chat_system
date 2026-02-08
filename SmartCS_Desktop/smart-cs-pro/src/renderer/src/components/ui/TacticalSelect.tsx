@@ -56,7 +56,7 @@ export function TacticalSelect({
       <div 
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={cn(
-          "w-full px-4 py-2.5 bg-white/70 backdrop-blur-md border border-slate-200 rounded-xl text-xs font-black flex items-center justify-between transition-colors shadow-sm group cursor-pointer",
+          "w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black flex items-center justify-between transition-colors shadow-sm group cursor-pointer",
           disabled ? "opacity-50 cursor-not-allowed bg-slate-50" : "hover:border-cyan-400",
           isOpen ? "ring-2 ring-cyan-500/20 border-cyan-500 shadow-lg" : ""
         )}
@@ -71,7 +71,7 @@ export function TacticalSelect({
       {isOpen && (
         <div 
           style={{ willChange: 'transform, opacity' }}
-          className="absolute z-[1100] left-0 right-0 mt-2 bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col p-2 animate-in fade-in zoom-in-95 duration-150"
+          className="absolute z-[1100] left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col p-2 animate-in fade-in zoom-in-95 duration-100"
         >
           {showSearch && (
             <div className="relative mb-2 shrink-0">
@@ -81,7 +81,7 @@ export function TacticalSelect({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="搜索项..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-100/50 border-none rounded-xl text-[11px] font-black text-black focus:ring-2 focus:ring-cyan-500/20 outline-none"
+                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-xl text-[11px] font-black text-black focus:ring-2 focus:ring-cyan-500/20 outline-none"
               />
             </div>
           )}
@@ -105,7 +105,7 @@ export function TacticalSelect({
                       "px-4 py-2.5 rounded-xl text-[11px] font-bold flex items-center justify-between cursor-pointer transition-colors",
                       isSelected 
                         ? "bg-cyan-500/10 text-cyan-700 ring-1 ring-cyan-500/20" 
-                        : "text-slate-600 hover:bg-slate-100/50 hover:text-slate-900"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     )}
                   >
                     <span className="truncate pr-4">{opt.name}</span>
