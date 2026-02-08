@@ -218,6 +218,10 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
     from api.auth import JWT_SECRET, JWT_ALGORITHM
     import jwt
     try:
+        # V5.00: 尝试解构 JWT
+        if not token.count('.') == 2:
+            raise jwt.exceptions.DecodeError("Not a JWT format")
+            
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         role = payload.get("role_id", RoleID.AGENT)
         
@@ -229,23 +233,27 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
         
         logger.info(f"✅ [WS 鉴权成功] 操作员 {username} (JWT模式) 已建立链路")
 
-    except Exception as e:
-        # 过渡期兼容：检查 Redis
+    except (jwt.exceptions.DecodeError, jwt.exceptions.InvalidTokenError) as jwt_err:
+        # 过渡期兼容：如果不是 JWT 或解码失败，尝试在 Redis 中找旧版 token
         redis = app.state.redis
         if redis:
             cached = await redis.get(f"token:{token}")
             if cached:
                 user_info = json.loads(cached)
                 role = user_info.get("role_id", RoleID.AGENT)
-                logger.info(f"✅ [WS 鉴权通过] 操作员 {username} (旧版Token) 建立链路")
+                logger.info(f"✅ [WS 鉴权通过] 操作员 {username} (旧版Token兼容) 建立链路")
             else:
-                logger.error(f"🚨 [WS 拒绝] 鉴权失败: {e}")
+                logger.warning(f"⚠️ [WS 拒绝] 令牌失效或格式错误: {token[:10]}...")
                 await websocket.close(code=1008)
                 return
         else:
-            logger.error(f"🚨 [WS 拒绝] 无效 JWT 且 Redis 脱机: {e}")
+            logger.error(f"🚨 [WS 拒绝] 无效凭证且 Redis 脱机: {jwt_err}")
             await websocket.close(code=1008)
             return
+    except Exception as e:
+        logger.error(f"🚨 [WS 异常] 系统鉴权故障: {e}")
+        await websocket.close(code=1008)
+        return
 
     await manager.connect(username, websocket, role=role)
     from utils.redis_utils import redis_mgr

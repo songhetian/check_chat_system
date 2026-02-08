@@ -309,8 +309,8 @@ function createWindow(): void {
       console.error(`❌ [API 转发崩溃拦截] URL: ${url} | Error: ${e.message}`)
       
       try {
-        // 离线读缓存逻辑：如果是 GET 请求失败，尝试从缓存返回
-        if (db && (method === 'GET' || !method)) {
+        // 离线读缓存逻辑：如果是 GET 请求失败，尝试从缓存返回 (排除健康检查)
+        if (db && (method === 'GET' || !method) && !url.includes('/health')) {
           const finalUrl = url.startsWith('http') ? url : `${serverConfig.network.central_server_url}${url}`
           const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
           const cached = db.prepare('SELECT data FROM api_cache WHERE url = ?').get(cleanUrl) as { data: string } | undefined
