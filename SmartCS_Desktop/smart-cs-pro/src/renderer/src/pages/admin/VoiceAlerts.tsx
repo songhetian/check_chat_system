@@ -34,18 +34,25 @@ export default function VoiceAlertsPage() {
   // 2. 渲染优化 (V3.70 极速协议)
   const VoiceItems = useMemo(() => {
     return (voiceData?.data || []).map((item: any) => (
-      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center">
-        <td className="px-8 py-5 font-black text-slate-900 text-left">
-           <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shadow-inner"><Mic size={14}/></div>{item.content}</div>
+      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center border-b border-slate-50">
+        <td className="px-8 py-5 font-black text-slate-900 text-center">
+           <div className="flex items-center justify-center gap-3">
+             <div className="w-8 h-8 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shadow-inner shrink-0"><Mic size={14}/></div>
+             <span className="truncate max-w-md">{item.content}</span>
+           </div>
         </td>
         <td className="px-6 py-5 text-center">
-          <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase">部门专用</span>
+          <div className="flex items-center justify-center">
+            <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase tracking-widest">物理隔离：部门专用</span>
+          </div>
         </td>
-        <td className="px-6 py-5 text-slate-400 text-xs font-medium">{new Date(item.created_at).toLocaleString()}</td>
+        <td className="px-6 py-5 text-slate-400 text-xs font-medium text-center">
+          {item.created_at ? new Date(item.created_at).toLocaleString() : '-'}
+        </td>
         <td className="px-8 py-5 text-center">
           <div className="flex justify-center gap-2">
-            {hasPermission('admin:voice:update') && (<button onClick={() => { setEditItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all shadow-sm active:scale-95"><Edit3 size={16} /></button>)}
-            {hasPermission('admin:voice:delete') && (<button onClick={() => { setEditItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all shadow-sm active:scale-95"><Trash2 size={16} /></button>)}
+            {hasPermission('admin:voice:update') && (<button onClick={() => { setEditItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer border border-transparent hover:border-slate-200" title="修订"><Edit3 size={16} /></button>)}
+            {hasPermission('admin:voice:delete') && (<button onClick={() => { setEditItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer border border-transparent hover:border-slate-200" title="移除"><Trash2 size={16} /></button>)}
           </div>
         </td>
       </tr>
