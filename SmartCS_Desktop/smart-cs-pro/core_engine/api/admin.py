@@ -59,14 +59,16 @@ async def get_agents(
         t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
         m_count = await Department.filter(manager_id=a["id"], is_deleted=0).count()
         
-        # 实时拉取活跃度
+        # 实时拉取活跃度与锁定状态
         last_activity = await redis_mgr.get_last_activity(a["username"])
+        is_locked = await redis_mgr.client.get(f"agent_lock_status:{a['username']}") == "1"
         
         return {
             "username": a["username"], "real_name": a["real_name"],
             "role_id": a["role_id"], "role_name": a["role__name"], "role_code": a["role__code"],
             "dept_name": dept.name if dept else "全域节点",
             "is_manager": m_count > 0, "is_online": a["username"] in online_usernames,
+            "is_locked": is_locked,
             "tactical_score": a["tactical_score"], "reward_count": r_count,
             "training_progress": t_session.progress if t_session else 0,
             "last_violation_type": last_v.keyword if last_v else None,
@@ -110,7 +112,14 @@ async def delete_agent(data: dict, user: dict = Depends(check_permission("admin:
 async def send_command(data: dict, request: Request, user: dict = Depends(check_permission("command:input:lock"))):
     target_username, cmd_type, cmd_payload = data.get("username"), data.get("type"), data.get("payload", {})
     ws_manager = request.app.state.ws_manager
+    redis = request.app.state.redis
     if not ws_manager: return {"status": "error", "message": "指令中枢未挂载"}
+
+    # V3.85: 状态持久化 - 如果是锁定指令，同步写入 Redis
+    if cmd_type == 'LOCK' and redis:
+        lock_val = "1" if cmd_payload.get("lock") else "0"
+        await redis.set(f"agent_lock_status:{target_username}", lock_val)
+
     await ws_manager.send_personal_message({"type": f"TACTICAL_{cmd_type}", "payload": cmd_payload, "commander": user["real_name"]}, target_username)
     await record_audit(user["real_name"], f"CMD_{cmd_type}", target_username, f"下发物理干预指令: {json.dumps(cmd_payload)}")
     return {"status": "ok"}

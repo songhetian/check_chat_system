@@ -191,7 +191,7 @@ export default function TacticalCommand() {
   const [lastFrameTime, setLastFrameTime] = useState<number>(0)
   
   const fetchDepts = async () => { if (!isHQ || !token) return; try { const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments?size=100`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }); if (res.status === 200) setDepts(res.data.data); } catch (e) { console.error(e) } }
-  const fetchData = async (silent = false) => { if (!token) return; if (!silent) setLoading(true); try { const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/agents?search=${search}&dept_id=${deptId}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }); if (res.status === 200) { const sorted = [...res.data.data].sort((a, b) => { if (a.is_online !== b.is_online) return a.is_online ? -1 : 1; return 0; }); setAgents(sorted); if (activeAgent) { const updated = sorted.find((a: any) => a.username === activeAgent.username); if (updated) setActiveAgent(updated); } } } catch (e) { console.error(e) } finally { setLoading(false) } }
+  const fetchData = async (silent = false) => { if (!token) return; if (!silent) setLoading(true); try { const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/agents?search=${search}&dept_id=${deptId}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }); if (res.status === 200) { const sorted = [...res.data.data].sort((a, b) => { if (a.is_online !== b.is_online) return a.is_online ? -1 : 1; return 0; }); setAgents(sorted); if (activeAgent) { const updated = sorted.find((a: any) => a.username === activeAgent.username); if (updated) { setActiveAgent(updated); setIsInputLocked(!!updated.is_locked); } } } } catch (e) { console.error(e) } finally { setLoading(false) } }
 
   // V3.76: 格式化最后活动时间
   const formatLastActivity = (timestamp: number | null) => {
@@ -210,7 +210,7 @@ export default function TacticalCommand() {
       const theme = getAgentStatusTheme(a.tactical_score, a.is_online, a.role_id);
       const isActive = activeAgent?.username === a.username;
       return (
-        <tr key={a.username} onClick={() => { setActiveAgent(a); setLiveChat([]); setScreenShot(null); setLastFrameTime(0); }} className={cn("cursor-pointer transition-all duration-300", isActive ? "bg-cyan-600/10 text-cyan-900" : "hover:bg-cyan-50/50 text-black")}>
+        <tr key={a.username} onClick={() => { setActiveAgent(a); setIsInputLocked(!!a.is_locked); setLiveChat([]); setScreenShot(null); setLastFrameTime(0); }} className={cn("cursor-pointer transition-all duration-300", isActive ? "bg-cyan-600/10 text-cyan-900" : "hover:bg-cyan-50/50 text-black")}>
           <td className="px-5 py-4 text-left"><div className="flex items-center gap-3"><div className={cn("w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-all shadow-sm", a.is_online ? "bg-emerald-500/10 text-emerald-600" : "bg-slate-100 text-slate-400")}>{a.real_name[0]}</div><span className="text-[11px] font-black truncate">{a.real_name}</span></div></td>
           <td className="px-3 py-4 text-center"><span className="text-[10px] font-bold text-slate-500 uppercase">{a.dept_name || '未分配'}</span></td>
           <td className="px-3 py-4 text-center"><div className="flex justify-center items-center gap-2"><div className={cn("w-2 h-2 rounded-full transition-all", theme.dot)} /><span className={cn("text-[9px] font-black uppercase tracking-tighter", isActive ? "text-cyan-700" : "text-slate-500")}>{theme.label}</span></div></td>
