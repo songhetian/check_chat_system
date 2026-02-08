@@ -247,6 +247,11 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
                 await redis_mgr.mark_online(username)
                 continue
 
+            if msg.get("type") == "ACTIVITY_SYNC":
+                # V3.76: 物理活跃同步 (键盘/鼠标动作)
+                await redis_mgr.update_activity(username)
+                continue
+
             if msg.get("type") == "CHAT_TRANSMISSION":
                 # 战术加固：实时扫描内容敏感词
                 from core.services import SmartScanner, grant_user_reward

@@ -66,6 +66,20 @@ class RedisManager:
             await self.client.srem("online_agents_set", username)
             await self.client.delete(f"agent_heartbeat:{username}")
 
+    # --- 活跃度监控增强 ---
+    async def update_activity(self, username: str):
+        """记录最后一次物理动作 (鼠标/键盘)"""
+        if self.client:
+            # 记录时间戳，设置 24 小时自动过期
+            await self.client.setex(f"last_activity:{username}", 86400, str(int(time.time())))
+
+    async def get_last_activity(self, username: str) -> Optional[int]:
+        """获取最后一次活动的时间戳"""
+        if self.client:
+            val = await self.client.get(f"last_activity:{username}")
+            return int(val) if val else None
+        return None
+
     async def get_online_list(self):
         if self.client:
             # 这里的优化：如果需要更精确，可以结合心跳 Key 过滤

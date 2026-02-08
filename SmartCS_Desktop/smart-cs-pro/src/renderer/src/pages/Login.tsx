@@ -116,9 +116,12 @@ export default function Login() {
         }
   
         speak(`欢迎进入系统，${user.real_name}。全链路已就绪。`)
-        if (user.role_code !== 'AGENT') {
-          toast.success(`欢迎归队，${user.real_name}`, { description: '全链路战术系统已就绪' })
-        }
+        
+        // V3.77: 延迟跳转机制，确保登录提示 Toast 在大窗口状态下显示完整
+        toast.success(`全链路同步成功`, { 
+          description: `操作员 ${user.real_name} 身份核验通过，正在注入战术环境...`,
+          duration: 3000
+        })
         
         // 3. 持久化至中央状态库
         setAuth({ 
@@ -133,8 +136,10 @@ export default function Login() {
           tactical_score: user.tactical_score
         }, token)
         
-        // 强制使用 replace 导航，防止返回键导致的逻辑混乱
-        navigate('/', { replace: true })
+        // 延迟 1.5 秒跳转，给 Toast 留出在大窗口显示的时间
+        setTimeout(() => {
+          navigate('/', { replace: true })
+        }, 1500)
       } catch (err: any) {      if (err.response) {
         // 服务器返回了错误 (如 401, 404, 500)
         const msg = err.response.data?.message || '指挥中枢拒绝了访问请求'

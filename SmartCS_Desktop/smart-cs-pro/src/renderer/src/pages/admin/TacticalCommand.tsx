@@ -193,6 +193,16 @@ export default function TacticalCommand() {
   const fetchDepts = async () => { if (!isHQ || !token) return; try { const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/departments?size=100`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }); if (res.status === 200) setDepts(res.data.data); } catch (e) { console.error(e) } }
   const fetchData = async (silent = false) => { if (!token) return; if (!silent) setLoading(true); try { const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/agents?search=${search}&dept_id=${deptId}`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }); if (res.status === 200) { const sorted = [...res.data.data].sort((a, b) => { if (a.is_online !== b.is_online) return a.is_online ? -1 : 1; return 0; }); setAgents(sorted); if (activeAgent) { const updated = sorted.find((a: any) => a.username === activeAgent.username); if (updated) setActiveAgent(updated); } } } catch (e) { console.error(e) } finally { setLoading(false) } }
 
+  // V3.76: 格式化最后活动时间
+  const formatLastActivity = (timestamp: number | null) => {
+    if (!timestamp) return <span className="opacity-20">-</span>;
+    const diff = Math.floor(Date.now() / 1000) - timestamp;
+    if (diff < 60) return <span className="text-emerald-500 animate-pulse">刚才</span>;
+    if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
+    return '1天前';
+  };
+
   useEffect(() => { fetchDepts() }, [token])
   useEffect(() => { fetchData() }, [search, deptId, token])
 
@@ -251,7 +261,7 @@ export default function TacticalCommand() {
               <TacticalSearch value={search} onChange={setSearch} placeholder="搜索成员姓名..." />
            </div>
            <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
-              <TacticalTable headers={['成员', '部门', '状态', '评分', '身份']}>
+              <TacticalTable headers={['成员', '部门', '状态', '最后活动', '身份']}>
                 {agents.map(a => {
                   const theme = getAgentStatusTheme(a.tactical_score, a.is_online, a.role_id);
                   const isActive = activeAgent?.username === a.username;
@@ -260,7 +270,7 @@ export default function TacticalCommand() {
                       <td className="px-4 py-3 text-left"><div className="flex items-center gap-2"><div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-all", a.is_online ? "bg-emerald-500/10 text-emerald-600" : "bg-slate-100 text-slate-400")}>{a.real_name[0]}</div><span className="text-[11px] font-black truncate">{a.real_name}</span></div></td>
                       <td className="px-2 py-3 text-center"><span className="text-[10px] font-bold text-slate-500 uppercase">{a.dept_name || '未分配'}</span></td>
                       <td className="px-2 py-3 text-center"><div className="flex justify-center items-center gap-1.5"><div className={cn("w-1.5 h-1.5 rounded-full transition-all", theme.dot)} /><span className={cn("text-[9px] font-black uppercase", isActive ? "text-cyan-700" : "text-slate-500")}>{theme.label}</span></div></td>
-                      <td className="px-2 py-3 text-center"><span className={cn("text-[10px] font-black", a.tactical_score < 60 && a.role_id === ROLE_ID.AGENT ? "text-red-500" : (isActive ? "text-cyan-700" : "text-cyan-600"))}>{a.role_id === ROLE_ID.AGENT ? a.tactical_score : '-'}</span></td>
+                      <td className="px-2 py-3 text-center"><span className={cn("text-[10px] font-black", isActive ? "text-cyan-700" : "text-slate-600")}>{formatLastActivity(a.last_activity)}</span></td>
                       <td className="px-4 py-3 text-center"><RoleBadge roleId={a.role_id} roleName={a.role_name} /></td>
                     </tr>
                   )

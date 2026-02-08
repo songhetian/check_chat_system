@@ -104,6 +104,21 @@ export const useRiskSocket = () => {
 
     connect();
 
+    // V3.76: 物理活跃度自动采集系统
+    let lastSyncTime = 0;
+    const syncActivity = () => {
+      const now = Date.now();
+      if (now - lastSyncTime > 30000) { // 30秒节流，保护 Redis 性能
+        if (socket?.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: 'ACTIVITY_SYNC', timestamp: now }));
+          lastSyncTime = now;
+        }
+      }
+    };
+
+    window.addEventListener('mousemove', syncActivity);
+    window.addEventListener('keydown', syncActivity);
+
     // V3.74: HTTP 链路熔断监听 (来自主进程转发失败信号)
     const handleLinkBreak = () => {
       if (useRiskStore.getState().isOnline) {

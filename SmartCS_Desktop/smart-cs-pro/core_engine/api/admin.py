@@ -49,6 +49,8 @@ async def get_agents(
 
     total = await query.count()
     agents_data = await query.order_by("-id").limit(size).offset(offset).values("id", "username", "real_name", "role_id", "role__name", "role__code", "tactical_score", "department_id")
+    
+    from utils.redis_utils import redis_mgr
     async def process_agent(a):
         dept = await Department.get_or_none(id=a["department_id"]) if a["department_id"] else None
         last_v = await ViolationRecord.filter(user_id=a["id"], is_deleted=0).order_by("-timestamp").first()
@@ -56,6 +58,10 @@ async def get_agents(
         r_count = await UserReward.filter(user_id=a["id"]).count()
         t_session = await TrainingSession.filter(user_id=a["id"]).order_by("-updated_at").first()
         m_count = await Department.filter(manager_id=a["id"], is_deleted=0).count()
+        
+        # 实时拉取活跃度
+        last_activity = await redis_mgr.get_last_activity(a["username"])
+        
         return {
             "username": a["username"], "real_name": a["real_name"],
             "role_id": a["role_id"], "role_name": a["role__name"], "role_code": a["role__code"],
@@ -63,7 +69,8 @@ async def get_agents(
             "is_manager": m_count > 0, "is_online": a["username"] in online_usernames,
             "tactical_score": a["tactical_score"], "reward_count": r_count,
             "training_progress": t_session.progress if t_session else 0,
-            "last_violation_type": last_v.keyword if last_v else None
+            "last_violation_type": last_v.keyword if last_v else None,
+            "last_activity": last_activity # 返回活跃时间戳
         }
     result = await asyncio.gather(*[process_agent(a) for a in agents_data])
     return {"status": "ok", "data": result, "total": total}
