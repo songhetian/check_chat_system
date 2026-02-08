@@ -211,19 +211,23 @@ export const TacticalIsland = () => {
   useEffect(() => {
     const screenWidth = window.screen.width
     const screenHeight = window.screen.height
-    const active = isPushMode || isScratchpad || isEvasionMode || isSopMode
+    const active = isPushMode || isScratchpad || isEvasionMode || isSopMode || showVoiceAlertOverlay
     let width = isFolded ? 80 : 800 
     let height = showHelpModal ? 480 : (isExpanded ? 564 : 72)
     let x: number | undefined, y: number | undefined, center = false
 
     if (isLocked) { width = screenWidth; height = screenHeight; x = 0; y = 0; } 
+    else if (showVoiceAlertOverlay) { 
+      // V3.87: 视觉警报时，临时将窗口扩展至全屏透明层，确保中心弹窗可见
+      width = screenWidth; height = screenHeight; x = 0; y = 0;
+    }
     else if (active) { width = 800; height = 350; x = screenWidth - 820; y = 30; } 
     else { x = isFolded ? screenWidth - 100 : screenWidth - 820; y = 30 }
     
     window.electron.ipcRenderer.send('resize-window', { width, height, center, x, y })
-    window.electron.ipcRenderer.send('set-always-on-top', isLocked || active || !showBigScreenModal)
+    window.electron.ipcRenderer.send('set-always-on-top', isLocked || active || showVoiceAlertOverlay || !showBigScreenModal)
     if (isScratchpad && inputRef.current) setTimeout(() => inputRef.current?.focus(), 300)
-  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad, isEvasionMode, isSopMode])
+  }, [isExpanded, showHelpModal, showBigScreenModal, layoutMode, isFolded, isLocked, isPushMode, isScratchpad, isEvasionMode, isSopMode, showVoiceAlertOverlay])
 
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none bg-transparent text-black">
