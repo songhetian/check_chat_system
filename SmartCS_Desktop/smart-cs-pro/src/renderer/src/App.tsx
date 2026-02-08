@@ -9,6 +9,7 @@ import { Fireworks } from './components/agent/Fireworks'
 import { SOPOverlay } from './components/agent/SOPOverlay'
 import { CustomerHUD } from './components/agent/CustomerHUD'
 import { useRiskSocket } from './hooks/useRiskSocket'
+import { useSystemStatus } from './hooks/useSystemStatus'
 import { useRiskStore } from './store/useRiskStore'
 import Login from './pages/Login'
 import DashboardLayout from './layouts/DashboardLayout'
@@ -247,6 +248,7 @@ const AgentView = () => {
 
 function App() {
   const { user } = useAuthStore()
+  useSystemStatus()
   useRiskSocket()
   
   const isAgent = user?.role_code === 'AGENT' || user?.role_id === ROLE_ID.AGENT;

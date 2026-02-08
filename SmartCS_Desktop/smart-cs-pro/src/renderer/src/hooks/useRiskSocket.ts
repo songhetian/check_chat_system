@@ -135,11 +135,22 @@ export const useRiskSocket = () => {
 
     const handleSendMsg = (e: any) => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(e.detail)); }
     window.addEventListener('send-risk-msg', handleSendMsg);
+
+    // V3.80: 物理链路快速自愈引擎
+    // 当 useSystemStatus 探测到后端服务恢复时，强制重置 WS 连通性
+    const unsubscribeOnline = useRiskStore.subscribe((state) => {
+      if (state.isOnline && (!socket || socket.readyState === WebSocket.CLOSED)) {
+        console.log('⚡ [WS链路] 探测到物理中枢恢复，触发快速自愈...');
+        clearTimeout(reconnectTimeout);
+        connect();
+      }
+    });
     
     return () => { 
       socket?.close(); 
       clearTimeout(reconnectTimeout); 
       window.removeEventListener('send-risk-msg', handleSendMsg);
+      unsubscribeOnline();
       if (removeLinkBreakListener) {
         removeLinkBreakListener();
       }

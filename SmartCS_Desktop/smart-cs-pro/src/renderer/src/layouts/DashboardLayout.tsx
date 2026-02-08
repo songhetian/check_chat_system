@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { useRiskStore } from '../store/useRiskStore' 
+import { useSystemStatus } from '../hooks/useSystemStatus'
 import { cn } from '../lib/utils'
 import { CONFIG } from '../lib/config'
 import { toast } from 'sonner'
@@ -106,27 +107,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   })
 
   // V3.75: 指挥中心状态同步引擎
-  const { data: sysStatus } = useQuery({
-    queryKey: ['system_status'],
-    queryFn: async () => {
-      let pendingCount = 0;
-      if (window.api?.getSyncStatus) {
-        const syncRes = await window.api.getSyncStatus()
-        pendingCount = syncRes.pendingCount
-      }
-      try {
-        const healthRes = await window.api.callApi({ url: '/health', method: 'GET' })
-        const currentStatus = healthRes.status === 200;
-        if (currentStatus !== isOnline) setOnline(currentStatus);
-        return { isOnline: currentStatus, pendingSyncCount: pendingCount }
-      } catch {
-        if (isOnline) setOnline(false);
-        return { isOnline: false, pendingSyncCount: pendingCount }
-      }
-    },
-    refetchInterval: 5000, 
-    staleTime: 2000
-  })
+  const { data: sysStatus } = useSystemStatus()
 
   const pendingSyncCount = sysStatus?.pendingSyncCount ?? 0
   const unreadCount = notifications.filter(n => n.is_read === 0).length
