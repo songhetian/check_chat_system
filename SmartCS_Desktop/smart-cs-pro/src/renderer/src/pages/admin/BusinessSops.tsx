@@ -343,39 +343,59 @@ export default function BusinessSopsPage() {
       );
     }
 
-    return items.map((item: any) => (
-      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center border-b border-slate-50">
-        <td className="px-8 py-5 font-black text-slate-900 text-center min-w-[200px]">{item.title || '未命名规范'}</td>
-        <td className="px-6 py-5 text-center max-w-md">
-          <div className="mx-auto truncate italic opacity-60 w-fit max-w-[300px]">
-            {item.content ? `"${item.content}"` : <span className="text-[10px] uppercase tracking-tighter opacity-30">空内容</span>}
-          </div>
-        </td>
-        <td className="px-6 py-5 text-center">
-           <div className="flex items-center justify-center">
-             <span className="px-3 py-1 bg-slate-100 rounded-2xl flex items-center justify-center gap-2 border border-slate-200 text-[9px] font-black uppercase shadow-sm">
-                {getTypeIcon(item?.sop_type)} {item?.sop_type || 'TEXT'}
-             </span>
-           </div>
-        </td>
-        <td className="px-6 py-5 text-center">
-          <div className="flex items-center justify-center">
-            <span className={cn(
-              "px-3 py-1 rounded-2xl text-[9px] font-black border uppercase tracking-widest",
-              item.department_id ? "bg-slate-50 text-slate-500 border-slate-200" : "bg-cyan-50 text-cyan-600 border-cyan-100"
-            )}>
-              {item.department__name || (item.department_id ? '未知部门' : '全域规范')}
-            </span>
-          </div>
-        </td>
-        <td className="px-8 py-5 text-center">
-          <div className="flex justify-center gap-2">
-            {hasPermission('admin:sop:update') && (<button onClick={() => { setActiveItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all active:scale-95 cursor-pointer border border-transparent hover:border-slate-200 shadow-sm" title="修订"><Edit3 size={16} /></button>)}
-            {hasPermission('admin:sop:delete') && (<button onClick={() => { setActiveItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all active:scale-95 cursor-pointer border border-transparent hover:border-slate-200 shadow-sm" title="废弃"><Trash2 size={16} /></button>)}
-          </div>
-        </td>
-      </tr>
-    ));
+    return items.map((item: any) => {
+      // V4.70: 预览内容语义化处理
+      let previewText = item.content;
+      if (item.sop_type !== 'TEXT' && item.content) {
+        try {
+          const parsed = JSON.parse(item.content);
+          if (Array.isArray(parsed)) {
+            previewText = `[包含 ${parsed.length} 个附件资源]`;
+          } else if (item.sop_type === 'MD') {
+            previewText = '[Markdown 物理载荷]';
+          }
+        } catch (e) {
+          // 如果解析失败且包含 http，则标记为远程载荷
+          if (String(item.content).includes('http')) {
+            previewText = '[远程物理资源]';
+          }
+        }
+      }
+
+      return (
+        <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center border-b border-slate-50">
+          <td className="px-8 py-5 font-black text-slate-900 text-center min-w-[200px]">{item.title || '未命名规范'}</td>
+          <td className="px-6 py-5 text-center max-w-md">
+            <div className="mx-auto truncate italic opacity-60 w-fit max-w-[300px] font-medium">
+              {item.content ? `"${previewText}"` : <span className="text-[10px] uppercase tracking-tighter opacity-30">空内容</span>}
+            </div>
+          </td>
+          <td className="px-6 py-5 text-center">
+             <div className="flex items-center justify-center">
+               <span className="px-3 py-1 bg-slate-100 rounded-2xl flex items-center justify-center gap-2 border border-slate-200 text-[9px] font-black uppercase shadow-sm">
+                  {getTypeIcon(item?.sop_type)} {item?.sop_type || 'TEXT'}
+               </span>
+             </div>
+          </td>
+          <td className="px-6 py-5 text-center">
+            <div className="flex items-center justify-center">
+              <span className={cn(
+                "px-3 py-1 rounded-2xl text-[9px] font-black border uppercase tracking-widest",
+                item.department_id ? "bg-slate-50 text-slate-500 border-slate-200" : "bg-cyan-50 text-cyan-600 border-cyan-100"
+              )}>
+                {item.department__name || (item.department_id ? '未知部门' : '全域规范')}
+              </span>
+            </div>
+          </td>
+          <td className="px-8 py-5 text-center">
+            <div className="flex justify-center gap-2">
+              {hasPermission('admin:sop:update') && (<button onClick={() => { setActiveItem(item); setModalType('EDIT') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-cyan-600 rounded-xl transition-all active:scale-95 cursor-pointer border border-transparent hover:border-slate-200 shadow-sm" title="修订"><Edit3 size={16} /></button>)}
+              {hasPermission('admin:sop:delete') && (<button onClick={() => { setActiveItem(item); setModalType('DELETE') }} className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all active:scale-95 cursor-pointer border border-transparent hover:border-slate-200 shadow-sm" title="废弃"><Trash2 size={16} /></button>)}
+            </div>
+          </td>
+        </tr>
+      );
+    });
   }, [sopData?.data, hasPermission, isLoading]);
 
   const saveMutation = useMutation({
