@@ -281,8 +281,8 @@ export const TacticalIsland = () => {
       <motion.div 
         layout
         animate={{ 
-          width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isFolded ? 80 : 800))),
-          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isPushMode || isScratchpad || isEvasionMode || isSopMode ? 350 : (showHelpModal ? 480 : (isExpanded ? 564 : 72)))))
+          width: isLocked ? window.screen.width : (layoutMode === 'SIDE' ? 440 : (showBigScreenModal ? 1280 : (isHistoryMode || isExpanded || showHelpModal ? 1000 : (isFolded ? 80 : 800)))),
+          height: isLocked ? window.screen.height : (layoutMode === 'SIDE' ? 850 : (showBigScreenModal ? 850 : (isHistoryMode || isExpanded || showHelpModal ? 650 : (isPushMode || isScratchpad || isEvasionMode || isSopMode ? 350 : 72))))
         }}
         className={cn(
           "pointer-events-auto border border-white/10 flex flex-col overflow-hidden transition-all duration-500 relative shadow-2xl", 
