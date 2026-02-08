@@ -214,32 +214,38 @@ app.include_router(ai_router)
 # --- 4. WebSocket 战术链路 ---
 @app.websocket("/api/ws/risk")
 async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), username: str = Query(...)):
-    # 鉴权并提取角色
-    from api.auth import get_current_user
+    # V5.00: 使用无状态 JWT 执行物理握手校验
+    from api.auth import JWT_SECRET, JWT_ALGORITHM
+    import jwt
     try:
-        # 模拟 Request 对象以复用鉴权逻辑
-        class MockRequest:
-            def __init__(self, app): self.app = app
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        role = payload.get("role_id", RoleID.AGENT)
         
-        # 关键修正：传入实例而非类，并确保 credentials 属性可访问
-        class MockCreds:
-            def __init__(self, t): self.credentials = t
-            
-        user_info = await get_current_user(MockRequest(app), MockCreds(token))
-        role = user_info.get("role_id", RoleID.AGENT)
-        
-        # 校验令牌中的用户名与请求用户名是否一致，防止非法劫持链路
-        if user_info.get("username") != username:
-            logger.error(f"🚨 [WS 拒绝] 用户名不匹配: Token({user_info.get('username')}) vs Query({username})")
+        # 严格校验：确保令牌中的用户与链路请求一致
+        if payload.get("username") != username:
+            logger.error(f"🚨 [WS 拒绝] 用户名不匹配: Token({payload.get('username')}) vs Query({username})")
             await websocket.close(code=1008)
             return
         
-        logger.info(f"✅ [WS 鉴权成功] 操作员 {username} 已建立物理链路")
+        logger.info(f"✅ [WS 鉴权成功] 操作员 {username} (JWT模式) 已建立链路")
 
     except Exception as e:
-        logger.error(f"🚨 [WS 拒绝] 鉴权失败: {e}")
-        await websocket.close(code=1008)
-        return
+        # 过渡期兼容：检查 Redis
+        redis = app.state.redis
+        if redis:
+            cached = await redis.get(f"token:{token}")
+            if cached:
+                user_info = json.loads(cached)
+                role = user_info.get("role_id", RoleID.AGENT)
+                logger.info(f"✅ [WS 鉴权通过] 操作员 {username} (旧版Token) 建立链路")
+            else:
+                logger.error(f"🚨 [WS 拒绝] 鉴权失败: {e}")
+                await websocket.close(code=1008)
+                return
+        else:
+            logger.error(f"🚨 [WS 拒绝] 无效 JWT 且 Redis 脱机: {e}")
+            await websocket.close(code=1008)
+            return
 
     await manager.connect(username, websocket, role=role)
     from utils.redis_utils import redis_mgr

@@ -1,33 +1,41 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from core.models import User, Role, RolePermission, AuditLog
-import hashlib, secrets, json, logging, traceback
+import hashlib, secrets, json, logging, traceback, jwt, os
+from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 security = HTTPBearer()
 logger = logging.getLogger("SmartCS")
+
+# V5.00: 物理级无状态鉴权配置
+JWT_SECRET = os.getenv("JWT_SECRET", "smart-cs-tactical-link-2024-secure")
+JWT_ALGORITHM = "HS256"
 
 def get_hash(p: str, s: str):
     return hashlib.sha256((p + s).encode()).hexdigest()
 
 async def get_current_user(request: Request, creds: HTTPAuthorizationCredentials = Depends(security)):
     token = creds.credentials
-    redis = request.app.state.redis
-    if not redis:
-        logger.error("🚨 [鉴权故障] Redis 连接未就绪")
-        raise HTTPException(status_code=500, detail="中枢缓存脱机")
-    
     try:
-        cached = await redis.get(f"token:{token}")
-        if not cached: 
-            logger.warning(f"🚨 [鉴权失效] 令牌未命中: {token[:10]}...")
-            raise HTTPException(status_code=401, detail="令牌失效或已过期")
-        return json.loads(cached)
-    except HTTPException:
-        raise
+        # 核心：物理校验 JWT 签名 (即使 Redis 重启也能通过)
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        logger.warning(f"🚨 [鉴权失效] 令牌已过期")
+        raise HTTPException(status_code=401, detail="令牌已过期")
+    except jwt.InvalidTokenError:
+        # 为了兼容性，尝试在 Redis 中找旧版 token (过渡期)
+        redis = request.app.state.redis
+        if redis:
+            cached = await redis.get(f"token:{token}")
+            if cached: return json.loads(cached)
+        
+        logger.warning(f"🚨 [鉴权失败] 无效令牌: {token[:10]}...")
+        raise HTTPException(status_code=401, detail="身份凭证无效")
     except Exception as e:
         logger.error(f"🚨 [鉴权异常]: {e}")
-        raise HTTPException(status_code=500, detail="鉴权中枢解析失败")
+        raise HTTPException(status_code=500, detail="鉴权引擎解析失败")
 
 def check_permission(required_perm: str):
     async def _check(user: dict = Depends(get_current_user)):
@@ -46,27 +54,18 @@ async def login(data: dict, request: Request):
         if not user: return {"status": "error", "message": "身份核验未通过"}
         if get_hash(p, user.salt) != user.password_hash: return {"status": "error", "message": "访问密钥错误"}
 
-        # 核心修复：采用极其严谨的权限拉取逻辑
+        # 1. 精准拉取权限集
         role_id = user.role_id if user.role_id else 0
         perms = []
-        try:
-            if role_id > 0:
-                perms_data = await RolePermission.filter(role_id=role_id).values_list("permission_code", flat=True)
-                if perms_data is not None:
-                    # 强制转换为列表，并过滤掉任何潜在的 None 值
-                    perms = [str(p) for p in perms_data if p is not None]
-        except Exception as perm_err:
-            logger.error(f"⚠️ [权限拉取轻微异常]: {perm_err}")
-            perms = [] # 降级处理，不中断登录
+        if role_id > 0:
+            perms_data = await RolePermission.filter(role_id=role_id).values_list("permission_code", flat=True)
+            perms = [str(p) for p in perms_data if p]
 
-        role_code = user.role.code if (user.role and hasattr(user.role, 'code')) else "GUEST"
+        role_code = user.role.code if user.role else "GUEST"
         dept_id = user.department_id if user.department_id else 0
-        # 再次确保 dept_name 绝对安全
-        dept_name = "独立战术单元"
-        if user.department and hasattr(user.department, 'name'):
-            dept_name = user.department.name
+        dept_name = user.department.name if user.department else "独立战术单元"
 
-        token = "tk_" + secrets.token_hex(16)
+        # 2. 构造 JWT 载荷 (包含所有核心状态)
         user_payload = {
             "id": user.id,
             "username": user.username,
@@ -74,35 +73,37 @@ async def login(data: dict, request: Request):
             "role_id": role_id,
             "role_code": role_code,
             "dept_id": dept_id,
-            "permissions": perms
+            "dept_name": dept_name,
+            "permissions": perms,
+            "exp": datetime.utcnow() + timedelta(days=7) # 延长有效期至 7 天
         }
         
+        # 3. 物理签发
+        token = jwt.encode(user_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        
         if redis: 
-            # 记录活跃令牌映射
-            old_token = await redis.get(f"active_token:{user.username}")
-            
-            # V4.90: 物理策略修正 - 针对 admin 允许战术多开，不挤下线旧连接
-            if old_token and user.username != 'admin':
-                await redis.delete(f"token:{old_token}")
-                # 物理下线逻辑
-                ws_manager = getattr(request.app.state, 'ws_manager', None)
-                if ws_manager and user.username in ws_manager.active_connections:
-                    try:
-                        old_ws = ws_manager.active_connections[user.username]
-                        await old_ws.send_json({"type": "TERMINATE_SESSION", "message": "账号在新设备登录"})
-                        await old_ws.close(code=1001)
-                    except: pass
+            # 记录活跃映射（用于统计，但不作为鉴权唯一依据）
+            await redis.setex(f"active_token:{user.username}", 3600 * 24 * 7, token)
+            await AuditLog.create(operator=user.real_name or user.username, action="LOGIN", target=user.username, details="JWT 链路建立成功")
 
-            await redis.setex(f"token:{token}", 3600 * 24, json.dumps(user_payload))
-            await redis.setex(f"active_token:{user.username}", 3600 * 24, token)
-
-            # 记录审计 (放在 Redis 之后确保主流程成功)
-            await AuditLog.create(
-                operator=user.real_name or user.username,
-                action="LOGIN",
-                target=user.username,
-                details="建立战术链路成功"
-            )
+        return {
+            "status": "ok", 
+            "data": {
+                "user": {
+                    "username": user.username, 
+                    "real_name": user.real_name or user.username, 
+                    "role_id": role_id,
+                    "role_code": role_code,
+                    "dept_name": dept_name,
+                    "tactical_score": user.tactical_score,
+                    "permissions": perms
+                }, 
+                "token": token
+            }
+        }
+    except Exception as e:
+        logger.error(f"❌ [登录崩溃] {traceback.format_exc()}")
+        return {"status": "error", "message": f"中枢逻辑熔断: {str(e)}"}
 
         return {
             "status": "ok", 
