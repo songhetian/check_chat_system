@@ -91,7 +91,7 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
     let filters: any[] = [];
     if (editItem.sop_type === 'IMAGE') filters = [{ name: '图片', extensions: ['jpg', 'png', 'gif', 'webp'] }];
     else if (editItem.sop_type === 'MD') filters = [{ name: 'Markdown', extensions: ['md'] }];
-    else filters = [{ name: '附件', extensions: ['pdf', 'doc', 'docx', 'zip'] }];
+    else filters = [{ name: '附件', extensions: ['pdf', 'doc', 'docx', 'xlsx', 'xls', 'ppt', 'pptx', 'zip'] }];
     
     const file = await window.api.selectFile({ title: '选取战术载体', filters })
     if (file) uploadFile(file);
@@ -107,6 +107,14 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
+      // 检查扩展名 (简单前端校验)
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      const allowedExts = ['jpg', 'png', 'gif', 'webp', 'md', 'pdf', 'doc', 'docx', 'xlsx', 'xls', 'ppt', 'pptx', 'zip'];
+      if (!allowedExts.includes(ext)) {
+        toast.error('不支持的物理格式', { description: `不允许上传 .${ext} 文件` });
+        return;
+      }
+
       // 将 File 转为 Base64 以复用逻辑 (Electron 模式下 selectFile 返回的是 base64)
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -120,10 +128,10 @@ const SopEditModal = memo(({ item, onSave, onCancel, isPending }: any) => {
   const isFileMode = ['IMAGE', 'FILE', 'MD'].includes(editItem.sop_type)
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 lg:p-8">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 lg:p-8">
       <div onClick={onCancel} className="absolute inset-0 bg-slate-950/80 backdrop-blur-md cursor-pointer" />
       
-      <div className="bg-white w-full max-w-5xl h-[85vh] rounded-[48px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative z-10 flex overflow-hidden border border-white/20">
+      <div className="bg-white w-full max-w-5xl h-[80vh] rounded-[48px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative z-10 flex overflow-hidden border border-white/20">
          
          {/* 左栏：核心配置 */}
          <div className="w-[400px] bg-slate-50 border-r border-slate-100 flex flex-col p-10 shrink-0">
