@@ -20,18 +20,22 @@ function startPythonEngine(): void {
 
   console.log(`🚀 [引擎拉起] 正在尝试激活物理核心: ${enginePath}`)
 
-  // V3.55: 跨平台端口强制排空 (解决 Errno 48 / 10048)
+  // V3.98: 强化版端口排空逻辑
   try {
     const port = 8000
     if (process.platform === 'win32') {
       spawn('cmd', ['/c', `for /f "tokens=5" %a in ('netstat -aon ^| findstr :${port}') do taskkill /f /pid %a`], { shell: true })
     } else {
-      // Mac/Linux: 使用 lsof 查找并强制杀掉所有占用该端口的进程
-      const cmd = `lsof -ti:${port} | xargs kill -9`
-      require('child_process').execSync(cmd)
-      console.log(`🧹 [端口清理] 已强制排空端口 ${port}`)
+      // 使用更兼容的 shell 方式清理端口
+      const killCmd = `lsof -ti:${port} | xargs kill -9`
+      try {
+        require('child_process').execSync(killCmd)
+        console.log(`🧹 [物理排空] 成功清理端口 ${port}`)
+      } catch (e) {
+        // 忽略端口未被占用的报错
+      }
     }
-  } catch (e) { console.warn('⚠️ 端口清理跳过或端口未被占用') }
+  } catch (e) { console.warn('⚠️ 端口清理跳过') }
 
   try {
     if (is.dev) {

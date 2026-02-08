@@ -1,5 +1,4 @@
-import React, { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState, useMemo, useEffect } from 'react'
 import { 
   FileText, Loader2, RefreshCw, X, Plus, Save, Trash2, Edit3, ShieldAlert, Search, FileCode, Paperclip, Image as ImageIcon
 } from 'lucide-react'
@@ -11,6 +10,17 @@ import { TacticalSelect } from '../../components/ui/TacticalSelect'
 import { useAuthStore } from '../../store/useAuthStore'
 import { toast } from 'sonner'
 
+// V3.99: 移出组件外部，防止重复定义
+const getTypeIcon = (type: string) => {
+  if (!type) return <FileText className="text-slate-400" size={16}/>;
+  switch(type) {
+    case 'MD': return <FileCode className="text-cyan-500" size={16}/>
+    case 'IMAGE': return <ImageIcon className="text-amber-500" size={16}/>
+    case 'FILE': return <Paperclip className="text-purple-500" size={16}/>
+    default: return <FileText className="text-slate-400" size={16}/>
+  }
+}
+
 export default function BusinessSopsPage() {
   const { token, hasPermission, user } = useAuthStore()
   const queryClient = useQueryClient()
@@ -18,8 +28,6 @@ export default function BusinessSopsPage() {
   const [search, setSearch] = useState('')
   const [modalType, setModalType] = useState<'NONE' | 'EDIT' | 'DELETE'>('NONE')
   const [editItem, setEditItem] = useState<any>(null)
-
-  const isHQ = user?.role_id === 3 || user?.role_code === 'HQ'
 
   const { data: sopData, isLoading, isFetching, refetch, isError, error: queryError } = useQuery({
     queryKey: ['business_sops_admin', page, search],
@@ -33,7 +41,6 @@ export default function BusinessSopsPage() {
       if (res.status !== 200 || res.data?.status === 'error') {
         throw new Error(res.data?.message || res.error || '指挥中心同步失败');
       }
-      
       return res.data
     },
     enabled: !!token,
@@ -41,16 +48,13 @@ export default function BusinessSopsPage() {
     staleTime: 5000
   })
 
-  // V3.97: 安全副作用管理 - 仅在渲染周期外触发 UI 提示
-  React.useEffect(() => {
+  useEffect(() => {
     if (isError && queryError) {
       toast.error('SOP 获取异常', { description: queryError instanceof Error ? queryError.message : String(queryError) });
     }
   }, [isError, queryError]);
 
-  // 渲染优化 (V3.70 极速协议)
   const SopItems = useMemo(() => {
-    // 增加数据安全性检查，防止渲染崩溃
     const items = Array.isArray(sopData?.data) ? sopData.data : [];
     if (items.length === 0) {
       return (
@@ -90,8 +94,7 @@ export default function BusinessSopsPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const { title, content, sop_type, id } = payload;
-      return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: { id, title, content, sop_type } })
+      return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: payload })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business_sops_admin'] })
@@ -101,7 +104,6 @@ export default function BusinessSopsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      if (!id) throw new Error('ID missing');
       return window.api.callApi({ url: `${CONFIG.API_BASE}/ai/sops/delete`, method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, data: { id } })
     },
     onSuccess: () => {
@@ -110,34 +112,23 @@ export default function BusinessSopsPage() {
     }
   })
 
-  const listData = sopData?.data || []
   const total = sopData?.total || 0
 
-  const getTypeIcon = (type: string) => {
-    if (!type) return <FileText className="text-slate-400" size={16}/>;
-    switch(type) {
-      case 'MD': return <FileCode className="text-cyan-500" size={16}/>
-      case 'IMAGE': return <ImageIcon className="text-amber-500" size={16}/>
-      case 'FILE': return <Paperclip className="text-purple-500" size={16}/>
-      default: return <FileText className="text-slate-400" size={16}/>
-    }
-  }
-
   return (
-    <div className="flex flex-col gap-6 h-full font-sans bg-slate-50/50 p-4 lg:p-6 text-slate-900">
+    <div className="flex flex-col gap-6 h-full font-sans bg-slate-50 p-4 lg:p-6 text-slate-900">
       <header className="flex justify-between items-end bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm shrink-0">
         <div>
           <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter">SOP 业务规范库</h2>
-          <p className="text-slate-500 text-sm mt-1 font-medium italic text-emerald-600">管理各业务维度的标准操作流程 · 支持文字、Markdown、图片及多媒体附件</p>
+          <p className="text-slate-500 text-sm mt-1 font-medium italic text-emerald-600">管理业务标准流程 · 支持文字、Markdown、图片及多媒体</p>
         </div>
         <div className="flex gap-3">
            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input value={search} onChange={(e) => {setSearch(e.target.value); setPage(1);}} placeholder="搜索 SOP 标题..." className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold w-64 outline-none" />
            </div>
-           <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 transition-all active:scale-95 cursor-pointer"><RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} /></button>
+           <button onClick={() => refetch()} className="p-3 bg-slate-50 text-slate-600 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-100 transition-all cursor-pointer"><RefreshCw size={18} className={cn((isLoading || isFetching) && "animate-spin")} /></button>
            {hasPermission('admin:sop:create') && (
-             <button onClick={() => { setEditItem({ title: '', content: '', sop_type: 'TEXT' }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl active:scale-95 transition-all cursor-pointer"><Plus size={16} /> 录入 SOP</button>
+             <button onClick={() => { setEditItem({ title: '', content: '', sop_type: 'TEXT' }); setModalType('EDIT'); }} className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black shadow-xl transition-all cursor-pointer"><Plus size={16} /> 录入 SOP</button>
            )}
         </div>
       </header>
@@ -153,55 +144,53 @@ export default function BusinessSopsPage() {
          {total > 10 && <div className="p-2 border-t border-slate-100"><TacticalPagination total={total} pageSize={10} currentPage={page} onPageChange={setPage} /></div>}
       </div>
 
-      <AnimatePresence>
-        {modalType === 'EDIT' && (
-          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm cursor-pointer" />
-            <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl relative z-10 p-12 overflow-y-auto max-h-[90vh]">
-               <h3 className="text-2xl font-black text-slate-900 mb-8 italic uppercase flex items-center gap-3"><FileText className="text-emerald-500"/> 业务规范定义</h3>
-               <div className="space-y-6">
-                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">规范标题</label><input value={editItem?.title || ''} onChange={(e)=>setEditItem({...editItem, title: e.target.value})} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold border-none shadow-inner outline-none" placeholder="如：售后退换货 SOP v1.2" /></div>
-                  
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">载体类型</label>
-                      <TacticalSelect 
-                        options={[{id: 'TEXT', name: '纯文本'}, {id: 'MD', name: 'Markdown'}, {id: 'IMAGE', name: '图片内容'}, {id: 'FILE', name: '外部文件路径'}]} 
-                        value={editItem?.sop_type || 'TEXT'} 
-                        onChange={(val) => setEditItem({...editItem, sop_type: val})} 
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">数据归属</label>
-                      <div className="px-6 py-4 bg-slate-100 rounded-2xl text-xs font-black text-slate-500 border border-slate-200 uppercase tracking-widest">物理隔离：部门内部规范</div>
-                    </div>
+      {modalType === 'EDIT' && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
+          <div onClick={() => setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm cursor-pointer" />
+          <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl relative z-10 p-12 overflow-y-auto max-h-[90vh]">
+             <h3 className="text-2xl font-black text-slate-900 mb-8 italic uppercase flex items-center gap-3"><FileText className="text-emerald-500"/> 业务规范定义</h3>
+             <div className="space-y-6">
+                <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">规范标题</label><input value={editItem?.title || ''} onChange={(e)=>setEditItem({...editItem, title: e.target.value})} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-bold border-none shadow-inner outline-none" placeholder="如：售后退换货 SOP v1.2" /></div>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">载体类型</label>
+                    <TacticalSelect 
+                      options={[{id: 'TEXT', name: '纯文本'}, {id: 'MD', name: 'Markdown'}, {id: 'IMAGE', name: '图片内容'}, {id: 'FILE', name: '外部文件路径'}]} 
+                      value={editItem?.sop_type || 'TEXT'} 
+                      onChange={(val) => setEditItem({...editItem, sop_type: val})} 
+                    />
                   </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">数据归属</label>
+                    <div className="px-6 py-4 bg-slate-100 rounded-2xl text-xs font-black text-slate-500 border border-slate-200 uppercase tracking-widest">物理隔离：部门内部规范</div>
+                  </div>
+                </div>
 
-                  <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">详细内容 / 文件链接</label><textarea value={editItem?.content || ''} onChange={(e)=>setEditItem({...editItem, content: e.target.value})} rows={6} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-medium border-none shadow-inner outline-none resize-none" placeholder="输入 SOP 详细说明，或图片/附件的物理 URL 地址..." /></div>
+                <div><label className="text-[10px] font-black text-slate-400 uppercase block mb-2 ml-1">详细内容 / 文件链接</label><textarea value={editItem?.content || ''} onChange={(e)=>setEditItem({...editItem, content: e.target.value})} rows={6} className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-sm font-medium border-none shadow-inner outline-none resize-none" placeholder="输入 SOP 详细说明，或图片/附件的物理 URL 地址..." /></div>
 
-                  <button disabled={saveMutation.isPending} onClick={() => saveMutation.mutate(editItem)} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer">
-                    {saveMutation.isPending ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 固化规范文档
-                  </button>
-               </div>
-            </motion.div>
+                <button disabled={saveMutation.isPending} onClick={() => saveMutation.mutate(editItem)} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase shadow-2xl transition-all flex items-center justify-center gap-3 cursor-pointer">
+                  {saveMutation.isPending ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} 固化规范文档
+                </button>
+             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {modalType === 'DELETE' && (
-          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm cursor-pointer" />
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl relative z-10 p-10 text-center">
-               <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><ShieldAlert size={40} /></div>
-               <h3 className="text-xl font-black text-slate-900 mb-2 uppercase italic">注销 SOP 规范?</h3>
-               <p className="text-slate-500 text-xs font-medium mb-8">此操作将逻辑移除该业务指南，操作员端将无法再调取此规范文件。</p>
-               <div className="flex gap-4">
-                  <button onClick={() => setModalType('NONE')} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all cursor-pointer">取消</button>
-                  <button disabled={deleteMutation.isPending} onClick={() => editItem?.id && deleteMutation.mutate(editItem.id)} className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-red-200 active:scale-95 transition-all cursor-pointer">确认注销</button>
-               </div>
-            </motion.div>
+      {modalType === 'DELETE' && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 text-slate-900">
+          <div onClick={() => setModalType('NONE')} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm cursor-pointer" />
+          <div className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl relative z-10 p-10 text-center">
+             <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><ShieldAlert size={40} /></div>
+             <h3 className="text-xl font-black text-slate-900 mb-2 uppercase italic">注销 SOP 规范?</h3>
+             <p className="text-slate-500 text-xs font-medium mb-8">此操作将逻辑移除该业务指南，操作员端将无法再调取此规范文件。</p>
+             <div className="flex gap-4">
+                <button onClick={() => setModalType('NONE')} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all cursor-pointer">取消</button>
+                <button disabled={deleteMutation.isPending} onClick={() => editItem?.id && deleteMutation.mutate(editItem.id)} className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-red-200 transition-all cursor-pointer">确认注销</button>
+             </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   )
 }
