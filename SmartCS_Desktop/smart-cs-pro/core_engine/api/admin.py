@@ -119,10 +119,33 @@ async def send_command(data: dict, request: Request, user: dict = Depends(check_
     if cmd_type == 'LOCK' and redis:
         lock_val = "1" if cmd_payload.get("lock") else "0"
         await redis.set(f"agent_lock_status:{target_username}", lock_val)
+    
+    # V3.88: 指令历史持久化 - 如果是 SOP 指令，存入 Redis 列表
+    if cmd_type == 'SOP' and redis:
+        sop_record = {
+            **cmd_payload,
+            "timestamp": int(time.time() * 1000),
+            "commander": user["real_name"]
+        }
+        key = f"sop_history:{target_username}"
+        await redis.lpush(key, json.dumps(sop_record))
+        await redis.ltrim(key, 0, 19) # 仅保留最近 20 条
+        await redis.expire(key, 86400 * 3) # 保留 3 天
 
     await ws_manager.send_personal_message({"type": f"TACTICAL_{cmd_type}", "payload": cmd_payload, "commander": user["real_name"]}, target_username)
     await record_audit(user["real_name"], f"CMD_{cmd_type}", target_username, f"下发物理干预指令: {json.dumps(cmd_payload)}")
     return {"status": "ok"}
+
+@router.get("/sop-history")
+async def get_sop_history(request: Request, current_user: dict = Depends(get_current_user)):
+    """[物理回溯] 从 Redis 获取当前节点的指令历史"""
+    redis = request.app.state.redis
+    if not redis: return {"status": "ok", "data": []}
+    
+    key = f"sop_history:{current_user['username']}"
+    raw_list = await redis.lrange(key, 0, 19)
+    history = [json.loads(x) for x in raw_list]
+    return {"status": "ok", "data": history}
 
 @router.get("/departments")
 async def get_departments(request: Request, page: int = 1, size: int = 10, current_user: dict = Depends(get_current_user)):

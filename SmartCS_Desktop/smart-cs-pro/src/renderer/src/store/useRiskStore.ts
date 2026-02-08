@@ -59,6 +59,7 @@ interface RiskState {
   setAiAnalysis: (analysis: AiUltraAnalysis) => void
   addViolation: (violation: Violation) => void
   addSopHistory: (sop: any) => void
+  setSopHistory: (history: any[]) => void
   resolveViolation: (violationId: string, solution: string) => void
   setSendMessage: (fn: (msg: any) => void) => void
 }
@@ -106,6 +107,7 @@ export const useRiskStore = create<RiskState>((set) => ({
       ...state.sopHistory.slice(0, 19) // 仅保留最近 20 条
     ] 
   })),
+  setSopHistory: (sopHistory) => set({ sopHistory }),
   resolveViolation: (id, solution) => set((state) => {
     const v = state.violations.find(x => x.id === id);
     if (!v) return state;

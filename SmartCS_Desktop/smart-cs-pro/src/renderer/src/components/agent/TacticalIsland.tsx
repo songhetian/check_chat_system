@@ -70,6 +70,20 @@ export const TacticalIsland = () => {
     enabled: !!token
   })
 
+  // V3.88: 物理回溯 - 初始化拉取 Redis 指令历史
+  useQuery({
+    queryKey: ['sop_history_init'],
+    queryFn: async () => {
+      const res = await window.api.callApi({ url: `${CONFIG.API_BASE}/admin/sop-history`, method: 'GET', headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.status === 200) {
+        useRiskStore.getState().setSopHistory(res.data.data);
+      }
+      return res.data.data;
+    },
+    enabled: !!token,
+    staleTime: Infinity // 仅初次加载
+  })
+
   useEffect(() => { if (token) refetch(); }, [token])
 
   useEffect(() => {
@@ -283,7 +297,10 @@ export const TacticalIsland = () => {
                   sopHistory.map((sop: any) => (
                     <div key={sop.id} className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-cyan-500/30 transition-all group">
                        <div className="flex justify-between items-start mb-2">
-                          <h5 className="text-sm font-black text-white group-hover:text-cyan-400 transition-colors">{sop.title}</h5>
+                          <div>
+                             <h5 className="text-sm font-black text-white group-hover:text-cyan-400 transition-colors">{sop.title}</h5>
+                             <p className="text-[8px] font-black text-cyan-600 uppercase tracking-widest mt-0.5">指令源: {sop.commander || '指挥部'}</p>
+                          </div>
                           <span className="text-[8px] font-mono text-slate-500">{new Date(sop.timestamp).toLocaleTimeString()}</span>
                        </div>
                        <p className="text-[10px] text-slate-400 line-clamp-2 mb-3 font-medium italic leading-relaxed">"{sop.content}"</p>
