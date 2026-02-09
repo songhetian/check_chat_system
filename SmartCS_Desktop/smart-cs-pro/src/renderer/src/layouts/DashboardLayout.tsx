@@ -83,10 +83,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const location = useLocation()
   const queryClient = useQueryClient()
   
-  // V3.50: 手风琴状态管理 (记录当前展开的分组 ID)
   const [activeGroup, setActiveGroup] = useState<string | null>(null)
   const [showNotif, setShowNotif] = useState(false)
-  const [isFullScreen, setIsFullScreen] = useState(false)
+  const [isMaximized, setIsMaximized] = useState(false) 
   const [selectedMsg, setSelectedMsg] = useState<Notification | null>(null)
   const bellRef = useRef<HTMLButtonElement | null>(null)
 
@@ -95,6 +94,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const group = menuGroups.find(g => g.items.some(i => i.path === location.pathname))
     if (group) setActiveGroup(group.id)
   }, [location.pathname])
+
+  // V5.25: 物理监听 Electron 窗口状态变更，实现图标同步
+  useEffect(() => {
+    const handleStateChange = (_: any, state: string) => {
+      setIsMaximized(state === 'maximized')
+    }
+    const removeListener = window.electron.ipcRenderer.on('window-state-change', handleStateChange)
+    return () => removeListener()
+  }, [])
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications_recent'],
@@ -112,12 +120,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pendingSyncCount = sysStatus?.pendingSyncCount ?? 0
   const unreadCount = notifications.filter(n => n.is_read === 0).length
 
-  // V3.71: 401 自动熔断逻辑 (已降级：仅提示不强制跳转，以支持离线模式)
+  // V3.71: 401 自动熔断逻辑 (已降级：仅提示不强制跳转)
   useEffect(() => {
     const handleGlobalError = (event: any) => {
       if (event.detail?.status === 401 || event.detail?.status === 403) {
         console.warn('🚨 [鉴权链路异常] 令牌已失效，当前已自动切入受限离线模式');
-        setOnline(false); // 强制 UI 进入离线态
+        setOnline(false);
         toast.error('链路凭证失效', { description: '中枢连接已转为受限访问，建议重新登录以恢复全功能' });
       }
     };
@@ -160,7 +168,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <button 
                       onClick={() => setActiveGroup(isOpen ? null : group.id)}
                       className={cn(
-                        "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group",
+                        "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group cursor-pointer",
                         (isOpen || hasActiveChild) ? "bg-white/5 text-cyan-400" : "text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]"
                       )}
                     >
@@ -260,8 +268,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                 <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
                   <button onClick={() => window.electron.ipcRenderer.send('minimize-window')} className="text-slate-400 hover:text-black transition-colors cursor-pointer" title="最小化"><Minus size={18} /></button>
-                  <button onClick={() => window.electron.ipcRenderer.send('set-fullscreen', !isFullScreen)} className="text-slate-400 hover:text-black transition-colors cursor-pointer" title="全屏切换">
-                    <Square size={14} />
+                  <button onClick={() => window.electron.ipcRenderer.send('toggle-maximize')} className="text-slate-400 hover:text-black transition-colors cursor-pointer" title={isMaximized ? "向下还原" : "最大化"}>
+                    {isMaximized ? <CopyIcon size={14} className="rotate-180" /> : <Square size={14} />}
                   </button>
                   <button onClick={() => window.electron.ipcRenderer.send('close-window')} className="text-slate-400 hover:text-red-500 transition-colors cursor-pointer" title="关闭"><X size={18} /></button>
                 </div>

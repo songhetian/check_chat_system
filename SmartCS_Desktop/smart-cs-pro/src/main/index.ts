@@ -436,9 +436,22 @@ function createWindow(): void {
   });
 
   // 窗口控制逻辑
-  ipcMain.on('minimize-window', () => mainWindow.minimize())
-  ipcMain.on('close-window', () => mainWindow.close())
+  ipcMain.on('minimize-window', () => mainWindow?.minimize())
+  ipcMain.on('close-window', () => mainWindow?.close())
   
+  // V5.25: 增强型最大化/还原控制
+  ipcMain.on('toggle-maximize', () => {
+    if (mainWindow?.isMaximized()) {
+      mainWindow.unmaximize()
+    } else {
+      mainWindow?.maximize()
+    }
+  })
+
+  // 监听原生窗口事件并物理同步至前端
+  mainWindow?.on('maximize', () => mainWindow?.webContents.send('window-state-change', 'maximized'))
+  mainWindow?.on('unmaximize', () => mainWindow?.webContents.send('window-state-change', 'normal'))
+
   // 动态置顶逻辑
   ipcMain.on('set-always-on-top', (_, flag: boolean) => {
     mainWindow.setAlwaysOnTop(flag, 'screen-saver') // 使用 screen-saver 等级确保在 Mac 上真正置顶
