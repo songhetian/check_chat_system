@@ -10,9 +10,10 @@ httptools==0.7.1
 idna==3.11
 msgpack==1.1.2
 packaging==26.0
-pydantic==2.12.5
 pydantic_core==2.41.5
+pydantic==2.12.5
 pyinstaller==6.18.0
+pyjwt
 PyMySQL==1.1.2
 pypika-tortoise==0.1.6
 pypinyin==0.55.0
