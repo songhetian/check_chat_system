@@ -31,6 +31,7 @@ const menuGroups = [
       { path: '/', icon: LayoutDashboard, label: '系统运行首页' },
       { path: '/command', icon: Zap, label: '成员实时监控' },
       { path: '/alerts', icon: ShieldAlert, label: '高危违规审计' },
+      { path: '/blacklist', icon: UserCog, label: '战术禁闭名单' },
     ]
   },
   {

@@ -34,6 +34,7 @@ import DeptWordsPage from './pages/admin/DeptWords'
 import ComplianceAuditPage from './pages/admin/ComplianceAudit'
 import VoiceAlertsPage from './pages/admin/VoiceAlerts'
 import BusinessSopsPage from './pages/admin/BusinessSops'
+import BlacklistPage from './pages/admin/Blacklist'
 import { 
   CheckCircle2, AlertCircle, ShieldAlert, User, Search, Filter, Activity, 
   Globe, ShieldCheck, Users, ArrowRight, Award, GraduationCap, Volume2, VolumeX, RefreshCw,
@@ -303,6 +304,7 @@ function App() {
               <Route path="/voice-alerts" element={<VoiceAlertsPage />} />
               <Route path="/business-sops" element={<BusinessSopsPage />} />
               <Route path="/compliance-audit" element={<ComplianceAuditPage />} />
+              <Route path="/blacklist" element={<BlacklistPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
             </Routes>
           </DashboardLayout>

@@ -294,6 +294,8 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 ('command:input:lock', '物理输入锁定', '实时指挥'),
 ('command:system:lock', '物理系统锁定', '实时指挥'),
 ('command:force:kill', '链路强制切断', '实时指挥'),
+('admin:blacklist:view', '禁闭名单查看', '实时指挥'),
+('admin:blacklist:delete', '战术封禁解除', '实时指挥'),
 ('command:push:script', '战术话术弹射', '实时指挥'),
 ('audit:log:view', '合规审计流查看', '风险拦截'),
 ('admin:violation:resolve', '违规风险处置', '风险拦截'),
@@ -327,3 +329,4 @@ INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (1, 'agent
 INSERT IGNORE INTO role_permissions (role_id, permission_code) SELECT 2, code FROM permissions WHERE code LIKE 'admin:sop:%';
 INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (2, 'command:force:kill');
 INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (3, 'command:force:kill');
+INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (2, 'admin:blacklist:view'), (2, 'admin:blacklist:delete'), (3, 'admin:blacklist:view'), (3, 'admin:blacklist:delete');

@@ -190,13 +190,55 @@ async def force_kill_link(data: dict, request: Request, user: dict = Depends(che
     return {"status": "ok", "message": f"目标 {target_username} 已物理切断"}
 
 @router.get("/blacklist")
-async def get_blacklist(current_user: dict = Depends(get_current_user)):
-    """[物理同步] 获取当前全量有效封禁名单"""
+async def get_blacklist(current_user: dict = Depends(check_permission("admin:blacklist:view"))):
+    """[物理隔离] 获取受限访问的操作员名单，执行部门数据熔断"""
     from tortoise import Tortoise
     conn = Tortoise.get_connection("default")
-    sql = "SELECT * FROM blacklist WHERE expired_at > NOW() ORDER BY created_at DESC"
-    data = await conn.execute_query_dict(sql)
+    
+    role_id = current_user.get("role_id")
+    dept_id = current_user.get("dept_id")
+
+    # 核心：物理 JOIN 检索，带出部门与姓名信息
+    base_sql = """
+        SELECT b.*, u.real_name, d.name as dept_name 
+        FROM blacklist b
+        JOIN users u ON b.username = u.username
+        LEFT JOIN departments d ON u.department_id = d.id
+        WHERE b.expired_at > NOW()
+    """
+    
+    params = []
+    # 物理隔离逻辑
+    if role_id != 3: # 非总部角色，强制锁定本部门数据
+        base_sql += " AND u.department_id = %s"
+        params.append(dept_id)
+    
+    base_sql += " ORDER BY b.created_at DESC"
+    
+    data = await conn.execute_query_dict(base_sql, params)
     return {"status": "ok", "data": data}
+
+@router.post("/blacklist/delete")
+async def delete_blacklist_item(data: dict, request: Request, user: dict = Depends(check_permission("admin:blacklist:delete"))):
+    """[战术解封] 物理移除黑名单记录并刷新 Redis 链路"""
+    username = data.get("username")
+    if not username: return {"status": "error", "message": "未指定目标"}
+    
+    redis = request.app.state.redis
+    from tortoise import Tortoise
+    conn = Tortoise.get_connection("default")
+    
+    async with in_transaction() as db_conn:
+        # 1. 物理移除 MySQL 记录
+        await conn.execute_query("DELETE FROM blacklist WHERE username = %s", [username])
+        
+        # 2. 同步清理 Redis 缓存
+        if redis:
+            await redis.delete(f"blacklist:{username}")
+            
+        await record_audit(user["real_name"], "UNBAN_USER", username, "手动解除战术封禁，恢复链路权限")
+        
+    return {"status": "ok", "message": f"操作员 {username} 已成功解封"}
 
 @router.get("/sop-history")
 async def get_sop_history(request: Request, current_user: dict = Depends(get_current_user)):
