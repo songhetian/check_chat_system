@@ -51,6 +51,7 @@ description: Smart-CS Pro (数智化运营治理平台) 专用开发与维护 Sk
 
 ## 4. 核心参考文档
 在执行任务前，请根据需要读取以下参考资料：
+- [V5.00 鉴权与物理干预](references/auth-and-tactical-v5.md): JWT 架构、多文件 SOP 规范、物理切断指令。
 - [UI 设计规范](references/ui-standards.md): 颜色、圆角、Tailwind 类。
 - [实时事件系统](references/event-system.md): WebSocket 事件定义、IPC 通道说明。
 - [核心引擎架构](references/architecture.md): 混合通信模式与离线缓冲机制。
