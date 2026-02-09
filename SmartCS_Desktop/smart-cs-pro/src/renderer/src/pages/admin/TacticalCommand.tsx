@@ -73,6 +73,8 @@ export default function TacticalCommand() {
   const [sopLoading, setSopLoading] = useState(false)
 
   const [showLockPrompt, setShowLockPrompt] = useState(false)
+  const [showKillModal, setShowKillModal] = useState(false) // V5.30: 物理封禁模态框
+  const [killDuration, setKillDuration] = useState(0)
   const [pendingLockMsg, setPendingLockMsg] = useState('')
 
   const isHQ = user?.role_id === ROLE_ID.HQ || user?.role_code === 'HQ'
@@ -134,7 +136,7 @@ export default function TacticalCommand() {
   }
 
   // V5.20: 物理切断指令执行
-  const handleForceKill = async (username: string) => {
+  const handleForceKill = async (username: string, duration: number = 0) => {
     if (processing) return
     setProcessing('KILL')
     try {
@@ -142,10 +144,11 @@ export default function TacticalCommand() {
         url: `${CONFIG.API_BASE}/admin/force-kill`,
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
-        data: { username }
+        data: { username, duration }
       })
       if (res.status === 200 || res.data?.status === 'ok') {
-        toast.success('物理切断成功', { description: `已物理断开目标 ${username} 的战术链路` })
+        toast.success(duration > 0 ? '目标已物理封禁' : '链路已强制切断')
+        setShowKillModal(false)
         fetchData(true) // 静默刷新列表
       }
     } finally { setProcessing(null) }
@@ -328,7 +331,7 @@ export default function TacticalCommand() {
                            <span className="text-[9px] font-bold text-cyan-600 italic font-mono uppercase">Node: {activeAgent.real_name}</span>
                         </div>
                      </div>
-                     <div className="grid grid-cols-4 gap-4">
+                     <div className="grid grid-cols-5 gap-3">
                         <CommandBtn 
                           active={isInputLocked} 
                           loading={processing === 'LOCK'} 
@@ -339,8 +342,8 @@ export default function TacticalCommand() {
                               setShowLockPrompt(true);
                             }
                           }} 
-                          icon={isInputLocked ? Lock : Unlock} 
-                          label={isInputLocked ? '锁定中' : '强制锁定'} 
+                          icon={Lock} 
+                          label={isInputLocked ? '解除锁定' : '强制锁定'} 
                           color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : (isInputLocked ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200')} 
                           disabled={!isOnline} 
                         />
@@ -351,11 +354,7 @@ export default function TacticalCommand() {
                         {/* V5.20: 物理切断按钮 */}
                         <CommandBtn 
                           loading={processing === 'KILL'} 
-                          onClick={() => {
-                            if (window.confirm(`确定要物理切断操作员 [${activeAgent.real_name}] 的战术链路吗？此操作将封禁其账号 24 小时。`)) {
-                              handleForceKill(activeAgent.username)
-                            }
-                          }} 
+                          onClick={() => setShowKillModal(true)} 
                           icon={MonitorX} 
                           label="强制切断" 
                           color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-red-600 text-white shadow-lg shadow-red-200'} 
@@ -487,16 +486,72 @@ export default function TacticalCommand() {
                      </div>
                      
                      <div className="flex gap-3">
-                        <button onClick={() => setShowLockPrompt(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all active:scale-95">取消</button>
+                        <button onClick={() => setShowLockPrompt(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all active:scale-95 cursor-pointer">取消</button>
                         <button 
                            onClick={() => {
                               executeIntervention('LOCK', '锁定', { lock: true, message: pendingLockMsg });
                               setShowLockPrompt(false);
                               setPendingLockMsg('');
                            }} 
-                           className="flex-[2] py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-red-900/20 hover:bg-red-700 transition-all active:scale-95 flex items-center justify-center gap-2"
+                           className="flex-[2] py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-red-900/20 hover:bg-red-700 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                         >
                            确认并执行锁定
+                        </button>
+                     </div>
+                  </div>
+               </motion.div>
+            </div>
+         )}
+      </AnimatePresence>
+
+      {/* V5.30: 物理切断与封禁模态框 */}
+      <AnimatePresence>
+         {showKillModal && (
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 text-black">
+               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowKillModal(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+               <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} className="bg-white w-full max-w-md rounded-[40px] shadow-2xl relative z-10 overflow-hidden p-10">
+                  <div className="flex flex-col items-center text-center mb-8">
+                     <div className="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center shadow-inner mb-4">
+                        <MonitorX size={32} />
+                     </div>
+                     <h4 className="text-2xl font-black text-black uppercase italic tracking-tighter">物理链路切断</h4>
+                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">正在处理目标节点: {activeAgent?.real_name}</p>
+                  </div>
+                  
+                  <div className="space-y-6">
+                     <div>
+                        <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block text-center tracking-[0.2em]">请选择战术封禁时长</label>
+                        <div className="grid grid-cols-2 gap-2">
+                           {[
+                             { label: '仅下线 (不封禁)', val: 0 },
+                             { label: '禁闭 1 小时', val: 3600 },
+                             { label: '禁闭 12 小时', val: 43200 },
+                             { label: '禁闭 24 小时', val: 86400 },
+                             { label: '禁闭 7 天', val: 604800 },
+                             { label: '永久封锁', val: 315360000 }
+                           ].map(opt => (
+                             <button 
+                               key={opt.val}
+                               onClick={() => setKillDuration(opt.val)}
+                               className={cn(
+                                 "py-3 rounded-xl text-[10px] font-black uppercase transition-all border cursor-pointer",
+                                 killDuration === opt.val ? "bg-red-600 text-white border-red-600 shadow-lg shadow-red-200" : "bg-slate-50 text-slate-500 border-slate-100 hover:border-red-200"
+                               )}
+                             >
+                               {opt.label}
+                             </button>
+                           ))}
+                        </div>
+                     </div>
+                     
+                     <div className="flex gap-3 pt-4">
+                        <button onClick={() => setShowKillModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all cursor-pointer">取消</button>
+                        <button 
+                           onClick={() => handleForceKill(activeAgent.username, killDuration)} 
+                           className="flex-[2] py-4 bg-black text-white rounded-2xl font-black text-[10px] uppercase shadow-xl hover:bg-red-700 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                           {processing === 'KILL' ? <Loader2 className="animate-spin" size={14}/> : <CheckCircle2 size={14}/>}
+                           执行物理切断指令
                         </button>
                      </div>
                   </div>

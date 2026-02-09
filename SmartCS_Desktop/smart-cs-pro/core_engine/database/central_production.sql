@@ -213,6 +213,16 @@ CREATE TABLE IF NOT EXISTS dept_sensitive_words (
     FOREIGN KEY (department_id) REFERENCES departments(id)
 ) ENGINE=InnoDB;
 
+-- 19. 战术禁闭名单 (黑名单)
+CREATE TABLE IF NOT EXISTS blacklist (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    expired_at TIMESTAMP NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_expiry (username, expired_at)
+) ENGINE=InnoDB;
+
 -- ==========================================
 -- 初始数据填充
 -- ==========================================

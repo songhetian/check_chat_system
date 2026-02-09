@@ -6,6 +6,7 @@ from tortoise.expressions import Q
 from tortoise.functions import Count
 from tortoise.transactions import in_transaction
 import os, json, asyncio, time
+from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
@@ -150,28 +151,42 @@ async def send_command(data: dict, request: Request, user: dict = Depends(check_
 
 @router.post("/force-kill")
 async def force_kill_link(data: dict, request: Request, user: dict = Depends(check_permission("command:force:kill"))):
-    """[物理打击] 强制切断目标节点的战术链路并拉黑"""
+    """[物理打击] 强制切断目标节点的战术链路并根据时长拉黑"""
     target_username = data.get("username")
+    duration = int(data.get("duration", 0)) # 单位：秒，0 表示仅踢下线
     redis = request.app.state.redis
     ws_manager = request.app.state.ws_manager
     
     if not target_username: return {"status": "error", "message": "未指定打击目标"}
 
-    # 1. 注入 Redis 黑名单 (有效期 24 小时)
-    if redis:
-        await redis.setex(f"blacklist:{target_username}", 86400, "1")
-        # 顺便清除在线标记
-        await redis.srem("online_agents_set", target_username)
+    # 1. 如果需要封禁，执行物理拉黑
+    if duration > 0:
+        expiry_dt = datetime.now() + timedelta(seconds=duration)
+        # A. 写入 Redis (极速拦截)
+        if redis:
+            await redis.setex(f"blacklist:{target_username}", duration, "1")
+        
+        # B. 写入 MySQL (持久化)
+        # 注意：此处需先在 core.models 定义 Blacklist 模型或使用原生 SQL
+        from tortoise import Tortoise
+        conn = Tortoise.get_connection("default")
+        sql = "INSERT INTO blacklist (username, expired_at, reason) VALUES (%s, %s, %s)"
+        await conn.execute_query(sql, [target_username, expiry_dt.strftime('%Y-%m-%d %H:%M:%S'), f"指挥部手动干预 - 时长: {duration}s"])
 
-    # 2. 发送物理下线指令
+    # 2. 物理标记离线
+    if redis:
+        await redis.srem("online_agents_set", target_username)
+        await redis.delete(f"agent_heartbeat:{target_username}")
+
+    # 3. 发送物理下线指令
     if ws_manager:
         await ws_manager.send_personal_message({
             "type": "TERMINATE_SESSION", 
-            "message": "指挥部已强制切断您的物理链路",
+            "message": "指挥部已强制切断您的物理链路" if duration == 0 else f"您的账号已被封禁至 { (datetime.now() + timedelta(seconds=duration)).strftime('%m-%d %H:%M') }",
             "commander": user["real_name"]
         }, target_username)
 
-    await record_audit(user["real_name"], "FORCE_KILL", target_username, "物理切断战术链路并封禁 24h")
+    await record_audit(user["real_name"], "FORCE_KILL", target_username, f"物理切断链路 (封禁时长: {duration}s)")
     return {"status": "ok", "message": f"目标 {target_username} 已物理切断"}
 
 @router.get("/sop-history")
