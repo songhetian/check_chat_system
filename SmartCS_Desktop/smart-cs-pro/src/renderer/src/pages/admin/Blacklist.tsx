@@ -88,21 +88,23 @@ export default function BlacklistPage() {
               ) : (
                 blacklist.map((item: any) => (
                   <tr key={item.id} className="hover:bg-red-50/30 transition-colors group text-sm font-bold text-slate-600 text-center border-b border-slate-50">
-                    <td className="px-8 py-5 text-left min-w-[200px]">
-                      <div className="flex items-center gap-4">
+                    <td className="px-8 py-5 min-w-[200px]">
+                      <div className="flex items-center justify-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-black text-xs shadow-inner shrink-0">
                           {item.real_name?.[0]}
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-slate-900">{item.real_name}</span>
-                          <span className="text-[9px] text-slate-400 font-mono">@{item.username}</span>
+                        <div className="flex flex-col text-left">
+                          <span className="text-sm font-black text-slate-900 leading-none">{item.real_name}</span>
+                          <span className="text-[9px] text-slate-400 font-mono mt-1">@{item.username}</span>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase tracking-widest mx-auto block w-fit">
-                        {item.dept_name || '全域通用'}
-                      </span>
+                      <div className="flex items-center justify-center">
+                        <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-2xl text-[9px] font-black border border-slate-200 uppercase tracking-widest">
+                          {item.dept_name || '全域通用'}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-5 italic opacity-60 text-[11px] font-medium max-w-xs truncate">
                       "{item.reason || '指挥部手动执行'}"

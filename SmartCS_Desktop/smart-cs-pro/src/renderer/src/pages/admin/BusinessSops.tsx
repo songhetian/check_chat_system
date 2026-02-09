@@ -355,7 +355,6 @@ export default function BusinessSopsPage() {
             previewText = '[Markdown 物理载荷]';
           }
         } catch (e) {
-          // 如果解析失败且包含 http，则标记为远程载荷
           if (String(item.content).includes('http')) {
             previewText = '[远程物理资源]';
           }
@@ -364,9 +363,11 @@ export default function BusinessSopsPage() {
 
       return (
         <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group text-sm font-bold text-slate-600 text-center border-b border-slate-50">
-          <td className="px-8 py-5 font-black text-slate-900 text-center min-w-[200px]">{item.title || '未命名规范'}</td>
+          <td className="px-8 py-5 font-black text-slate-900 text-center min-w-[200px]">
+            <div className="flex justify-center">{item.title || '未命名规范'}</div>
+          </td>
           <td className="px-6 py-5 text-center max-w-md">
-            <div className="mx-auto truncate italic opacity-60 w-fit max-w-[300px] font-medium">
+            <div className="mx-auto truncate italic opacity-60 w-fit max-w-[300px] font-medium text-center">
               {item.content ? `"${previewText}"` : <span className="text-[10px] uppercase tracking-tighter opacity-30">空内容</span>}
             </div>
           </td>
