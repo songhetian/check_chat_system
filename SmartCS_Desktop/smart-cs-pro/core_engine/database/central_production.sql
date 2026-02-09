@@ -168,8 +168,8 @@ CREATE TABLE IF NOT EXISTS voice_alerts (
 CREATE TABLE IF NOT EXISTS business_sops (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(100) NOT NULL,
-    content TEXT NOT NULL,
-    sop_type VARCHAR(20) NOT NULL,
+    content TEXT NOT NULL, -- 存储逻辑：TEXT模式存字符串，多载荷模式存 JSON 数组 ["url1", "url2"]
+    sop_type VARCHAR(20) NOT NULL, -- 载荷类型：TEXT, MD, IMAGE, FILE, VIDEO
     department_id INT,
     is_deleted TINYINT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -283,6 +283,7 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES
 ('admin:customer:export', '全量画像导出', '风险拦截'),
 ('command:input:lock', '物理输入锁定', '实时指挥'),
 ('command:system:lock', '物理系统锁定', '实时指挥'),
+('command:force:kill', '链路强制切断', '实时指挥'),
 ('command:push:script', '战术话术弹射', '实时指挥'),
 ('audit:log:view', '合规审计流查看', '风险拦截'),
 ('admin:violation:resolve', '违规风险处置', '风险拦截'),
@@ -314,3 +315,5 @@ INSERT IGNORE INTO permissions (code, name, module) VALUES ('agent:action:side_p
 INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (1, 'agent:action:side_panel'), (1, 'agent:view:customer_insight'), (1, 'agent:alert:attitude'), (3, 'agent:action:side_panel'), (3, 'agent:view:customer_insight'), (3, 'agent:alert:attitude');
 
 INSERT IGNORE INTO role_permissions (role_id, permission_code) SELECT 2, code FROM permissions WHERE code LIKE 'admin:sop:%';
+INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (2, 'command:force:kill');
+INSERT IGNORE INTO role_permissions (role_id, permission_code) VALUES (3, 'command:force:kill');
