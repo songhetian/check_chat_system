@@ -250,7 +250,12 @@ export const TacticalIsland = () => {
     const originalText = content;
     try {
       const serverConfig = await window.api.getServerConfig()
-      const prompt = `请直接重写这段话术，使其语气更加${selectedSentiment.name}。规则：只输出重写后的一句话,不要有任何多余的解释。原文：${originalText}`;
+      const prompt = `你是一位金牌客服专家。现在的战术任务是：基于“[${selectedSentiment.name}]”这一应对策略，重写坐席的话术草稿，使其更具亲和力、专业度，且能显著提升客户满意度。
+规则：
+1. 保持原意不变，禁止过度修饰。
+2. 语气要自然得体，严禁机械化输出。
+3. 只输出重写后的纯净话术，严禁包含任何前缀、解释或双引号。
+原文：${originalText}`;
       
       // V5.60: 物理增强 - 采用流式物理载荷解析引擎
       const response = await fetch(serverConfig.ai_engine.url, { 
