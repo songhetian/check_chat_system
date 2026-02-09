@@ -197,13 +197,13 @@ const AgentView = () => {
     
     const onViolation = (e: any) => {
       if (!isMuted) {
-        // V3.72: 放弃对物理文件的依赖，改用 TTS 播报增强实战感知
+        // V3.72: 增强实战感知
         try {
           window.speechSynthesis.cancel();
           const text = `警告：检测到违规项，关键词为：${e.detail.keyword}`;
           const utterance = new SpeechSynthesisUtterance(text);
           utterance.lang = 'zh-CN';
-          utterance.rate = 1.1; // 略微加快语速提升紧迫感
+          utterance.rate = 1.1;
           window.speechSynthesis.speak(utterance);
         } catch (err) {
           console.warn('TTS 播报失败', err);
@@ -219,8 +219,23 @@ const AgentView = () => {
       })
     }
 
+    const handleGlobalError = (event: any) => {
+      if (event.detail?.status === 401 || event.detail?.status === 403) {
+        console.warn('🚨 [鉴权链路异常] 令牌已失效，正在为您物理重置');
+        setOnline(false);
+        // V5.48: 物理强制重置 - 清理失效令牌并强制跳转至登录页
+        useAuthStore.getState().logout();
+        toast.error('链路凭证已彻底失效', { 
+          description: '系统已自动清理陈旧凭证，请重新登录同步最新战术授权',
+          duration: 5000
+        });
+        setTimeout(() => { window.location.hash = '/login'; }, 1000);
+      }
+    };
+
     window.addEventListener('trigger-toast', onToast)
     window.addEventListener('trigger-violation-alert', onViolation)
+    window.addEventListener('api-response-error', handleGlobalError);
     window.addEventListener('trigger-permission-toast', (e: any) => { 
       toast.info(e.detail.title, { description: e.detail.message })
     })
@@ -228,14 +243,15 @@ const AgentView = () => {
     return () => {
       window.removeEventListener('trigger-toast', onToast); 
       window.removeEventListener('trigger-violation-alert', onViolation)
+      window.removeEventListener('api-response-error', handleGlobalError);
     }
-  }, [isMuted])
+  }, [isMuted, setOnline])
 
   return (
     <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600")}>
       <TacticalIsland />
 
-      {/* 侧边栏组件 - 实时画像 (已重构为侧边栏样式) */}
+      {/* 侧边栏组件 - 实时画像 */}
       <AnimatePresence>
         {layoutMode === 'SIDE' && activeSideTool === 'CUSTOMERS' && currentCustomer && (
           <CustomerHUD data={currentCustomer} onDismiss={() => setLayoutMode('FLOAT')} />
@@ -256,7 +272,7 @@ const AgentView = () => {
         )}
       </AnimatePresence>
       
-      {/* V3.22: 物理锁定遮罩 - 阻止一切交互，且覆盖悬浮框 */}
+      {/* V3.22: 物理锁定遮罩 - 阻止一切交互 */}
       <AnimatePresence>
         {isLocked && (
           <motion.div 

@@ -267,8 +267,13 @@ function createWindow(): void {
 
       const response = await fetch(cacheBustedUrl, {
         method: method || 'GET',
-        headers: finalHeaders,
+        headers: {
+          ...finalHeaders,
+          'Connection': 'close' // 禁用长连接，防止局域网链路假死
+        },
         body,
+        // @ts-ignore - 强制 IPv4 优先，解决某些环境下 IPv6 导致的 fetch failed
+        family: 4, 
         signal: AbortSignal.timeout(10000)
       })
       
@@ -316,7 +321,14 @@ function createWindow(): void {
 
       return { status: response.status, data: result }
     } catch (e: any) {
-      console.error(`❌ [API 转发崩溃拦截] URL: ${url} | Error: ${e.message}`)
+      // V4.95: 增强型物理链路排障日志
+      const errorDetail = {
+        message: e.message,
+        code: e.code,
+        cause: e.cause?.message || e.cause?.code || '未知诱因',
+        stack: e.stack?.split('\n')[0]
+      };
+      console.error(`❌ [API 转发崩溃拦截] URL: ${url} | 详情:`, errorDetail);
       
       try {
         // 离线读缓存逻辑：如果是 GET 请求失败，尝试从缓存返回 (排除健康检查)
