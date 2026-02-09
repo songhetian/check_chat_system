@@ -235,10 +235,10 @@ const AgentView = () => {
     <div className={cn("bg-transparent relative h-screen w-screen overflow-hidden transition-all duration-500 grain", isRedAlert && "bg-red-600/20 shadow-[inset_0_0_100px_rgba(220,38,38,0.5)] border-4 border-red-600")}>
       <TacticalIsland />
 
-      {/* 实时画像组件 */}
+      {/* 侧边栏组件 - 实时画像 (已重构为侧边栏样式) */}
       <AnimatePresence>
-        {isCustomerHudEnabled && currentCustomer && (
-          <CustomerHUD data={currentCustomer} onDismiss={() => setCustomerHudEnabled(false)} />
+        {layoutMode === 'SIDE' && activeSideTool === 'CUSTOMERS' && currentCustomer && (
+          <CustomerHUD data={currentCustomer} onDismiss={() => setLayoutMode('FLOAT')} />
         )}
       </AnimatePresence>
 

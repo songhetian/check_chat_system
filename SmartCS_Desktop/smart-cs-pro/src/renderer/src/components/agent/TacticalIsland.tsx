@@ -29,8 +29,8 @@ export const TacticalIsland = () => {
 
   // V4.10: 随机物理画像抽取引擎
   const triggerRandomCustomer = async () => {
-    if (isCustomerHudEnabled) {
-      setCustomerHudEnabled(false);
+    if (layoutMode === 'SIDE' && activeSideTool === 'CUSTOMERS') {
+      setLayoutMode('FLOAT');
       return;
     }
 
@@ -57,7 +57,6 @@ export const TacticalIsland = () => {
           lastProducts: ['战术级核心包', '全域监控模块']
         };
       } else {
-        // 2. 物理兜底数据 (当数据库为空时)
         customerData = {
           name: '样板大客户(模拟)',
           level: 'VIP',
@@ -71,10 +70,12 @@ export const TacticalIsland = () => {
       }
 
       setCurrentCustomer(customerData);
-      setCustomerHudEnabled(true);
+      setLayoutMode('SIDE');
+      setActiveSideTool('CUSTOMERS' as any);
     } catch (e) {
       console.error('画像抽取失败', e);
-      setCustomerHudEnabled(!isCustomerHudEnabled);
+      setLayoutMode('SIDE');
+      setActiveSideTool('CUSTOMERS' as any);
     }
   }
 
@@ -538,7 +539,7 @@ export const TacticalIsland = () => {
                     <HubBtn icon={<PenTool size={20} />} active={isScratchpad} onClick={() => { setContent(''); setIsScratchpad(true); setHasOptimized(false); }} title="草稿" color="emerald" />
                     <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="资料" color="white" />
                     <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
-                    <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={triggerRandomCustomer} title="画像" color={isCustomerHudEnabled ? "emerald" : "white"} />
+                    <HubBtn icon={<Tags size={20} />} active={layoutMode === 'SIDE' && activeSideTool === 'CUSTOMERS'} onClick={triggerRandomCustomer} title="画像" color={(layoutMode === 'SIDE' && activeSideTool === 'CUSTOMERS') ? "emerald" : "white"} />
                     <div className="w-px h-5 bg-white/10 mx-0.5" />
                     <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景" color="emerald" />
                     <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="求助" color="red" />
