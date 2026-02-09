@@ -18,8 +18,17 @@ def get_hash(p: str, s: str):
 async def get_current_user(request: Request, creds: HTTPAuthorizationCredentials = Depends(security)):
     token = creds.credentials
     try:
-        # 核心：物理校验 JWT 签名 (即使 Redis 重启也能通过)
+        # 1. 物理校验 JWT 签名
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        
+        # 2. V5.20: 引入黑名单拦截 (物理撤回权)
+        redis = request.app.state.redis
+        if redis:
+            is_blocked = await redis.get(f"blacklist:{payload['username']}")
+            if is_blocked:
+                logger.warning(f"🚫 [物理拦截] 处于黑名单的用户尝试访问: {payload['username']}")
+                raise HTTPException(status_code=401, detail="您的战术链路已被指挥部物理切断")
+                
         return payload
     except jwt.ExpiredSignatureError:
         logger.warning(f"🚨 [鉴权失效] 令牌已过期")

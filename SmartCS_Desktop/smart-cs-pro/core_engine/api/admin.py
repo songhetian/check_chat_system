@@ -148,6 +148,36 @@ async def send_command(data: dict, request: Request, user: dict = Depends(check_
     await record_audit(user["real_name"], f"CMD_{cmd_type}", target_username, f"下发物理干预指令: {json.dumps(cmd_payload)}")
     return {"status": "ok"}
 
+@router.post("/command")
+async def send_command(data: dict, request: Request, user: dict = Depends(check_permission("command:input:lock"))):
+    # ... (保持原有逻辑)
+
+@router.post("/force-kill")
+async def force_kill_link(data: dict, request: Request, user: dict = Depends(check_permission("admin:user:delete"))):
+    """[物理打击] 强制切断目标节点的战术链路并拉黑"""
+    target_username = data.get("username")
+    redis = request.app.state.redis
+    ws_manager = request.app.state.ws_manager
+    
+    if not target_username: return {"status": "error", "message": "未指定打击目标"}
+
+    # 1. 注入 Redis 黑名单 (有效期 24 小时)
+    if redis:
+        await redis.setex(f"blacklist:{target_username}", 86400, "1")
+        # 顺便清除在线标记
+        await redis.srem("online_agents_set", target_username)
+
+    # 2. 发送物理下线指令
+    if ws_manager:
+        await ws_manager.send_personal_message({
+            "type": "TERMINATE_SESSION", 
+            "message": "指挥部已强制切断您的物理链路",
+            "commander": user["real_name"]
+        }, target_username)
+
+    await record_audit(user["real_name"], "FORCE_KILL", target_username, "物理切断战术链路并封禁 24h")
+    return {"status": "ok", "message": f"目标 {target_username} 已物理切断"}
+
 @router.get("/sop-history")
 async def get_sop_history(request: Request, current_user: dict = Depends(get_current_user)):
     """[物理回溯] 从 Redis 获取当前节点的指令历史"""
