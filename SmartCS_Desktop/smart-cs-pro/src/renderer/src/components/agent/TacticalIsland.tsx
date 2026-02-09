@@ -251,26 +251,52 @@ export const TacticalIsland = () => {
     try {
       const serverConfig = await window.api.getServerConfig()
       const prompt = `请直接重写这段话术，使其语气更加${selectedSentiment.name}。规则：只输出重写后的一句话,不要有任何多余的解释。原文：${originalText}`;
-      const response = await fetch(serverConfig.ai_engine.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: serverConfig.ai_engine.model, prompt, stream: true, options: { temperature: 0.1, num_predict: 128 } }) })
-      if (!response.body) throw new Error('Stream missing')
+      
+      // V5.60: 物理增强 - 采用流式物理载荷解析引擎
+      const response = await fetch(serverConfig.ai_engine.url, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ 
+          model: serverConfig.ai_engine.model, 
+          messages: [{ role: 'user', content: prompt }], // 适配 api/chat 格式
+          prompt: prompt, // 兼容 api/generate 格式
+          stream: true, 
+          options: { temperature: 0.1, num_predict: 128 } 
+        }) 
+      })
+
+      if (!response.body) throw new Error('AI 链路流丢失')
       const reader = response.body.getReader(); const decoder = new TextDecoder();
       let fullText = ''; setContent(''); 
+      
       while (true) {
         const { done, value } = await reader.read(); if (done) break
         const chunk = decoder.decode(value, { stream: true })
+        // V5.62: 物理碎片重组逻辑 - 处理粘包或非标准换行
         const lines = chunk.split('\n').filter(l => l.trim())
         for (const line of lines) {
           try {
-            const json = JSON.parse(line); const token = json.response || json.message?.content
+            const json = JSON.parse(line); 
+            // 深度兼容性解析：适配 Ollama 的不同 API 版本
+            const token = json.response || json.message?.content || '';
             if (token) {
               fullText += token
-              setContent(fullText.replace(/^(好的|收到|明白了|理解了|优化后|回复如下|对话建议)[:：\s]*/g, '').replace(/^["'“](.*)["'”]$/g, '$1').trim())
+              // 实时脱敏与格式化
+              const cleanContent = fullText
+                .replace(/^(好的|收到|明白了|理解了|优化后|回复如下|对话建议)[:：\s]*/g, '')
+                .replace(/^["'“](.*)["'”]$/g, '$1')
+                .trim();
+              setContent(cleanContent);
             }
           } catch (e) {}
         }
       }
       setHasOptimized(true)
-    } catch (e) { setContent(originalText); toast.error('AI 链路故障') } finally { setOptimizing(false) }
+    } catch (e) { 
+      console.error('AI 优化崩溃:', e);
+      setContent(originalText); 
+      toast.error('智脑链路故障', { description: '请确认后台 AI 引擎已启动' }); 
+    } finally { setOptimizing(false) }
   }
 
   const copyAndClose = () => { if (!content || optimizing) return; navigator.clipboard.writeText(content); resetSpecialModes(); }

@@ -93,7 +93,14 @@ export const useRiskSocket = () => {
         }
       }
 
-      socket.onclose = () => {
+      socket.onclose = (e) => {
+        // V5.55: 强制鉴权熔断检测 - 如果 CloseCode 为 1008 (Policy Violation)，通常意味着 403 Forbidden
+        if (e.code === 1008) {
+          console.error('🚨 [WS 拒绝] 检测到鉴权熔断信号，正在通知系统物理重置');
+          window.dispatchEvent(new CustomEvent('api-response-error', { detail: { status: 403 } }));
+          return;
+        }
+
         // V3.82: 增加断开缓冲，避免瞬间闪断导致 UI 剧烈抖动
         clearTimeout(graceTimer);
         graceTimer = setTimeout(() => {

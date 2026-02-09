@@ -87,7 +87,9 @@ class ConnectionManager:
         """
         for user, connection in self.active_connections.items():
             role = self.user_roles.get(user)
-            if role in [RoleID.ADMIN, RoleID.HQ]:
+            # V5.52: 兼容性加固 - 处理数字或字符串形式的 RoleID
+            is_management = str(role) in [str(RoleID.ADMIN), str(RoleID.HQ)]
+            if is_management:
                 await connection.send_json(message)
 
     async def broadcast(self, message: dict):

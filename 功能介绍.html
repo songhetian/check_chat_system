@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数智化运营治理平台 - 全量功能全景手册</title>
+    <title>Smart-CS Pro | 全量功能全景手册</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -11,12 +11,13 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .section-anchor { padding-top: 20px; margin-top: -20px; }
-        .svg-card { background: #0f172a; border-radius: 24px; padding: 24px; border: 1px solid #1e293b; transition: all 0.3s; }
-        .svg-card:hover { border-color: #0ea5e9; box-shadow: 0 0 30px rgba(14, 165, 233, 0.1); }
+        .section-anchor { padding-top: 40px; margin-top: -20px; }
+        .svg-card { background: #0f172a; border-radius: 24px; padding: 24px; border: 1px solid #1e293b; transition: all 0.3s; position: relative; overflow: hidden; }
+        .svg-card:hover { border-color: #0ea5e9; box-shadow: 0 0 40px rgba(14, 165, 233, 0.15); }
         .status-tag { font-size: 9px; padding: 2px 10px; border-radius: 6px; font-weight: 900; letter-spacing: 1px; }
         .done { background: #10b981; color: white; }
         .pending { background: #f59e0b; color: white; }
+        .client-effect { background: rgba(14, 165, 233, 0.05); border-left: 4px solid #0ea5e9; padding: 12px 20px; border-radius: 0 12px 12px 0; font-size: 13px; color: #94a3b8; font-style: italic; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-300 flex overflow-hidden h-screen">
@@ -26,46 +27,65 @@
         <div class="p-8 shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20 font-black text-white text-xs">LOGO</div>
-                <span class="text-xl font-black text-white tracking-tighter italic uppercase">治理平台手册</span>
+                <div class="flex flex-col">
+                    <span class="text-xl font-black text-white tracking-tighter italic uppercase leading-none">Smart-CS Pro</span>
+                    <span class="text-[8px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Operational Governance</span>
+                </div>
             </div>
         </div>
-        <nav class="flex-1 overflow-y-auto custom-scrollbar px-4 pb-20 space-y-8 text-[11px] font-black uppercase tracking-widest">
+        <nav class="flex-1 overflow-y-auto custom-scrollbar px-4 pb-20 space-y-8 text-[10px] font-black uppercase tracking-widest">
+            <!-- 实时指挥 -->
             <div>
-                <h5 class="px-4 text-slate-600 mb-4">实时指挥中心</h5>
-                <div class="space-y-1">
+                <h5 class="px-4 text-slate-600 mb-4 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-cyan-500"></div> 实时指挥中心</h5>
+                <div class="space-y-1 pl-4 border-l border-white/5 ml-4">
                     <a href="#f-home" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">系统运行首页</a>
                     <a href="#f-monitor" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">成员实时监控</a>
                     <a href="#f-alerts" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">高危违规审计</a>
                     <a href="#f-blacklist" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">战术禁闭名单</a>
                 </div>
             </div>
+            <!-- 合规策略 -->
             <div>
-                <h5 class="px-4 text-slate-600 mb-4">合规策略中枢</h5>
-                <div class="space-y-1">
+                <h5 class="px-4 text-slate-600 mb-4 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> 合规策略中枢</h5>
+                <div class="space-y-1 pl-4 border-l border-white/5 ml-4">
                     <a href="#f-comp-audit" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">部门合规审计</a>
                     <a href="#f-words" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">规避词库管理</a>
                     <a href="#f-sentiments" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">情绪维度定义</a>
                 </div>
             </div>
+            <!-- 组织权限 -->
             <div>
-                <h5 class="px-4 text-slate-600 mb-4">组织与权限</h5>
-                <div class="space-y-1">
+                <h5 class="px-4 text-slate-600 mb-4 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> 组织与权限</h5>
+                <div class="space-y-1 pl-4 border-l border-white/5 ml-4">
                     <a href="#f-dept" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">部门架构管理</a>
+                    <a href="#f-users" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">成员账号管理</a>
                     <a href="#f-rbac" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">角色权限定义</a>
+                    <a href="#f-categories" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">业务分类管理</a>
                     <a href="#f-voice" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">语音库管理</a>
                     <a href="#f-sops" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">SOP 规范管理</a>
                 </div>
             </div>
+            <!-- 基础档案 -->
             <div>
-                <h5 class="px-4 text-slate-600 mb-4">基础战术档案</h5>
-                <div class="space-y-1">
+                <h5 class="px-4 text-slate-600 mb-4 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div> 基础战术档案</h5>
+                <div class="space-y-1 pl-4 border-l border-white/5 ml-4">
                     <a href="#f-customers" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">客户档案管理</a>
                     <a href="#f-products" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">商品资料管理</a>
+                    <a href="#f-tools" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">常用辅助工具</a>
                 </div>
             </div>
+            <!-- 系统配置 -->
             <div>
-                <h5 class="px-4 text-slate-600 mb-4">智脑核心</h5>
-                <div class="space-y-1">
+                <h5 class="px-4 text-slate-600 mb-4 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-purple-500"></div> 系统全局配置</h5>
+                <div class="space-y-1 pl-4 border-l border-white/5 ml-4">
+                    <a href="#f-policy" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">全局策略配置</a>
+                    <a href="#f-notif" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">系统消息中心</a>
+                </div>
+            </div>
+            <!-- 智脑 -->
+            <div>
+                <h5 class="px-4 text-slate-600 mb-4 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-orange-500"></div> 智脑核心模块</h5>
+                <div class="space-y-1 pl-4 border-l border-white/5 ml-4">
                     <a href="#f-ai-detect" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">智脑实时检测</a>
                     <a href="#f-ai-optimize" class="block px-4 py-2 hover:text-cyan-400 rounded-lg hover:bg-white/5 transition-all">话术 AI 优化</a>
                 </div>
@@ -74,282 +94,385 @@
     </aside>
 
     <!-- 主内容 -->
-    <main class="flex-1 overflow-y-auto custom-scrollbar p-12 lg:p-20 space-y-32">
+    <main class="flex-1 overflow-y-auto custom-scrollbar p-12 lg:p-24 space-y-40">
         
         <!-- 导言 -->
-        <header>
-            <h1 class="text-6xl font-black text-white italic tracking-tighter mb-6">全量功能全景展示</h1>
-            <p class="text-slate-500 text-xl font-medium max-w-3xl leading-relaxed italic">
-                本文档为基于系统物理逻辑的 1:1 视觉还原。涵盖了从实时指挥到智脑预研的每一个原子级功能模块。
+        <header class="space-y-6">
+            <div class="flex items-center gap-4">
+                <div class="h-px flex-1 bg-gradient-to-r from-transparent to-slate-800"></div>
+                <span class="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em]">Command & Governance</span>
+                <div class="h-px flex-1 bg-gradient-to-l from-transparent to-slate-800"></div>
+            </div>
+            <h1 class="text-7xl font-black text-white italic tracking-tighter text-center">全量功能全景展示</h1>
+            <p class="text-slate-500 text-xl font-medium max-w-3xl mx-auto text-center leading-relaxed italic">
+                本手册为您呈现系统的 18 个核心业务模块。每一个像素均源自真实的实战逻辑，涵盖管理端掌控力与坐席端极致交互。
             </p>
         </header>
 
-        <!-- 1. 实时指挥中心 -->
-        <section class="space-y-20">
-            <h3 class="text-xs font-black text-cyan-500 tracking-[0.5em] uppercase border-b border-cyan-500/20 pb-4">一、 实时指挥中心</h3>
+        <!-- 一、 实时指挥中心 -->
+        <section class="space-y-24">
+            <h3 class="text-[10px] font-black text-cyan-500 tracking-[0.8em] uppercase border-b border-cyan-500/20 pb-6 mb-12">一、 实时指挥中心</h3>
             
-            <div id="f-home" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">系统运行首页</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">全域运行态势的“数字化驾驶舱”。实时监控各部门在线率、24小时高危拦截趋势及智脑识别准确率。支持一键调取可视化大屏。</p>
+            <!-- 1.1 -->
+            <div id="f-home" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">系统运行首页</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">数字化运营的“总高度”。实时呈现全域在线率、高危拦截总数及智脑识别准确率。动态波形图表实时反馈 24 小时的风险压力走势。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】悬浮岛状态灯随首页全局负载频率呼吸。</div>
                 </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="10" y="10" width="110" height="60" rx="12" fill="#1e293b"/><text x="25" y="30" font-size="8" fill="#94a3b8">全域在线率</text><text x="25" y="55" font-size="20" font-weight="900" fill="#0ea5e9">94.8%</text>
-                        <rect x="130" y="10" width="110" height="60" rx="12" fill="#1e293b"/><text x="145" y="30" font-size="8" fill="#94a3b8">高危拦截</text><text x="145" y="55" font-size="20" font-weight="900" fill="#ef4444">12 次</text>
-                        <rect x="250" y="10" width="130" height="60" rx="12" fill="#ffffff" fill-opacity="0.05"/><text x="265" y="30" font-size="8" fill="#94a3b8">识别准确率</text><text x="265" y="55" font-size="20" font-weight="900" fill="#22d3ee">98.2%</text>
-                        <path d="M20 140 Q100 100 200 130 T380 110" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-opacity="0.5"/>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="110" height="70" rx="12" fill="#1e293b" stroke="#334155"/><text x="25" y="30" font-size="8" fill="#94a3b8">全域在线率</text><text x="25" y="60" font-size="22" font-weight="900" fill="#0ea5e9">94.8%</text>
+                        <rect x="130" y="10" width="110" height="70" rx="12" fill="#1e293b" stroke="#334155"/><text x="145" y="30" font-size="8" fill="#94a3b8">拦截总数</text><text x="145" y="60" font-size="22" font-weight="900" fill="#ef4444">1,240</text>
+                        <rect x="250" y="10" width="130" height="70" rx="12" fill="#ffffff" fill-opacity="0.05"/><text x="265" y="30" font-size="8" fill="#94a3b8">智脑识别率</text><text x="265" y="60" font-size="22" font-weight="900" fill="#22d3ee">98.2%</text>
+                        <path d="M20 150 L60 120 L100 140 L140 100 L180 130 L220 90 L260 110 L300 70 L340 90 L380 60" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-opacity="0.4"/>
                     </svg>
                 </div>
             </div>
 
-            <div id="f-monitor" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">成员实时监控</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">物理级桌面同步链路。主管可实时观察坐席屏幕，并直接下发强制锁定、话术弹射、语音警报等干预包。</p>
+            <!-- 1.2 -->
+            <div id="f-monitor" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">成员实时监控</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">物理桌面级同步。主管可 1:1 调取坐席实时屏幕，延迟低于 120ms。支持“非对称”指令注入：一键锁定、话术弹射、语音警报。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】被查看时，悬浮岛周围产生青色脉冲波纹。</div>
                 </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="10" y="10" width="260" height="140" rx="10" fill="#000" stroke="#334155"/><text x="140" y="80" text-anchor="middle" fill="#334155" font-size="10">[远程桌面数据流]</text>
-                        <rect x="280" y="10" width="110" height="40" rx="8" fill="#ef4444"/><text x="335" y="35" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">强制锁定</text>
-                        <rect x="280" y="60" width="110" height="40" rx="8" fill="#0ea5e9"/><text x="335" y="85" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">话术弹射</text>
-                        <rect x="280" y="110" width="110" height="40" rx="8" fill="#f59e0b"/><text x="335" y="135" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">语音警报</text>
-                    </svg>
-                </div>
-            </div>
-
-            <div id="f-alerts" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">高危违规审计</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">实时捕获高权重违规行为。坐席端触发时伴随<b>红色呼吸灯光效</b>。管理端支持导出数字化取证详单。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="400" height="160" rx="15" fill="#0f172a"/>
-                        <rect x="0" y="0" width="400" height="30" fill="#ef4444" fill-opacity="0.1"/>
-                        <text x="20" y="20" font-size="9" font-weight="bold" fill="#ef4444">14:20 | 李某某 | 命中：刷单返利 | LV.10</text>
-                        <rect x="20" y="40" width="360" height="100" rx="10" fill="#ffffff" fill-opacity="0.03" stroke="#ffffff" stroke-opacity="0.1"/>
-                        <text x="40" y="70" font-size="9" fill="#94a3b8">对话原文：</text>
-                        <text x="40" y="90" font-size="10" fill="#ffffff" font-style="italic">“只要充值1000，明天返你2000...”</text>
-                        <rect x="280" y="110" width="80" height="20" rx="5" fill="#ef4444"/><text x="320" y="123" text-anchor="middle" fill="#fff" font-size="8">数字化取证</text>
-                    </svg>
-                </div>
-            </div>
-
-            <div id="f-blacklist" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">战术禁闭名单</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">对严重违规坐席执行物理封禁。禁闭期间无法建立战术链路，登录时强制提示剩余封禁时间。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="20" y="20" width="170" height="50" rx="10" fill="#ffffff" fill-opacity="0.05" stroke="#ef4444" stroke-opacity="0.3"/>
-                        <text x="35" y="45" font-size="12" font-weight="900" fill="#ffffff">张某某 (账号已封禁)</text>
-                        <text x="35" y="60" font-size="8" fill="#ef4444">禁闭剩余：12 小时 45 分</text>
-                        <rect x="210" y="20" width="170" height="50" rx="10" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.1"/>
-                        <text x="225" y="45" font-size="12" font-weight="900" fill="#94a3b8">王某某 (已解除)</text>
-                        <text x="225" y="60" font-size="8" fill="#10b981">手动解封于：2026-02-09</text>
-                    </svg>
-                </div>
-            </div>
-        </section>
-
-        <!-- 2. 合规策略中枢 -->
-        <section class="space-y-20">
-            <h3 class="text-xs font-black text-emerald-500 tracking-[0.5em] uppercase border-b border-emerald-500/20 pb-4">二、 合规策略中枢</h3>
-            
-            <div id="f-comp-audit" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">部门合规审计</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">按业务线查看规避词拦截记录。坐席输入规避词时，其输入框会产生微弱震动反馈。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="20" y="20" width="360" height="120" rx="10" fill="#ffffff" fill-opacity="0.02" stroke="#ffffff" stroke-opacity="0.1"/>
-                        <rect x="20" y="20" width="360" height="30" fill="#ffffff" fill-opacity="0.05"/>
-                        <text x="40" y="40" font-size="10" font-weight="bold" fill="#ffffff">部门 | 触发人 | 规避词 | 时间</text>
-                        <text x="40" y="70" font-size="9" fill="#94a3b8">销售部 | 王一一 | #加微信 | 10:05</text>
-                        <text x="40" y="100" font-size="9" fill="#94a3b8">售后部 | 李二二 | #傻逼 | 09:42</text>
-                    </svg>
-                </div>
-            </div>
-
-            <div id="f-words" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">规避词库管理</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">支持物理录入各业务线的违禁词及修正建议。命中后侧边栏会自动联动展示“官方推荐话术”。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="20" y="20" width="100" height="30" rx="15" fill="#ef4444" fill-opacity="0.1" stroke="#ef4444"/><text x="70" y="40" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold"># 引流词汇</text>
-                        <rect x="130" y="20" width="100" height="30" rx="15" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b"/><text x="180" y="40" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="bold"># 敏感回复</text>
-                        <rect x="20" y="70" width="360" height="60" rx="10" fill="#ffffff" fill-opacity="0.05"/>
-                        <text x="40" y="95" font-size="9" fill="#94a3b8">命中修正建议：</text>
-                        <text x="40" y="115" font-size="10" fill="#ffffff" font-style="italic">“由于平台规定，请不要提及微信...”</text>
-                    </svg>
-                </div>
-            </div>
-
-            <div id="f-sentiments" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">情绪维度定义</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">定义客户情绪维度及视觉配色。坐席端战术岛旁会实时显示当前识别到的客户情绪圆点。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="50" cy="50" r="10" fill="#ef4444"/><text x="70" y="55" fill="#ffffff" font-size="12">极度愤怒</text>
-                        <circle cx="180" cy="50" r="10" fill="#10b981"/><text x="200" y="55" fill="#ffffff" font-size="12">满意度高</text>
-                        <circle cx="50" cy="100" r="10" fill="#0ea5e9"/><text x="70" y="105" fill="#ffffff" font-size="12">咨询意向强</text>
-                        <circle cx="180" cy="100" r="10" fill="#94a3b8"/><text x="200" y="105" fill="#ffffff" font-size="12">中性沟通</text>
-                    </svg>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. 组织与权限 -->
-        <section class="space-y-20">
-            <h3 class="text-xs font-black text-blue-500 tracking-[0.5em] uppercase border-b border-blue-500/20 pb-4">三、 组织与权限</h3>
-            
-            <div id="f-dept" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">部门架构管理</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">维护组织树形结构。支持主管指派，实现部门间的数据物理隔离与战术互通。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="150" y="10" width="100" height="35" rx="8" fill="#0ea5e9"/><text x="200" y="32" text-anchor="middle" fill="#fff" font-size="10">总指挥部</text>
-                        <line x1="200" y1="45" x2="200" y2="70" stroke="#334155"/>
-                        <line x1="100" y1="70" x2="300" y2="70" stroke="#334155"/>
-                        <rect x="50" y="80" width="100" height="35" rx="8" fill="#1e293b"/><text x="100" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">销售一组</text>
-                        <rect x="250" y="80" width="100" height="35" rx="8" fill="#1e293b"/><text x="300" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">售后二组</text>
-                    </svg>
-                </div>
-            </div>
-
-            <div id="f-rbac" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">角色权限定义</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">基于原子级颗粒度权限模型。坐席端仅展示其被授权的“实战模块”，物理隐藏所有管理按钮。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="20" y="20" width="360" height="120" rx="10" fill="#1e293b" fill-opacity="0.5"/>
-                        <text x="40" y="50" fill="#0ea5e9" font-weight="bold" font-size="12">主管权限集：</text>
-                        <text x="40" y="80" fill="#10b981" font-size="9">✔ 实时监控  ✔ 下发锁定  ✔ 审核违规</text>
-                        <text x="40" y="110" fill="#94a3b8" font-size="9">✖ 物理删除数据库  ✖ 修改全局算法</text>
-                    </svg>
-                </div>
-            </div>
-
-            <div id="f-voice" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">语音库管理</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">预设常用的战术警报语音。管理端一键下发，坐席端强制通过底层声卡播放数字音频。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="30" y="30" width="160" height="40" rx="10" fill="#ffffff" fill-opacity="0.05"/><text x="50" y="55" fill="#ffffff" font-size="10">🔊 提醒客户核实单号</text>
-                        <rect x="210" y="30" width="160" height="40" rx="10" fill="#ffffff" fill-opacity="0.05"/><text x="230" y="55" fill="#ffffff" font-size="10">🔊 禁止承诺账期</text>
-                        <path d="M100 120 Q120 90 140 120 T180 120" fill="none" stroke="#ef4444" stroke-width="2"><animate attributeName="d" values="M100 120 Q120 90 140 120 T180 120;M100 120 Q120 150 140 120 T180 120;M100 120 Q120 90 140 120 T180 120" dur="1s" repeatCount="indefinite"/></path>
-                    </svg>
-                </div>
-            </div>
-
-            <div id="f-sops" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">SOP 规范管理</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">业务流程标准化中心。支持 Markdown 与附件资源。坐席点击侧边栏“手册”即可沉浸式阅读。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="20" y="20" width="170" height="120" rx="10" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.1"/>
-                        <text x="35" y="45" font-size="12" font-weight="900" fill="#ffffff">退款处理 SOP</text>
-                        <rect x="35" y="60" width="140" height="5" rx="2" fill="#334155"/>
-                        <rect x="35" y="75" width="100" height="5" rx="2" fill="#334155"/>
-                        <rect x="210" y="20" width="170" height="120" rx="10" fill="#10b981" fill-opacity="0.1" stroke="#10b981" stroke-opacity="0.3"/>
-                        <text x="225" y="45" font-size="12" font-weight="900" fill="#10b981">售后挽回手册</text>
-                        <text x="225" y="80" font-size="8" fill="#94a3b8">点击侧边栏一键预览</text>
-                    </svg>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. 基础战术档案 -->
-        <section class="space-y-20">
-            <h3 class="text-xs font-black text-amber-500 tracking-[0.5em] uppercase border-b border-amber-500/20 pb-4">四、 基础战术档案</h3>
-            
-            <div id="f-customers" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">客户档案管理</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">整合全生命周期价值与历史轨迹。坐席端采用“指纹识别”动画展现，实时暴露恶意投诉风险。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="250" y="0" width="150" height="160" fill="#0f172a" rx="15"/>
-                        <rect x="250" y="0" width="150" height="40" fill="#f59e0b" fill-opacity="0.1"/>
-                        <text x="265" y="25" fill="#f59e0b" font-weight="900" font-size="12">北京科技公司</text>
-                        <rect x="265" y="50" width="120" height="30" rx="8" fill="#ffffff" fill-opacity="0.05"/>
-                        <text x="275" y="70" fill="#fff" font-size="10">¥ 580,000</text>
-                        <rect x="265" y="90" width="120" height="25" rx="8" fill="#ef4444" fill-opacity="0.1"/><text x="275" y="107" fill="#ef4444" font-size="8">⚠️ 恶意投诉风险</text>
-                    </svg>
-                </div>
-            </div>
-
-            <div id="f-products" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">商品资料管理</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">维护核心卖点与实时库存。侧边栏以卡片流形式展示，支持一键模拟向客户“同步载荷”。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="20" y="20" width="110" height="120" rx="10" fill="#ffffff" fill-opacity="0.05" stroke="#0ea5e9"/>
-                        <rect x="30" y="30" width="90" height="50" rx="5" fill="#334155"/>
-                        <text x="30" y="100" fill="#fff" font-size="10" font-weight="bold">智能手表 Pro</text>
-                        <text x="30" y="125" fill="#0ea5e9" font-size="12" font-weight="900">¥ 2,999</text>
-                    </svg>
-                </div>
-            </div>
-        </section>
-
-        <!-- 5. 智脑核心 -->
-        <section class="space-y-20">
-            <h3 class="text-xs font-black text-orange-500 tracking-[0.5em] uppercase border-b border-orange-500/20 pb-4">五、 智脑核心</h3>
-            
-            <div id="f-ai-detect" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">智脑实时检测</h4><span class="status-tag pending text-black">未完成 / 未来预研</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">通过熵值波动算法实现违规前置拦截。预测球体会在风险发生前 3 秒产生黄色预警波动。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="400" height="160" rx="15" fill="#000"/>
-                        <circle cx="200" cy="80" r="50" fill="none" stroke="#eab308" stroke-width="1" stroke-dasharray="5,5"/>
-                        <circle cx="200" cy="80" r="30" fill="#eab308" fill-opacity="0.2"><animate attributeName="r" values="30;40;30" dur="2s" repeatCount="indefinite"/></circle>
-                        <text x="200" y="145" text-anchor="middle" fill="#eab308" font-size="10" font-weight="900">风险预判熵值: 0.12</text>
-                    </svg>
-                </div>
-            </div>
-
-            <div id="f-ai-optimize" class="section-anchor grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3"><h4 class="text-2xl font-black text-white italic">话术 AI 优化</h4><span class="status-tag done">已完成</span></div>
-                    <p class="text-slate-400 leading-relaxed text-sm">文字粒子化重构引擎。输入粗糙文字，点击优化后化作蓝色流光，生成高情商、合规的回复文本。</p>
-                </div>
-                <div class="svg-card">
-                    <svg width="100%" height="160" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="20" y="40" width="360" height="80" rx="12" fill="#0f172a" stroke="#22d3ee"/>
-                        <text x="40" y="85" fill="#22d3ee" font-size="14" font-family="monospace">语义重构注入中...</text>
-                        <g opacity="0.5">
-                            <circle cx="340" cy="60" r="2" fill="#22d3ee"><animate attributeName="cy" values="60;100;60" dur="1s" repeatCount="indefinite"/></circle>
-                            <circle cx="350" cy="80" r="1.5" fill="#22d3ee"><animate attributeName="cy" values="80;40;80" dur="1.5s" repeatCount="indefinite"/></circle>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="220" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="260" height="180" x="10" y="20" rx="10" fill="#000"/><text x="140" y="110" text-anchor="middle" fill="#334155" font-size="10">桌面实时视频流 (1:1)</text>
+                        <g transform="translate(280, 20)">
+                            <rect width="110" height="30" rx="8" fill="#ef4444"/><text x="55" y="20" text-anchor="middle" fill="#fff" font-size="9" font-weight="bold">强制全屏锁定</text>
+                            <rect y="40" width="110" height="30" rx="8" fill="#0ea5e9"/><text x="55" y="60" text-anchor="middle" fill="#fff" font-size="9" font-weight="bold">话术极速弹射</text>
+                            <rect y="80" width="110" height="30" rx="8" fill="#f59e0b"/><text x="55" y="100" text-anchor="middle" fill="#fff" font-size="9" font-weight="bold">物理语音警报</text>
                         </g>
                     </svg>
                 </div>
             </div>
+
+            <!-- 1.3 -->
+            <div id="f-alerts" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">高危违规审计</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">命中严重红线（如私下套现、引流）的行为自动捕获。关联操作员、所属部门及触发时刻的完整上下文取证。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】屏幕边缘触发红色呼吸灯警示。</div>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="400" height="40" fill="#ef4444" fill-opacity="0.1" rx="10"/>
+                        <text x="20" y="25" fill="#ef4444" font-weight="900" font-size="10">⚠️ 发现高危违规行为 (LV.10)</text>
+                        <text x="20" y="60" fill="#ffffff" font-size="11">操作员：李操作员 | 命中词：刷单返利</text>
+                        <rect x="20" y="80" width="360" height="60" rx="10" fill="#ffffff" fill-opacity="0.03" stroke="#ffffff" stroke-opacity="0.1"/>
+                        <text x="35" y="110" fill="#94a3b8" font-size="10">上下文：“加微信私聊，给你高额返现...”</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 1.4 -->
+            <div id="f-blacklist" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">战术禁闭名单</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">对恶意行为者执行物理链路隔离。支持 1 小时至永久封禁。封禁后账号瞬间登出，且在期限内无法再次建立链路。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】账号瞬间熔断，并提示禁闭剩余时长。</div>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="360" height="60" rx="15" fill="#ffffff" fill-opacity="0.02" stroke="#ef4444" stroke-opacity="0.2"/>
+                        <circle cx="50" cy="50" r="15" fill="#ef4444"/><text x="45" y="56" fill="#fff" font-weight="900">X</text>
+                        <text x="80" y="45" fill="#ffffff" font-weight="900" font-size="14">用户：tian (永久封锁)</text>
+                        <text x="80" y="62" fill="#ef4444" font-size="9">封禁原因：严重诱导欺诈行为</text>
+                    </svg>
+                </div>
+            </div>
         </section>
 
-        <footer class="mt-32 pt-12 border-t border-slate-900 opacity-20 text-center pb-40">
-            <p class="text-xs font-black uppercase tracking-[0.5em]">Strategic Governance Layer © 2026 Secured</p>
+        <!-- 二、 合规策略中枢 -->
+        <section class="space-y-24">
+            <h3 class="text-[10px] font-black text-emerald-500 tracking-[0.8em] uppercase border-b border-emerald-500/20 pb-6 mb-12">二、 合规策略中枢</h3>
+            
+            <!-- 2.1 -->
+            <div id="f-comp-audit" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">部门合规审计</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">横向审计各业务线的规避词触发率。支持按日/周导出合规报告，助力各部门用语标准化。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】触发拦截时，输入框产生微弱物理震动。</div>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="100" height="120" rx="10" fill="#10b981" fill-opacity="0.1"/>
+                        <text x="70" y="50" text-anchor="middle" fill="#10b981" font-weight="900" font-size="10">销售部</text>
+                        <text x="70" y="90" text-anchor="middle" fill="#fff" font-weight="900" font-size="20">12%</text>
+                        <text x="70" y="110" text-anchor="middle" fill="#94a3b8" font-size="8">合规预警率</text>
+                        <rect x="140" y="20" width="100" height="120" rx="10" fill="#ffffff" fill-opacity="0.05"/>
+                        <text x="190" y="50" text-anchor="middle" fill="#94a3b8" font-size="10">售后部</text>
+                        <text x="190" y="90" text-anchor="middle" fill="#fff" font-weight="900" font-size="20">2%</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 2.2 -->
+            <div id="f-words" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">规避词库管理</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">支持分级（LV.1 - LV.10）定义敏感词汇。可配置“官方推荐替代话术”，实现强制过滤后的智能引导。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】命中后手册按钮自动跳动，展示修正语。</div>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="120" height="40" rx="15" fill="#ef4444" fill-opacity="0.1"/><text x="80" y="45" text-anchor="middle" fill="#ef4444" font-weight="bold"># 站外引流</text>
+                        <rect x="150" y="20" width="120" height="40" rx="15" fill="#f59e0b" fill-opacity="0.1"/><text x="210" y="45" text-anchor="middle" fill="#f59e0b" font-weight="bold"># 负面评价</text>
+                        <text x="20" y="100" fill="#94a3b8" font-size="10">修正建议：使用“平台规定”代替“官方禁止”</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 2.3 -->
+            <div id="f-sentiments" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">情绪维度定义</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">定义客户情绪的色彩标签。为智脑模块提供语调参考（如：专业、柔和、强硬等）。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】悬浮岛中心显示情绪实时感知灯。</div>
+                </div>
+                <div class="xl:col-span-3 svg-card text-center">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="60" r="12" fill="#ef4444"/><text x="100" y="100" text-anchor="middle" fill="#ffffff" font-size="10">极度愤怒</text>
+                        <circle cx="200" cy="60" r="12" fill="#10b981"/><text x="200" y="100" text-anchor="middle" fill="#ffffff" font-size="10">高度满意</text>
+                        <circle cx="300" cy="60" r="12" fill="#0ea5e9"/><text x="300" y="100" text-anchor="middle" fill="#ffffff" font-size="10">咨询意向强</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 三、 组织与权限 -->
+        <section class="space-y-24">
+            <h3 class="text-[10px] font-black text-blue-500 tracking-[0.8em] uppercase border-b border-blue-500/20 pb-6 mb-12">三、 组织与权限</h3>
+            
+            <!-- 3.1 -->
+            <div id="f-dept" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">部门架构管理</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">维护企业树形组织。支持多级嵌套，实现数据的物理权限隔离（主管仅能看所属组员画面）。</p>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="150" y="10" width="100" height="35" rx="8" fill="#0ea5e9"/><text x="200" y="32" text-anchor="middle" fill="#fff" font-size="10">中央指挥部</text>
+                        <line x1="200" y1="45" x2="200" y2="80" stroke="#334155"/>
+                        <line x1="100" y1="80" x2="300" y2="80" stroke="#334155"/>
+                        <rect x="50" y="90" width="100" height="35" rx="8" fill="#1e293b"/><text x="100" y="112" text-anchor="middle" fill="#94a3b8" font-size="10">销售一科</text>
+                        <rect x="250" y="90" width="100" height="35" rx="8" fill="#1e293b"/><text x="300" y="112" text-anchor="middle" fill="#94a3b8" font-size="10">售后二科</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 3.2 -->
+            <div id="f-users" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">成员账号管理</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">全量管理操作员账号。支持密码重置、所属角色分配、所属科室对齐及战术 PT 积分统计。</p>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="360" height="50" rx="10" fill="#ffffff" fill-opacity="0.05"/>
+                        <circle cx="50" cy="45" r="15" fill="#334155"/><text x="45" y="50" fill="#fff" font-size="12">宋</text>
+                        <text x="80" y="40" fill="#fff" font-weight="900" font-size="12">账号：song_operator</text>
+                        <text x="80" y="55" fill="#94a3b8" font-size="9">角色：高级坐席 | 部门：销售一科</text>
+                        <rect x="300" y="32" width="60" height="25" rx="5" fill="#0ea5e9"/><text x="330" y="48" text-anchor="middle" fill="#fff" font-size="9">物理锁定</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 3.3 -->
+            <div id="f-rbac" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">角色权限定义</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">定义主管（ADMIN）、总部（HQ）、坐席（AGENT）的权责边界。精准控制每一处物理按钮的可见性。</p>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <text x="20" y="30" fill="#ffffff" font-weight="900" font-size="12">总部权限矩阵：</text>
+                        <rect x="20" y="50" width="100" height="30" rx="5" fill="#10b981"/><text x="70" y="70" text-anchor="middle" fill="#fff" font-size="9">全域监控</text>
+                        <rect x="130" y="50" width="100" height="30" rx="5" fill="#10b981"/><text x="180" y="70" text-anchor="middle" fill="#fff" font-size="9">算法定义</text>
+                        <rect x="20" y="90" width="100" height="30" rx="5" fill="#10b981"/><text x="70" y="110" text-anchor="middle" fill="#fff" font-size="9">封禁操作员</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 3.4 -->
+            <div id="f-categories" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">业务分类管理</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">维护业务知识树。定义话术、违禁词、SOP 规范的所属类别，实现跨部门分类审计。</p>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="110" height="40" rx="10" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.1"/><text x="75" y="45" text-anchor="middle" fill="#fff" font-size="10">📦 实物产品类</text>
+                        <rect x="140" y="20" width="110" height="40" rx="10" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.1"/><text x="195" y="45" text-anchor="middle" fill="#fff" font-size="10">💳 售后退款类</text>
+                        <rect x="260" y="20" width="110" height="40" rx="10" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.1"/><text x="315" y="45" text-anchor="middle" fill="#fff" font-size="10">📞 投诉话务类</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 3.5 -->
+            <div id="f-voice" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">语音库管理</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">物理音频指令库。管理端预设语音文本，坐席端接收后通过合成引擎强制播放。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】屏幕中心显示巨大跳动声波波纹。</div>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="360" height="40" rx="10" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b"/><text x="40" y="45" fill="#f59e0b" font-weight="bold" font-size="10">🔊 下发：请不要引导客户私下交易</text>
+                        <rect x="100" y="100" width="4" height="20" fill="#ef4444"><animate attributeName="height" values="20;50;20" dur="0.5s" repeatCount="indefinite"/></rect>
+                        <rect x="110" y="100" width="4" height="40" fill="#ef4444"><animate attributeName="height" values="40;10;40" dur="0.5s" repeatCount="indefinite"/></rect>
+                        <rect x="120" y="100" width="4" height="30" fill="#ef4444"><animate attributeName="height" values="30;60;30" dur="0.5s" repeatCount="indefinite"/></rect>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 3.6 -->
+            <div id="f-sops" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">SOP 规范管理</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">标准作业程序托管。支持高清图片、视频教程、Markdown 方案。侧边栏联动展示，实现工作流中的沉浸式参考。</p>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="300" y="0" width="100" height="180" fill="#0f172a" stroke="#334155"/>
+                        <text x="310" y="30" fill="#10b981" font-weight="900" font-size="10">SOP 手册</text>
+                        <rect x="310" y="45" width="80" height="100" rx="5" fill="#ffffff" fill-opacity="0.05"/>
+                        <text x="350" y="100" text-anchor="middle" fill="#94a3b8" font-size="8">标准退款流程</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 四、 基础战术档案 -->
+        <section class="space-y-24">
+            <h3 class="text-[10px] font-black text-amber-500 tracking-[0.8em] uppercase border-b border-amber-500/20 pb-6 mb-12">四、 基础战术档案</h3>
+            
+            <!-- 4.1 -->
+            <div id="f-customers" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">客户档案管理</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">建立多维度客户身份库。整合历史价值（LTV）、消费趋势及合规风险（如恶意投诉记录）。支持点击随机模拟画像识别。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】侧边栏展现蓝色指纹上下扫描动画。</div>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="300" y="0" width="100" height="180" fill="#0f172a" stroke="#334155"/>
+                        <rect x="300" y="0" width="100" height="40" fill="#f59e0b" fill-opacity="0.1"/>
+                        <text x="350" y="25" text-anchor="middle" fill="#f59e0b" font-weight="900" font-size="9">北京科技发展公司</text>
+                        <rect x="310" y="50" width="80" height="25" rx="5" fill="#ffffff" fill-opacity="0.05"/><text x="350" y="67" text-anchor="middle" fill="#fff" font-size="10" font-family="monospace">¥ 580,000</text>
+                        <rect x="310" y="80" width="80" height="20" rx="5" fill="#ef4444" fill-opacity="0.1"/><text x="350" y="93" text-anchor="middle" fill="#ef4444" font-size="7">风险标记</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 4.2 -->
+            <div id="f-products" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">商品资料管理</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">维护核心卖点（USP）、库存及参数。坐席端点击即可一键推送结构化信息至剪贴板。</p>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="300" y="0" width="100" height="180" fill="#0f172a" stroke="#334155"/>
+                        <rect x="310" y="20" width="80" height="60" rx="8" fill="#ffffff" fill-opacity="0.05" stroke="#0ea5e9"/>
+                        <text x="315" y="40" fill="#fff" font-weight="900" font-size="8">智能手表 Pro</text>
+                        <text x="315" y="65" fill="#0ea5e9" font-weight="900" font-size="10">¥ 2,999</text>
+                        <rect x="310" y="90" width="80" height="20" rx="5" fill="#0ea5e9"/><text x="350" y="103" text-anchor="middle" fill="#fff" font-size="8">一键推送</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 4.3 -->
+            <div id="f-tools" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">常用辅助工具</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">集成单位换算、物流追踪、利率计算等高频实战小工具。避免坐席频繁切换应用，降低数据脱离风险。</p>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="100" height="100" rx="15" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.1"/><text x="70" y="60" text-anchor="middle" fill="#fff" font-size="24">🧮</text><text x="70" y="90" text-anchor="middle" fill="#94a3b8" font-size="10">计算器</text>
+                        <rect x="140" y="20" width="100" height="100" rx="15" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.1"/><text x="190" y="60" text-anchor="middle" fill="#fff" font-size="24">🚚</text><text x="190" y="90" text-anchor="middle" fill="#94a3b8" font-size="10">物流追踪</text>
+                        <rect x="260" y="20" width="100" height="100" rx="15" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.1"/><text x="310" y="60" text-anchor="middle" fill="#fff" font-size="24">⚙️</text><text x="310" y="90" text-anchor="middle" fill="#94a3b8" font-size="10">格式化</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 五、 系统全局配置 -->
+        <section class="space-y-24">
+            <h3 class="text-[10px] font-black text-purple-500 tracking-[0.8em] uppercase border-b border-purple-500/20 pb-6 mb-12">五、 系统全局配置</h3>
+            
+            <!-- 5.1 -->
+            <div id="f-policy" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">全局策略配置</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">系统的核心“算法大脑”。调整 AI 响应倾向、数据同步频率、JWT 令牌有效期及品牌外观（Logo、名称）配置。</p>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <text x="20" y="30" fill="#ffffff" font-weight="900" font-size="12">系统物理常数定义：</text>
+                        <rect x="20" y="50" width="360" height="30" rx="8" fill="#ffffff" fill-opacity="0.05"/><text x="40" y="70" fill="#a855f7" font-size="10">JWT_SECRET: ************ (已加密)</text>
+                        <rect x="20" y="90" width="360" height="30" rx="8" fill="#ffffff" fill-opacity="0.05"/><text x="40" y="110" fill="#a855f7" font-size="10">SYNC_INTERVAL: 300s (战术心跳周期)</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 5.2 -->
+            <div id="f-notif" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">系统消息中心</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">指挥部全域公告平台。支持针对特定科室下发紧急战术动员通知。消息直接注入坐席端通知栏并常驻。</p>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="180" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="360" height="60" rx="15" fill="#a855f7" fill-opacity="0.1" stroke="#a855f7"/><text x="40" y="45" fill="#ffffff" font-weight="900" font-size="12">🔔 系统紧急扩容公告</text><text x="40" y="62" fill="#a855f7" font-size="9">发布于：2026-02-09 | 目标：全员</text>
+                        <rect x="20" y="90" width="360" height="60" rx="15" fill="#ffffff" fill-opacity="0.05"/><text x="40" y="115" fill="#ffffff" font-weight="900" font-size="12">战术手册版本更新通知</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 六、 智脑核心模块 -->
+        <section class="space-y-24">
+            <h3 class="text-[10px] font-black text-orange-500 tracking-[0.8em] uppercase border-b border-orange-500/20 pb-6 mb-12">六、 智脑核心模块</h3>
+            
+            <div id="f-ai-detect" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">智脑实时检测</h4><span class="status-tag pending text-black">预研中</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">无需关键词预设。基于多模态大模型，实时分析操作画面中的异常交易倾向、欺诈意图或消极应付风险。</p>
+                    <div class="client-effect text-[11px]">【预期展现】悬浮岛演变为黄色“熵值预测球”。</div>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="400" height="200" rx="20" fill="#000"/>
+                        <circle cx="200" cy="100" r="60" fill="none" stroke="#eab308" stroke-width="1" stroke-dasharray="5,5"><animateTransform attributeName="transform" type="rotate" from="0 200 100" to="360 200 100" dur="10s" repeatCount="indefinite"/></circle>
+                        <circle cx="200" cy="100" r="30" fill="#eab308" fill-opacity="0.3"><animate attributeName="r" values="30;45;30" dur="3s" repeatCount="indefinite"/></circle>
+                        <text x="200" y="105" text-anchor="middle" fill="#eab308" font-family="monospace" font-weight="900" font-size="14">熵值: 0.12</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div id="f-ai-optimize" class="section-anchor grid grid-cols-1 xl:grid-cols-5 gap-16 items-start">
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex items-center gap-3"><h4 class="text-3xl font-black text-white italic tracking-tight">话术 AI 优化</h4><span class="status-tag done">已完成</span></div>
+                    <p class="text-slate-400 text-sm leading-relaxed">语义粒子化重构。将坐席输入的原始文字进行情绪对齐、礼貌增强及合规化处理。支持一键物理注入回复框。</p>
+                    <div class="client-effect text-[11px]">【坐席端效果】文字化作蓝色流光粒子瞬间消失并重构。</div>
+                </div>
+                <div class="xl:col-span-3 svg-card">
+                    <svg width="100%" height="120" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="360" height="80" rx="15" fill="#0f172a" stroke="#22d3ee" stroke-width="1"/>
+                        <text x="40" y="65" fill="#22d3ee" font-family="monospace" font-size="14">正在进行语义重构...</text>
+                        <circle cx="340" cy="40" r="2" fill="#22d3ee"><animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite"/></circle>
+                        <circle cx="360" cy="70" r="1.5" fill="#22d3ee"><animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/></circle>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-40 pt-20 border-t border-slate-900 opacity-20 text-center pb-40">
+            <p class="text-xs font-black uppercase tracking-[0.5em]">Smart-CS Strategic Governance Layer © 2026 Secured</p>
         </footer>
     </main>
 
