@@ -173,14 +173,11 @@ const AdminHome = () => {
 
 // 2. 坐席视图容器
 const AgentView = () => {
-  const isRedAlert = useRiskStore(s => s.isRedAlert)
-  const isMuted = useRiskStore(s => s.isMuted)
-  const isLocked = useRiskStore(s => s.isLocked)
-  const lockMessage = useRiskStore(s => s.lockMessage)
-
   const { 
+    isRedAlert, isMuted, isLocked, lockMessage,
     isCustomerHudEnabled, setCustomerHudEnabled, currentCustomer, 
-    activeSideTool, setActiveSideTool, layoutMode, setLayoutMode 
+    activeSideTool, setActiveSideTool, layoutMode, setLayoutMode,
+    setOnline
   } = useRiskStore()
 
   useEffect(() => {

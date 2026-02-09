@@ -565,7 +565,7 @@ export const TacticalIsland = () => {
                     <HubBtn icon={<PenTool size={20} />} active={isScratchpad} onClick={() => { setContent(''); setIsScratchpad(true); setHasOptimized(false); }} title="草稿" color="emerald" />
                     <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="资料" color="white" />
                     <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
-                    <HubBtn icon={<Tags size={20} />} active={layoutMode === 'SIDE' && activeSideTool === 'CUSTOMERS'} onClick={triggerRandomCustomer} title="画像" color={(layoutMode === 'SIDE' && activeSideTool === 'CUSTOMERS') ? "emerald" : "white"} />
+                    <HubBtn icon={<Tags size={20} />} active={(layoutMode as string) === 'SIDE' && activeSideTool === 'CUSTOMERS'} onClick={triggerRandomCustomer} title="画像" color={((layoutMode as string) === 'SIDE' && activeSideTool === 'CUSTOMERS') ? "emerald" : "white"} />
                     <div className="w-px h-5 bg-white/10 mx-0.5" />
                     <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景" color="emerald" />
                     <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="求助" color="red" />
