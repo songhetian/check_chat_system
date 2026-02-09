@@ -3,7 +3,7 @@
     "ai_engine": {
         "provider": "ollama",
         "provider_remark": "AI 驱动服务商，目前仅支持 ollama 本地化部署方案",
-        "url": "http://192.168.2.184:11434/api/chat",
+        "url": "http://192.168.2.186:11434/api/chat",
         "url_remark": "AI 服务器地址。场景 B 模式下设为中心服务器 IP",
         "model": "qwen2:1.5b",
         "model_remark": "调用的模型名称，推荐使用 qwen2:1.5b 以获得最佳性能平衡",
@@ -15,7 +15,7 @@
         "local_bind_host_remark": "后端服务绑定地址。0.0.0.0 表示允许局域网内所有客服主机连接",
         "local_port": 8000,
         "local_port_remark": "后端 WebSocket 和 API 服务端口，请确保防火墙已开放此端口",
-        "central_server_url": "http://192.168.2.184:8000/api",
+        "central_server_url": "http://192.168.2.186:8000/api",
         "central_server_url_remark": "中央 MySQL 服务器地址，用于全局数据同步和总部审计"
     },
     "security": {
