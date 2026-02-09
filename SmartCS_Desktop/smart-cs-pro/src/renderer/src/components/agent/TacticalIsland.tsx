@@ -20,12 +20,76 @@ export const TacticalIsland = () => {
   const { 
     isOnline, isGlassMode, setGlassMode,
     layoutMode, setLayoutMode, activeSideTool, setActiveSideTool,
-    isCustomerHudEnabled, setCustomerHudEnabled,
+    isCustomerHudEnabled, setCustomerHudEnabled, setCurrentCustomer,
     isOnboardingMode, setOnboardingMode, isMuted, setMuted, isLocked,
     sopHistory
   } = useRiskStore()
-  
+
   const { user, logout, token } = useAuthStore()
+
+  // V4.10: 随机物理画像抽取引擎
+  const triggerRandomCustomer = async () => {
+    if (isCustomerHudEnabled) {
+      setCustomerHudEnabled(false);
+      return;
+    }
+
+    try {
+      // 1. 尝试从数据库物理拉取
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/customers?page=1&size=50`,
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      let customerData = null;
+      if (res.status === 200 && res.data.data.length > 0) {
+        const pool = res.data.data;
+        const random = pool[Math.floor(Math.random() * pool.length)];
+        customerData = {
+          name: random.name,
+          level: random.level === 'DIAMOND' || random.level === 'VIP' ? 'VIP' : 'NORMAL',
+          tags: random.tags.split(',').map((t: string) => t.trim()),
+          ltv: Number(random.ltv).toLocaleString(),
+          frequency: random.frequency,
+          isRisk: random.ltv > 10000 && random.frequency > 30, 
+          trend: [20, 45, 30, 70, 50, 90],
+          lastProducts: ['战术级核心包', '全域监控模块']
+        };
+      } else {
+        // 2. 物理兜底数据 (当数据库为空时)
+        customerData = {
+          name: '样板大客户(模拟)',
+          level: 'VIP',
+          tags: ['高价值', '价格敏感', '长期合作'],
+          ltv: '50,000',
+          frequency: 120,
+          isRisk: false,
+          trend: [10, 30, 20, 60, 40, 80],
+          lastProducts: ['演示版全量授权', '标准咨询服务']
+        };
+      }
+
+      setCurrentCustomer(customerData);
+      setCustomerHudEnabled(true);
+    } catch (e) {
+      console.error('画像抽取失败', e);
+      setCustomerHudEnabled(!isCustomerHudEnabled);
+    }
+  }
+
+  // V4.12: 随机产品/手册展示引擎 (侧边栏预览版)
+  const triggerProducts = () => {
+    setLayoutMode('SIDE');
+    setActiveSideTool('PRODUCTS' as any);
+    toast.info('产品中心已锁定', { description: '正在为您实时匹配关联商品资产...' });
+  }
+
+  const triggerKnowledge = () => {
+    setLayoutMode('SIDE');
+    setActiveSideTool('KNOWLEDGE' as any);
+    toast.info('战术手册已对齐', { description: '正在为您实时匹配当前场景的 SOP 指南...' });
+  }
   
   const [isExpanded, setIsExpanded] = useState(false)
   const [isFolded, setIsFolded] = useState(false) 
@@ -474,7 +538,7 @@ export const TacticalIsland = () => {
                     <HubBtn icon={<PenTool size={20} />} active={isScratchpad} onClick={() => { setContent(''); setIsScratchpad(true); setHasOptimized(false); }} title="草稿" color="emerald" />
                     <HubBtn icon={<Package size={20} />} active={activeSideTool === 'PRODUCTS'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('PRODUCTS' as any); }} title="资料" color="white" />
                     <HubBtn icon={<BookOpen size={20} />} active={activeSideTool === 'KNOWLEDGE'} onClick={() => { setLayoutMode('SIDE'); setActiveSideTool('KNOWLEDGE' as any); }} title="手册" color="white" />
-                    <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={() => setCustomerHudEnabled(!isCustomerHudEnabled)} title="画像" color={isCustomerHudEnabled ? "emerald" : "white"} />
+                    <HubBtn icon={<Tags size={20} />} active={isCustomerHudEnabled} onClick={triggerRandomCustomer} title="画像" color={isCustomerHudEnabled ? "emerald" : "white"} />
                     <div className="w-px h-5 bg-white/10 mx-0.5" />
                     <HubBtn icon={<Globe size={20} />} active={showBigScreenModal} onClick={() => setShowBigScreenModal(!showBigScreenModal)} title="全景" color="emerald" />
                     <HubBtn icon={<Hand size={20} />} active={showHelpModal} onClick={() => setShowHelpModal(!showHelpModal)} title="求助" color="red" />
