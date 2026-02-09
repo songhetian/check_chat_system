@@ -140,18 +140,6 @@ export default function BlacklistPage() {
           )}
         </div>
       </div>
-
-      <div className="p-6 bg-slate-900 rounded-[32px] border border-white/5 shadow-2xl flex items-start gap-4 shrink-0">
-         <div className="w-10 h-10 bg-amber-500/20 text-amber-500 rounded-xl flex items-center justify-center shrink-0 border border-amber-500/20 shadow-inner">
-            <Info size={20} />
-         </div>
-         <div className="space-y-1">
-            <h4 className="text-white text-xs font-black uppercase tracking-widest">物理隔离协议说明</h4>
-            <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
-              黑名单数据执行物理隔离。部门主管（ADMIN）仅能查看其所属战术单元内的被封禁成员。总部（HQ）拥有全域穿透权限。解封操作将同步清除 Redis 缓存并恢复该账号的建立链路能力。
-            </p>
-         </div>
-      </div>
     </div>
   )
 }
