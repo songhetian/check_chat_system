@@ -148,12 +148,8 @@ async def send_command(data: dict, request: Request, user: dict = Depends(check_
     await record_audit(user["real_name"], f"CMD_{cmd_type}", target_username, f"下发物理干预指令: {json.dumps(cmd_payload)}")
     return {"status": "ok"}
 
-@router.post("/command")
-async def send_command(data: dict, request: Request, user: dict = Depends(check_permission("command:input:lock"))):
-    # ... (保持原有逻辑)
-
 @router.post("/force-kill")
-async def force_kill_link(data: dict, request: Request, user: dict = Depends(check_permission("admin:user:delete"))):
+async def force_kill_link(data: dict, request: Request, user: dict = Depends(check_permission("command:force:kill"))):
     """[物理打击] 强制切断目标节点的战术链路并拉黑"""
     target_username = data.get("username")
     redis = request.app.state.redis
