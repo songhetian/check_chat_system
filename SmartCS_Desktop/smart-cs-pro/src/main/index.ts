@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, dialog, desktopCapturer } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, desktopCapturer, safeStorage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -418,6 +418,22 @@ function createWindow(): void {
     }
     return null
   })
+
+  // V5.10: 物理级安全存储接口 (利用系统钥匙串加密)
+  ipcMain.handle('secure-encrypt', (_, text: string) => {
+    try {
+      if (!safeStorage.isEncryptionAvailable()) return text;
+      return safeStorage.encryptString(text).toString('base64');
+    } catch (e) { return text; }
+  });
+
+  ipcMain.handle('secure-decrypt', (_, encryptedBase64: string) => {
+    try {
+      if (!safeStorage.isEncryptionAvailable()) return encryptedBase64;
+      const buffer = Buffer.from(encryptedBase64, 'base64');
+      return safeStorage.decryptString(buffer);
+    } catch (e) { return ''; }
+  });
 
   // 窗口控制逻辑
   ipcMain.on('minimize-window', () => mainWindow.minimize())

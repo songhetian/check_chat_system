@@ -24,15 +24,19 @@ export default function Login() {
     if (user) {
       navigate('/')
     } else {
-      // 物理回填已记忆的凭证
-      const saved = localStorage.getItem('smart-cs-remembered');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setFormData({ username: parsed.u || '', password: parsed.p || '' });
-          setRememberMe(true);
-        } catch (e) {}
-      }
+      // 物理回填已记忆的凭证 (V5.10: 物理加密解密)
+      const fillSaved = async () => {
+        const saved = localStorage.getItem('smart-cs-remembered');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            const decryptedPwd = await window.api.secureDecrypt(parsed.p || '');
+            setFormData({ username: parsed.u || '', password: decryptedPwd });
+            setRememberMe(true);
+          } catch (e) {}
+        }
+      };
+      fillSaved();
     }
   }, [user])
 
@@ -151,9 +155,10 @@ export default function Login() {
           tactical_score: user.tactical_score
         }, token)
 
-        // 4. 物理级凭证记忆处理
+        // 4. 物理级凭证记忆处理 (V5.10: 强制安全加密)
         if (rememberMe) {
-          localStorage.setItem('smart-cs-remembered', JSON.stringify({ u: formData.username, p: formData.password }));
+          const encryptedPwd = await window.api.secureEncrypt(formData.password);
+          localStorage.setItem('smart-cs-remembered', JSON.stringify({ u: formData.username, p: encryptedPwd }));
         } else {
           localStorage.removeItem('smart-cs-remembered');
         }
