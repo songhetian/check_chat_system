@@ -189,6 +189,15 @@ async def force_kill_link(data: dict, request: Request, user: dict = Depends(che
     await record_audit(user["real_name"], "FORCE_KILL", target_username, f"物理切断链路 (封禁时长: {duration}s)")
     return {"status": "ok", "message": f"目标 {target_username} 已物理切断"}
 
+@router.get("/blacklist")
+async def get_blacklist(current_user: dict = Depends(get_current_user)):
+    """[物理同步] 获取当前全量有效封禁名单"""
+    from tortoise import Tortoise
+    conn = Tortoise.get_connection("default")
+    sql = "SELECT * FROM blacklist WHERE expired_at > NOW() ORDER BY created_at DESC"
+    data = await conn.execute_query_dict(sql)
+    return {"status": "ok", "data": data}
+
 @router.get("/sop-history")
 async def get_sop_history(request: Request, current_user: dict = Depends(get_current_user)):
     """[物理回溯] 从 Redis 获取当前节点的指令历史"""

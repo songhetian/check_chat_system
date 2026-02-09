@@ -150,8 +150,24 @@ async def lifespan(app: FastAPI):
         
         # V3.26: 启动自愈 - 强制清空在线状态集
         await client.delete("online_agents_set")
-        logger.info("🧹 [系统启动] 已物理清空旧节点状态，等待新链路注入")
         
+        # V5.40: 物理黑名单自愈 - 从 MySQL 加载未过期的封禁记录
+        try:
+            from datetime import datetime
+            conn = Tortoise.get_connection("default")
+            active_bans = await conn.execute_query_dict(
+                "SELECT username, expired_at FROM blacklist WHERE expired_at > %s", 
+                [datetime.now().strftime('%Y-%m-%d %H:%M:%S')]
+            )
+            for ban in active_bans:
+                duration = int((ban['expired_at'] - datetime.now()).total_seconds())
+                if duration > 0:
+                    await client.setex(f"blacklist:{ban['username']}", duration, "1")
+            logger.info(f"🛡️ [黑名单自愈] 已成功加载 {len(active_bans)} 条封禁载荷")
+        except Exception as ban_err:
+            logger.error(f"⚠️ [黑名单加载失败]: {ban_err}")
+        
+        logger.info("扫除僵尸节点: 等待新链路注入")
         asyncio.create_task(online_status_cleaner())
     
     app.state.ws_manager = manager

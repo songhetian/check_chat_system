@@ -26,8 +26,18 @@ async def get_current_user(request: Request, creds: HTTPAuthorizationCredentials
         if redis:
             is_blocked = await redis.get(f"blacklist:{payload['username']}")
             if is_blocked:
-                logger.warning(f"🚫 [物理拦截] 处于黑名单的用户尝试访问: {payload['username']}")
+                logger.warning(f"🚫 [物理拦截] 处于 Redis 黑名单的用户尝试访问: {payload['username']}")
                 raise HTTPException(status_code=401, detail="您的战术链路已被指挥部物理切断")
+        
+        # V5.42: 数据库兜底校验 (防止 Redis 重启后同步间隙)
+        from tortoise import Tortoise
+        conn = Tortoise.get_connection("default")
+        sql = "SELECT id FROM blacklist WHERE username = %s AND expired_at > NOW() LIMIT 1"
+        res = await conn.execute_query_dict(sql, [payload['username']])
+        if res:
+            logger.warning(f"🚫 [物理拦截] 处于 DB 黑名单的用户尝试访问: {payload['username']}")
+            if redis: await redis.setex(f"blacklist:{payload['username']}", 3600, "1") # 自动同步回缓存
+            raise HTTPException(status_code=401, detail="战术封禁中，禁止建立链路")
                 
         return payload
     except jwt.ExpiredSignatureError:
