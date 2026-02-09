@@ -257,13 +257,14 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), user
             if cached:
                 user_info = json.loads(cached)
                 role = user_info.get("role_id", RoleID.AGENT)
-                logger.info(f"✅ [WS 鉴权通过] 操作员 {username} (旧版Token兼容) 建立链路")
+                logger.info(f"✅ [WS 兼容模式] 操作员 {username} 使用旧版令牌建立链路")
             else:
-                logger.warning(f"⚠️ [WS 拒绝] 令牌失效或格式错误: {token[:10]}...")
+                logger.error(f"🚫 [鉴权熔断] 令牌无效或已过期: {token[:15]}... (用户: {username})")
                 await websocket.close(code=1008)
                 return
         else:
-            logger.error(f"🚨 [WS 拒绝] 无效凭证且 Redis 脱机: {jwt_err}")
+            # V5.45: 紧急避险 - 如果 Redis 脱机且令牌非 JWT，强制拒绝并记录原因
+            logger.error(f"🚨 [物理拦截] 令牌非 JWT 格式且 Redis 脱机，无法验证身份: {token[:10]}")
             await websocket.close(code=1008)
             return
     except Exception as e:

@@ -242,7 +242,17 @@ function createWindow(): void {
         finalHeaders['Authorization'] = `Bearer ${finalHeaders['Authorization']}`
       }
 
-      console.log(`📡 [API 转发] ${method || 'GET'} -> ${finalUrl}`)
+      // V4.90: 物理缓存击穿 (针对局域网 IP 优化)
+      let cacheBustedUrl = finalUrl;
+      try {
+        const urlObj = new URL(finalUrl);
+        urlObj.searchParams.set('_t', Date.now().toString());
+        cacheBustedUrl = urlObj.toString();
+      } catch (e) {
+        console.warn('⚠️ [URL 解析告警] 无法注入时间戳:', finalUrl);
+      }
+
+      console.log(`📡 [API 转发] ${method || 'GET'} -> ${cacheBustedUrl}`)
       
       // V3.92: 增加请求体安全序列化
       let body: string | undefined = undefined;
@@ -255,7 +265,7 @@ function createWindow(): void {
         }
       }
 
-      const response = await fetch(finalUrl, {
+      const response = await fetch(cacheBustedUrl, {
         method: method || 'GET',
         headers: finalHeaders,
         body,
@@ -280,13 +290,13 @@ function createWindow(): void {
       if (db && (method === 'GET' || !method) && response.ok && !url.includes('/health')) {
         try {
           const cleanUrl = finalUrl.replace(/[\?&]_t=\d+/, '').replace(/[\?&]t=\d+/, '')
-          const cacheData = JSON.stringify(result)
+          const cacheData = JSON.stringify(result) || ''
           // V3.82: 增加大容量缓存保护，防止 SQLite 物理溢出导致进程崩溃
-          if (cacheData.length < 1024 * 1024) { // 限制 1MB
+          if ((cacheData || '').length < 1024 * 1024) { // 限制 1MB
             const stmt = db.prepare('INSERT OR REPLACE INTO api_cache (url, data) VALUES (?, ?)')
             stmt.run(cleanUrl, cacheData)
           } else {
-            console.warn(`⚠️ [读缓存跳过] 数据过大 (${Math.round(cacheData.length/1024)}KB): ${url}`)
+            console.warn(`⚠️ [读缓存跳过] 数据过大 (${Math.round((cacheData || '').length/1024)}KB): ${url}`)
           }
         } catch (sqliteErr) {
           console.error('❌ [读缓存写入失败]', sqliteErr)
