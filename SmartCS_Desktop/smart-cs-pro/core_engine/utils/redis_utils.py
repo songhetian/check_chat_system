@@ -58,8 +58,8 @@ class RedisManager:
     async def mark_online(self, username: str):
         if self.client:
             await self.client.sadd("online_agents_set", username)
-            # 同时保留一个带 TTL 的 Key 用于自动下线探测 (可选)
-            await self.client.setex(f"agent_heartbeat:{username}", 60, "1")
+            # V5.22: 增加容错 TTL 至 90s，配合前端 5s 心跳实现极致稳定的在线状态
+            await self.client.setex(f"agent_heartbeat:{username}", 90, "1")
 
     async def mark_offline(self, username: str):
         if self.client:

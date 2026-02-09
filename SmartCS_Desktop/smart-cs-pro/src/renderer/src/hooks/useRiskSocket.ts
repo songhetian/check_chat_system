@@ -49,7 +49,7 @@ export const useRiskSocket = () => {
 
         runLoop(() => {
           socket?.send(JSON.stringify({ type: 'HEARTBEAT', timestamp: Date.now() }));
-        }, 10000, '_heartbeatTimer');
+        }, 5000, '_heartbeatTimer');
       }
 
       socket.onmessage = (event) => {

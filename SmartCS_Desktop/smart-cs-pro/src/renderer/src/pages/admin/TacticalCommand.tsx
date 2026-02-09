@@ -133,6 +133,24 @@ export default function TacticalCommand() {
     setShowSopModal(false)
   }
 
+  // V5.20: 物理切断指令执行
+  const handleForceKill = async (username: string) => {
+    if (processing) return
+    setProcessing('KILL')
+    try {
+      const res = await window.api.callApi({
+        url: `${CONFIG.API_BASE}/admin/force-kill`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        data: { username }
+      })
+      if (res.status === 200 || res.data?.status === 'ok') {
+        toast.success('物理切断成功', { description: `已物理断开目标 ${username} 的战术链路` })
+        fetchData(true) // 静默刷新列表
+      }
+    } finally { setProcessing(null) }
+  }
+
   // 极速渲染组件 (V3.70)
   const ScriptItem = useMemo(() => kbList.map(item => (
     <div key={item.id} onClick={() => sendScript(item.answer)} className="p-4 rounded-xl border border-slate-100 bg-slate-50/30 hover:bg-cyan-600 hover:text-white cursor-pointer transition-colors group active:scale-[0.98]">
@@ -329,6 +347,20 @@ export default function TacticalCommand() {
                         <CommandBtn loading={processing === 'PUSH'} onClick={() => setShowScriptModal(true)} onMouseEnter={() => !kbList.length && fetchKb()} icon={Send} label="话术提示" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-emerald-600/10 text-emerald-700 border border-emerald-100'} disabled={!isOnline} />
                         <CommandBtn loading={processing === 'VOICE'} onClick={() => setShowVoiceModal(true)} onMouseEnter={() => !voiceList.length && fetchVoice()} icon={Mic} label="语音警报" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-red-50/80 text-red-600 border border-red-100'} disabled={!isOnline} />
                         <CommandBtn loading={processing === 'SOP'} onClick={() => setShowSopModal(true)} onMouseEnter={() => !sopList.length && fetchSop()} icon={FileText} label="业务规范" color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-white text-cyan-700 border border-cyan-100'} disabled={!isOnline} />
+                        
+                        {/* V5.20: 物理切断按钮 */}
+                        <CommandBtn 
+                          loading={processing === 'KILL'} 
+                          onClick={() => {
+                            if (window.confirm(`确定要物理切断操作员 [${activeAgent.real_name}] 的战术链路吗？此操作将封禁其账号 24 小时。`)) {
+                              handleForceKill(activeAgent.username)
+                            }
+                          }} 
+                          icon={MonitorX} 
+                          label="强制切断" 
+                          color={!isOnline ? 'bg-slate-50 text-slate-300 border-slate-100' : 'bg-red-600 text-white shadow-lg shadow-red-200'} 
+                          disabled={!isOnline} 
+                        />
                      </div>
                   </section>
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
